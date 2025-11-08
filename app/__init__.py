@@ -41,28 +41,6 @@ def create_app(config_name=None):
     # Initialize extensions
     init_extensions(app)
     
-    # Force locale refresh on each request to ensure language changes are applied
-    @app.before_request
-    def force_locale_refresh():
-        """Force Flask-Babel to refresh locale on each request"""
-        from flask import session, request
-        from flask_babel import get_locale as babel_get_locale, force_locale
-        if 'language' in session:
-            session_lang = session.get('language', 'ca')
-            # Force Babel to use the session language
-            try:
-                force_locale(session_lang)
-                app.logger.debug(f"Forced locale to {session_lang} for request to {request.path}")
-            except Exception as e:
-                app.logger.warning(f"Could not force locale: {e}")
-            
-            # Verify the locale was set
-            current_locale = babel_get_locale()
-            if current_locale and str(current_locale) != session_lang:
-                app.logger.warning(f"Locale mismatch: Babel has {current_locale}, session has {session_lang}")
-            else:
-                app.logger.debug(f"Locale OK: {current_locale} matches session {session_lang}")
-    
     # Setup Flask-Security with custom form
     from app.extensions import user_datastore, security
     security.init_app(app, user_datastore, register_form=ExtendedRegisterForm)
@@ -91,8 +69,10 @@ def create_app(config_name=None):
             try:
                 from flask_babel import get_locale as babel_get_locale
                 locale = babel_get_locale()
-                return str(locale) if locale else 'ca'
-            except:
+                locale_str = str(locale) if locale else 'ca'
+                return locale_str
+            except Exception as e:
+                app.logger.warning(f"Error in current_locale(): {e}")
                 return session.get('language', 'ca')
         
         return dict(_=_, get_locale=current_locale, get_category_name=get_category_name)

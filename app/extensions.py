@@ -39,23 +39,16 @@ def init_extensions(app):
     
     # Initialize Babel with locale selector
     from app.utils import get_locale
-    babel.init_app(app, locale_selector=get_locale)
+    import os
     
-    # Verify translations are available
-    try:
-        import os
-        translations_dir = app.config.get('BABEL_TRANSLATION_DIRECTORIES', 'babel/translations')
-        ca_mo = os.path.join(translations_dir, 'ca', 'LC_MESSAGES', 'messages.mo')
-        es_mo = os.path.join(translations_dir, 'es', 'LC_MESSAGES', 'messages.mo')
-        ca_exists = os.path.exists(ca_mo)
-        es_exists = os.path.exists(es_mo)
-        app.logger.info(f"Translations files - CA: {ca_exists}, ES: {es_exists}")
-        if ca_exists and es_exists:
-            ca_size = os.path.getsize(ca_mo)
-            es_size = os.path.getsize(es_mo)
-            app.logger.info(f"Translation file sizes - CA: {ca_size} bytes, ES: {es_size} bytes")
-    except Exception as e:
-        app.logger.warning(f"Could not verify translations: {e}")
+    # Get absolute path to translations directory
+    root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    translations_dir = os.path.join(root_dir, 'babel', 'translations')
+    
+    # Update config with absolute path
+    app.config['BABEL_TRANSLATION_DIRECTORIES'] = translations_dir
+    
+    babel.init_app(app, locale_selector=get_locale)
     
     # Initialize Flask-Security (needs models)
     from app.models import User, Role

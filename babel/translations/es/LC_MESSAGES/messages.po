@@ -485,3 +485,93 @@ msgstr "Donación a Tarragoneta"
 
 msgid "Donación voluntaria para mantener la plataforma"
 msgstr "Donación voluntaria para mantener la plataforma"
+
+msgid "Fem la"
+msgstr "Hacemos la"
+
+msgid "Tarragoneta - Plataforma ciutadana per a iniciatives cíviques a Tarragona"
+msgstr "Tarragoneta - Plataforma ciudadana para iniciativas cívicas en Tarragona"
+
+msgid "Sobre Tarragoneta"
+msgstr "Sobre Tarragoneta"
+
+msgid "Som una plataforma ciutadana compromesa amb la transformació de Tarragona en una ciutat més neta, sostenible i cívica."
+msgstr "Somos una plataforma ciudadana comprometida con la transformación de Tarragona en una ciudad más limpia, sostenible y cívica."
+
+msgid "La Nostra Missió"
+msgstr "Nuestra Misión"
+
+msgid "Connectar ciutadans compromesos amb iniciatives que millorin el nostre entorn urbà, fomentant la participació activa en la construcció d'una Tarragona més habitable i sostenible per a tothom."
+msgstr "Conectar a ciudadanos comprometidos con iniciativas que mejoren nuestro entorno urbano, fomentando la participación activa en la construcción de una Tarragona más habitable y sostenible para todos."
+
+msgid "La Nostra Visió"
+msgstr "Nuestra Visión"
+
+msgid "Ser el punt de trobada digital on cada tarragoní pugui contribuir activament al canvi positiu, creant una xarxa ciutadana forta que impulsi la transformació sostenible de la nostra ciutat."
+msgstr "Ser el punto de encuentro digital donde cada tarraconense pueda contribuir activamente al cambio positivo, creando una red ciudadana fuerte que impulse la transformación sostenible de nuestra ciudad."
+
+msgid "Els Nostres Valors"
+msgstr "Nuestros Valores"
+
+msgid "Col·laboració"
+msgstr "Colaboración"
+
+msgid "Creiem en el poder de l'acció col·lectiva per generar canvis significatius."
+msgstr "Creemos en el poder de la acción colectiva para generar cambios significativos."
+
+msgid "Compromís"
+msgstr "Compromiso"
+
+msgid "Fomentem la responsabilitat individual i col·lectiva amb la nostra ciutat."
+msgstr "Fomentamos la responsabilidad individual y colectiva con nuestra ciudad."
+
+msgid "Civisme"
+msgstr "Civismo"
+
+msgid "Promovem el respecte mutu i la convivència harmònica en espais públics."
+msgstr "Promovemos el respeto mutuo y la convivencia armoniosa en espacios públicos."
+
+msgid "Transparència"
+msgstr "Transparencia"
+
+msgid "Operem amb total obertura sobre les nostres activitats i impacte."
+msgstr "Operamos con total apertura sobre nuestras actividades e impacto."
+
+msgid "Com Funciona?"
+msgstr "¿Cómo Funciona?"
+
+msgid "Descobreix"
+msgstr "Descubre"
+
+msgid "Explora les iniciatives actives a la teva ciutat"
+msgstr "Explora las iniciativas activas en tu ciudad"
+
+msgid "Participa"
+msgstr "Participa"
+
+msgid "Uneix-te a les iniciatives que et motivin"
+msgstr "Únete a las iniciativas que te motiven"
+
+msgid "Actua"
+msgstr "Actúa"
+
+msgid "Col·labora amb altres ciutadans compromesos"
+msgstr "Colabora con otros ciudadanos comprometidos"
+
+msgid "Impacta"
+msgstr "Impacta"
+
+msgid "Genera canvis positius a la teva comunitat"
+msgstr "Genera cambios positivos en tu comunidad"
+
+msgid "Uneix-te al Moviment!"
+msgstr "¡Únete al Movimiento!"
+
+msgid "Cada acció compta. La teva participació pot marcar la diferència en la construcció d'una Tarragona millor per a tothom."
+msgstr "Cada acción cuenta. Tu participación puede marcar la diferencia en la construcción de una Tarragona mejor para todos."
+
+msgid "Explorar Iniciatives"
+msgstr "Explorar Iniciativas"
+
+msgid "Tarragoneta - Junts per una ciutat millor"
+msgstr "Tarragoneta - Juntos por una ciudad mejor"

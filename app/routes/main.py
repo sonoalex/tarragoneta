@@ -61,18 +61,10 @@ def contact():
 @bp.route('/set_language/<lang>')
 def set_language(lang):
     from flask import current_app
+    
     if lang in current_app.config['BABEL_SUPPORTED_LOCALES']:
         session['language'] = lang
-        session.permanent = True  # Make session persistent
-        session.modified = True  # Force session to save
-        current_app.logger.info(f"Language changed to: {lang}, session saved")
-        
-        # Verify the change was saved
-        if 'language' in session:
-            current_app.logger.info(f"Session language verified: {session['language']}")
-        else:
-            current_app.logger.warning("Session language was not saved!")
-    else:
-        current_app.logger.warning(f"Invalid language: {lang}")
+        session.permanent = True
+        session.modified = True
     return redirect(request.referrer or url_for('main.index'))
 

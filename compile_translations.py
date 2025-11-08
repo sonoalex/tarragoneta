@@ -61,29 +61,58 @@ def compile_translations():
     return success
 
 def compile_translations_subprocess():
-    """Fallback: compile using subprocess"""
+    """Fallback: compile using subprocess (msgfmt or babel)"""
     import subprocess
+    import shutil
     translations_dir = 'babel/translations'
     success = True
     
+    # Try msgfmt first (usually available on Unix systems)
+    msgfmt_path = shutil.which('msgfmt')
+    
     for lang in ['ca', 'es']:
         po_file = f'{translations_dir}/{lang}/LC_MESSAGES/messages.po'
+        mo_file = f'{translations_dir}/{lang}/LC_MESSAGES/messages.mo'
         
         if not os.path.exists(po_file):
             continue
         
-        # Try using python -m babel
-        try:
-            result = subprocess.run(
-                ['python', '-m', 'babel.messages.frontend', 'compile', 
-                 '-d', translations_dir, '-l', lang],
-                check=True,
-                capture_output=True,
-                text=True
-            )
-            print(f'✓ Compiled {lang} using babel.messages.frontend')
-        except Exception as e:
-            print(f'✗ Could not compile {lang}: {e}')
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(mo_file), exist_ok=True)
+        
+        compiled = False
+        
+        # Try msgfmt first
+        if msgfmt_path:
+            try:
+                result = subprocess.run(
+                    [msgfmt_path, '-o', mo_file, po_file],
+                    check=True,
+                    capture_output=True,
+                    text=True
+                )
+                print(f'✓ Compiled {lang} using msgfmt')
+                compiled = True
+            except Exception as e:
+                pass
+        
+        # Try babel if msgfmt didn't work
+        if not compiled:
+            try:
+                result = subprocess.run(
+                    ['python3', '-m', 'babel.messages.frontend', 'compile', 
+                     '-d', translations_dir, '-l', lang],
+                    check=True,
+                    capture_output=True,
+                    text=True
+                )
+                print(f'✓ Compiled {lang} using babel.messages.frontend')
+                compiled = True
+            except Exception as e:
+                pass
+        
+        if not compiled:
+            print(f'✗ Could not compile {lang}')
             success = False
     
     return success
