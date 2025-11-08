@@ -10,8 +10,12 @@ ALLOWED_EXTENSIONS = Config.ALLOWED_EXTENSIONS
 
 def get_locale():
     """Language selector function for Babel"""
-    if 'language' in session:
-        return session['language']
+    from flask import has_request_context, session
+    if has_request_context() and 'language' in session:
+        lang = session['language']
+        # Ensure it's a valid locale
+        if lang in ['ca', 'es']:
+            return lang
     return 'ca'
 
 def allowed_file(filename):

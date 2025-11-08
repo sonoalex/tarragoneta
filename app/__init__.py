@@ -30,6 +30,10 @@ def create_app(config_name=None):
             config_name = os.environ.get('FLASK_ENV', 'development')
     app.config.from_object(config.get(config_name, config['default']))
     
+    # Configure session to be permanent
+    from datetime import timedelta
+    app.permanent_session_lifetime = timedelta(days=1)
+    
     # Create directories
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     os.makedirs('static/images', exist_ok=True)

@@ -42,9 +42,20 @@ def compile_translations():
             with open(mo_file, 'wb') as f:
                 write_mo(f, catalog)
             
-            print(f'✓ Compiled {lang}/LC_MESSAGES/messages.mo ({len(catalog)} messages)')
+            message_count = len([m for m in catalog if m.id and m.string])
+            print(f'✓ Compiled {lang}/LC_MESSAGES/messages.mo ({message_count} messages)')
+            
+            # Verify file was created
+            if os.path.exists(mo_file):
+                file_size = os.path.getsize(mo_file)
+                print(f'  File size: {file_size} bytes')
+            else:
+                print(f'  ⚠ Warning: {mo_file} was not created!')
+                success = False
         except Exception as e:
             print(f'✗ Error compiling {lang}: {e}')
+            import traceback
+            traceback.print_exc()
             success = False
     
     return success

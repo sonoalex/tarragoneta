@@ -37,6 +37,10 @@ class Config:
     SECURITY_LOGIN_USER_TEMPLATE = 'security/login.html'
     SECURITY_REGISTER_USER_TEMPLATE = 'security/register.html'
     
+    # Session configuration
+    SESSION_PERMANENT = True
+    PERMANENT_SESSION_LIFETIME = 86400  # 24 hours in seconds
+    
     # WTF
     WTF_CSRF_ENABLED = True
     WTF_CSRF_TIME_LIMIT = None

@@ -41,6 +41,17 @@ def init_extensions(app):
     from app.utils import get_locale
     babel.init_app(app, locale_selector=get_locale)
     
+    # Verify translations are available
+    try:
+        from flask_babel import get_translations
+        with app.app_context():
+            # Test if translations load
+            ca_translations = get_translations('ca')
+            es_translations = get_translations('es')
+            app.logger.info(f"Translations loaded - CA: {ca_translations is not None}, ES: {es_translations is not None}")
+    except Exception as e:
+        app.logger.warning(f"Could not verify translations: {e}")
+    
     # Initialize Flask-Security (needs models)
     from app.models import User, Role
     user_datastore = SQLAlchemyUserDatastore(db, User, Role)

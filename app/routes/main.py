@@ -63,5 +63,7 @@ def set_language(lang):
     from flask import current_app
     if lang in current_app.config['BABEL_SUPPORTED_LOCALES']:
         session['language'] = lang
+        session.permanent = True  # Make session persistent
+        current_app.logger.info(f"Language changed to: {lang}")
     return redirect(request.referrer or url_for('main.index'))
 
