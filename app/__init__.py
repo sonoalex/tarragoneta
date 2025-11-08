@@ -46,14 +46,20 @@ def create_app(config_name=None):
     def force_locale_refresh():
         """Force Flask-Babel to refresh locale on each request"""
         from flask import session, request
-        from flask_babel import get_locale as babel_get_locale
+        from flask_babel import get_locale as babel_get_locale, force_locale
         if 'language' in session:
-            # Get current locale from Babel
-            current_locale = babel_get_locale()
             session_lang = session.get('language', 'ca')
-            # Log if there's a mismatch
+            # Force Babel to use the session language
+            try:
+                force_locale(session_lang)
+                app.logger.debug(f"Forced locale to {session_lang} for request to {request.path}")
+            except Exception as e:
+                app.logger.warning(f"Could not force locale: {e}")
+            
+            # Verify the locale was set
+            current_locale = babel_get_locale()
             if current_locale and str(current_locale) != session_lang:
-                app.logger.info(f"Locale mismatch detected: Babel has {current_locale}, session has {session_lang}")
+                app.logger.warning(f"Locale mismatch: Babel has {current_locale}, session has {session_lang}")
             else:
                 app.logger.debug(f"Locale OK: {current_locale} matches session {session_lang}")
     
