@@ -296,9 +296,11 @@ Railway es una plataforma de despliegue que facilita el proceso de publicación 
    - `DATABASE_URL` (PostgreSQL)
    - `PORT` (puerto donde escuchar)
 
-3. **Añadir base de datos PostgreSQL** (opcional pero recomendado)
+3. **Añadir base de datos PostgreSQL** (⚠️ **OBLIGATORIO**)
    - En Railway Dashboard → "New" → "Database" → "Add PostgreSQL"
    - Railway automáticamente configurará `DATABASE_URL`
+   - **IMPORTANTE**: Sin PostgreSQL, la app usará SQLite que no persiste entre despliegues
+   - El release phase inicializará automáticamente las tablas en el primer despliegue
 
 4. **Desplegar**
    - Railway detectará automáticamente el `Procfile`
@@ -326,17 +328,21 @@ STRIPE_WEBHOOK_SECRET=tu-webhook-secret-stripe
 
 #### Inicializar la base de datos
 
-Después del primer despliegue, conecta a tu servicio Railway y ejecuta:
+**La base de datos se inicializa automáticamente** durante el despliegue mediante el `release` phase del Procfile.
+
+Si necesitas reinicializar manualmente, puedes ejecutar:
 
 ```bash
-railway run flask init-db
+railway run python init_db.py
 ```
 
-O usa el CLI de Railway:
+O usando el CLI de Railway:
 ```bash
 railway connect
-flask init-db
+python init_db.py
 ```
+
+**Nota**: El script `init_db.py` crea las tablas, roles y usuario admin automáticamente.
 
 ### Producción local con Gunicorn
 

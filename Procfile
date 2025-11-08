@@ -1,3 +1,3 @@
-release: flask db upgrade || flask init-db || true
+release: flask db upgrade || python init_db.py || true
 web: bash start_production.sh
 
