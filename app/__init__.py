@@ -132,7 +132,36 @@ def create_app(config_name=None):
     # Log configuration on startup
     app.logger.info(f"Environment: {app.config['ENV']}")
     app.logger.info(f"Debug mode: {app.config['DEBUG']}")
-    app.logger.info(f"Database: {app.config['SQLALCHEMY_DATABASE_URI']}")
+    db_uri = app.config['SQLALCHEMY_DATABASE_URI']
+    # Mask password in logs
+    if '@' in db_uri:
+        # Hide password from connection string
+        import re
+        db_uri_display = re.sub(r':([^:@]+)@', r':****@', db_uri)
+    else:
+        db_uri_display = db_uri
+    app.logger.info(f"Database: {db_uri_display}")
+    
+    # Log environment variables status (for debugging)
+    env_vars_to_check = ['SECRET_KEY', 'SECURITY_PASSWORD_SALT', 'STRIPE_PUBLISHABLE_KEY', 'STRIPE_SECRET_KEY']
+    app.logger.info("Environment variables status:")
+    for var in env_vars_to_check:
+        value = os.environ.get(var)
+        if value:
+            # Mask sensitive values
+            if 'SECRET' in var or 'KEY' in var or 'SALT' in var:
+                masked = value[:4] + '****' + value[-4:] if len(value) > 8 else '****'
+                app.logger.info(f"  ✓ {var}: {masked} (set)")
+            else:
+                app.logger.info(f"  ✓ {var}: {value[:20]}... (set)")
+        else:
+            app.logger.warning(f"  ✗ {var}: not set (using default)")
+    
+    # Warn if using SQLite in production (but allow it for staging)
+    if app.config['ENV'] == 'production' and 'sqlite' in db_uri.lower():
+        app.logger.warning("⚠️  Using SQLite in production (staging mode).")
+        app.logger.info("   This is OK for testing, but data will be lost on each deployment.")
+        app.logger.info("   For production, add PostgreSQL in Railway.")
     
     return app
 

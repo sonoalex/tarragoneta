@@ -7,7 +7,10 @@ echo "🚀 Starting Tarragoneta in production mode..."
 
 # Compile translations (migrations are handled by Procfile release phase)
 echo "🌐 Compiling translations..."
-python compile_translations.py 2>/dev/null || echo "⚠️  Translation compilation skipped"
+python compile_translations.py || {
+    echo "⚠️  Translation compilation failed, but continuing..."
+    echo "   Translations may not work correctly"
+}
 
 echo "✅ Starting Gunicorn server..."
 
