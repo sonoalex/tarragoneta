@@ -9,14 +9,25 @@ from app.config import Config
 ALLOWED_EXTENSIONS = Config.ALLOWED_EXTENSIONS
 
 def get_locale():
-    """Language selector function for Babel"""
+    """Language selector function for Babel - must return a Locale object or string"""
     from flask import has_request_context, session
+    from babel import Locale
+    
     if has_request_context() and 'language' in session:
         lang = session['language']
         # Ensure it's a valid locale
         if lang in ['ca', 'es']:
-            return lang
-    return 'ca'
+            try:
+                # Return Locale object for better compatibility
+                return Locale.parse(lang)
+            except:
+                # Fallback to string if Locale parsing fails
+                return lang
+    # Default to Catalan
+    try:
+        return Locale.parse('ca')
+    except:
+        return 'ca'
 
 def allowed_file(filename):
     """Check if file extension is allowed"""

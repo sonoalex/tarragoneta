@@ -41,6 +41,22 @@ def create_app(config_name=None):
     # Initialize extensions
     init_extensions(app)
     
+    # Force locale refresh on each request to ensure language changes are applied
+    @app.before_request
+    def force_locale_refresh():
+        """Force Flask-Babel to refresh locale on each request"""
+        from flask import session, request
+        from flask_babel import get_locale as babel_get_locale
+        if 'language' in session:
+            # Get current locale from Babel
+            current_locale = babel_get_locale()
+            session_lang = session.get('language', 'ca')
+            # Log if there's a mismatch
+            if current_locale and str(current_locale) != session_lang:
+                app.logger.info(f"Locale mismatch detected: Babel has {current_locale}, session has {session_lang}")
+            else:
+                app.logger.debug(f"Locale OK: {current_locale} matches session {session_lang}")
+    
     # Setup Flask-Security with custom form
     from app.extensions import user_datastore, security
     security.init_app(app, user_datastore, register_form=ExtendedRegisterForm)
