@@ -43,12 +43,17 @@ def init_extensions(app):
     
     # Verify translations are available
     try:
-        from flask_babel import get_translations
-        with app.app_context():
-            # Test if translations load
-            ca_translations = get_translations('ca')
-            es_translations = get_translations('es')
-            app.logger.info(f"Translations loaded - CA: {ca_translations is not None}, ES: {es_translations is not None}")
+        import os
+        translations_dir = app.config.get('BABEL_TRANSLATION_DIRECTORIES', 'babel/translations')
+        ca_mo = os.path.join(translations_dir, 'ca', 'LC_MESSAGES', 'messages.mo')
+        es_mo = os.path.join(translations_dir, 'es', 'LC_MESSAGES', 'messages.mo')
+        ca_exists = os.path.exists(ca_mo)
+        es_exists = os.path.exists(es_mo)
+        app.logger.info(f"Translations files - CA: {ca_exists}, ES: {es_exists}")
+        if ca_exists and es_exists:
+            ca_size = os.path.getsize(ca_mo)
+            es_size = os.path.getsize(es_mo)
+            app.logger.info(f"Translation file sizes - CA: {ca_size} bytes, ES: {es_size} bytes")
     except Exception as e:
         app.logger.warning(f"Could not verify translations: {e}")
     
