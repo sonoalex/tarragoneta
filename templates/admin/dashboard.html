@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Admin') }} - Tarragoneta{% endblock %}
+
+{% block content %}
+<section class="py-5" style="padding-top: 8rem !important;">
+    <div class="container-fluid px-4">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h1 class="display-5 fw-bold mb-2">
+                    <i class="fas fa-tachometer-alt text-primary me-2"></i>
+                    {{ _('Panel d\'Administració') }}
+                </h1>
+                <p class="text-muted mb-0">{{ _('Gestiona les iniciatives i supervisa la plataforma') }}</p>
+            </div>
+            <a href="{{ url_for('admin.new_initiative') }}" class="btn btn-primary btn-lg px-4" style="border-radius: 50px;">
+                <i class="fas fa-plus me-2"></i>{{ _('Nova Iniciativa') }}
+            </a>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 20px;">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <p class="text-muted mb-2 small fw-semibold text-uppercase">{{ _('Iniciatives Totals') }}</p>
+                                <h2 class="fw-bold mb-0">{{ initiatives|length }}</h2>
+                            </div>
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10" 
+                                 style="width: 60px; height: 60px;">
+                                <i class="fas fa-flag fa-lg text-primary"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 20px;">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <p class="text-muted mb-2 small fw-semibold text-uppercase">{{ _('Usuaris Registrats') }}</p>
+                                <h2 class="fw-bold mb-0">{{ users_count }}</h2>
+                            </div>
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-10" 
+                                 style="width: 60px; height: 60px;">
+                                <i class="fas fa-users fa-lg text-success"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 20px;">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <p class="text-muted mb-2 small fw-semibold text-uppercase">{{ _('Participacions Totals') }}</p>
+                                <h2 class="fw-bold mb-0">{{ participations_count }}</h2>
+                            </div>
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10" 
+                                 style="width: 60px; height: 60px;">
+                                <i class="fas fa-hand-paper fa-lg text-warning"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 20px;">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <p class="text-muted mb-2 small fw-semibold text-uppercase">{{ _('Esdeveniments Propers') }}</p>
+                                <h2 class="fw-bold mb-0">
+                                    {{ initiatives|selectattr('is_upcoming')|list|length }}
+                                </h2>
+                            </div>
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-info bg-opacity-10" 
+                                 style="width: 60px; height: 60px;">
+                                <i class="fas fa-calendar-check fa-lg text-info"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card border-0 shadow-sm mb-5" style="border-radius: 20px;">
+            <div class="card-body p-4">
+                <h3 class="fw-bold mb-4">
+                    <i class="fas fa-bolt text-primary me-2"></i>
+                    {{ _('Accions Ràpides') }}
+                </h3>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{{ url_for('admin.new_initiative') }}" class="btn btn-primary px-4" style="border-radius: 50px;">
+                        <i class="fas fa-plus me-2"></i>{{ _('Nova Iniciativa') }}
+                    </a>
+                    <a href="{{ url_for('admin.admin_users') }}" class="btn btn-outline-secondary px-4" style="border-radius: 50px;">
+                        <i class="fas fa-users me-2"></i>{{ _('Gestionar Usuaris') }}
+                    </a>
+                    <a href="{{ url_for('admin.admin_participations') }}" class="btn btn-outline-secondary px-4" style="border-radius: 50px;">
+                        <i class="fas fa-list me-2"></i>{{ _('Veure Participacions') }}
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Participations -->
+        {% if recent_participations %}
+        <div class="card border-0 shadow-sm mb-5" style="border-radius: 20px;">
+            <div class="card-body p-4">
+                <h3 class="fw-bold mb-4">
+                    <i class="fas fa-clock text-primary me-2"></i>
+                    {{ _('Participacions Recents') }}
+                </h3>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>{{ _('Nom') }}</th>
+                                <th>Email</th>
+                                <th>{{ _('Iniciativa') }}</th>
+                                <th>{{ _('Data') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for participation in recent_participations[:5] %}
+                            <tr>
+                                <td><strong>{{ participation.name }}</strong></td>
+                                <td>{{ participation.email or '-' }}</td>
+                                <td>
+                                    <a href="{{ url_for('initiatives.initiative_detail', slug=participation.initiative_rel.slug) }}" 
+                                       class="text-decoration-none">
+                                        {{ participation.initiative_rel.title[:40] }}{% if participation.initiative_rel.title|length > 40 %}...{% endif %}
+                                    </a>
+                                </td>
+                                <td>{{ participation.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Initiatives Table -->
+        <div class="card border-0 shadow-sm" style="border-radius: 20px;">
+            <div class="card-header bg-white border-0 p-4" style="border-radius: 20px 20px 0 0;">
+                <h3 class="fw-bold mb-0">
+                    <i class="fas fa-flag text-primary me-2"></i>
+                    {{ _('Totes les Iniciatives') }}
+                </h3>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">{{ _('Títol') }}</th>
+                                <th>{{ _('Categoria') }}</th>
+                                <th>{{ _('Data') }}</th>
+                                <th class="text-center">{{ _('Participants') }}</th>
+                                <th class="text-center">{{ _('Vistes') }}</th>
+                                <th>{{ _('Estat') }}</th>
+                                <th class="text-center pe-4">{{ _('Accions') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for initiative in initiatives %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div>
+                                        <strong class="d-block">{{ initiative.title }}</strong>
+                                        <small class="text-muted">{{ initiative.location }}</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2" style="border-radius: 50px;">
+                                        {{ get_category_name(initiative.category) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div>
+                                        <div>{{ initiative.date.strftime('%d/%m/%Y') }}</div>
+                                        {% if initiative.time %}
+                                        <small class="text-muted">{{ initiative.time }}</small>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-success bg-opacity-10 text-success px-3 py-2" style="border-radius: 50px;">
+                                        {{ initiative.participant_count + (initiative.anonymous_participants|length if initiative.anonymous_participants else 0) }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="text-muted">
+                                        <i class="fas fa-eye me-1"></i>{{ initiative.view_count }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if initiative.is_upcoming %}
+                                    <span class="badge bg-info bg-opacity-10 text-info px-3 py-2" style="border-radius: 50px;">
+                                        {{ _('Proper') }}
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary px-3 py-2" style="border-radius: 50px;">
+                                        {{ _('Passat') }}
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center pe-4">
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ url_for('initiatives.initiative_detail', slug=initiative.slug) }}" 
+                                           class="btn btn-sm btn-outline-secondary" 
+                                           title="{{ _('Veure') }}"
+                                           style="border-radius: 8px 0 0 8px;">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ url_for('admin.edit_initiative', id=initiative.id) }}" 
+                                           class="btn btn-sm btn-outline-warning" 
+                                           title="{{ _('Editar') }}">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form method="POST" 
+                                              action="{{ url_for('admin.delete_initiative', id=initiative.id) }}" 
+                                              style="display: inline;" 
+                                              onsubmit="return confirm('{{ _('Estàs segur d\'eliminar aquesta iniciativa?') }}');">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" 
+                                                    class="btn btn-sm btn-outline-danger" 
+                                                    title="{{ _('Eliminar') }}"
+                                                    style="border-radius: 0 8px 8px 0;">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="fas fa-inbox fa-2x mb-3 d-block"></i>
+                                    {{ _('No hi ha iniciatives encara') }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

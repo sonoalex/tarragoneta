@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+
+{% block title %}{{ initiative.title }} - Tarragoneta{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<style>
+    #map { height: 300px; border-radius: 16px; z-index: 0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section with Image and Title -->
+<section class="py-0" style="background: var(--bg-cream); padding-top: 110px !important;" id="hero-section">
+    <div class="container-fluid px-0">
+        <div class="row g-0">
+            <!-- Image Column -->
+            <div class="col-lg-7">
+                {% if initiative.image_path %}
+                    <img src="{{ url_for('static', filename='uploads/' + initiative.image_path) }}" 
+                         alt="{{ initiative.title }}" 
+                         class="w-100" 
+                         style="object-fit: cover; height: 500px;">
+                {% else %}
+                    <img src="https://picsum.photos/1200/800?random={{ initiative.id }}" 
+                         alt="{{ initiative.title }}" 
+                         class="w-100" 
+                         style="object-fit: cover; height: 500px;">
+                {% endif %}
+            </div>
+            
+            <!-- Title Column -->
+            <div class="col-lg-5 d-flex align-items-center" style="background: var(--bg-white);">
+                <div class="p-5 w-100">
+                    <span class="badge bg-primary px-3 py-2 mb-3" style="border-radius: 50px; font-weight: 600;">
+                        {{ get_category_name(initiative.category) }}
+                    </span>
+                    <h1 class="display-5 fw-bold mb-4" style="line-height: 1.2;">{{ initiative.title }}</h1>
+                    
+                    <div class="d-flex flex-column gap-3">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3" style="width: 40px; height: 40px; background: var(--primary-green-pale); border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <span style="color: var(--primary-green); font-size: 1.2rem;">📍</span>
+                            </div>
+                            <div>
+                                <div class="small text-muted">{{ _('Ubicació') }}</div>
+                                <div class="fw-bold">{{ initiative.location }}</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="me-3" style="width: 40px; height: 40px; background: var(--primary-green-pale); border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <span style="color: var(--primary-green); font-size: 1.2rem;">📅</span>
+                            </div>
+                            <div>
+                                <div class="small text-muted">{{ _('Data') }}</div>
+                                <div class="fw-bold">{{ initiative.date.strftime('%d/%m/%Y') }}{% if initiative.time %} · {{ initiative.time }}{% endif %}</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="me-3" style="width: 40px; height: 40px; background: var(--primary-green-pale); border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <span style="color: var(--primary-green); font-size: 1.2rem;">👥</span>
+                            </div>
+                            <div>
+                                <div class="small text-muted">{{ _('Participants') }}</div>
+                                <div class="fw-bold">{{ initiative.participant_count + initiative.anonymous_participants|length }} {{ _('persones') }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Main Content -->
+<section class="py-5" style="background: var(--bg-cream);">
+    <div class="container">
+        <div class="row">
+            <!-- Left Column: Main Content -->
+            <div class="col-lg-8 mb-5 mb-lg-0">
+                <!-- Map Section -->
+                <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; overflow: hidden;">
+                    <div class="card-body p-0">
+                        <div class="p-4 border-bottom">
+                            <h3 class="h5 fw-bold mb-0">{{ _('Ubicació') }}</h3>
+                            <p class="text-muted small mb-0">{{ initiative.location }}</p>
+                        </div>
+                        <div id="map"></div>
+                    </div>
+                </div>
+
+                <!-- Organizer Info -->
+                <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px;">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3" style="width: 50px; height: 50px; background: var(--primary-green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 1.2rem; flex-shrink: 0;">
+                                {{ initiative.creator.username[0]|upper }}
+                            </div>
+                            <div>
+                                <div class="small text-muted">{{ _('Organitzat per') }}</div>
+                                <div class="fw-bold">{{ initiative.creator.username }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px;">
+                    <div class="card-body p-4">
+                        <h2 class="h4 fw-bold mb-4">{{ _('Descripció') }}</h2>
+                        <div style="line-height: 1.8; color: var(--text-medium);">
+                            {{ initiative.description|safe }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Participants -->
+                <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px;">
+                    <div class="card-body p-4">
+                        <h3 class="h5 fw-bold mb-4">{{ _('Persones compromeses') }}</h3>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            {% for participant in initiative.participants[:12] %}
+                                <div class="d-flex align-items-center" style="background: var(--bg-light); padding: 0.5rem 1rem; border-radius: 50px;">
+                                    <div class="me-2" style="width: 32px; height: 32px; background: var(--primary-green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem;">
+                                        {{ participant.username[0]|upper }}
+                                    </div>
+                                    <span class="small">{{ participant.username }}</span>
+                                </div>
+                            {% endfor %}
+                            {% for participant in initiative.anonymous_participants[:5] %}
+                                <div class="d-flex align-items-center" style="background: var(--bg-light); padding: 0.5rem 1rem; border-radius: 50px;">
+                                    <div class="me-2" style="width: 32px; height: 32px; background: var(--primary-green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem;">
+                                        {{ participant.name[0]|upper }}
+                                    </div>
+                                    <span class="small">{{ participant.name }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% set total = initiative.participant_count + initiative.anonymous_participants|length %}
+                        {% if total == 0 %}
+                            <p class="text-muted mb-0">{{ _('Sigues el primer a unir-te a aquesta iniciativa') }}</p>
+                        {% elif total > 17 %}
+                            <p class="text-muted mb-0">+{{ total - 17 }} {{ _('més persones') }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Comments -->
+                <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+                    <div class="card-body p-4">
+                        <h3 class="h5 fw-bold mb-4">{{ _('Comentaris i preguntes') }}</h3>
+                        
+                        {% if current_user.is_authenticated %}
+                            <form method="POST" action="{{ url_for('initiatives.add_comment', slug=initiative.slug) }}" class="mb-4">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <div class="mb-3">
+                                    <textarea name="content" class="form-control" rows="3" 
+                                              placeholder="{{ _('Comparteix la teva opinió o fes una pregunta...') }}" 
+                                              required style="border-radius: 12px; border: 1px solid var(--border-color);"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary" style="border-radius: 50px;">
+                                    {{ _('Publicar comentari') }}
+                                </button>
+                            </form>
+                        {% else %}
+                            <div class="alert alert-info mb-4" style="border-radius: 12px; border: none; background: var(--primary-green-pale); color: var(--primary-green);">
+                                <a href="{{ url_for('security.login') }}" class="text-decoration-none fw-bold">{{ _('Inicia sessió') }}</a> {{ _('per deixar un comentari') }}
+                            </div>
+                        {% endif %}
+                        
+                        {% if comments %}
+                            <div class="comments-list">
+                                {% for comment in comments %}
+                                    <div class="d-flex mb-4 pb-4" style="border-bottom: 1px solid var(--border-color);">
+                                        <div class="me-3" style="width: 48px; height: 48px; background: var(--primary-green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; flex-shrink: 0;">
+                                            {{ comment.author.username[0]|upper }}
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <span class="fw-bold me-2">{{ comment.author.username }}</span>
+                                                <span class="small text-muted">{{ comment.created_at.strftime('%d/%m/%Y a les %H:%M') }}</span>
+                                            </div>
+                                            <div style="color: var(--text-medium); line-height: 1.6;">{{ comment.content|safe }}</div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted mb-0">{{ _('No hi ha comentaris encara. Sigues el primer a comentar!') }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column: Join Card -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-lg sticky-top" style="top: 100px; border-radius: 16px;">
+                    <div class="card-body p-4">
+                        {% if initiative.is_upcoming %}
+                            <h3 class="h5 fw-bold mb-4 text-center">{{ _('Participa!') }}</h3>
+                            
+                            {% if current_user.is_authenticated %}
+                                {% if is_participating %}
+                                    <div class="alert alert-success mb-4 text-center" style="border-radius: 12px; border: none; background: var(--primary-green-pale); color: var(--primary-green);">
+                                        ✓ {{ _('Ja estàs participant') }}
+                                    </div>
+                                    <form method="POST" action="{{ url_for('initiatives.leave_initiative', slug=initiative.slug) }}">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-outline-primary w-100" style="border-radius: 50px;">
+                                            {{ _('Cancel·lar participació') }}
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <p class="text-muted mb-4 text-center small">{{ _('Uneix-te a aquesta iniciativa i ajuda\'ns a millorar la nostra ciutat.') }}</p>
+                                    <form method="POST" action="{{ url_for('initiatives.join_initiative', slug=initiative.slug) }}">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-primary w-100" style="border-radius: 50px;">
+                                            {{ _('Vull participar') }}
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            {% else %}
+                                <p class="text-muted mb-4 text-center small">{{ _('Registra el teu interès a participar. Et contactarem amb més detalls.') }}</p>
+                                
+                                <form method="POST" action="{{ url_for('initiatives.join_initiative', slug=initiative.slug) }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">{{ _('Nom complet') }} *</label>
+                                        <input type="text" name="name" class="form-control" required 
+                                               placeholder="{{ _('El teu nom') }}" style="border-radius: 12px;">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">{{ _('Email') }}</label>
+                                        <input type="email" name="email" class="form-control" 
+                                               placeholder="tu@email.com" style="border-radius: 12px;">
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <label class="form-label small fw-bold">{{ _('Telèfon') }}</label>
+                                        <input type="tel" name="phone" class="form-control" 
+                                               placeholder="600 000 000" style="border-radius: 12px;">
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary w-100 mb-3" style="border-radius: 50px;">
+                                        {{ _('Vull participar') }}
+                                    </button>
+                                </form>
+                                
+                                <div class="text-center">
+                                    <small class="text-muted">
+                                        {{ _('Ja tens compte?') }} 
+                                        <a href="{{ url_for('security.login') }}" class="text-decoration-none fw-bold">{{ _('Inicia sessió') }}</a>
+                                    </small>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="alert alert-info text-center" style="border-radius: 12px; border: none; background: var(--bg-light);">
+                                {{ _('Aquesta iniciativa ja ha finalitzat') }}
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Share buttons -->
+                        <div class="mt-4 pt-4" style="border-top: 1px solid var(--border-color);">
+                            <p class="small text-muted text-center mb-3">{{ _('Comparteix aquesta iniciativa:') }}</p>
+                            <div class="d-flex justify-content-center gap-2">
+                                <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url }}" 
+                                   target="_blank" class="btn btn-sm btn-outline-secondary" style="border-radius: 50px; width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                                    <span style="font-size: 1.1rem;">f</span>
+                                </a>
+                                <a href="https://twitter.com/intent/tweet?url={{ request.url }}&text={{ initiative.title }}" 
+                                   target="_blank" class="btn btn-sm btn-outline-secondary" style="border-radius: 50px; width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                                    <span style="font-size: 1.1rem;">t</span>
+                                </a>
+                                <a href="https://wa.me/?text={{ initiative.title }} - {{ request.url }}" 
+                                   target="_blank" class="btn btn-sm btn-outline-secondary" style="border-radius: 50px; width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                                    <span style="font-size: 1.1rem;">w</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Related Initiatives -->
+        {% if related_initiatives %}
+            <div class="mt-5">
+                <h3 class="h4 fw-bold mb-4">{{ _('Iniciatives relacionades') }}</h3>
+                <div class="initiatives-grid">
+                    {% for related in related_initiatives %}
+                        <article class="card initiative-card h-100 border-0 shadow-sm" style="border-radius: 16px;">
+                            <div class="initiative-image" style="height: 180px;">
+                                {% if related.image_path %}
+                                    <img src="{{ url_for('static', filename='uploads/' + related.image_path) }}" 
+                                         alt="{{ related.title }}" class="w-100 h-100" style="object-fit: cover;">
+                                {% else %}
+                                    <img src="https://picsum.photos/400/300?random={{ related.id }}" 
+                                         alt="{{ related.title }}" class="w-100 h-100" style="object-fit: cover;">
+                                {% endif %}
+                            </div>
+                            <div class="card-body p-4">
+                                <h4 class="h6 fw-bold mb-2">{{ related.title }}</h4>
+                                <div class="small text-muted mb-3">{{ related.date.strftime('%d/%m/%Y') }}</div>
+                                <a href="{{ url_for('initiatives.initiative_detail', slug=related.slug) }}" 
+                                   class="btn btn-primary btn-sm w-100" style="border-radius: 50px;">
+                                    {{ _('Veure detalls') }}
+                                </a>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize map centered on Tarragona
+        var map = L.map('map').setView([41.1189, 1.2445], 13);
+        
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+        
+        // Geocode location using Nominatim (OpenStreetMap geocoding)
+        var location = "{{ initiative.location }}, Tarragona, Spain";
+        
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&limit=1`, {
+            headers: {
+                'User-Agent': 'Tarragoneta/1.0'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    var lat = parseFloat(data[0].lat);
+                    var lon = parseFloat(data[0].lon);
+                    
+                    // Set map view to the location
+                    map.setView([lat, lon], 15);
+                    
+                    // Add marker
+                    var marker = L.marker([lat, lon]).addTo(map);
+                    marker.bindPopup("<b>{{ initiative.title }}</b><br>{{ initiative.location }}").openPopup();
+                } else {
+                    // Fallback to Tarragona center if geocoding fails
+                    var marker = L.marker([41.1189, 1.2445]).addTo(map);
+                    marker.bindPopup("<b>{{ initiative.title }}</b><br>{{ initiative.location }}");
+                }
+            })
+            .catch(error => {
+                console.error('Error geocoding location:', error);
+                // Fallback to Tarragona center
+                var marker = L.marker([41.1189, 1.2445]).addTo(map);
+                marker.bindPopup("<b>{{ initiative.title }}</b><br>{{ initiative.location }}");
+            });
+    });
+</script>
+{% endblock %}

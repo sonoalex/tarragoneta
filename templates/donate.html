@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Donar') }} - Tarragoneta{% endblock %}
+
+{% block content %}
+<section class="py-5" style="padding-top: 8rem !important;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="text-center mb-5">
+                    <div class="mb-4">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10" 
+                             style="width: 80px; height: 80px;">
+                            <i class="fas fa-heart fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                    <h1 class="display-5 fw-bold mb-3">{{ _('Ajuda\'ns a mantenir Tarragoneta') }}</h1>
+                    <p class="lead text-muted">
+                        {{ _('Les donacions voluntàries ens ajuden a cobrir els costos del servidor i mantenir la plataforma gratuïta per a tothom.') }}
+                    </p>
+                </div>
+                
+                <div class="card border-0 shadow-sm" style="border-radius: 20px;">
+                    <div class="card-body p-5">
+                        <form method="POST" action="{{ url_for('donations.donate') }}" id="donationForm">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            
+                            <div class="mb-4">
+                                <label class="form-label fw-bold mb-3">{{ _('Quantitat de la donació') }}</label>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6 col-md-3">
+                                        <button type="button" class="btn btn-outline-primary w-100 amount-btn" data-amount="5" style="border-radius: 12px;">
+                                            5€
+                                        </button>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <button type="button" class="btn btn-outline-primary w-100 amount-btn" data-amount="10" style="border-radius: 12px;">
+                                            10€
+                                        </button>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <button type="button" class="btn btn-outline-primary w-100 amount-btn" data-amount="25" style="border-radius: 12px;">
+                                            25€
+                                        </button>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <button type="button" class="btn btn-outline-primary w-100 amount-btn" data-amount="50" style="border-radius: 12px;">
+                                            50€
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <span class="input-group-text" style="border-radius: 12px 0 0 12px;">€</span>
+                                    <input type="number" 
+                                           class="form-control form-control-lg" 
+                                           id="amount" 
+                                           name="amount" 
+                                           min="1" 
+                                           step="0.01" 
+                                           placeholder="{{ _('Altres quantitats') }}"
+                                           required
+                                           style="border-radius: 0 12px 12px 0;">
+                                </div>
+                                <small class="text-muted">{{ _('Quantitat mínima: 1€') }}</small>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="email" class="form-label fw-bold">{{ _('Email') }} <span class="text-muted">({{ _('opcional') }})</span></label>
+                                <input type="email" 
+                                       class="form-control form-control-lg" 
+                                       id="email" 
+                                       name="email" 
+                                       placeholder="tu@email.com">
+                                <small class="text-muted">{{ _('Per enviar-te el comprovant de donació') }}</small>
+                            </div>
+                            
+                            <div class="alert alert-info d-flex align-items-center" style="border-radius: 12px;">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <div>
+                                    <strong>{{ _('Segur i segur') }}</strong><br>
+                                    {{ _('Els pagaments es processen de forma segura a través de Stripe. No emmagatzemem les teves dades de targeta.') }}
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg px-5 py-3" style="border-radius: 50px;">
+                                    <i class="fas fa-hand-holding-heart me-2"></i>{{ _('Continuar amb el pagament') }}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <p class="text-muted small">
+                        <i class="fas fa-lock me-1"></i>
+                        {{ _('Pagament segur processat per') }} <strong>Stripe</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const amountInput = document.getElementById('amount');
+    const amountButtons = document.querySelectorAll('.amount-btn');
+    
+    amountButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            amountButtons.forEach(btn => {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-outline-primary');
+            });
+            
+            // Add active class to clicked button
+            this.classList.remove('btn-outline-primary');
+            this.classList.add('btn-primary');
+            
+            // Set amount in input
+            amountInput.value = this.dataset.amount;
+        });
+    });
+    
+    // Clear button selection when typing custom amount
+    amountInput.addEventListener('input', function() {
+        amountButtons.forEach(btn => {
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline-primary');
+        });
+    });
+});
+</script>
+{% endblock %}
+

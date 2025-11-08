@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if initiative %}Editar{% else %}Nueva{% endif %} Iniciativa - Tarragoneta
+{% endblock %}
+
+{% block content %}
+<section class="container mt-4">
+    <div class="bg-white p-4" style="border-radius: var(--border-radius); box-shadow: var(--shadow-md); max-width: 800px; margin: 0 auto;">
+        <h1 class="mb-4">
+            <i class="fas fa-{% if initiative %}edit{% else %}plus{% endif %} text-primary"></i>
+            {% if initiative %}Editar{% else %}Crear Nueva{% endif %} Iniciativa
+        </h1>
+        
+        <form method="POST" enctype="multipart/form-data" novalidate>
+            {{ form.hidden_tag() }}
+            
+            <div class="form-group">
+                {{ form.title.label(class="form-label") }}
+                {{ form.title(class="form-input" + (" is-invalid" if form.title.errors else ""), 
+                             placeholder="Ej: Gran Limpieza de la Playa del Miracle") }}
+                {% if form.title.errors %}
+                    <div class="text-danger mt-1">
+                        {% for error in form.title.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <small class="form-hint">Un título claro y atractivo que motive a participar</small>
+            </div>
+            
+            <div class="form-group">
+                {{ form.description.label(class="form-label") }}
+                {{ form.description(class="form-textarea" + (" is-invalid" if form.description.errors else ""),
+                                  rows="6",
+                                  placeholder="Describe detalladamente la iniciativa: objetivos, qué se necesita, impacto esperado...") }}
+                {% if form.description.errors %}
+                    <div class="text-danger mt-1">
+                        {% for error in form.description.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <small class="form-hint">Sé específico sobre lo que se va a hacer y cómo los participantes pueden ayudar</small>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form.category.label(class="form-label") }}
+                    {{ form.category(class="form-select" + (" is-invalid" if form.category.errors else "")) }}
+                    {% if form.category.errors %}
+                        <div class="text-danger mt-1">
+                            {% for error in form.category.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    {{ form.location.label(class="form-label") }}
+                    {{ form.location(class="form-input" + (" is-invalid" if form.location.errors else ""),
+                                   placeholder="Ej: Playa del Miracle, Tarragona") }}
+                    {% if form.location.errors %}
+                        <div class="text-danger mt-1">
+                            {% for error in form.location.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form.date.label(class="form-label") }}
+                    {{ form.date(class="form-input" + (" is-invalid" if form.date.errors else "")) }}
+                    {% if form.date.errors %}
+                        <div class="text-danger mt-1">
+                            {% for error in form.date.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    {{ form.time.label(class="form-label") }}
+                    {{ form.time(class="form-input" + (" is-invalid" if form.time.errors else ""),
+                               placeholder="Ej: 10:00") }}
+                    {% if form.time.errors %}
+                        <div class="text-danger mt-1">
+                            {% for error in form.time.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <small class="form-hint">Formato HH:MM (opcional)</small>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                {{ form.image.label(class="form-label") }}
+                {% if initiative and initiative.image_path %}
+                    <div class="mb-2">
+                        <img src="{{ url_for('static', filename='uploads/' + initiative.image_path) }}" 
+                             alt="Imagen actual" 
+                             style="max-width: 200px; border-radius: var(--border-radius);">
+                        <p class="text-light mt-1">Imagen actual</p>
+                    </div>
+                {% endif %}
+                {{ form.image(class="form-input" + (" is-invalid" if form.image.errors else ""),
+                            accept="image/*") }}
+                {% if form.image.errors %}
+                    <div class="text-danger mt-1">
+                        {% for error in form.image.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <small class="form-hint">
+                    Formatos aceptados: JPG, PNG, GIF, WEBP (Máx. 16MB). 
+                    La imagen será optimizada automáticamente.
+                </small>
+            </div>
+            
+            <div class="d-flex gap-2 mt-4">
+                <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-secondary btn-icon">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-success btn-lg btn-icon">
+                    <i class="fas fa-save"></i> 
+                    {% if initiative %}Actualizar{% else %}Crear{% endif %} Iniciativa
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

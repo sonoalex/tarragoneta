@@ -1,0 +1,487 @@
+# Spanish translations for Tarragoneta
+msgid ""
+msgstr ""
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Inici"
+msgstr "Inicio"
+
+msgid "Pròximes"
+msgstr "Próximas"
+
+msgid "Sobre Nosaltres"
+msgstr "Nosotros"
+
+msgid "Contacte"
+msgstr "Contacto"
+
+msgid "El Meu Perfil"
+msgstr "Mi Perfil"
+
+msgid "Admin"
+msgstr "Admin"
+
+msgid "Sortir"
+msgstr "Salir"
+
+msgid "Accedir"
+msgstr "Acceder"
+
+msgid "Registrar-se"
+msgstr "Registrarse"
+
+msgid "Junts construïm la Tarragona que volem"
+msgstr "Juntos construimos la Tarragona que queremos"
+
+msgid "Uneix-te a les iniciatives ciutadanes que estan transformant la nostra ciutat. Cada acció compta, cada persona suma. Sigues part del canvi!"
+msgstr "Únete a las iniciativas ciudadanas que están transformando nuestra ciudad. Cada acción cuenta, cada persona suma. ¡Sé parte del cambio!"
+
+msgid "Iniciatives Actives"
+msgstr "Iniciativas Activas"
+
+msgid "Ciutadans Compromesos"
+msgstr "Ciudadanos Comprometidos"
+
+msgid "Àrees d'Acció"
+msgstr "Áreas de Acción"
+
+msgid "Uneix-te al Moviment"
+msgstr "Únete al Movimiento"
+
+msgid "Veure Iniciatives"
+msgstr "Ver Iniciativas"
+
+msgid "Sostenibilitat"
+msgstr "Sostenibilidad"
+
+msgid "Iniciatives que cuiden el nostre medi ambient i promouen pràctiques ecològiques."
+msgstr "Iniciativas que cuidan nuestro medio ambiente y promueven prácticas ecológicas."
+
+msgid "Comunitat"
+msgstr "Comunidad"
+
+msgid "Connecta amb veïns compromesos i construeix una xarxa ciutadana forta."
+msgstr "Conecta con vecinos comprometidos y construye una red ciudadana fuerte."
+
+msgid "Acció"
+msgstr "Acción"
+
+msgid "Transforma les bones intencions en accions concretes i mesurables."
+msgstr "Transforma las buenas intenciones en acciones concretas y medibles."
+
+msgid "Troba la teva causa"
+msgstr "Encuentra tu causa"
+
+msgid "Categoria"
+msgstr "Categoría"
+
+msgid "Totes les categories"
+msgstr "Todas las categorías"
+
+msgid "Estat"
+msgstr "Estado"
+
+msgid "Totes"
+msgstr "Todas"
+
+msgid "Passades"
+msgstr "Pasadas"
+
+msgid "Buscar"
+msgstr "Buscar"
+
+msgid "Iniciatives Ciutadanes Actives"
+msgstr "Iniciativas Ciudadanas Activas"
+
+msgid "Descobreix com pots contribuir al canvi positiu a la nostra ciutat"
+msgstr "Descubre cómo puedes contribuir al cambio positivo en nuestra ciudad"
+
+msgid "Veure detalls i participar"
+msgstr "Ver detalles y participar"
+
+msgid "No hi ha iniciatives que coincideixin amb la teva cerca"
+msgstr "No hay iniciativas que coincidan con tu búsqueda"
+
+msgid "Prova amb altres filtres o crea una nova iniciativa"
+msgstr "Prueba con otros filtros o crea una nueva iniciativa"
+
+msgid "Crear Nova Iniciativa"
+msgstr "Crear Nueva Iniciativa"
+
+msgid "Tens una idea per millorar Tarragona?"
+msgstr "¿Tienes una idea para mejorar Tarragona?"
+
+msgid "Si ets una associació, col·lectiu o simplement un ciutadà compromès, contacta amb nosaltres per llançar la teva pròpia iniciativa."
+msgstr "Si eres una asociación, colectivo o simplemente un ciudadano comprometido, contacta con nosotros para lanzar tu propia iniciativa."
+
+msgid "Proposar Iniciativa"
+msgstr "Proponer Iniciativa"
+
+msgid "Neteja"
+msgstr "Limpieza"
+
+msgid "Reciclatge"
+msgstr "Reciclaje"
+
+msgid "Espais Verds"
+msgstr "Espacios Verdes"
+
+msgid "Mobilitat Sostenible"
+msgstr "Movilidad Sostenible"
+
+msgid "Educació Ambiental"
+msgstr "Educación Ambiental"
+
+msgid "Cultura i Civisme"
+msgstr "Cultura y Civismo"
+
+msgid "Acció Social"
+msgstr "Acción Social"
+
+msgid "vistes"
+msgstr "vistas"
+
+msgid "participants"
+msgstr "participantes"
+
+msgid "Plataforma ciutadana per construir junts una Tarragona més neta, sostenible i cívica."
+msgstr "Plataforma ciudadana para construir juntos una Tarragona más limpia, sostenible y cívica."
+
+msgid "Enllaços Ràpids"
+msgstr "Enlaces Rápidos"
+
+msgid "Esdeveniments Propers"
+msgstr "Próximos Eventos"
+
+msgid "Categories"
+msgstr "Categorías"
+
+msgid "Uneix-te al Canvi"
+msgstr "Únete al Cambio"
+
+msgid "Rep notificacions sobre noves iniciatives:"
+msgstr "Recibe notificaciones sobre nuevas iniciativas:"
+
+msgid "El teu correu electrònic"
+msgstr "Tu email"
+
+msgid "Subscriure's"
+msgstr "Suscribirse"
+
+msgid "Fet amb 💚 per Tarragona"
+msgstr "Hecho con 💚 para Tarragona"
+
+msgid "Privacitat"
+msgstr "Privacidad"
+
+msgid "Termes"
+msgstr "Términos"
+
+msgid "Nova Iniciativa"
+msgstr "Nueva Iniciativa"
+
+msgid "Ubicació"
+msgstr "Ubicación"
+
+msgid "Data"
+msgstr "Fecha"
+
+msgid "Organitzat per"
+msgstr "Organizado por"
+
+msgid "persones"
+msgstr "personas"
+
+msgid "Descripció"
+msgstr "Descripción"
+
+msgid "Persones compromeses"
+msgstr "Personas comprometidas"
+
+msgid "Sigues el primer a unir-te a aquesta iniciativa"
+msgstr "Sé el primero en unirte a esta iniciativa"
+
+msgid "més persones"
+msgstr "más personas"
+
+msgid "Comentaris i preguntes"
+msgstr "Comentarios y preguntas"
+
+msgid "Comparteix la teva opinió o fes una pregunta..."
+msgstr "Comparte tu opinión o haz una pregunta..."
+
+msgid "Publicar comentari"
+msgstr "Publicar comentario"
+
+msgid "Inicia sessió"
+msgstr "Inicia sesión"
+
+msgid "per deixar un comentari"
+msgstr "para dejar un comentario"
+
+msgid "No hi ha comentaris encara. Sigues el primer a comentar!"
+msgstr "No hay comentarios aún. ¡Sé el primero en comentar!"
+
+msgid "Participa!"
+msgstr "¡Participa!"
+
+msgid "Ja estàs participant"
+msgstr "Ya estás participando"
+
+msgid "Cancel·lar participació"
+msgstr "Cancelar participación"
+
+msgid "Uneix-te a aquesta iniciativa i ajuda'ns a millorar la nostra ciutat."
+msgstr "Únete a esta iniciativa y ayúdanos a mejorar nuestra ciudad."
+
+msgid "Vull participar"
+msgstr "Quiero participar"
+
+msgid "Registra el teu interès a participar. Et contactarem amb més detalls."
+msgstr "Registra tu interés en participar. Te contactaremos con más detalles."
+
+msgid "Nom complet"
+msgstr "Nombre completo"
+
+msgid "El teu nom"
+msgstr "Tu nombre"
+
+msgid "Telèfon"
+msgstr "Teléfono"
+
+msgid "Ja tens compte?"
+msgstr "¿Ya tienes cuenta?"
+
+msgid "Aquesta iniciativa ja ha finalitzat"
+msgstr "Esta iniciativa ya ha finalizado"
+
+msgid "Comparteix aquesta iniciativa:"
+msgstr "Comparte esta iniciativa:"
+
+msgid "Iniciatives relacionades"
+msgstr "Iniciativas relacionadas"
+
+msgid "Contacta amb Nosaltres"
+msgstr "Contáctanos"
+
+msgid "Tens una idea per millorar la ciutat? Vols organitzar una iniciativa? Necessites més informació? Estem aquí per escoltar-te!"
+msgstr "¿Tienes una idea para mejorar la ciudad? ¿Quieres organizar una iniciativa? ¿Necesitas más información? ¡Estamos aquí para escucharte!"
+
+msgid "Assumpte"
+msgstr "Asunto"
+
+msgid "Selecciona un assumpte"
+msgstr "Selecciona un asunto"
+
+msgid "Proposar una iniciativa"
+msgstr "Proponer una iniciativa"
+
+msgid "Col·laboració amb associació/col·lectiu"
+msgstr "Colaboración con asociación/colectivo"
+
+msgid "Informació sobre voluntariat"
+msgstr "Información sobre voluntariado"
+
+msgid "Suggeriments i millores"
+msgstr "Sugerencias y mejoras"
+
+msgid "Reportar un problema"
+msgstr "Reportar un problema"
+
+msgid "Altres"
+msgstr "Otros"
+
+msgid "Missatge"
+msgstr "Mensaje"
+
+msgid "Explica'ns en què podem ajudar-te..."
+msgstr "Cuéntanos en qué podemos ayudarte..."
+
+msgid "opcional"
+msgstr "opcional"
+
+msgid "Enviar Missatge"
+msgstr "Enviar Mensaje"
+
+msgid "Si us plau, introdueix el teu nom"
+msgstr "Por favor, introduce tu nombre"
+
+msgid "Si us plau, introdueix un email vàlid"
+msgstr "Por favor, introduce un email válido"
+
+msgid "Si us plau, selecciona un assumpte"
+msgstr "Por favor, selecciona un asunto"
+
+msgid "Si us plau, escriu un missatge"
+msgstr "Por favor, escribe un mensaje"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "Espanya"
+msgstr "España"
+
+msgid "Segueix-nos"
+msgstr "Síguenos"
+
+msgid "Preguntes Freqüents"
+msgstr "Preguntas Frecuentes"
+
+msgid "Com puc proposar una nova iniciativa?"
+msgstr "¿Cómo puedo proponer una nueva iniciativa?"
+
+msgid "Pots contactar-nos a través d'aquest formulari seleccionant \"Proposar una iniciativa\" en l'assumpte. Explica'ns la teva idea i t'ajudarem a fer-la realitat."
+msgstr "Puedes contactarnos a través de este formulario seleccionando \"Proponer una iniciativa\" en el asunto. Cuéntanos tu idea y te ayudaremos a hacerla realidad."
+
+msgid "Necessito registrar-me per participar?"
+msgstr "¿Necesito registrarme para participar?"
+
+msgid "No és obligatori. Pots participar com a usuari anònim deixant el teu nom i contacte, però registrar-te et permet fer seguiment de les teves participacions i rebre actualitzacions."
+msgstr "No es obligatorio. Puedes participar como usuario anónimo dejando tu nombre y contacto, pero registrarte te permite hacer seguimiento de tus participaciones y recibir actualizaciones."
+
+msgid "Com puc col·laborar com a associació o col·lectiu?"
+msgstr "¿Cómo puedo colaborar como asociación o colectivo?"
+
+msgid "Estem oberts a col·laboracions amb associacions i col·lectius locals. Contacta amb nosaltres i explorarem com podem treballar junts."
+msgstr "Estamos abiertos a colaboraciones con asociaciones y colectivos locales. Contacta con nosotros y exploraremos cómo podemos trabajar juntos."
+
+msgid "Les iniciatives tenen algun cost?"
+msgstr "¿Las iniciativas tienen algún coste?"
+
+msgid "La participació en totes les iniciatives és completament gratuïta. El nostre objectiu és facilitar l'acció ciutadana sense barreres econòmiques."
+msgstr "La participación en todas las iniciativas es completamente gratuita. Nuestro objetivo es facilitar la acción ciudadana sin barreras económicas."
+
+msgid "Panel d'Administració"
+msgstr "Panel de Administración"
+
+msgid "Gestiona les iniciatives i supervisa la plataforma"
+msgstr "Gestiona las iniciativas y supervisa la plataforma"
+
+msgid "Iniciatives Totals"
+msgstr "Iniciativas Totales"
+
+msgid "Usuaris Registrats"
+msgstr "Usuarios Registrados"
+
+msgid "Participacions Totals"
+msgstr "Participaciones Totales"
+
+msgid "Accions Ràpides"
+msgstr "Acciones Rápidas"
+
+msgid "Gestionar Usuaris"
+msgstr "Gestionar Usuarios"
+
+msgid "Veure Participacions"
+msgstr "Ver Participaciones"
+
+msgid "Participacions Recents"
+msgstr "Participaciones Recientes"
+
+msgid "Totes les Iniciatives"
+msgstr "Todas las Iniciativas"
+
+msgid "Títol"
+msgstr "Título"
+
+msgid "Participants"
+msgstr "Participantes"
+
+msgid "Vistes"
+msgstr "Vistas"
+
+msgid "Accions"
+msgstr "Acciones"
+
+msgid "Proper"
+msgstr "Próximo"
+
+msgid "Passat"
+msgstr "Pasado"
+
+msgid "Veure"
+msgstr "Ver"
+
+msgid "Editar"
+msgstr "Editar"
+
+msgid "Eliminar"
+msgstr "Eliminar"
+
+msgid "Estàs segur d'eliminar aquesta iniciativa?"
+msgstr "¿Estás seguro de eliminar esta iniciativa?"
+
+msgid "No hi ha iniciatives encara"
+msgstr "No hay iniciativas aún"
+
+msgid "Ajuda'ns a mantenir Tarragoneta"
+msgstr "Ayúdanos a mantener Tarragoneta"
+
+msgid "Les donacions voluntàries ens ajuden a cobrir els costos del servidor i mantenir la plataforma gratuïta per a tothom."
+msgstr "Las donaciones voluntarias nos ayudan a cubrir los costos del servidor y mantener la plataforma gratuita para todos."
+
+msgid "Donar"
+msgstr "Donar"
+
+msgid "Donació voluntària"
+msgstr "Donación voluntaria"
+
+msgid "Quantitat de la donació"
+msgstr "Cantidad de la donación"
+
+msgid "Altres quantitats"
+msgstr "Otras cantidades"
+
+msgid "Quantitat mínima: 1€"
+msgstr "Cantidad mínima: 1€"
+
+msgid "Per enviar-te el comprovant de donació"
+msgstr "Para enviarte el comprobante de donación"
+
+msgid "Segur i segur"
+msgstr "Seguro y seguro"
+
+msgid "Els pagaments es processen de forma segura a través de Stripe. No emmagatzemem les teves dades de targeta."
+msgstr "Los pagos se procesan de forma segura a través de Stripe. No almacenamos tus datos de tarjeta."
+
+msgid "Continuar amb el pagament"
+msgstr "Continuar con el pago"
+
+msgid "Pagament segur processat per"
+msgstr "Pago seguro procesado por"
+
+msgid "Donació realitzada"
+msgstr "Donación realizada"
+
+msgid "Gràcies per la teva donació!"
+msgstr "¡Gracias por tu donación!"
+
+msgid "La teva donació ens ajuda a mantenir Tarragoneta gratuïta per a tothom."
+msgstr "Tu donación nos ayuda a mantener Tarragoneta gratuita para todos."
+
+msgid "Tornar a l'inici"
+msgstr "Volver al inicio"
+
+msgid "La cantidad mínima es 1€"
+msgstr "La cantidad mínima es 1€"
+
+msgid "El sistema de pagos no está configurado. Por favor, contacta con nosotros."
+msgstr "El sistema de pagos no está configurado. Por favor, contacta con nosotros."
+
+msgid "Error al procesar el pago: {error}"
+msgstr "Error al procesar el pago: {error}"
+
+msgid "Error inesperado. Por favor, inténtalo de nuevo."
+msgstr "Error inesperado. Por favor, inténtalo de nuevo."
+
+msgid "Les donacions voluntàries ens ajuden a cobrir els costos del servidor."
+msgstr "Las donaciones voluntarias nos ayudan a cubrir los costos del servidor."
+
+msgid "Donación a Tarragoneta"
+msgstr "Donación a Tarragoneta"
+
+msgid "Donación voluntaria para mantener la plataforma"
+msgstr "Donación voluntaria para mantener la plataforma"

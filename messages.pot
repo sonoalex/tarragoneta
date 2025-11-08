@@ -1,0 +1,3 @@
+# Este archivo se generará automáticamente con pybabel extract
+# Por ahora lo dejamos vacío
+

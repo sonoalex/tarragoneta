@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Sobre Nosotros - Tarragoneta{% endblock %}
+
+{% block content %}
+<section class="container mt-5">
+    <div class="bg-white p-5" style="border-radius: var(--border-radius); box-shadow: var(--shadow-md);">
+        <h1 class="text-center mb-4">
+            <i class="fas fa-heart text-primary"></i> 
+            Sobre Tarragoneta
+        </h1>
+        
+        <p class="lead text-center mb-5">
+            Somos una plataforma ciudadana comprometida con la transformación de Tarragona 
+            en una ciudad más limpia, sostenible y cívica.
+        </p>
+        
+        <div class="row mt-5">
+            <div class="col-md-6 mb-4">
+                <h3><i class="fas fa-bullseye text-primary"></i> Nuestra Misión</h3>
+                <p>
+                    Conectar a ciudadanos comprometidos con iniciativas que mejoren nuestro entorno urbano,
+                    fomentando la participación activa en la construcción de una Tarragona más habitable
+                    y sostenible para todos.
+                </p>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <h3><i class="fas fa-eye text-primary"></i> Nuestra Visión</h3>
+                <p>
+                    Ser el punto de encuentro digital donde cada tarraconense pueda contribuir activamente
+                    al cambio positivo, creando una red ciudadana fuerte que impulse la transformación
+                    sostenible de nuestra ciudad.
+                </p>
+            </div>
+        </div>
+        
+        <h2 class="text-center mt-5 mb-4">
+            <i class="fas fa-flag text-primary"></i> 
+            Nuestros Valores
+        </h2>
+        
+        <div class="initiatives-grid">
+            <div class="p-4 bg-light text-center" style="border-radius: var(--border-radius);">
+                <div class="mb-3" style="font-size: 3rem;">🤝</div>
+                <h4>Colaboración</h4>
+                <p>Creemos en el poder de la acción colectiva para generar cambios significativos.</p>
+            </div>
+            
+            <div class="p-4 bg-light text-center" style="border-radius: var(--border-radius);">
+                <div class="mb-3" style="font-size: 3rem;">🌱</div>
+                <h4>Sostenibilidad</h4>
+                <p>Promovemos acciones que respeten y protejan nuestro medio ambiente urbano.</p>
+            </div>
+            
+            <div class="p-4 bg-light text-center" style="border-radius: var(--border-radius);">
+                <div class="mb-3" style="font-size: 3rem;">💪</div>
+                <h4>Compromiso</h4>
+                <p>Fomentamos la responsabilidad individual y colectiva con nuestra ciudad.</p>
+            </div>
+            
+            <div class="p-4 bg-light text-center" style="border-radius: var(--border-radius);">
+                <div class="mb-3" style="font-size: 3rem;">🎯</div>
+                <h4>Acción</h4>
+                <p>Transformamos las buenas intenciones en acciones concretas y medibles.</p>
+            </div>
+            
+            <div class="p-4 bg-light text-center" style="border-radius: var(--border-radius);">
+                <div class="mb-3" style="font-size: 3rem;">🏛️</div>
+                <h4>Civismo</h4>
+                <p>Promovemos el respeto mutuo y la convivencia armoniosa en espacios públicos.</p>
+            </div>
+            
+            <div class="p-4 bg-light text-center" style="border-radius: var(--border-radius);">
+                <div class="mb-3" style="font-size: 3rem;">✨</div>
+                <h4>Transparencia</h4>
+                <p>Operamos con total apertura sobre nuestras actividades e impacto.</p>
+            </div>
+        </div>
+        
+        <div class="text-center mt-5">
+            <h3 class="mb-4">¿Cómo Funciona?</h3>
+            <div class="d-flex justify-content-around flex-wrap gap-4">
+                <div class="text-center" style="max-width: 200px;">
+                    <div class="stat-card-icon bg-primary mx-auto mb-2" style="width: 60px; height: 60px;">
+                        <i class="fas fa-lightbulb" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <h5>1. Descubre</h5>
+                    <p class="text-light">Explora las iniciativas activas en tu ciudad</p>
+                </div>
+                
+                <div class="text-center" style="max-width: 200px;">
+                    <div class="stat-card-icon bg-success mx-auto mb-2" style="width: 60px; height: 60px;">
+                        <i class="fas fa-hand-paper" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <h5>2. Participa</h5>
+                    <p class="text-light">Únete a las iniciativas que te motiven</p>
+                </div>
+                
+                <div class="text-center" style="max-width: 200px;">
+                    <div class="stat-card-icon bg-warning mx-auto mb-2" style="width: 60px; height: 60px;">
+                        <i class="fas fa-users" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <h5>3. Actúa</h5>
+                    <p class="text-light">Colabora con otros ciudadanos comprometidos</p>
+                </div>
+                
+                <div class="text-center" style="max-width: 200px;">
+                    <div class="stat-card-icon bg-info mx-auto mb-2" style="width: 60px; height: 60px;">
+                        <i class="fas fa-chart-line" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <h5>4. Impacta</h5>
+                    <p class="text-light">Genera cambios positivos en tu comunidad</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-5 p-4 bg-light" style="border-radius: var(--border-radius);">
+            <h3 class="mb-3">¡Únete al Movimiento!</h3>
+            <p class="mb-4">
+                Cada acción cuenta. Tu participación puede marcar la diferencia 
+                en la construcción de una Tarragona mejor para todos.
+            </p>
+            <a href="{{ url_for('main.index') }}" class="btn btn-lg btn-icon">
+                <i class="fas fa-rocket"></i> Explorar Iniciativas
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Donació realitzada') }} - Tarragoneta{% endblock %}
+
+{% block content %}
+<section class="py-5" style="padding-top: 8rem !important;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 text-center">
+                <div class="card border-0 shadow-sm" style="border-radius: 20px;">
+                    <div class="card-body p-5">
+                        <div class="mb-4">
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-10" 
+                                 style="width: 100px; height: 100px;">
+                                <i class="fas fa-check fa-3x text-success"></i>
+                            </div>
+                        </div>
+                        <h1 class="display-5 fw-bold mb-3">{{ _('Gràcies per la teva donació!') }}</h1>
+                        <p class="lead text-muted mb-4">
+                            {{ _('La teva donació ens ajuda a mantenir Tarragoneta gratuïta per a tothom.') }}
+                        </p>
+                        <div class="d-flex gap-3 justify-content-center flex-wrap">
+                            <a href="{{ url_for('main.index') }}" class="btn btn-primary" style="border-radius: 50px;">
+                                {{ _('Tornar a l\'inici') }}
+                            </a>
+                            <a href="{{ url_for('main.contact') }}" class="btn btn-outline-secondary" style="border-radius: 50px;">
+                                {{ _('Contactar') }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+

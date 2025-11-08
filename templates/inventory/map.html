@@ -1,0 +1,382 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Inventari de Coloms') }} - Tarragoneta{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+<style>
+    #map { height: 600px; border-radius: 16px; z-index: 0; }
+    .category-filter {
+        background: white;
+        padding: 1rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 1.5rem;
+    }
+    .category-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        margin: 0.25rem;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        color: inherit;
+    }
+    .category-badge:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .category-badge.active {
+        background: var(--primary-green);
+        color: white;
+        font-weight: 600;
+    }
+    .stats-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="py-5" style="background: var(--bg-cream); padding-top: 120px;">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="display-5 fw-bold mb-3">{{ _('Inventari de Coloms') }}</h1>
+                <p class="lead text-muted">{{ _('Mapa col·laboratiu per reportar i visualitzar problemes relacionats amb coloms a Tarragona') }}</p>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="stats-card text-center">
+                    <h3 class="display-6 fw-bold text-primary">{{ total_items }}</h3>
+                    <p class="text-muted mb-0">{{ _('Items reportats') }}</p>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="stats-card">
+                    <h5 class="fw-bold mb-3">{{ _('Per categoria') }}</h5>
+                    <div>
+                        {% for cat, count in by_category.items() %}
+                        <span class="badge bg-secondary me-2 mb-2" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+                            {% if cat == 'excremento' %}💩{% elif cat == 'nido' %}🪺{% elif cat == 'paloma' %}🕊️{% elif cat == 'plumas' %}🪶{% else %}📌{% endif %}
+                            {{ cat|title }}: {{ count }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Filter -->
+        <div class="category-filter">
+            <h5 class="fw-bold mb-3">{{ _('Filtrar per categoria') }}</h5>
+            <div>
+                <a href="{{ url_for('inventory.inventory_map') }}" 
+                   class="category-badge {% if not selected_category %}active{% endif %}">
+                    {{ _('Totes') }}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='excremento') }}" 
+                   class="category-badge {% if selected_category == 'excremento' %}active{% endif %}">
+                    💩 {{ _('Excremento') }}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='nido') }}" 
+                   class="category-badge {% if selected_category == 'nido' %}active{% endif %}">
+                    🪺 {{ _('Nido') }}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='paloma') }}" 
+                   class="category-badge {% if selected_category == 'paloma' %}active{% endif %}">
+                    🕊️ {{ _('Paloma') }}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='plumas') }}" 
+                   class="category-badge {% if selected_category == 'plumas' %}active{% endif %}">
+                    🪶 {{ _('Plumas') }}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='otro') }}" 
+                   class="category-badge {% if selected_category == 'otro' %}active{% endif %}">
+                    📌 {{ _('Otro') }}
+                </a>
+            </div>
+        </div>
+
+        <!-- Map -->
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; overflow: hidden;">
+            <div class="card-body p-0">
+                <div id="map"></div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="text-center mb-4">
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('inventory.report_item') }}" class="btn btn-primary btn-lg px-5" style="border-radius: 50px;">
+                <i class="fas fa-plus me-2"></i>{{ _('Reportar nou item') }}
+            </a>
+            {% else %}
+            <div class="alert alert-info d-inline-block" style="border-radius: 50px; padding: 1rem 2rem;">
+                <i class="fas fa-info-circle me-2"></i>
+                {{ _('Has de') }} <a href="{{ url_for('security.login') }}" class="alert-link">{{ _('iniciar sessió') }}</a> {{ _('per reportar items') }}
+            </div>
+            {% endif %}
+            {% if current_user.has_role('admin') %}
+            <a href="{{ url_for('inventory.admin_inventory') }}" class="btn btn-outline-secondary btn-lg px-5 ms-2" style="border-radius: 50px;">
+                <i class="fas fa-cog me-2"></i>{{ _('Administrar') }}
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize map centered on Tarragona
+        var map = L.map('map').setView([41.1189, 1.2445], 13);
+        
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+        
+        // Create marker cluster group
+        var markers = L.markerClusterGroup();
+        
+        // Category icons with optional image
+        function getCategoryIcon(category, imagePath) {
+            var colors = {
+                'excremento': '#8B4513',
+                'nido': '#D2691E',
+                'paloma': '#4682B4',
+                'plumas': '#708090',
+                'otro': '#696969'
+            };
+            var emojis = {
+                'excremento': '💩',
+                'nido': '🪺',
+                'paloma': '🕊️',
+                'plumas': '🪶',
+                'otro': '📌'
+            };
+            
+            var size = 40; // Size for custom markers
+            var iconSize = [size, size];
+            var iconAnchor = [size/2, size/2];
+            
+            // If image exists, use it as marker
+            if (imagePath) {
+                return L.divIcon({
+                    className: 'custom-marker-image',
+                    html: `<div style="width: ${size}px; 
+                                      height: ${size}px; 
+                                      border-radius: 50%; 
+                                      border: 3px solid white;
+                                      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+                                      overflow: hidden;
+                                      background-color: ${colors[category] || '#696969'};
+                                      display: flex;
+                                      align-items: center;
+                                      justify-content: center;">
+                                <img src="/static/uploads/${imagePath}" 
+                                     style="width: 100%; 
+                                            height: 100%; 
+                                            object-fit: cover;
+                                            border-radius: 50%;" 
+                                     alt="${category}"
+                                     onerror="this.style.display='none'; this.parentElement.innerHTML='${emojis[category] || '📌'}'; this.parentElement.style.fontSize='20px';">
+                            </div>`,
+                    iconSize: iconSize,
+                    iconAnchor: iconAnchor
+                });
+            }
+            
+            // Default icon with emoji
+            return L.divIcon({
+                className: 'custom-marker',
+                html: `<div style="background-color: ${colors[category] || '#696969'}; 
+                                  width: ${size}px; 
+                                  height: ${size}px; 
+                                  border-radius: 50%; 
+                                  border: 3px solid white;
+                                  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                                  display: flex;
+                                  align-items: center;
+                                  justify-content: center;
+                                  font-size: 18px;">${emojis[category] || '📌'}</div>`,
+                iconSize: iconSize,
+                iconAnchor: iconAnchor
+            });
+        }
+        
+        // Category emojis
+        function getCategoryEmoji(category) {
+            var emojis = {
+                'excremento': '💩',
+                'nido': '🪺',
+                'paloma': '🕊️',
+                'plumas': '🪶',
+                'otro': '📌'
+            };
+            return emojis[category] || '📌';
+        }
+        
+        // Load items from API
+        var category = '{{ selected_category or "" }}';
+        var apiUrl = category ? 
+            `{{ url_for('inventory.api_items') }}?category=${category}` : 
+            '{{ url_for('inventory.api_items') }}';
+        
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(items => {
+                items.forEach(function(item) {
+                    var voteButton = '';
+                    var isAuthenticated = {{ 'true' if current_user.is_authenticated else 'false' }};
+                    
+                    if (isAuthenticated) {
+                        if (item.has_voted) {
+                            voteButton = `
+                                <div class="mt-2 pt-2 border-top">
+                                    <button class="btn btn-sm btn-outline-secondary w-100" disabled>
+                                        <i class="fas fa-check me-1"></i>{{ _('Ja has votat') }}
+                                    </button>
+                                </div>
+                            `;
+                        } else {
+                            voteButton = `
+                                <div class="mt-2 pt-2 border-top">
+                                    <button class="btn btn-sm btn-primary w-100 vote-btn" data-item-id="${item.id}">
+                                        <i class="fas fa-thumbs-up me-1"></i>{{ _('Confirmar importància') }}
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    }
+                    
+                    var popupContent = `
+                        <div style="min-width: 200px;">
+                            <h6 class="fw-bold mb-2">${getCategoryEmoji(item.category)} ${item.full_category}</h6>
+                            ${item.description ? `<p class="small mb-2">${item.description}</p>` : ''}
+                            ${item.address ? `<p class="small text-muted mb-2"><i class="fas fa-map-marker-alt"></i> ${item.address}</p>` : ''}
+                            ${item.image_path ? `<img src="/static/uploads/${item.image_path}" style="max-width: 100%; border-radius: 8px; margin-top: 0.5rem;" />` : ''}
+                            <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+                                <span class="small text-muted">
+                                    <i class="fas fa-star text-warning me-1"></i>
+                                    <strong>${item.importance_count || 0}</strong> {{ _('confirmacions') }}
+                                </span>
+                                <span class="small text-muted">${new Date(item.created_at).toLocaleDateString('ca-ES')}</span>
+                            </div>
+                            ${voteButton}
+                        </div>
+                    `;
+                    
+                    var marker = L.marker([item.latitude, item.longitude], {
+                        icon: getCategoryIcon(item.category, item.image_path)
+                    });
+                    
+                    marker.bindPopup(popupContent);
+                    markers.addLayer(marker);
+                });
+                
+                map.addLayer(markers);
+                
+                // Fit map to show all markers
+                if (items.length > 0) {
+                    var group = new L.featureGroup(markers.getLayers());
+                    map.fitBounds(group.getBounds().pad(0.1));
+                }
+                
+                // Handle vote button clicks
+                map.on('popupopen', function(e) {
+                    var popup = e.popup;
+                    var content = popup.getContent();
+                    
+                    // Re-bind vote buttons after popup opens
+                    setTimeout(function() {
+                        document.querySelectorAll('.vote-btn').forEach(function(btn) {
+                            btn.addEventListener('click', function() {
+                                var itemId = this.getAttribute('data-item-id');
+                                voteForItem(itemId, this);
+                            });
+                        });
+                    }, 100);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading inventory items:', error);
+            });
+        
+        // Vote function
+        function voteForItem(itemId, button) {
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ _("Processant...") }}';
+            
+            // Get CSRF token from meta tag or form
+            var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || 
+                           document.querySelector('input[name="csrf_token"]')?.value || 
+                           '{{ csrf_token() }}';
+            
+            fetch(`{{ url_for('inventory.vote_item', item_id=0) }}`.replace('0', itemId), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `csrf_token=${encodeURIComponent(csrfToken)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update button
+                    button.disabled = true;
+                    button.classList.remove('btn-primary');
+                    button.classList.add('btn-outline-secondary');
+                    button.innerHTML = '<i class="fas fa-check me-1"></i>{{ _("Ja has votat") }}';
+                    
+                    // Update importance count in popup
+                    var countElement = button.closest('.border-top').previousElementSibling.querySelector('strong');
+                    if (countElement) {
+                        countElement.textContent = data.importance_count;
+                    }
+                    
+                    // Show success message
+                    var alert = document.createElement('div');
+                    alert.className = 'alert alert-success alert-dismissible fade show mt-2';
+                    alert.innerHTML = `
+                        <i class="fas fa-check-circle me-2"></i>${data.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    button.closest('.border-top').after(alert);
+                    
+                    // Reload items to update all markers
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    alert(data.error || '{{ _("Error al votar") }}');
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fas fa-thumbs-up me-1"></i>{{ _("Confirmar importància") }}';
+                }
+            })
+            .catch(error => {
+                console.error('Error voting:', error);
+                alert('{{ _("Error al votar. Intenta-ho de nou.") }}');
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-thumbs-up me-1"></i>{{ _("Confirmar importància") }}';
+            });
+        }
+    });
+</script>
+{% endblock %}
+

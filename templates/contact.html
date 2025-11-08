@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Contacte') }} - Tarragoneta{% endblock %}
+
+{% block content %}
+<section class="py-5" style="padding-top: 8rem !important;">
+    <div class="container">
+        <div class="row">
+            <!-- Main Form -->
+            <div class="col-lg-8 mx-auto mb-5">
+                <div class="text-center mb-5">
+                    <h1 class="display-4 fw-bold mb-3">
+                        {{ _('Contacta amb Nosaltres') }}
+                    </h1>
+                    <p class="lead text-muted">
+                        {{ _('Tens una idea per millorar la ciutat? Vols organitzar una iniciativa? Necessites més informació? Estem aquí per escoltar-te!') }}
+                    </p>
+                </div>
+                
+                <div class="card shadow-sm border-0" style="border-radius: 20px;">
+                    <div class="card-body p-5">
+                        <form method="POST" action="{{ url_for('main.contact') }}" class="needs-validation" novalidate>
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label for="name" class="form-label fw-semibold">
+                                        <i class="fas fa-user me-2 text-primary"></i>{{ _('Nom complet') }} *
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control form-control-lg" 
+                                           id="name" 
+                                           name="name" 
+                                           required 
+                                           placeholder="{{ _('El teu nom') }}">
+                                    <div class="invalid-feedback">
+                                        {{ _('Si us plau, introdueix el teu nom') }}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="email" class="form-label fw-semibold">
+                                        <i class="fas fa-envelope me-2 text-primary"></i>Email *
+                                    </label>
+                                    <input type="email" 
+                                           class="form-control form-control-lg" 
+                                           id="email" 
+                                           name="email" 
+                                           required 
+                                           placeholder="tu@email.com">
+                                    <div class="invalid-feedback">
+                                        {{ _('Si us plau, introdueix un email vàlid') }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="subject" class="form-label fw-semibold">
+                                    <i class="fas fa-tag me-2 text-primary"></i>{{ _('Assumpte') }} *
+                                </label>
+                                <select class="form-select form-select-lg" id="subject" name="subject" required>
+                                    <option value="">{{ _('Selecciona un assumpte') }}</option>
+                                    <option value="donacion" {% if default_subject == 'donacion' %}selected{% endif %}>{{ _('Donació voluntària') }}</option>
+                                    <option value="propuesta">{{ _('Proposar una iniciativa') }}</option>
+                                    <option value="colaboracion">{{ _('Col·laboració amb associació/col·lectiu') }}</option>
+                                    <option value="voluntariado">{{ _('Informació sobre voluntariat') }}</option>
+                                    <option value="sugerencia">{{ _('Suggeriments i millores') }}</option>
+                                    <option value="problema">{{ _('Reportar un problema') }}</option>
+                                    <option value="otro">{{ _('Altres') }}</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    {{ _('Si us plau, selecciona un assumpte') }}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="message" class="form-label fw-semibold">
+                                    <i class="fas fa-comment me-2 text-primary"></i>{{ _('Missatge') }} *
+                                </label>
+                                <textarea class="form-control" 
+                                          id="message" 
+                                          name="message" 
+                                          rows="6" 
+                                          required 
+                                          placeholder="{{ _('Explica\'ns en què podem ajudar-te...') }}"></textarea>
+                                <div class="invalid-feedback">
+                                    {{ _('Si us plau, escriu un missatge') }}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="phone" class="form-label fw-semibold">
+                                    <i class="fas fa-phone me-2 text-primary"></i>{{ _('Telèfon') }} <span class="text-muted">({{ _('opcional') }})</span>
+                                </label>
+                                <input type="tel" 
+                                       class="form-control form-control-lg" 
+                                       id="phone" 
+                                       name="phone" 
+                                       placeholder="600 000 000">
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg px-5 py-3" style="border-radius: 50px;">
+                                    <i class="fas fa-paper-plane me-2"></i>{{ _('Enviar Missatge') }}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contact Information Cards -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm text-center" style="border-radius: 20px;">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10" 
+                                 style="width: 60px; height: 60px;">
+                                <i class="fas fa-envelope fa-lg text-primary"></i>
+                            </div>
+                        </div>
+                        <h5 class="fw-bold mb-2">{{ _('Email') }}</h5>
+                        <p class="text-muted mb-0">info@tarragoneta.org</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm text-center" style="border-radius: 20px;">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-10" 
+                                 style="width: 60px; height: 60px;">
+                                <i class="fas fa-map-marker-alt fa-lg text-success"></i>
+                            </div>
+                        </div>
+                        <h5 class="fw-bold mb-2">{{ _('Ubicació') }}</h5>
+                        <p class="text-muted mb-0">Tarragona, {{ _('Espanya') }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm text-center" style="border-radius: 20px;">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-info bg-opacity-10" 
+                                 style="width: 60px; height: 60px;">
+                                <i class="fas fa-share-alt fa-lg text-info"></i>
+                            </div>
+                        </div>
+                        <h5 class="fw-bold mb-2">{{ _('Segueix-nos') }}</h5>
+                        <div class="d-flex justify-content-center gap-3 mt-3">
+                            <a href="#" class="text-primary text-decoration-none" aria-label="Facebook">
+                                <i class="fab fa-facebook fa-lg"></i>
+                            </a>
+                            <a href="#" class="text-info text-decoration-none" aria-label="Twitter">
+                                <i class="fab fa-twitter fa-lg"></i>
+                            </a>
+                            <a href="#" class="text-danger text-decoration-none" aria-label="Instagram">
+                                <i class="fab fa-instagram fa-lg"></i>
+                            </a>
+                            <a href="#" class="text-primary text-decoration-none" aria-label="Telegram">
+                                <i class="fab fa-telegram fa-lg"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- FAQ Section -->
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div class="card border-0 shadow-sm" style="border-radius: 20px;">
+                    <div class="card-body p-5">
+                        <h3 class="text-center mb-5 fw-bold">
+                            <i class="fas fa-question-circle text-primary me-2"></i>
+                            {{ _('Preguntes Freqüents') }}
+                        </h3>
+                        
+                        <div class="accordion accordion-flush" id="faqAccordion">
+                            <div class="accordion-item border-0 mb-3" style="border-radius: 12px !important; background: var(--bg-light);">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq1" aria-expanded="false" aria-controls="faq1">
+                                        {{ _('Com puc proposar una nova iniciativa?') }}
+                                    </button>
+                                </h2>
+                                <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body text-muted">
+                                        {{ _('Pots contactar-nos a través d\'aquest formulari seleccionant "Proposar una iniciativa" en l\'assumpte. Explica\'ns la teva idea i t\'ajudarem a fer-la realitat.') }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border-0 mb-3" style="border-radius: 12px !important; background: var(--bg-light);">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq2" aria-expanded="false" aria-controls="faq2">
+                                        {{ _('Necessito registrar-me per participar?') }}
+                                    </button>
+                                </h2>
+                                <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body text-muted">
+                                        {{ _('No és obligatori. Pots participar com a usuari anònim deixant el teu nom i contacte, però registrar-te et permet fer seguiment de les teves participacions i rebre actualitzacions.') }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border-0 mb-3" style="border-radius: 12px !important; background: var(--bg-light);">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq3" aria-expanded="false" aria-controls="faq3">
+                                        {{ _('Com puc col·laborar com a associació o col·lectiu?') }}
+                                    </button>
+                                </h2>
+                                <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body text-muted">
+                                        {{ _('Estem oberts a col·laboracions amb associacions i col·lectius locals. Contacta amb nosaltres i explorarem com podem treballar junts.') }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border-0" style="border-radius: 12px !important; background: var(--bg-light);">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq4" aria-expanded="false" aria-controls="faq4">
+                                        {{ _('Les iniciatives tenen algun cost?') }}
+                                    </button>
+                                </h2>
+                                <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body text-muted mb-0">
+                                        {{ _('La participació en totes les iniciatives és completament gratuïta. El nostre objectiu és facilitar l\'acció ciutadana sense barreres econòmiques.') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+// Bootstrap form validation
+(function() {
+    'use strict';
+    var forms = document.querySelectorAll('.needs-validation');
+    Array.prototype.slice.call(forms).forEach(function(form) {
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,402 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Mapa de Items Pendents') }} - Tarragoneta{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+<style>
+    #map {
+        height: 600px;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .pending-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="py-5" style="background: var(--bg-cream); padding-top: 120px;">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="display-5 fw-bold mb-2">{{ _('Mapa de Items Pendents') }}</h1>
+                        <p class="text-muted">{{ _('Aprova o rebutja items des del mapa') }}</p>
+                    </div>
+                    <a href="{{ url_for('inventory.admin_inventory', status='pending') }}" 
+                       class="btn btn-outline-secondary" style="border-radius: 50px;">
+                        <i class="fas fa-list me-2"></i>{{ _('Veure llista') }}
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px;">
+            <div class="card-body p-0 position-relative">
+                <div id="map"></div>
+                <div class="pending-badge">
+                    <span class="badge bg-warning text-dark fs-6 px-3 py-2">
+                        <i class="fas fa-clock me-2"></i>{{ items|length }} {{ _('pendents') }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>{{ _('Instruccions') }}:</strong> {{ _('Fes clic en un marcador per veure els detalls i aprovar o rebutjar l\'item.') }}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script>
+    // Wait for DOM to be ready
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize map centered on Tarragona
+        var map = L.map('map').setView([41.1189, 1.2586], 13);
+    
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+    
+    // Create marker cluster group
+    var markers = L.markerClusterGroup({
+        chunkedLoading: true,
+        maxClusterRadius: 50
+    });
+    
+    // Category icons with optional image
+    function getCategoryIcon(category, imagePath) {
+        var colors = {
+            'excremento': '#8B4513',
+            'nido': '#D2691E',
+            'paloma': '#4682B4',
+            'plumas': '#708090',
+            'otro': '#696969'
+        };
+        var emojis = {
+            'excremento': '💩',
+            'nido': '🪺',
+            'paloma': '🕊️',
+            'plumas': '🪶',
+            'otro': '📌'
+        };
+        
+        var size = 40; // Increased size to accommodate images
+        var iconSize = [size, size];
+        var iconAnchor = [size/2, size/2];
+        
+        // If image exists, use it as marker
+        if (imagePath) {
+            return L.divIcon({
+                className: 'custom-marker-image',
+                html: `<div style="width: ${size}px; 
+                                  height: ${size}px; 
+                                  border-radius: 50%; 
+                                  border: 3px solid white;
+                                  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+                                  overflow: hidden;
+                                  background-color: ${colors[category] || '#696969'};
+                                  display: flex;
+                                  align-items: center;
+                                  justify-content: center;">
+                            <img src="/static/uploads/${imagePath}" 
+                                 style="width: 100%; 
+                                        height: 100%; 
+                                        object-fit: cover;
+                                        border-radius: 50%;" 
+                                 alt="${category}"
+                                 onerror="this.style.display='none'; this.parentElement.innerHTML='${emojis[category] || '📌'}'; this.parentElement.style.fontSize='20px';">
+                        </div>`,
+                iconSize: iconSize,
+                iconAnchor: iconAnchor
+            });
+        }
+        
+        // Default icon with emoji
+        return L.divIcon({
+            className: 'custom-marker',
+            html: `<div style="background-color: ${colors[category] || '#696969'}; 
+                              width: ${size}px; 
+                              height: ${size}px; 
+                              border-radius: 50%; 
+                              border: 3px solid white;
+                              box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                              display: flex;
+                              align-items: center;
+                              justify-content: center;
+                              font-size: 18px;">${emojis[category] || '📌'}</div>`,
+            iconSize: iconSize,
+            iconAnchor: iconAnchor
+        });
+    }
+    
+    function getCategoryEmoji(category) {
+        var emojis = {
+            'excremento': '💩',
+            'nido': '🪺',
+            'paloma': '🕊️',
+            'plumas': '🪶',
+            'otro': '📌'
+        };
+        return emojis[category] || '📌';
+    }
+    
+    // Store reference to all markers for easy removal
+    var markerMap = {}; // itemId -> marker
+    var isInitialLoad = true; // Track if this is the first load
+    
+    // Function to update pending count badge
+    function updatePendingCount(count) {
+        var badge = document.querySelector('.pending-badge span');
+        if (badge) {
+            badge.innerHTML = '<i class="fas fa-clock me-2"></i>' + count + ' {{ _('pendents') }}';
+        }
+    }
+    
+    // Function to show toast notification
+    function showToast(message, type = 'success') {
+        // Remove existing toast if any
+        var existingToast = document.querySelector('.toast-notification');
+        if (existingToast) {
+            existingToast.remove();
+        }
+        
+        var toast = document.createElement('div');
+        toast.className = 'toast-notification alert alert-' + (type === 'success' ? 'success' : 'danger');
+        toast.style.cssText = 'position: fixed; top: 80px; right: 20px; z-index: 10000; min-width: 300px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 8px;';
+        toast.innerHTML = '<i class="fas fa-' + (type === 'success' ? 'check-circle' : 'exclamation-circle') + ' me-2"></i>' + message;
+        document.body.appendChild(toast);
+        
+        // Auto remove after 3 seconds
+        setTimeout(function() {
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 0.3s';
+            setTimeout(function() {
+                toast.remove();
+            }, 300);
+        }, 3000);
+    }
+    
+    // Function to create popup content
+    function createPopupContent(item) {
+        return `
+            <div style="min-width: 250px;">
+                <h6 class="fw-bold mb-2">${getCategoryEmoji(item.category)} ${item.full_category}</h6>
+                ${item.description ? `<p class="small mb-2">${item.description}</p>` : ''}
+                ${item.address ? `<p class="small text-muted mb-2"><i class="fas fa-map-marker-alt"></i> ${item.address}</p>` : ''}
+                ${item.reporter ? `<p class="small text-muted mb-2"><i class="fas fa-user"></i> ${item.reporter}</p>` : ''}
+                ${item.image_path ? `<img src="/static/uploads/${item.image_path}" style="max-width: 100%; border-radius: 8px; margin-top: 0.5rem;" />` : ''}
+                <div class="small text-muted mb-2">
+                    <i class="fas fa-calendar me-1"></i>${new Date(item.created_at).toLocaleDateString('ca-ES')}
+                </div>
+                <div class="d-grid gap-2 mt-3 pt-3 border-top">
+                    <button type="button" class="btn btn-sm btn-success w-100 approve-btn" data-item-id="${item.id}">
+                        <i class="fas fa-check me-1"></i>{{ _('Aprovar') }}
+                    </button>
+                    <button type="button" class="btn btn-sm btn-danger w-100 reject-btn" data-item-id="${item.id}">
+                        <i class="fas fa-times me-1"></i>{{ _('Rebutjar') }}
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Function to load and display pending items
+    function loadPendingItems() {
+        fetch('{{ url_for("inventory.api_pending_items") }}')
+            .then(response => response.json())
+            .then(items => {
+                // Clear existing markers
+                markers.clearLayers();
+                markerMap = {};
+                
+                // Add new markers
+                items.forEach(function(item) {
+                    var popupContent = createPopupContent(item);
+                    
+                    var marker = L.marker([item.latitude, item.longitude], {
+                        icon: getCategoryIcon(item.category, item.image_path)
+                    });
+                    
+                    marker.bindPopup(popupContent);
+                    markers.addLayer(marker);
+                    markerMap[item.id] = marker; // Store reference
+                });
+                
+                map.addLayer(markers);
+                
+                // Fit map to show all markers (only on initial load)
+                if (isInitialLoad && items.length > 0) {
+                    var group = new L.featureGroup(markers.getLayers());
+                    map.fitBounds(group.getBounds().pad(0.1));
+                    isInitialLoad = false;
+                }
+                
+                // Update pending count
+                updatePendingCount(items.length);
+                
+                // Re-bind popup events for new markers
+                bindPopupEvents();
+            })
+            .catch(error => {
+                console.error('Error loading pending items:', error);
+            });
+    }
+    
+    // Function to bind popup events
+    function bindPopupEvents() {
+        // Remove existing popupopen handler to avoid duplicates
+        map.off('popupopen');
+        
+        // Get CSRF token from meta tag
+        var csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        
+        // Handle button clicks in popups
+        map.on('popupopen', function(e) {
+            var popup = e.popup;
+            var content = popup.getElement();
+            
+            // Re-bind button clicks after popup opens
+            setTimeout(function() {
+                if (content) {
+                    // Approve button
+                    content.querySelectorAll('.approve-btn').forEach(function(button) {
+                        // Remove existing listeners to avoid duplicates
+                        var newButton = button.cloneNode(true);
+                        button.parentNode.replaceChild(newButton, button);
+                        
+                        newButton.addEventListener('click', function() {
+                            var itemId = this.getAttribute('data-item-id');
+                            var action = '/admin/inventory/' + itemId + '/approve';
+                            
+                            this.disabled = true;
+                            this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ _('Processant...') }}';
+                            
+                            var formData = new FormData();
+                            formData.append('csrf_token', csrfToken);
+                            
+                            fetch(action, {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-CSRFToken': csrfToken
+                                }
+                            })
+                            .then(response => {
+                                if (response.ok) {
+                                    // Remove marker from map
+                                    if (markerMap[itemId]) {
+                                        markers.removeLayer(markerMap[itemId]);
+                                        delete markerMap[itemId];
+                                    }
+                                    
+                                    // Close popup
+                                    map.closePopup();
+                                    
+                                    // Show success toast
+                                    showToast('{{ _('Item aprovat correctament') }}', 'success');
+                                    
+                                    // Reload items from API to update count
+                                    loadPendingItems();
+                                } else {
+                                    showToast('{{ _('Error al processar la sol·licitud') }}', 'error');
+                                    this.disabled = false;
+                                    this.innerHTML = '<i class="fas fa-check me-1"></i>{{ _('Aprovar') }}';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                showToast('{{ _('Error al processar la sol·licitud') }}', 'error');
+                                this.disabled = false;
+                                this.innerHTML = '<i class="fas fa-check me-1"></i>{{ _('Aprovar') }}';
+                            });
+                        });
+                    });
+                    
+                    // Reject button
+                    content.querySelectorAll('.reject-btn').forEach(function(button) {
+                        // Remove existing listeners to avoid duplicates
+                        var newButton = button.cloneNode(true);
+                        button.parentNode.replaceChild(newButton, button);
+                        
+                        newButton.addEventListener('click', function() {
+                            if (!confirm('{{ _('Estàs segur de rebutjar aquest item?') }}')) {
+                                return;
+                            }
+                            
+                            var itemId = this.getAttribute('data-item-id');
+                            var action = '/admin/inventory/' + itemId + '/reject';
+                            
+                            this.disabled = true;
+                            this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ _('Processant...') }}';
+                            
+                            var formData = new FormData();
+                            formData.append('csrf_token', csrfToken);
+                            
+                            fetch(action, {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-CSRFToken': csrfToken
+                                }
+                            })
+                            .then(response => {
+                                if (response.ok) {
+                                    // Remove marker from map
+                                    if (markerMap[itemId]) {
+                                        markers.removeLayer(markerMap[itemId]);
+                                        delete markerMap[itemId];
+                                    }
+                                    
+                                    // Close popup
+                                    map.closePopup();
+                                    
+                                    // Show success toast
+                                    showToast('{{ _('Item rebutjat') }}', 'success');
+                                    
+                                    // Reload items from API to update count
+                                    loadPendingItems();
+                                } else {
+                                    showToast('{{ _('Error al processar la sol·licitud') }}', 'error');
+                                    this.disabled = false;
+                                    this.innerHTML = '<i class="fas fa-times me-1"></i>{{ _('Rebutjar') }}';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                showToast('{{ _('Error al processar la sol·licitud') }}', 'error');
+                                this.disabled = false;
+                                this.innerHTML = '<i class="fas fa-times me-1"></i>{{ _('Rebutjar') }}';
+                            });
+                        });
+                    });
+                }
+            }, 100);
+        });
+    }
+    
+    // Initial load of pending items
+    loadPendingItems();
+    }); // End DOMContentLoaded
+</script>
+{% endblock %}
+

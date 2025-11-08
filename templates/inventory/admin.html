@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Administrar Inventari') }} - Tarragoneta{% endblock %}
+
+{% block content %}
+<section class="py-5" style="background: var(--bg-cream); padding-top: 120px;">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="display-5 fw-bold mb-3">{{ _('Administrar Inventari') }}</h1>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-2">
+                <div class="card border-0 shadow-sm text-center" style="border-radius: 16px;">
+                    <div class="card-body p-3">
+                        <h4 class="fw-bold text-primary mb-0">{{ total_items }}</h4>
+                        <small class="text-muted">{{ _('Total') }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card border-0 shadow-sm text-center" style="border-radius: 16px; border: 2px solid #ffc107;">
+                    <div class="card-body p-3">
+                        <h4 class="fw-bold text-warning mb-0">{{ pending_items }}</h4>
+                        <small class="text-muted">{{ _('Pendents') }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card border-0 shadow-sm text-center" style="border-radius: 16px;">
+                    <div class="card-body p-3">
+                        <h4 class="fw-bold text-success mb-0">{{ approved_items }}</h4>
+                        <small class="text-muted">{{ _('Aprovats') }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card border-0 shadow-sm text-center" style="border-radius: 16px;">
+                    <div class="card-body p-3">
+                        <h4 class="fw-bold text-info mb-0">{{ active_items }}</h4>
+                        <small class="text-muted">{{ _('Actius') }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card border-0 shadow-sm text-center" style="border-radius: 16px;">
+                    <div class="card-body p-3">
+                        <h4 class="fw-bold text-secondary mb-0">{{ resolved_items }}</h4>
+                        <small class="text-muted">{{ _('Resolts') }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card border-0 shadow-sm text-center" style="border-radius: 16px;">
+                    <div class="card-body p-3">
+                        <h4 class="fw-bold text-danger mb-0">{{ rejected_items }}</h4>
+                        <small class="text-muted">{{ _('Rebutjats') }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <ul class="nav nav-pills" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link {% if status_filter == 'all' %}active{% endif %}" 
+                           href="{{ url_for('inventory.admin_inventory', status='all', page=1, per_page=per_page|default(20)) }}">
+                            {{ _('Tots') }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if status_filter == 'pending' %}active{% endif %}" 
+                           href="{{ url_for('inventory.admin_inventory', status='pending', page=1, per_page=per_page|default(20)) }}">
+                            {{ _('Pendents') }} 
+                            {% if pending_items > 0 %}
+                            <span class="badge bg-warning text-dark">{{ pending_items }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if status_filter == 'approved' %}active{% endif %}" 
+                           href="{{ url_for('inventory.admin_inventory', status='approved', page=1, per_page=per_page|default(20)) }}">
+                            {{ _('Aprovats') }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if status_filter == 'active' %}active{% endif %}" 
+                           href="{{ url_for('inventory.admin_inventory', status='active', page=1, per_page=per_page|default(20)) }}">
+                            {{ _('Actius') }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if status_filter == 'resolved' %}active{% endif %}" 
+                           href="{{ url_for('inventory.admin_inventory', status='resolved', page=1, per_page=per_page|default(20)) }}">
+                            {{ _('Resolts') }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if status_filter == 'rejected' %}active{% endif %}" 
+                           href="{{ url_for('inventory.admin_inventory', status='rejected', page=1, per_page=per_page|default(20)) }}">
+                            {{ _('Rebutjats') }}
+                        </a>
+                    </li>
+                </ul>
+                {% if pending_items > 0 %}
+                <a class="btn btn-warning text-dark" 
+                   href="{{ url_for('inventory.admin_pending_map') }}"
+                   style="border-radius: 50px;">
+                    <i class="fas fa-map me-2"></i>{{ _('Veure Mapa de Pendents') }}
+                    <span class="badge bg-dark ms-2">{{ pending_items }}</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+            <div class="card-body p-4">
+                {% if items and items|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>{{ _('Categoria') }}</th>
+                                <th>{{ _('Ubicació') }}</th>
+                                <th>{{ _('Descripció') }}</th>
+                                <th>{{ _('Foto') }}</th>
+                                <th>{{ _('Importància') }}</th>
+                                <th>{{ _('Estat') }}</th>
+                                <th>{{ _('Reporter') }}</th>
+                                <th>{{ _('Data') }}</th>
+                                <th>{{ _('Accions') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td>
+                                    {% if item.category == 'excremento' %}💩
+                                    {% elif item.category == 'nido' %}🪺
+                                    {% elif item.category == 'paloma' %}🕊️
+                                    {% elif item.category == 'plumas' %}🪶
+                                    {% else %}📌{% endif %}
+                                    {{ item.category|title }}
+                                </td>
+                                <td>
+                                    <small>
+                                        {{ item.address or (item.latitude|string + ', ' + item.longitude|string) }}
+                                    </small>
+                                </td>
+                                <td>
+                                    <small>{{ item.description[:50] if item.description else '-' }}{% if item.description and item.description|length > 50 %}...{% endif %}</small>
+                                </td>
+                                <td>
+                                    {% if item.image_path %}
+                                        <img src="{{ url_for('static', filename='uploads/' + item.image_path) }}" 
+                                             style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;" 
+                                             alt="Foto">
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="fas fa-star me-1"></i>{{ item.importance_count or 0 }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if item.status == 'pending' %}
+                                        <span class="badge bg-warning text-dark">{{ _('Pendent') }}</span>
+                                    {% elif item.status == 'approved' %}
+                                        <span class="badge bg-success">{{ _('Aprovat') }}</span>
+                                    {% elif item.status == 'active' %}
+                                        <span class="badge bg-info">{{ _('Actiu') }}</span>
+                                    {% elif item.status == 'resolved' %}
+                                        <span class="badge bg-secondary">{{ _('Resolt') }}</span>
+                                    {% elif item.status == 'rejected' %}
+                                        <span class="badge bg-danger">{{ _('Rebutjat') }}</span>
+                                    {% else %}
+                                        <span class="badge bg-dark">{{ item.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.reporter %}
+                                        <small>{{ item.reporter.username }}</small>
+                                    {% else %}
+                                        <small class="text-muted">-</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small>{{ item.created_at.strftime('%d/%m/%Y') }}</small>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        {% if item.status == 'pending' %}
+                                        <form method="POST" action="{{ url_for('admin.approve_item', id=item.id) }}" style="display: inline;">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <input type="hidden" name="page" value="{{ page }}">
+                                            <input type="hidden" name="status" value="{{ status_filter }}">
+                                            <input type="hidden" name="per_page" value="{{ per_page }}">
+                                            <button type="submit" class="btn btn-sm btn-success" title="{{ _('Aprovar') }}">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="{{ url_for('admin.reject_item', id=item.id) }}" style="display: inline;">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <input type="hidden" name="page" value="{{ page }}">
+                                            <input type="hidden" name="status" value="{{ status_filter }}">
+                                            <input type="hidden" name="per_page" value="{{ per_page }}">
+                                            <button type="submit" class="btn btn-sm btn-danger" title="{{ _('Rebutjar') }}"
+                                                    onclick="return confirm('{{ _('Estàs segur de rebutjar aquest item?') }}');">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </form>
+                                        {% elif item.status == 'approved' or item.status == 'active' %}
+                                        <form method="POST" action="{{ url_for('inventory.resolve_item', id=item.id) }}" style="display: inline;">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <input type="hidden" name="page" value="{{ page }}">
+                                            <input type="hidden" name="status" value="{{ status_filter }}">
+                                            <input type="hidden" name="per_page" value="{{ per_page }}">
+                                            <button type="submit" class="btn btn-sm btn-warning" title="{{ _('Marcar com resolt') }}">
+                                                <i class="fas fa-check-circle"></i>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                        <form method="POST" action="{{ url_for('inventory.delete_item', id=item.id) }}" 
+                                              style="display: inline;"
+                                              onsubmit="return confirm('{{ _('Estàs segur d\'eliminar aquest item?') }}');">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <input type="hidden" name="page" value="{{ page }}">
+                                            <input type="hidden" name="status" value="{{ status_filter }}">
+                                            <input type="hidden" name="per_page" value="{{ per_page }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ _('Eliminar') }}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <p class="text-muted">{{ _('No hi ha items amb aquest estat') }}</p>
+                </div>
+                {% endif %}
+                
+                <!-- Pagination - Always show if pagination exists -->
+                {% if pagination %}
+                <!-- Navigation buttons (only if more than 1 page) -->
+                {% if pagination.pages > 1 %}
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if pagination.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('inventory.admin_inventory', status=status_filter, page=pagination.prev_num, per_page=per_page) }}">
+                                <i class="fas fa-chevron-left"></i> {{ _('Anterior') }}
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="fas fa-chevron-left"></i> {{ _('Anterior') }}</span>
+                        </li>
+                        {% endif %}
+                        
+                        {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                            {% if page_num %}
+                                {% if page_num == pagination.page %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_num }}</span>
+                                </li>
+                                {% else %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('inventory.admin_inventory', status=status_filter, page=page_num, per_page=per_page) }}">{{ page_num }}</a>
+                                </li>
+                                {% endif %}
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if pagination.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('inventory.admin_inventory', status=status_filter, page=pagination.next_num, per_page=per_page) }}">
+                                {{ _('Següent') }} <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">{{ _('Següent') }} <i class="fas fa-chevron-right"></i></span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+                
+                <!-- Pagination info (always show) -->
+                <div class="text-center mt-3">
+                    <small class="text-muted">
+                        {{ _('Mostrant') }} {{ (pagination.page - 1) * pagination.per_page + 1 }} - 
+                        {{ (pagination.page - 1) * pagination.per_page + pagination.items|length }} 
+                        {{ _('de') }} {{ pagination.total }} {{ _('items') }}
+                    </small>
+                    <div class="mt-2">
+                        <small class="text-muted">{{ _('Items per pàgina') }}:</small>
+                        <a href="{{ url_for('inventory.admin_inventory', status=status_filter, page=1, per_page=10) }}" 
+                           class="btn btn-sm btn-outline-secondary {% if per_page == 10 %}active{% endif %}">10</a>
+                        <a href="{{ url_for('inventory.admin_inventory', status=status_filter, page=1, per_page=20) }}" 
+                           class="btn btn-sm btn-outline-secondary {% if per_page == 20 %}active{% endif %}">20</a>
+                        <a href="{{ url_for('inventory.admin_inventory', status=status_filter, page=1, per_page=50) }}" 
+                           class="btn btn-sm btn-outline-secondary {% if per_page == 50 %}active{% endif %}">50</a>
+                        <a href="{{ url_for('inventory.admin_inventory', status=status_filter, page=1, per_page=100) }}" 
+                           class="btn btn-sm btn-outline-secondary {% if per_page == 100 %}active{% endif %}">100</a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mt-4 d-flex gap-2">
+            {% if status_filter == 'pending' and pending_items > 0 %}
+            <a href="{{ url_for('inventory.admin_pending_map') }}" class="btn btn-warning" style="border-radius: 50px;">
+                <i class="fas fa-map me-2"></i>{{ _('Veure Mapa de Pendents') }}
+            </a>
+            {% endif %}
+            <a href="{{ url_for('inventory.inventory_map') }}" class="btn btn-outline-secondary" style="border-radius: 50px;">
+                <i class="fas fa-arrow-left me-2"></i>{{ _('Tornar al mapa') }}
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
