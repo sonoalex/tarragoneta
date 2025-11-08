@@ -64,12 +64,7 @@ def set_language(lang):
     if lang in current_app.config['BABEL_SUPPORTED_LOCALES']:
         session['language'] = lang
         session.permanent = True  # Make session persistent
-        # Force session to save
-        try:
-            from flask import session
-            session.modified = True
-        except:
-            pass
+        session.modified = True  # Force session to save
         current_app.logger.info(f"Language changed to: {lang}, session saved")
         
         # Verify the change was saved
