@@ -73,8 +73,7 @@ def init_database():
             admin_role = Role.query.filter_by(name='admin').first()
             
             if admin_role:
-                # Flask-Security-Too's create_user should hash the password automatically,
-                # but we'll ensure it's hashed explicitly
+                # Flask-Security-Too's create_user hashes the password automatically
                 admin_user = user_datastore.create_user(
                     email='admin@tarragoneta.org',
                     username='admin',
@@ -84,31 +83,13 @@ def init_database():
                     roles=[admin_role]
                 )
                 db.session.commit()
-                
-                # Verify password is hashed (should start with $2b$ for bcrypt)
-                if admin_user.password and admin_user.password.startswith('$2b$'):
-                    print("✓ Admin user created with hashed password")
-                else:
-                    print("⚠️  Warning: Password might not be hashed correctly")
-                    # Force hash if needed
-                    admin_user.password = hash_password('admin123')
-                    db.session.commit()
-                    print("✓ Password hashed explicitly")
-                
+                print("✓ Admin user created")
                 print("  Email: admin@tarragoneta.org")
                 print("  Password: admin123")
             else:
                 print("✗ Admin role not found")
         else:
             print("✓ Admin user already exists")
-            # Verify existing admin password is hashed
-            if admin_user.password and not admin_user.password.startswith('$2b$'):
-                print("⚠️  Admin password not hashed. Fixing...")
-                admin_user.password = hash_password('admin123')
-                admin_user.active = True
-                admin_user.confirmed_at = datetime.now()
-                db.session.commit()
-                print("✓ Admin password hashed")
         
         print("✅ Database initialization complete!")
 
