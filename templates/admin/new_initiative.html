@@ -1,139 +1,206 @@
 {% extends "base.html" %}
 
 {% block title %}
-    {% if initiative %}Editar{% else %}Nueva{% endif %} Iniciativa - Tarragoneta
+    {% if initiative %}{{ _('Editar Iniciativa') }}{% else %}{{ _('Nova Iniciativa') }}{% endif %} - Tarragoneta
 {% endblock %}
 
 {% block content %}
-<section class="container mt-4">
-    <div class="bg-white p-4" style="border-radius: var(--border-radius); box-shadow: var(--shadow-md); max-width: 800px; margin: 0 auto;">
-        <h1 class="mb-4">
-            <i class="fas fa-{% if initiative %}edit{% else %}plus{% endif %} text-primary"></i>
-            {% if initiative %}Editar{% else %}Crear Nueva{% endif %} Iniciativa
-        </h1>
-        
-        <form method="POST" enctype="multipart/form-data" novalidate>
-            {{ form.hidden_tag() }}
-            
-            <div class="form-group">
-                {{ form.title.label(class="form-label") }}
-                {{ form.title(class="form-input" + (" is-invalid" if form.title.errors else ""), 
-                             placeholder="Ej: Gran Limpieza de la Playa del Miracle") }}
-                {% if form.title.errors %}
-                    <div class="text-danger mt-1">
-                        {% for error in form.title.errors %}
-                            <small>{{ error }}</small>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-                <small class="form-hint">Un título claro y atractivo que motive a participar</small>
-            </div>
-            
-            <div class="form-group">
-                {{ form.description.label(class="form-label") }}
-                {{ form.description(class="form-textarea" + (" is-invalid" if form.description.errors else ""),
-                                  rows="6",
-                                  placeholder="Describe detalladamente la iniciativa: objetivos, qué se necesita, impacto esperado...") }}
-                {% if form.description.errors %}
-                    <div class="text-danger mt-1">
-                        {% for error in form.description.errors %}
-                            <small>{{ error }}</small>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-                <small class="form-hint">Sé específico sobre lo que se va a hacer y cómo los participantes pueden ayudar</small>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    {{ form.category.label(class="form-label") }}
-                    {{ form.category(class="form-select" + (" is-invalid" if form.category.errors else "")) }}
-                    {% if form.category.errors %}
-                        <div class="text-danger mt-1">
-                            {% for error in form.category.errors %}
-                                <small>{{ error }}</small>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
+<section class="py-5" style="padding-top: 8rem !important;">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div class="text-center mb-5">
+                    <h1 class="display-5 fw-bold mb-3">
+                        <i class="fas fa-{% if initiative %}edit{% else %}plus-circle{% endif %} text-primary me-2"></i>
+                        {% if initiative %}{{ _('Editar Iniciativa') }}{% else %}{{ _('Crear Nova Iniciativa') }}{% endif %}
+                    </h1>
+                    <p class="lead text-muted">
+                        {% if initiative %}
+                            {{ _('Modifica els detalls de la iniciativa ciutadana') }}
+                        {% else %}
+                            {{ _('Crea una nova iniciativa per a la comunitat de Tarragona') }}
+                        {% endif %}
+                    </p>
                 </div>
                 
-                <div class="form-group">
-                    {{ form.location.label(class="form-label") }}
-                    {{ form.location(class="form-input" + (" is-invalid" if form.location.errors else ""),
-                                   placeholder="Ej: Playa del Miracle, Tarragona") }}
-                    {% if form.location.errors %}
-                        <div class="text-danger mt-1">
-                            {% for error in form.location.errors %}
-                                <small>{{ error }}</small>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    {{ form.date.label(class="form-label") }}
-                    {{ form.date(class="form-input" + (" is-invalid" if form.date.errors else "")) }}
-                    {% if form.date.errors %}
-                        <div class="text-danger mt-1">
-                            {% for error in form.date.errors %}
-                                <small>{{ error }}</small>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-                
-                <div class="form-group">
-                    {{ form.time.label(class="form-label") }}
-                    {{ form.time(class="form-input" + (" is-invalid" if form.time.errors else ""),
-                               placeholder="Ej: 10:00") }}
-                    {% if form.time.errors %}
-                        <div class="text-danger mt-1">
-                            {% for error in form.time.errors %}
-                                <small>{{ error }}</small>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                    <small class="form-hint">Formato HH:MM (opcional)</small>
-                </div>
-            </div>
-            
-            <div class="form-group">
-                {{ form.image.label(class="form-label") }}
-                {% if initiative and initiative.image_path %}
-                    <div class="mb-2">
-                        <img src="{{ url_for('static', filename='uploads/' + initiative.image_path) }}" 
-                             alt="Imagen actual" 
-                             style="max-width: 200px; border-radius: var(--border-radius);">
-                        <p class="text-light mt-1">Imagen actual</p>
+                <div class="card shadow-lg border-0" style="border-radius: 20px;">
+                    <div class="card-body p-5">
+                        <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                            {{ form.hidden_tag() }}
+                            
+                            <!-- Title -->
+                            <div class="mb-4">
+                                <label for="title" class="form-label fw-semibold">
+                                    <i class="fas fa-heading me-2 text-primary"></i>{{ form.title.label.text }} *
+                                </label>
+                                {{ form.title(class="form-control form-control-lg" + (" is-invalid" if form.title.errors else ""), 
+                                             id="title",
+                                             placeholder=_('Ex: Gran Neteja de la Platja del Miracle')) }}
+                                {% if form.title.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.title.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    {{ _('Un títol clar i atractiu que motivi a participar') }}
+                                </small>
+                            </div>
+                            
+                            <!-- Description -->
+                            <div class="mb-4">
+                                <label for="description" class="form-label fw-semibold">
+                                    <i class="fas fa-align-left me-2 text-primary"></i>{{ form.description.label.text }} *
+                                </label>
+                                {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""),
+                                                  id="description",
+                                                  rows="6",
+                                                  placeholder=_('Descriu detalladament la iniciativa: objectius, què es necessita, impacte esperat...')) }}
+                                {% if form.description.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.description.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    {{ _('Sigues específic sobre el que es farà i com els participants poden ajudar') }}
+                                </small>
+                            </div>
+                            
+                            <!-- Category and Location -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label for="category" class="form-label fw-semibold">
+                                        <i class="fas fa-tag me-2 text-primary"></i>{{ form.category.label.text }} *
+                                    </label>
+                                    {{ form.category(class="form-select form-select-lg" + (" is-invalid" if form.category.errors else ""), id="category") }}
+                                    {% if form.category.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.category.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="location" class="form-label fw-semibold">
+                                        <i class="fas fa-map-marker-alt me-2 text-primary"></i>{{ form.location.label.text }} *
+                                    </label>
+                                    {{ form.location(class="form-control form-control-lg" + (" is-invalid" if form.location.errors else ""),
+                                                   id="location",
+                                                   placeholder=_('Ex: Platja del Miracle, Tarragona')) }}
+                                    {% if form.location.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.location.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Date and Time -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label for="date" class="form-label fw-semibold">
+                                        <i class="fas fa-calendar me-2 text-primary"></i>{{ form.date.label.text }} *
+                                    </label>
+                                    {{ form.date(class="form-control form-control-lg" + (" is-invalid" if form.date.errors else ""), id="date") }}
+                                    {% if form.date.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.date.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="time" class="form-label fw-semibold">
+                                        <i class="fas fa-clock me-2 text-primary"></i>{{ form.time.label.text }}
+                                        <span class="text-muted">({{ _('opcional') }})</span>
+                                    </label>
+                                    {{ form.time(class="form-control form-control-lg" + (" is-invalid" if form.time.errors else ""),
+                                               id="time",
+                                               placeholder="10:00") }}
+                                    {% if form.time.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.time.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">{{ _('Format HH:MM') }}</small>
+                                </div>
+                            </div>
+                            
+                            <!-- Image -->
+                            <div class="mb-4">
+                                <label for="image" class="form-label fw-semibold">
+                                    <i class="fas fa-image me-2 text-primary"></i>{{ form.image.label.text }}
+                                    <span class="text-muted">({{ _('opcional') }})</span>
+                                </label>
+                                
+                                {% if initiative and initiative.image_path %}
+                                    <div class="mb-3">
+                                        <img src="{{ url_for('static', filename='uploads/' + initiative.image_path) }}" 
+                                             alt="{{ _('Imatge actual') }}" 
+                                             class="img-thumbnail"
+                                             style="max-width: 300px; border-radius: 12px;">
+                                        <p class="text-muted mt-2 small">{{ _('Imatge actual') }}</p>
+                                    </div>
+                                {% endif %}
+                                
+                                {{ form.image(class="form-control form-control-lg" + (" is-invalid" if form.image.errors else ""),
+                                            id="image",
+                                            accept="image/*") }}
+                                {% if form.image.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.image.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    {{ _('Formats acceptats: JPG, PNG, GIF, WEBP (Màx. 16MB). La imatge serà optimitzada automàticament.') }}
+                                </small>
+                            </div>
+                            
+                            <!-- Buttons -->
+                            <div class="d-flex gap-3 mt-5">
+                                <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-outline-secondary btn-lg px-4">
+                                    <i class="fas fa-times me-2"></i>{{ _('Cancel·lar') }}
+                                </a>
+                                <button type="submit" class="btn btn-primary btn-lg px-5" style="border-radius: 50px;">
+                                    <i class="fas fa-save me-2"></i>
+                                    {% if initiative %}{{ _('Actualitzar Iniciativa') }}{% else %}{{ _('Crear Iniciativa') }}{% endif %}
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                {% endif %}
-                {{ form.image(class="form-input" + (" is-invalid" if form.image.errors else ""),
-                            accept="image/*") }}
-                {% if form.image.errors %}
-                    <div class="text-danger mt-1">
-                        {% for error in form.image.errors %}
-                            <small>{{ error }}</small>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-                <small class="form-hint">
-                    Formatos aceptados: JPG, PNG, GIF, WEBP (Máx. 16MB). 
-                    La imagen será optimizada automáticamente.
-                </small>
+                </div>
             </div>
-            
-            <div class="d-flex gap-2 mt-4">
-                <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-secondary btn-icon">
-                    <i class="fas fa-times"></i> Cancelar
-                </a>
-                <button type="submit" class="btn btn-success btn-lg btn-icon">
-                    <i class="fas fa-save"></i> 
-                    {% if initiative %}Actualizar{% else %}Crear{% endif %} Iniciativa
-                </button>
-            </div>
-        </form>
+        </div>
     </div>
 </section>
+
+<script>
+// Bootstrap form validation
+(function() {
+    'use strict';
+    var forms = document.querySelectorAll('.needs-validation');
+    Array.prototype.slice.call(forms).forEach(function(form) {
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    });
+})();
+</script>
 {% endblock %}

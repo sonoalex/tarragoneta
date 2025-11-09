@@ -575,3 +575,66 @@ msgstr "Explorar Iniciativas"
 
 msgid "Tarragoneta - Junts per una ciutat millor"
 msgstr "Tarragoneta - Juntos por una ciudad mejor"
+
+msgid "Title"
+msgstr "Título"
+
+msgid "Description"
+msgstr "Descripción"
+
+msgid "Location"
+msgstr "Ubicación"
+
+msgid "Category"
+msgstr "Categoría"
+
+msgid "Date"
+msgstr "Fecha"
+
+msgid "Time"
+msgstr "Hora"
+
+msgid "Image"
+msgstr "Imagen"
+
+msgid "Editar Iniciativa"
+msgstr "Editar Iniciativa"
+
+msgid "Modifica els detalls de la iniciativa ciutadana"
+msgstr "Modifica los detalles de la iniciativa ciudadana"
+
+msgid "Crea una nova iniciativa per a la comunitat de Tarragona"
+msgstr "Crea una nueva iniciativa para la comunidad de Tarragona"
+
+msgid "Ex: Gran Neteja de la Platja del Miracle"
+msgstr "Ej: Gran Limpieza de la Playa del Miracle"
+
+msgid "Un títol clar i atractiu que motivi a participar"
+msgstr "Un título claro y atractivo que motive a participar"
+
+msgid "Descriu detalladament la iniciativa: objectius, què es necessita, impacte esperat..."
+msgstr "Describe detalladamente la iniciativa: objetivos, qué se necesita, impacto esperado..."
+
+msgid "Sigues específic sobre el que es farà i com els participants poden ajudar"
+msgstr "Sé específico sobre lo que se va a hacer y cómo los participantes pueden ayudar"
+
+msgid "Ex: Platja del Miracle, Tarragona"
+msgstr "Ej: Playa del Miracle, Tarragona"
+
+msgid "Format HH:MM"
+msgstr "Formato HH:MM"
+
+msgid "Imatge actual"
+msgstr "Imagen actual"
+
+msgid "Formats acceptats: JPG, PNG, GIF, WEBP (Màx. 16MB). La imatge serà optimitzada automàticament."
+msgstr "Formatos aceptados: JPG, PNG, GIF, WEBP (Máx. 16MB). La imagen será optimizada automáticamente."
+
+msgid "Cancel·lar"
+msgstr "Cancelar"
+
+msgid "Actualitzar Iniciativa"
+msgstr "Actualizar Iniciativa"
+
+msgid "Crear Iniciativa"
+msgstr "Crear Iniciativa"
