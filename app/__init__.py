@@ -41,12 +41,14 @@ def create_app(config_name=None):
     print("UPLOAD_FOLDER Configuration Debug:")
     print(f"  RAILWAY_ENVIRONMENT: {railway_env}")
     print(f"  FLASK_ENV: {flask_env}")
-    print(f"  app.config['ENV']: {app_env}")
+    print(f"  app.config.get('ENV'): {app_env}")
     
+    # Detect production: Railway sets RAILWAY_ENVIRONMENT (can be 'staging' or 'production')
+    # or FLASK_ENV='production', or app.config['ENV']='production'
     is_production = (
-        railway_env or 
+        railway_env is not None or  # Any Railway environment (staging, production, etc.)
         flask_env == 'production' or
-        app_env == 'production'
+        (app_env and app_env == 'production')
     )
     
     print(f"  is_production: {is_production}")
