@@ -129,6 +129,28 @@ def create_app(config_name=None):
     app.register_blueprint(donations.bp)
     app.register_blueprint(inventory.bp)
     
+    # Custom route to serve uploaded files from volume in production
+    # This ensures files are served correctly even if symlink doesn't work
+    @app.route('/static/uploads/<path:filename>')
+    def serve_uploaded_file(filename):
+        """Serve uploaded files from the configured upload folder"""
+        from flask import send_from_directory, abort
+        import os
+        
+        upload_folder = app.config['UPLOAD_FOLDER']
+        file_path = os.path.join(upload_folder, filename)
+        
+        # Security: ensure filename doesn't contain path traversal
+        if '..' in filename or filename.startswith('/'):
+            abort(404)
+        
+        # Check if file exists
+        if os.path.exists(file_path) and os.path.isfile(file_path):
+            return send_from_directory(upload_folder, filename)
+        else:
+            print(f"DEBUG: File not found: {file_path}")
+            abort(404)
+    
     # Context processor for templates
     @app.context_processor
     def inject_gettext():
