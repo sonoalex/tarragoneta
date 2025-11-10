@@ -69,13 +69,15 @@ class InventoryForm(FlaskForm):
     
     def __init__(self, *args, **kwargs):
         super(InventoryForm, self).__init__(*args, **kwargs)
-        # Set category choices for palomas
+        # Set category choices for inventory items
         if has_request_context():
             self.category.choices = [
                 ('excremento', '💩 ' + str(_('Excremento'))),
                 ('nido', '🪺 ' + str(_('Nido'))),
                 ('paloma', '🕊️ ' + str(_('Paloma'))),
                 ('plumas', '🪶 ' + str(_('Plumas'))),
+                ('basura_desborda', '🗑️ ' + str(_('Overflowing Trash'))),
+                ('vertidos', '💧 ' + str(_('Dumping'))),
                 ('otro', '📌 ' + str(_('Otro')))
             ]
         else:
@@ -84,6 +86,8 @@ class InventoryForm(FlaskForm):
                 ('nido', '🪺 Nido'),
                 ('paloma', '🕊️ Paloma'),
                 ('plumas', '🪶 Plumas'),
+                ('basura_desborda', '🗑️ Overflowing Trash'),
+                ('vertidos', '💧 Dumping'),
                 ('otro', '📌 Otro')
             ]
 
