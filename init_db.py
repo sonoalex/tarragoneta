@@ -63,28 +63,29 @@ def init_database():
             
             if 'subcategory' not in columns:
                 print("📦 Adding subcategory column to inventory_item...")
+                import sqlalchemy as sa
                 with db.engine.connect() as conn:
                     # Add column
-                    conn.execute(db.text("ALTER TABLE inventory_item ADD COLUMN subcategory VARCHAR(50)"))
+                    conn.execute(sa.text("ALTER TABLE inventory_item ADD COLUMN subcategory VARCHAR(50)"))
                     conn.commit()
                 
                 # Migrate existing data
                 print("📦 Migrating existing category data to subcategory...")
                 with db.engine.connect() as conn:
                     # Map old categories to new structure
-                    conn.execute(db.text("""
+                    conn.execute(sa.text("""
                         UPDATE inventory_item 
                         SET subcategory = category,
                             category = 'palomas'
                         WHERE category IN ('excremento', 'nido', 'paloma', 'plumas')
                     """))
-                    conn.execute(db.text("""
+                    conn.execute(sa.text("""
                         UPDATE inventory_item 
                         SET subcategory = category,
                             category = 'basura'
                         WHERE category IN ('basura_desborda', 'vertidos')
                     """))
-                    conn.execute(db.text("""
+                    conn.execute(sa.text("""
                         UPDATE inventory_item 
                         SET subcategory = COALESCE(subcategory, 'otro'),
                             category = 'palomas'
@@ -95,7 +96,7 @@ def init_database():
                 # Make NOT NULL if PostgreSQL
                 if db.engine.dialect.name == 'postgresql':
                     with db.engine.connect() as conn:
-                        conn.execute(db.text("ALTER TABLE inventory_item ALTER COLUMN subcategory SET NOT NULL"))
+                        conn.execute(sa.text("ALTER TABLE inventory_item ALTER COLUMN subcategory SET NOT NULL"))
                         conn.commit()
                 
                 print("✓ Subcategory column added and data migrated")
