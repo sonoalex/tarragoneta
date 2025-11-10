@@ -54,6 +54,55 @@ def init_database():
                     print(f"✗ Tables don't exist and couldn't be created: {e2}")
                     sys.exit(1)
         
+        # Ensure subcategory column exists (for existing databases)
+        try:
+            from app.models import InventoryItem
+            from sqlalchemy import inspect
+            inspector = inspect(db.engine)
+            columns = [col['name'] for col in inspector.get_columns('inventory_item')]
+            
+            if 'subcategory' not in columns:
+                print("📦 Adding subcategory column to inventory_item...")
+                with db.engine.connect() as conn:
+                    # Add column
+                    conn.execute(db.text("ALTER TABLE inventory_item ADD COLUMN subcategory VARCHAR(50)"))
+                    conn.commit()
+                
+                # Migrate existing data
+                print("📦 Migrating existing category data to subcategory...")
+                with db.engine.connect() as conn:
+                    # Map old categories to new structure
+                    conn.execute(db.text("""
+                        UPDATE inventory_item 
+                        SET subcategory = category,
+                            category = 'palomas'
+                        WHERE category IN ('excremento', 'nido', 'paloma', 'plumas')
+                    """))
+                    conn.execute(db.text("""
+                        UPDATE inventory_item 
+                        SET subcategory = category,
+                            category = 'basura'
+                        WHERE category IN ('basura_desborda', 'vertidos')
+                    """))
+                    conn.execute(db.text("""
+                        UPDATE inventory_item 
+                        SET subcategory = COALESCE(subcategory, 'otro'),
+                            category = 'palomas'
+                        WHERE subcategory IS NULL
+                    """))
+                    conn.commit()
+                
+                # Make NOT NULL if PostgreSQL
+                if db.engine.dialect.name == 'postgresql':
+                    with db.engine.connect() as conn:
+                        conn.execute(db.text("ALTER TABLE inventory_item ALTER COLUMN subcategory SET NOT NULL"))
+                        conn.commit()
+                
+                print("✓ Subcategory column added and data migrated")
+        except Exception as e:
+            print(f"⚠️  Could not add subcategory column: {e}")
+            print("   This might be normal if column already exists or migration handled it")
+        
         # Create roles
         if not Role.query.first():
             print("👥 Creating default roles...")
