@@ -52,7 +52,8 @@ class Config:
     BABEL_TRANSLATION_DIRECTORIES = 'babel/translations'
     
     # File uploads
-    # Default to relative path - will be overridden in __init__.py based on environment
+    # Use static/uploads in both local and production
+    # In Railway, mount the volume at static/uploads
     UPLOAD_FOLDER = 'static/uploads'
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}

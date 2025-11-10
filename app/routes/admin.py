@@ -65,11 +65,7 @@ def new_initiative():
             file = form.image.data
             if file and allowed_file(file.filename):
                 filename = secure_filename(f"{datetime.now().timestamp()}_{file.filename}")
-                upload_folder = current_app.config['UPLOAD_FOLDER']
-                file_path = os.path.join(upload_folder, filename)
-                print(f"DEBUG: Saving file to: {file_path}")
-                print(f"DEBUG: UPLOAD_FOLDER from config: {upload_folder}")
-                print(f"DEBUG: file_path is absolute: {os.path.isabs(file_path)}")
+                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
                 file.save(file_path)
                 
                 # Optimize image
@@ -123,11 +119,7 @@ def edit_initiative(id):
                         os.remove(old_path)
                 
                 filename = secure_filename(f"{datetime.now().timestamp()}_{file.filename}")
-                upload_folder = current_app.config['UPLOAD_FOLDER']
-                file_path = os.path.join(upload_folder, filename)
-                print(f"DEBUG: Saving edited initiative file to: {file_path}")
-                print(f"DEBUG: UPLOAD_FOLDER from config: {upload_folder}")
-                print(f"DEBUG: file_path is absolute: {os.path.isabs(file_path)}")
+                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
                 file.save(file_path)
                 
                 if optimize_image(file_path):

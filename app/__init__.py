@@ -30,109 +30,16 @@ def create_app(config_name=None):
             config_name = os.environ.get('FLASK_ENV', 'development')
     app.config.from_object(config.get(config_name, config['default']))
     
-    # Override UPLOAD_FOLDER based on environment (after config is loaded)
-    # This ensures we detect production correctly at runtime
-    railway_env = os.environ.get('RAILWAY_ENVIRONMENT')
-    flask_env = os.environ.get('FLASK_ENV')
-    app_env = app.config.get('ENV')
-    
-    # Debug logging (use print for Railway logs visibility)
-    print("=" * 60)
-    print("UPLOAD_FOLDER Configuration Debug:")
-    print(f"  RAILWAY_ENVIRONMENT: {railway_env}")
-    print(f"  FLASK_ENV: {flask_env}")
-    print(f"  app.config.get('ENV'): {app_env}")
-    
-    # Detect production: Railway sets RAILWAY_ENVIRONMENT (can be 'staging' or 'production')
-    # or FLASK_ENV='production', or app.config['ENV']='production'
-    is_production = (
-        railway_env is not None or  # Any Railway environment (staging, production, etc.)
-        flask_env == 'production' or
-        (app_env and app_env == 'production')
-    )
-    
-    print(f"  is_production: {is_production}")
-    
-    if is_production:
-        # Production: use Railway volume mount path
-        upload_folder_env = os.environ.get('UPLOAD_FOLDER')
-        app.config['UPLOAD_FOLDER'] = upload_folder_env if upload_folder_env else '/data/uploads'
-        print(f"  ✓ Production mode detected")
-        print(f"  ✓ Using upload folder: {app.config['UPLOAD_FOLDER']}")
-    else:
-        # Development: relative path
-        app.config['UPLOAD_FOLDER'] = 'static/uploads'
-        print(f"  ✓ Development mode detected")
-        print(f"  ✓ Using upload folder: {app.config['UPLOAD_FOLDER']}")
-    print("=" * 60)
-    
-    # Also log to app.logger if available
-    try:
-        app.logger.info(f"UPLOAD_FOLDER configured: {app.config['UPLOAD_FOLDER']}")
-    except:
-        pass
-    
     # Configure session to be permanent
     from datetime import timedelta
     app.permanent_session_lifetime = timedelta(days=1)
     
     # Create directories
+    # Use static/uploads in both local and production
+    # In Railway, mount the volume directly at static/uploads
     upload_folder = app.config['UPLOAD_FOLDER']
-    
-    # Try to create upload folder, handle errors gracefully
-    try:
-        # Ensure parent directory exists for absolute paths
-        if os.path.isabs(upload_folder):
-            parent_dir = os.path.dirname(upload_folder)
-            if parent_dir and not os.path.exists(parent_dir):
-                print(f"WARNING: Parent directory {parent_dir} does not exist. Volume may not be mounted.")
-                print(f"Falling back to static/uploads for now.")
-                upload_folder = 'static/uploads'
-                app.config['UPLOAD_FOLDER'] = upload_folder
-        
-        os.makedirs(upload_folder, exist_ok=True)
-        print(f"✓ Upload folder ready: {upload_folder}")
-    except (OSError, PermissionError) as e:
-        print(f"ERROR: Could not create upload folder {upload_folder}: {e}")
-        print(f"Falling back to static/uploads")
-        upload_folder = 'static/uploads'
-        app.config['UPLOAD_FOLDER'] = upload_folder
-        try:
-            os.makedirs(upload_folder, exist_ok=True)
-        except Exception as e2:
-            print(f"CRITICAL: Could not create fallback folder either: {e2}")
-    
-    try:
-        os.makedirs('static/images', exist_ok=True)
-    except Exception as e:
-        print(f"WARNING: Could not create static/images: {e}")
-    
-    # In production (Railway), create symlink from static/uploads to volume mount
-    # This allows Flask to serve files using url_for('static', filename='uploads/...')
-    if is_production and os.path.isabs(upload_folder):
-        static_uploads = os.path.join(static_dir, 'uploads')
-        print(f"Checking symlink: {static_uploads} -> {upload_folder}")
-        if not os.path.exists(static_uploads):
-            try:
-                os.symlink(upload_folder, static_uploads)
-                print(f'✓ Created symlink: {static_uploads} -> {upload_folder}')
-                try:
-                    app.logger.info(f'Created symlink: {static_uploads} -> {upload_folder}')
-                except:
-                    pass
-            except (OSError, FileExistsError) as e:
-                # Symlink might already exist or creation failed
-                print(f'⚠ Could not create symlink: {e}')
-                try:
-                    app.logger.warning(f'Could not create symlink: {e}')
-                except:
-                    pass
-        else:
-            print(f'✓ Symlink already exists: {static_uploads}')
-            try:
-                app.logger.info(f'Symlink already exists: {static_uploads}')
-            except:
-                pass
+    os.makedirs(upload_folder, exist_ok=True)
+    os.makedirs('static/images', exist_ok=True)
     
     # Initialize extensions
     init_extensions(app)
@@ -156,28 +63,6 @@ def create_app(config_name=None):
     app.register_blueprint(admin.bp)
     app.register_blueprint(donations.bp)
     app.register_blueprint(inventory.bp)
-    
-    # Custom route to serve uploaded files from volume in production
-    # This ensures files are served correctly even if symlink doesn't work
-    @app.route('/static/uploads/<path:filename>')
-    def serve_uploaded_file(filename):
-        """Serve uploaded files from the configured upload folder"""
-        from flask import send_from_directory, abort
-        import os
-        
-        upload_folder = app.config['UPLOAD_FOLDER']
-        file_path = os.path.join(upload_folder, filename)
-        
-        # Security: ensure filename doesn't contain path traversal
-        if '..' in filename or filename.startswith('/'):
-            abort(404)
-        
-        # Check if file exists
-        if os.path.exists(file_path) and os.path.isfile(file_path):
-            return send_from_directory(upload_folder, filename)
-        else:
-            print(f"DEBUG: File not found: {file_path}")
-            abort(404)
     
     # Context processor for templates
     @app.context_processor
