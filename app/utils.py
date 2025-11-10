@@ -61,7 +61,9 @@ def get_category_name(category_key):
         'movilidad': _('Sustainable Mobility'),
         'educacion': _('Environmental Education'),
         'cultura': _('Culture and Civics'),
-        'social': _('Social Action')
+        'social': _('Social Action'),
+        'basura_desborda': _('Overflowing Trash'),
+        'vertidos': _('Dumping')
     }
     return category_names.get(category_key, category_key)
 

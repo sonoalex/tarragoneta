@@ -638,3 +638,15 @@ msgstr "Actualizar Iniciativa"
 
 msgid "Crear Iniciativa"
 msgstr "Crear Iniciativa"
+
+msgid "Overflowing Trash"
+msgstr "Basura Desbordada"
+
+msgid "Dumping"
+msgstr "Vertidos"
+
+msgid "Brossa Desbordada"
+msgstr "Basura Desbordada"
+
+msgid "Abocaments"
+msgstr "Vertidos"

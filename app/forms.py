@@ -41,7 +41,9 @@ class InitiativeForm(FlaskForm):
                 ('movilidad', '🚴 ' + str(_('Sustainable Mobility'))),
                 ('educacion', '📚 ' + str(_('Environmental Education'))),
                 ('cultura', '🎭 ' + str(_('Culture and Civics'))),
-                ('social', '🤝 ' + str(_('Social Action')))
+                ('social', '🤝 ' + str(_('Social Action'))),
+                ('basura_desborda', '🗑️ ' + str(_('Overflowing Trash'))),
+                ('vertidos', '💧 ' + str(_('Dumping')))
             ]
         else:
             # Fallback for when there's no request context
@@ -52,7 +54,9 @@ class InitiativeForm(FlaskForm):
                 ('movilidad', '🚴 Sustainable Mobility'),
                 ('educacion', '📚 Environmental Education'),
                 ('cultura', '🎭 Culture and Civics'),
-                ('social', '🤝 Social Action')
+                ('social', '🤝 Social Action'),
+                ('basura_desborda', '🗑️ Overflowing Trash'),
+                ('vertidos', '💧 Dumping')
             ]
 
 class InventoryForm(FlaskForm):
