@@ -52,7 +52,14 @@ class Config:
     BABEL_TRANSLATION_DIRECTORIES = 'babel/translations'
     
     # File uploads
-    UPLOAD_FOLDER = 'static/uploads'
+    # Use volume path in production (Railway), relative path in development
+    # Railway volume should be mounted at /data/uploads
+    if os.environ.get('RAILWAY_ENVIRONMENT') or os.environ.get('FLASK_ENV') == 'production':
+        # Production: use Railway volume mount path
+        UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', '/data/uploads')
+    else:
+        # Development: relative path
+        UPLOAD_FOLDER = 'static/uploads'
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
     

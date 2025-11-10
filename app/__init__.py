@@ -35,8 +35,21 @@ def create_app(config_name=None):
     app.permanent_session_lifetime = timedelta(days=1)
     
     # Create directories
-    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    upload_folder = app.config['UPLOAD_FOLDER']
+    os.makedirs(upload_folder, exist_ok=True)
     os.makedirs('static/images', exist_ok=True)
+    
+    # In production (Railway), create symlink from static/uploads to volume mount
+    # This allows Flask to serve files using url_for('static', filename='uploads/...')
+    if os.environ.get('RAILWAY_ENVIRONMENT') or os.environ.get('FLASK_ENV') == 'production':
+        static_uploads = os.path.join(static_dir, 'uploads')
+        if not os.path.exists(static_uploads) and os.path.isabs(upload_folder):
+            try:
+                os.symlink(upload_folder, static_uploads)
+                app.logger.info(f'Created symlink: {static_uploads} -> {upload_folder}')
+            except (OSError, FileExistsError) as e:
+                # Symlink might already exist or creation failed
+                app.logger.warning(f'Could not create symlink: {e}')
     
     # Initialize extensions
     init_extensions(app)
