@@ -30,6 +30,22 @@ def create_app(config_name=None):
             config_name = os.environ.get('FLASK_ENV', 'development')
     app.config.from_object(config.get(config_name, config['default']))
     
+    # Override UPLOAD_FOLDER based on environment (after config is loaded)
+    # This ensures we detect production correctly at runtime
+    is_production = (
+        os.environ.get('RAILWAY_ENVIRONMENT') or 
+        os.environ.get('FLASK_ENV') == 'production' or
+        app.config.get('ENV') == 'production'
+    )
+    if is_production:
+        # Production: use Railway volume mount path
+        app.config['UPLOAD_FOLDER'] = os.environ.get('UPLOAD_FOLDER', '/data/uploads')
+        app.logger.info(f"Production mode: Using upload folder: {app.config['UPLOAD_FOLDER']}")
+    else:
+        # Development: relative path
+        app.config['UPLOAD_FOLDER'] = 'static/uploads'
+        app.logger.info(f"Development mode: Using upload folder: {app.config['UPLOAD_FOLDER']}")
+    
     # Configure session to be permanent
     from datetime import timedelta
     app.permanent_session_lifetime = timedelta(days=1)
