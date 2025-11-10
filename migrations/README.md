@@ -4,23 +4,31 @@ Este directorio contiene las migraciones de Alembic para la base de datos.
 
 ## Orden de las Migraciones
 
-Las migraciones están ordenadas por la cadena de `down_revision`. El orden actual es:
+Las migraciones están ordenadas por la cadena de `down_revision` y tienen timestamps en el nombre del archivo para facilitar la visualización del orden cronológico.
 
-1. **6a9481a976b8** - `add_slug_field_to_initiatives.py` (base)
+1. **20251106_130612_6a9481a976b8** - `add_slug_field_to_initiatives.py` (base)
+   - Fecha: 2025-11-06 13:06:12
    - Añade campo `slug` a la tabla `initiative`
+   - Revision ID: `6a9481a976b8`
 
-2. **aa2d24bcfc2b** - `add_inventory_items_table.py`
+2. **20251107_010151_aa2d24bcfc2b** - `add_inventory_items_table.py`
+   - Fecha: 2025-11-07 01:01:51
    - Crea la tabla `inventory_item`
+   - Revision ID: `aa2d24bcfc2b`
    - Revises: `6a9481a976b8`
 
-3. **4908fda2abca** - `add_inventory_votes_and_importance_count.py`
+3. **20251107_011419_4908fda2abca** - `add_inventory_votes_and_importance_count.py`
+   - Fecha: 2025-11-07 01:14:19
    - Añade tabla `inventory_vote` y campo `importance_count` a `inventory_item`
+   - Revision ID: `4908fda2abca`
    - Revises: `aa2d24bcfc2b`
 
-4. **8eac5677c563** - `add_subcategory_field_to_inventoryitem.py` (head)
+4. **20251110_113422_8eac5677c563** - `add_subcategory_field_to_inventoryitem.py` (head)
+   - Fecha: 2025-11-10 11:34:22
    - Añade campo `subcategory` a `inventory_item`
    - Migra datos existentes a estructura jerárquica (category->subcategory)
    - Compatible con PostgreSQL (producción) y SQLite (desarrollo)
+   - Revision ID: `8eac5677c563`
    - Revises: `4908fda2abca`
 
 ## Verificar el Orden
