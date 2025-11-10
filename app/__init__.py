@@ -76,8 +76,34 @@ def create_app(config_name=None):
     
     # Create directories
     upload_folder = app.config['UPLOAD_FOLDER']
-    os.makedirs(upload_folder, exist_ok=True)
-    os.makedirs('static/images', exist_ok=True)
+    
+    # Try to create upload folder, handle errors gracefully
+    try:
+        # Ensure parent directory exists for absolute paths
+        if os.path.isabs(upload_folder):
+            parent_dir = os.path.dirname(upload_folder)
+            if parent_dir and not os.path.exists(parent_dir):
+                print(f"WARNING: Parent directory {parent_dir} does not exist. Volume may not be mounted.")
+                print(f"Falling back to static/uploads for now.")
+                upload_folder = 'static/uploads'
+                app.config['UPLOAD_FOLDER'] = upload_folder
+        
+        os.makedirs(upload_folder, exist_ok=True)
+        print(f"✓ Upload folder ready: {upload_folder}")
+    except (OSError, PermissionError) as e:
+        print(f"ERROR: Could not create upload folder {upload_folder}: {e}")
+        print(f"Falling back to static/uploads")
+        upload_folder = 'static/uploads'
+        app.config['UPLOAD_FOLDER'] = upload_folder
+        try:
+            os.makedirs(upload_folder, exist_ok=True)
+        except Exception as e2:
+            print(f"CRITICAL: Could not create fallback folder either: {e2}")
+    
+    try:
+        os.makedirs('static/images', exist_ok=True)
+    except Exception as e:
+        print(f"WARNING: Could not create static/images: {e}")
     
     # In production (Railway), create symlink from static/uploads to volume mount
     # This allows Flask to serve files using url_for('static', filename='uploads/...')
