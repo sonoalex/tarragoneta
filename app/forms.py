@@ -29,9 +29,29 @@ class InitiativeForm(FlaskForm):
     date = DateField(_l('Date'), validators=[DataRequired()])
     time = StringField(_l('Time'), validators=[Optional()])
     image = FileField(_l('Image'), validators=[Optional()])
+    status = SelectField(_l('Status'), validators=[Optional()])
     
     def __init__(self, *args, **kwargs):
         super(InitiativeForm, self).__init__(*args, **kwargs)
+        # Set status choices dynamically to support translations
+        if has_request_context():
+            from flask_babel import gettext as _
+            self.status.choices = [
+                ('pending', '⏳ ' + str(_('Pendent'))),
+                ('approved', '✅ ' + str(_('Aprovada'))),
+                ('rejected', '❌ ' + str(_('Rebutjada'))),
+                ('active', '🟢 ' + str(_('Activa'))),
+                ('cancelled', '🚫 ' + str(_('Cancel·lada')))
+            ]
+        else:
+            # Fallback for when there's no request context
+            self.status.choices = [
+                ('pending', '⏳ Pending'),
+                ('approved', '✅ Approved'),
+                ('rejected', '❌ Rejected'),
+                ('active', '🟢 Active'),
+                ('cancelled', '🚫 Cancelled')
+            ]
         # Set category choices dynamically to support translations
         if has_request_context():
             self.category.choices = [

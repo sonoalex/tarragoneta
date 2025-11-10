@@ -15,12 +15,13 @@ def index():
     # Build query
     query = Initiative.query
     
+    # Only show approved initiatives to public
+    query = query.filter(Initiative.status == 'approved')
+    
     if status == 'upcoming':
         query = query.filter(Initiative.date >= datetime.now().date())
     elif status == 'past':
         query = query.filter(Initiative.date < datetime.now().date())
-    else:
-        query = query.filter(Initiative.status == 'active')
     
     if category:
         query = query.filter(Initiative.category == category)

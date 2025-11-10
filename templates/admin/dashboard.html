@@ -77,20 +77,35 @@
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
-                                <p class="text-muted mb-2 small fw-semibold text-uppercase">{{ _('Esdeveniments Propers') }}</p>
-                                <h2 class="fw-bold mb-0">
-                                    {{ initiatives|selectattr('is_upcoming')|list|length }}
-                                </h2>
+                                <p class="text-muted mb-2 small fw-semibold text-uppercase">{{ _('Donacions') }}</p>
+                                <h2 class="fw-bold mb-0">{{ total_donations }}</h2>
+                                <small class="text-muted">{{ _('Total:') }} {{ "%.2f"|format(total_donated_euros) }}€</small>
                             </div>
-                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-info bg-opacity-10" 
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-10" 
                                  style="width: 60px; height: 60px;">
-                                <i class="fas fa-calendar-check fa-lg text-info"></i>
+                                <i class="fas fa-heart fa-lg text-success"></i>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Pending Initiatives Alert -->
+        {% if pending_initiatives_count > 0 %}
+        <div class="alert alert-warning alert-dismissible fade show mb-4" role="alert" style="border-radius: 15px;">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                <div class="flex-grow-1">
+                    <h5 class="alert-heading mb-1">{{ _('Iniciatives Pendents') }}</h5>
+                    <p class="mb-0">{{ _('Hi ha') }} <strong>{{ pending_initiatives_count }}</strong> {{ _('iniciatives esperant aprovació') }}.</p>
+                </div>
+                <a href="{{ url_for('admin.pending_initiatives') }}" class="btn btn-warning ms-3">
+                    <i class="fas fa-eye me-2"></i>{{ _('Revisar') }}
+                </a>
+            </div>
+        </div>
+        {% endif %}
 
         <!-- Quick Actions -->
         <div class="card border-0 shadow-sm mb-5" style="border-radius: 20px;">
@@ -103,15 +118,60 @@
                     <a href="{{ url_for('admin.new_initiative') }}" class="btn btn-primary px-4" style="border-radius: 50px;">
                         <i class="fas fa-plus me-2"></i>{{ _('Nova Iniciativa') }}
                     </a>
+                    <a href="{{ url_for('admin.pending_initiatives') }}" class="btn btn-warning px-4" style="border-radius: 50px;">
+                        <i class="fas fa-clock me-2"></i>{{ _('Iniciatives Pendents') }}
+                        {% if pending_initiatives_count > 0 %}
+                        <span class="badge bg-light text-dark ms-1">{{ pending_initiatives_count }}</span>
+                        {% endif %}
+                    </a>
                     <a href="{{ url_for('admin.admin_users') }}" class="btn btn-outline-secondary px-4" style="border-radius: 50px;">
                         <i class="fas fa-users me-2"></i>{{ _('Gestionar Usuaris') }}
                     </a>
                     <a href="{{ url_for('admin.admin_participations') }}" class="btn btn-outline-secondary px-4" style="border-radius: 50px;">
                         <i class="fas fa-list me-2"></i>{{ _('Veure Participacions') }}
                     </a>
+                    <a href="{{ url_for('admin.admin_donations') }}" class="btn btn-outline-success px-4" style="border-radius: 50px;">
+                        <i class="fas fa-heart me-2"></i>{{ _('Veure Donacions') }}
+                    </a>
                 </div>
             </div>
         </div>
+
+        <!-- Recent Donations -->
+        {% if recent_donations %}
+        <div class="card border-0 shadow-sm mb-5" style="border-radius: 20px;">
+            <div class="card-body p-4">
+                <h3 class="fw-bold mb-4">
+                    <i class="fas fa-heart text-success me-2"></i>
+                    {{ _('Donacions Recents') }}
+                </h3>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>{{ _('Quantitat') }}</th>
+                                <th>{{ _('Email') }}</th>
+                                <th>{{ _('Data') }}</th>
+                                <th>{{ _('Estat') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for donation in recent_donations %}
+                            <tr>
+                                <td><strong class="text-success">{{ "%.2f"|format(donation.amount_euros) }}€</strong></td>
+                                <td>{{ donation.email or donation.user.username if donation.user else _('Anònim') }}</td>
+                                <td>{{ donation.completed_at.strftime('%d/%m/%Y %H:%M') if donation.completed_at else donation.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td>
+                                    <span class="badge bg-success">{{ _('Completada') }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
 
         <!-- Recent Participations -->
         {% if recent_participations %}
@@ -184,7 +244,7 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2" style="border-radius: 50px;">
+                                    <span class="badge bg-success px-3 py-2" style="border-radius: 50px;">
                                         {{ get_category_name(initiative.category) }}
                                     </span>
                                 </td>
@@ -207,13 +267,29 @@
                                     </span>
                                 </td>
                                 <td>
-                                    {% if initiative.is_upcoming %}
-                                    <span class="badge bg-info bg-opacity-10 text-info px-3 py-2" style="border-radius: 50px;">
-                                        {{ _('Proper') }}
+                                    {% if initiative.status == 'pending' %}
+                                    <span class="badge bg-warning px-3 py-2" style="border-radius: 50px;">
+                                        ⏳ {{ _('Pendent') }}
+                                    </span>
+                                    {% elif initiative.status == 'approved' %}
+                                    <span class="badge bg-success px-3 py-2" style="border-radius: 50px;">
+                                        ✅ {{ _('Aprovada') }}
+                                    </span>
+                                    {% elif initiative.status == 'rejected' %}
+                                    <span class="badge bg-danger px-3 py-2" style="border-radius: 50px;">
+                                        ❌ {{ _('Rebutjada') }}
+                                    </span>
+                                    {% elif initiative.status == 'active' %}
+                                    <span class="badge bg-info px-3 py-2" style="border-radius: 50px;">
+                                        🟢 {{ _('Activa') }}
+                                    </span>
+                                    {% elif initiative.status == 'cancelled' %}
+                                    <span class="badge bg-secondary px-3 py-2" style="border-radius: 50px;">
+                                        🚫 {{ _('Cancel·lada') }}
                                     </span>
                                     {% else %}
-                                    <span class="badge bg-secondary bg-opacity-10 text-secondary px-3 py-2" style="border-radius: 50px;">
-                                        {{ _('Passat') }}
+                                    <span class="badge bg-secondary px-3 py-2" style="border-radius: 50px;">
+                                        {{ initiative.status|title }}
                                     </span>
                                     {% endif %}
                                 </td>
@@ -258,6 +334,55 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Pagination -->
+        {% if pagination.pages > 1 %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if pagination.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('admin.admin_dashboard', page=pagination.prev_num) }}">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link"><i class="fas fa-chevron-left"></i></span>
+                </li>
+                {% endif %}
+                
+                {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                    {% if page_num %}
+                        {% if page_num == pagination.page %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                        {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('admin.admin_dashboard', page=page_num) }}">{{ page_num }}</a>
+                        </li>
+                        {% endif %}
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">…</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if pagination.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('admin.admin_dashboard', page=pagination.next_num) }}">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link"><i class="fas fa-chevron-right"></i></span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
     </div>
 </section>
 {% endblock %}

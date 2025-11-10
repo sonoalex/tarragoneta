@@ -78,7 +78,17 @@ def create_app(config_name=None):
                 app.logger.warning(f"Error in current_locale(): {e}")
                 return session.get('language', 'ca')
         
-        return dict(_=_, get_locale=current_locale, get_category_name=get_category_name)
+        # Get pending initiatives count for admin/moderator
+        pending_count = 0
+        try:
+            from flask_security import current_user
+            if current_user.is_authenticated and (current_user.has_role('admin') or current_user.has_role('moderator')):
+                from app.models import Initiative
+                pending_count = Initiative.query.filter(Initiative.status == 'pending').count()
+        except Exception:
+            pass  # Ignore errors in context processor
+        
+        return dict(_=_, get_locale=current_locale, get_category_name=get_category_name, pending_initiatives_count=pending_count)
     
     # Error handlers
     from flask import render_template, request

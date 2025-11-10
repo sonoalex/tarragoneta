@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app
 from flask_babel import gettext as _
+from app.extensions import db
 import stripe
 
 bp = Blueprint('donations', __name__, url_prefix='/donate')
@@ -27,6 +28,10 @@ def donate():
             # Create Stripe Checkout Session
             stripe.api_key = stripe_secret_key
             
+            # Get current user if authenticated
+            from flask_security import current_user
+            user_email = request.form.get('email') or (current_user.email if current_user.is_authenticated else None)
+            
             checkout_session = stripe.checkout.Session.create(
                 payment_method_types=['card'],
                 line_items=[{
@@ -43,9 +48,10 @@ def donate():
                 mode='payment',
                 success_url=url_for('donations.donate_success', _external=True),
                 cancel_url=url_for('donations.donate', _external=True),
+                customer_email=user_email,  # Pre-fill email if provided
                 metadata={
                     'donation_type': 'voluntary',
-                    'user_email': request.form.get('email', 'anonymous'),
+                    'user_email': user_email or 'anonymous',
                 }
             )
             
@@ -98,7 +104,58 @@ def stripe_webhook():
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
         current_app.logger.info(f'Payment successful for session: {session["id"]}, amount: {session.get("amount_total", 0)/100}€')
-        # TODO: Save donation to database if needed
+        
+        # Save donation to database
+        from app.models import Donation
+        from datetime import datetime
+        
+        # Check if donation already exists
+        existing_donation = Donation.query.filter_by(stripe_session_id=session['id']).first()
+        if not existing_donation:
+            donation = Donation(
+                amount=session.get('amount_total', 0),
+                currency=session.get('currency', 'eur'),
+                email=session.get('customer_details', {}).get('email') or session.get('metadata', {}).get('user_email'),
+                stripe_session_id=session['id'],
+                stripe_payment_intent_id=session.get('payment_intent'),
+                status='completed',
+                donation_type=session.get('metadata', {}).get('donation_type', 'voluntary'),
+                completed_at=datetime.utcnow()
+            )
+            
+            # Try to link to user if email matches
+            if donation.email:
+                from app.models import User
+                user = User.query.filter_by(email=donation.email).first()
+                if user:
+                    donation.user_id = user.id
+            
+            db.session.add(donation)
+            db.session.commit()
+            current_app.logger.info(f'Donation saved: {donation.id} - {donation.amount_euros}€')
+        else:
+            # Update existing donation
+            existing_donation.status = 'completed'
+            existing_donation.completed_at = datetime.utcnow()
+            if session.get('payment_intent'):
+                existing_donation.stripe_payment_intent_id = session.get('payment_intent')
+            db.session.commit()
+            current_app.logger.info(f'Donation updated: {existing_donation.id}')
+    
+    elif event['type'] == 'payment_intent.succeeded':
+        # Additional confirmation when payment intent succeeds
+        payment_intent = event['data']['object']
+        current_app.logger.info(f'Payment intent succeeded: {payment_intent["id"]}')
+    
+    elif event['type'] == 'charge.refunded':
+        # Handle refunds
+        charge = event['data']['object']
+        from app.models import Donation
+        donation = Donation.query.filter_by(stripe_payment_intent_id=charge.get('payment_intent')).first()
+        if donation:
+            donation.status = 'refunded'
+            db.session.commit()
+            current_app.logger.info(f'Donation refunded: {donation.id}')
     
     return jsonify({'status': 'success'}), 200
 

@@ -326,6 +326,65 @@ SECURITY_PASSWORD_SALT=genera-un-salt-seguro
 STRIPE_PUBLISHABLE_KEY=tu-clave-publica-stripe
 STRIPE_SECRET_KEY=tu-clave-secreta-stripe
 STRIPE_WEBHOOK_SECRET=tu-webhook-secret-stripe
+
+## Webhooks de Stripe en Desarrollo Local
+
+Para recibir webhooks de Stripe en desarrollo local, usa Stripe CLI:
+
+### 1. Instalar Stripe CLI
+
+```bash
+# macOS
+brew install stripe/stripe-cli/stripe
+
+# O descargar desde: https://stripe.com/docs/stripe-cli
+```
+
+### 2. Autenticarse
+
+```bash
+stripe login
+```
+
+### 3. Iniciar el túnel de webhooks
+
+En una terminal separada (mientras Flask está corriendo):
+
+```bash
+# Opción 1: Usar el script proporcionado
+./stripe_webhook_local.sh
+
+# Opción 2: Comando manual
+stripe listen --forward-to localhost:5000/donate/webhook \
+  --events checkout.session.completed,payment_intent.succeeded,charge.refunded
+```
+
+### 4. Configurar el Webhook Secret
+
+Stripe CLI mostrará un secreto que empieza con `whsec_`. Cópialo y añádelo a tu `.env`:
+
+```bash
+STRIPE_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxx
+```
+
+**Importante:** Reinicia Flask después de añadir el webhook secret para que cargue la nueva variable de entorno.
+
+### 5. Probar el webhook
+
+1. Haz una donación de prueba en http://localhost:5000/donate
+2. Usa la tarjeta de prueba: `4242 4242 4242 4242`
+3. Verifica en los logs de Stripe CLI que el webhook se recibió
+4. Verifica en la base de datos que la donación se guardó:
+
+```bash
+sqlite3 tarragoneta.db "SELECT * FROM donation;"
+```
+
+### Notas
+
+- El webhook secret de desarrollo local (generado por Stripe CLI) es diferente al de producción
+- En producción, configura el webhook en el dashboard de Stripe y usa ese secret
+- Los eventos que se escuchan: `checkout.session.completed`, `payment_intent.succeeded`, `charge.refunded`
 ```
 
 #### Inicializar la base de datos

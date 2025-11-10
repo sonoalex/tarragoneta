@@ -179,6 +179,8 @@ def create_sample_data():
         
         # Add slug to data
         data['slug'] = slug
+        # Admin-created initiatives are auto-approved
+        data['status'] = 'approved'
         initiative = Initiative(creator_id=admin_user.id, **data)
         db.session.add(initiative)
         created += 1

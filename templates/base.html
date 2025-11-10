@@ -146,6 +146,7 @@
                                     </a>
                                 </li>
                                 {% if current_user.has_role('admin') %}
+                                <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <a class="dropdown-item py-2" href="{{ url_for('admin.admin_dashboard') }}">
                                         <i class="fas fa-tachometer-alt me-2 text-warning"></i>

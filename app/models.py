@@ -52,7 +52,7 @@ class Initiative(db.Model):
     date = db.Column(db.Date, nullable=False)
     time = db.Column(db.String(10))
     image_path = db.Column(db.String(300))
-    status = db.Column(db.String(20), default='active')
+    status = db.Column(db.String(20), default='pending')  # 'pending', 'approved', 'rejected', 'active', 'cancelled'
     created_at = db.Column(db.DateTime(), default=datetime.utcnow)
     updated_at = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
     view_count = db.Column(db.Integer, default=0)
@@ -161,4 +161,31 @@ class InventoryVote(db.Model):
     
     def __repr__(self):
         return f'<InventoryVote user:{self.user_id} item:{self.item_id}>'
+
+class Donation(db.Model):
+    """Track donations received through Stripe"""
+    id = db.Column(db.Integer, primary_key=True)
+    amount = db.Column(db.Integer, nullable=False)  # Amount in cents
+    currency = db.Column(db.String(3), default='eur')
+    email = db.Column(db.String(255))  # Donor email (optional)
+    stripe_session_id = db.Column(db.String(255), unique=True, nullable=False)
+    stripe_payment_intent_id = db.Column(db.String(255))  # Payment intent ID if available
+    status = db.Column(db.String(20), default='pending')  # 'pending', 'completed', 'failed', 'refunded'
+    donation_type = db.Column(db.String(50), default='voluntary')  # 'voluntary', etc.
+    created_at = db.Column(db.DateTime(), default=datetime.utcnow)
+    completed_at = db.Column(db.DateTime())  # When payment was completed
+    
+    # Optional: link to user if they were logged in
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    
+    # Relationships
+    user = db.relationship('User', backref='donations')
+    
+    @property
+    def amount_euros(self):
+        """Return amount in euros"""
+        return self.amount / 100
+    
+    def __repr__(self):
+        return f'<Donation {self.amount_euros}€ from {self.email or "anonymous"} - {self.status}>'
 

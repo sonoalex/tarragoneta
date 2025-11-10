@@ -4,14 +4,84 @@ from flask_babel import gettext as _
 from app.models import Initiative, Comment, Participation
 from app.extensions import db
 from app.utils import sanitize_html
+from app.forms import InitiativeForm
 from datetime import datetime
 
 bp = Blueprint('initiatives', __name__)
 
+@bp.route('/initiative/create', methods=['GET', 'POST'])
+@login_required
+def create_initiative():
+    """Permitir a usuarios crear iniciativas (requiere aprobación)"""
+    from flask import current_app
+    from app.utils import allowed_file, optimize_image
+    from werkzeug.utils import secure_filename
+    import os
+    
+    form = InitiativeForm()
+    
+    if form.validate_on_submit():
+        # Generate slug from title
+        from app.utils import generate_slug
+        base_slug = generate_slug(form.title.data)
+        slug = base_slug
+        counter = 1
+        # Ensure slug is unique
+        while Initiative.query.filter_by(slug=slug).first():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+        
+        initiative = Initiative(
+            title=sanitize_html(form.title.data),
+            slug=slug,
+            description=sanitize_html(form.description.data),
+            location=sanitize_html(form.location.data),
+            category=form.category.data,
+            date=form.date.data,
+            time=sanitize_html(form.time.data) if form.time.data else None,
+            creator_id=current_user.id,
+            status='pending'  # Requires approval
+        )
+        
+        # Handle image upload
+        if form.image.data:
+            file = form.image.data
+            if file and allowed_file(file.filename):
+                filename = secure_filename(f"{datetime.now().timestamp()}_{file.filename}")
+                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                file.save(file_path)
+                
+                # Optimize image
+                if optimize_image(file_path):
+                    initiative.image_path = filename
+        
+        db.session.add(initiative)
+        db.session.commit()
+        
+        flash(_('Tu iniciativa ha sido creada y está pendiente de aprobación. Te notificaremos cuando sea revisada.'), 'success')
+        return redirect(url_for('main.index'))
+    
+    return render_template('initiatives/create.html', form=form)
+
 @bp.route('/initiative/<slug>')
 def initiative_detail(slug):
     from flask import current_app
+    from flask_security import current_user
+    
     initiative = Initiative.query.filter_by(slug=slug).first_or_404()
+    
+    # Only show approved initiatives to public, or if user is creator/admin/moderator
+    if initiative.status != 'approved':
+        if not current_user.is_authenticated:
+            from flask import abort
+            abort(404)
+        # Check if user is creator, admin, or moderator
+        is_creator = initiative.creator_id == current_user.id
+        is_admin = current_user.has_role('admin')
+        is_moderator = current_user.has_role('moderator')
+        if not (is_creator or is_admin or is_moderator):
+            from flask import abort
+            abort(404)
     
     # Increment view count
     initiative.view_count += 1
@@ -26,11 +96,11 @@ def initiative_detail(slug):
     if current_user.is_authenticated:
         is_participating = current_user in initiative.participants
     
-    # Get related initiatives
+    # Get related initiatives (only approved)
     related = Initiative.query.filter(
         Initiative.category == initiative.category,
         Initiative.id != initiative.id,
-        Initiative.status == 'active'
+        Initiative.status == 'approved'
     ).limit(3).all()
     
     return render_template('initiative_detail.html',

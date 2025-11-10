@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Gestió d\'Usuaris') }} - Tarragoneta{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+<style>
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter {
+        margin-bottom: 1rem;
+    }
+    .dataTables_wrapper .dataTables_paginate {
+        margin-top: 1rem;
+    }
+    table.dataTable {
+        border-collapse: separate !important;
+        border-spacing: 0;
+    }
+    table.dataTable thead th {
+        border-bottom: 2px solid #dee2e6;
+    }
+    table.dataTable tbody td {
+        vertical-align: middle;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="py-5" style="padding-top: 8rem !important;">
+    <div class="container-fluid px-4">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="display-5 fw-bold mb-2">
+                    <i class="fas fa-users text-primary me-2"></i>
+                    {{ _('Gestió d\'Usuaris') }}
+                </h1>
+                <p class="text-muted mb-0">{{ _('Gestiona els usuaris de la plataforma') }}</p>
+            </div>
+            <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>{{ _('Tornar') }}
+            </a>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 15px;">
+                    <div class="card-body p-3">
+                        <p class="text-muted mb-1 small fw-semibold">{{ _('Total Usuaris') }}</p>
+                        <h3 class="fw-bold mb-0">{{ total_users }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 15px; border-left: 4px solid #28a745 !important;">
+                    <div class="card-body p-3">
+                        <p class="text-muted mb-1 small fw-semibold">{{ _('Actius') }}</p>
+                        <h3 class="fw-bold mb-0 text-success">{{ active_users }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 15px; border-left: 4px solid #dc3545 !important;">
+                    <div class="card-body p-3">
+                        <p class="text-muted mb-1 small fw-semibold">{{ _('Inactius') }}</p>
+                        <h3 class="fw-bold mb-0 text-danger">{{ inactive_users }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 15px; border-left: 4px solid #ffc107 !important;">
+                    <div class="card-body p-3">
+                        <p class="text-muted mb-1 small fw-semibold">{{ _('No Confirmats') }}</p>
+                        <h3 class="fw-bold mb-0 text-warning">{{ unconfirmed_users }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Users Table -->
+        <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+            <div class="card-body p-4">
+                <table id="usersTable" class="table table-hover align-middle mb-0" style="width: 100%;">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 25%;">{{ _('Usuari') }}</th>
+                                <th style="width: 20%;">{{ _('Email') }}</th>
+                                <th style="width: 12%;">{{ _('Rol') }}</th>
+                                <th style="width: 15%;">{{ _('Estat') }}</th>
+                                <th style="width: 13%;">{{ _('Data') }}</th>
+                                <th style="width: 15%;" class="text-end">{{ _('Accions') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle me-2" style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.9rem; flex-shrink: 0;">
+                                            {{ user.username[0].upper() }}
+                                        </div>
+                                        <div class="flex-grow-1" style="min-width: 0;">
+                                            <div class="fw-semibold text-truncate" style="max-width: 200px;" title="{{ user.username }}">
+                                                {{ user.username }}
+                                            </div>
+                                            {% if user.id == current_user.id %}
+                                            <span class="badge bg-info" style="font-size: 0.7rem;">{{ _('Tu') }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="text-truncate" style="max-width: 200px;" title="{{ user.email }}">
+                                        <small>{{ user.email }}</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        {% for role in user.roles %}
+                                        <span class="badge bg-primary" style="font-size: 0.75rem;">{{ role.name|title }}</span>
+                                        {% else %}
+                                        <span class="text-muted small">{{ _('Sense rol') }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column gap-1">
+                                        {% if user.active %}
+                                        <span class="badge bg-success" style="font-size: 0.75rem; width: fit-content;">
+                                            <i class="fas fa-check-circle me-1"></i>{{ _('Actiu') }}
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-danger" style="font-size: 0.75rem; width: fit-content;">
+                                            <i class="fas fa-ban me-1"></i>{{ _('Inactiu') }}
+                                        </span>
+                                        {% endif %}
+                                        {% if not user.confirmed_at %}
+                                        <span class="badge bg-warning text-dark" style="font-size: 0.7rem; width: fit-content;">
+                                            <i class="fas fa-clock me-1"></i>{{ _('No confirmat') }}
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        {{ user.created_at.strftime('%d/%m/%Y') if user.created_at else '-' }}
+                                    </small>
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-flex gap-1 justify-content-end">
+                                        <!-- Toggle Active -->
+                                        {% if user.id != current_user.id %}
+                                        <form method="POST" action="{{ url_for('admin.toggle_user_active', id=user.id) }}" class="d-inline">
+                                            <button type="submit" class="btn btn-sm {% if user.active %}btn-outline-danger{% else %}btn-outline-success{% endif %}" 
+                                                    title="{% if user.active %}{{ _('Desactivar') }}{% else %}{{ _('Activar') }}{% endif %}">
+                                                <i class="fas fa-{% if user.active %}ban{% else %}check{% endif %}"></i>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                        
+                                        <!-- Confirm User -->
+                                        {% if not user.confirmed_at %}
+                                        <form method="POST" action="{{ url_for('admin.confirm_user', id=user.id) }}" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-success" title="{{ _('Confirmar') }}">
+                                                <i class="fas fa-check-circle"></i>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                        
+                                        <!-- Change Role -->
+                                        <div class="btn-group dropend">
+                                            <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" 
+                                                    data-bs-toggle="dropdown" title="{{ _('Canviar Rol') }}" aria-expanded="false">
+                                                <i class="fas fa-user-tag"></i>
+                                            </button>
+                                            <ul class="dropdown-menu" style="min-width: 120px; font-size: 0.875rem;">
+                                                {% for role in all_roles %}
+                                                <li>
+                                                    <form method="POST" action="{{ url_for('admin.change_user_role', id=user.id) }}" class="d-inline">
+                                                        <input type="hidden" name="role" value="{{ role.name }}">
+                                                        {% set is_current_role = role in user.roles %}
+                                                        {% set is_admin_user = user.id == current_user.id %}
+                                                        {% set user_has_admin = false %}
+                                                        {% for r in user.roles %}
+                                                            {% if r.name == 'admin' %}
+                                                                {% set user_has_admin = true %}
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                        <button type="submit" class="dropdown-item py-2 {% if is_current_role %}active{% endif %}" 
+                                                                {% if is_admin_user and user_has_admin and role.name == 'admin' %}disabled{% endif %}>
+                                                            {{ role.name|title }}
+                                                            {% if is_current_role %}<i class="fas fa-check ms-2"></i>{% endif %}
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <i class="fas fa-users fa-3x mb-3 d-block"></i>
+                                    {{ _('No s\'han trobat usuaris') }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+<script>
+$(document).ready(function() {
+    var table = $('#usersTable').DataTable({
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/{{ "ca" if session.get("language", "ca") == "ca" else "es-ES" }}.json',
+            search: "{{ _('Cercar') }}:",
+            lengthMenu: "{{ _('Mostrar') }} _MENU_ {{ _('registres') }}",
+            info: "{{ _('Mostrant') }} _START_ {{ _('a') }} _END_ {{ _('de') }} _TOTAL_ {{ _('registres') }}",
+            infoEmpty: "{{ _('Mostrant') }} 0 {{ _('a') }} 0 {{ _('de') }} 0 {{ _('registres') }}",
+            infoFiltered: "({{ _('filtrat de') }} _MAX_ {{ _('registres totals') }})",
+            paginate: {
+                first: "{{ _('Primer') }}",
+                last: "{{ _('Últim') }}",
+                next: "{{ _('Següent') }}",
+                previous: "{{ _('Anterior') }}"
+            },
+            emptyTable: "{{ _('No s\'han trobat usuaris') }}",
+            zeroRecords: "{{ _('No s\'han trobat resultats') }}"
+        },
+        pageLength: 20,
+        lengthMenu: [[10, 20, 50, 100], [10, 20, 50, 100]],
+        order: [[4, 'desc']], // Ordenar por fecha de registro (columna 4)
+        columnDefs: [
+            { orderable: false, targets: [5] }, // Desactivar ordenación en columna de acciones
+            { width: "25%", targets: [0] },
+            { width: "20%", targets: [1] },
+            { width: "12%", targets: [2] },
+            { width: "15%", targets: [3] },
+            { width: "13%", targets: [4] },
+            { width: "15%", targets: [5] }
+        ],
+        responsive: true,
+        autoWidth: false,
+        fixedColumns: false
+    });
+    
+    // Inicializar dropdowns de Bootstrap después de que DataTables renderice
+    table.on('draw', function() {
+        // Los dropdowns de Bootstrap deberían funcionar automáticamente
+        // Pero reinicializamos por si acaso
+        var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+        var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+            return new bootstrap.Dropdown(dropdownToggleEl);
+        });
+    });
+});
+</script>
+{% endblock %}
+
