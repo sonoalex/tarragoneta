@@ -32,19 +32,43 @@ def create_app(config_name=None):
     
     # Override UPLOAD_FOLDER based on environment (after config is loaded)
     # This ensures we detect production correctly at runtime
+    railway_env = os.environ.get('RAILWAY_ENVIRONMENT')
+    flask_env = os.environ.get('FLASK_ENV')
+    app_env = app.config.get('ENV')
+    
+    # Debug logging (use print for Railway logs visibility)
+    print("=" * 60)
+    print("UPLOAD_FOLDER Configuration Debug:")
+    print(f"  RAILWAY_ENVIRONMENT: {railway_env}")
+    print(f"  FLASK_ENV: {flask_env}")
+    print(f"  app.config['ENV']: {app_env}")
+    
     is_production = (
-        os.environ.get('RAILWAY_ENVIRONMENT') or 
-        os.environ.get('FLASK_ENV') == 'production' or
-        app.config.get('ENV') == 'production'
+        railway_env or 
+        flask_env == 'production' or
+        app_env == 'production'
     )
+    
+    print(f"  is_production: {is_production}")
+    
     if is_production:
         # Production: use Railway volume mount path
-        app.config['UPLOAD_FOLDER'] = os.environ.get('UPLOAD_FOLDER', '/data/uploads')
-        app.logger.info(f"Production mode: Using upload folder: {app.config['UPLOAD_FOLDER']}")
+        upload_folder_env = os.environ.get('UPLOAD_FOLDER')
+        app.config['UPLOAD_FOLDER'] = upload_folder_env if upload_folder_env else '/data/uploads'
+        print(f"  ✓ Production mode detected")
+        print(f"  ✓ Using upload folder: {app.config['UPLOAD_FOLDER']}")
     else:
         # Development: relative path
         app.config['UPLOAD_FOLDER'] = 'static/uploads'
-        app.logger.info(f"Development mode: Using upload folder: {app.config['UPLOAD_FOLDER']}")
+        print(f"  ✓ Development mode detected")
+        print(f"  ✓ Using upload folder: {app.config['UPLOAD_FOLDER']}")
+    print("=" * 60)
+    
+    # Also log to app.logger if available
+    try:
+        app.logger.info(f"UPLOAD_FOLDER configured: {app.config['UPLOAD_FOLDER']}")
+    except:
+        pass
     
     # Configure session to be permanent
     from datetime import timedelta
@@ -59,15 +83,28 @@ def create_app(config_name=None):
     # This allows Flask to serve files using url_for('static', filename='uploads/...')
     if is_production and os.path.isabs(upload_folder):
         static_uploads = os.path.join(static_dir, 'uploads')
+        print(f"Checking symlink: {static_uploads} -> {upload_folder}")
         if not os.path.exists(static_uploads):
             try:
                 os.symlink(upload_folder, static_uploads)
-                app.logger.info(f'Created symlink: {static_uploads} -> {upload_folder}')
+                print(f'✓ Created symlink: {static_uploads} -> {upload_folder}')
+                try:
+                    app.logger.info(f'Created symlink: {static_uploads} -> {upload_folder}')
+                except:
+                    pass
             except (OSError, FileExistsError) as e:
                 # Symlink might already exist or creation failed
-                app.logger.warning(f'Could not create symlink: {e}')
+                print(f'⚠ Could not create symlink: {e}')
+                try:
+                    app.logger.warning(f'Could not create symlink: {e}')
+                except:
+                    pass
         else:
-            app.logger.info(f'Symlink already exists: {static_uploads}')
+            print(f'✓ Symlink already exists: {static_uploads}')
+            try:
+                app.logger.info(f'Symlink already exists: {static_uploads}')
+            except:
+                pass
     
     # Initialize extensions
     init_extensions(app)
