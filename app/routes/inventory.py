@@ -18,6 +18,7 @@ def inventory_map():
     """Mapa principal del inventario"""
     # Get filter parameters
     category = request.args.get('category')
+    subcategory = request.args.get('subcategory')
     
     # Build query - only show approved or active items
     query = InventoryItem.query.filter(
@@ -26,6 +27,8 @@ def inventory_map():
     
     if category:
         query = query.filter(InventoryItem.category == category)
+    if subcategory:
+        query = query.filter(InventoryItem.subcategory == subcategory)
     
     items = query.order_by(InventoryItem.created_at.desc()).all()
     
@@ -37,7 +40,8 @@ def inventory_map():
     for item in InventoryItem.query.filter(
         InventoryItem.status.in_(['approved', 'active'])
     ).all():
-        by_category[item.category] = by_category.get(item.category, 0) + 1
+        cat_key = f"{item.category}->{item.subcategory}"
+        by_category[cat_key] = by_category.get(cat_key, 0) + 1
     
     # Ensure all items have importance_count set (fix for existing items)
     # This handles items created before the importance_count field was added
@@ -52,17 +56,35 @@ def inventory_map():
     if fixed:
         db.session.commit()
     
+    # Group statistics by main category and subcategory
+    by_main_category = {}
+    by_subcategory = {}
+    for item in InventoryItem.query.filter(
+        InventoryItem.status.in_(['approved', 'active'])
+    ).all():
+        # Count by main category
+        by_main_category[item.category] = by_main_category.get(item.category, 0) + 1
+        # Count by subcategory (only if category is selected)
+        if category and item.category == category:
+            by_subcategory[item.subcategory] = by_subcategory.get(item.subcategory, 0) + 1
+    
     return render_template('inventory/map.html',
                          items=items,
                          total_items=total_items,
                          by_category=by_category,
-                         selected_category=category)
+                         by_main_category=by_main_category,
+                         by_subcategory=by_subcategory,
+                         selected_category=category,
+                         selected_subcategory=subcategory)
 
 @bp.route('/report', methods=['GET', 'POST'])
 @login_required
 def report_item():
     """Formulario para reportar un item del inventario"""
     form = InventoryForm()
+    # Set default category to 'palomas' if form is new (GET request)
+    if request.method == 'GET' and not form.category.data:
+        form.category.data = 'palomas'
     
     if form.validate_on_submit():
         try:
@@ -76,6 +98,7 @@ def report_item():
             
             item = InventoryItem(
                 category=form.category.data,
+                subcategory=form.subcategory.data,
                 description=sanitize_html(form.description.data) if form.description.data else None,
                 latitude=latitude,
                 longitude=longitude,
@@ -115,6 +138,7 @@ def report_item():
 def api_items():
     """API endpoint para obtener items del inventario (para el mapa)"""
     category = request.args.get('category')
+    subcategory = request.args.get('subcategory')
     
     # Only return approved or active items
     query = InventoryItem.query.filter(
@@ -123,6 +147,8 @@ def api_items():
     
     if category:
         query = query.filter(InventoryItem.category == category)
+    if subcategory:
+        query = query.filter(InventoryItem.subcategory == subcategory)
     
     items = query.all()
     
@@ -136,6 +162,7 @@ def api_items():
         items_data.append({
             'id': item.id,
             'category': item.category,
+            'subcategory': item.subcategory,
             'full_category': item.full_category,
             'description': item.description,
             'latitude': item.latitude,
@@ -203,6 +230,7 @@ def api_pending_items():
         items_data.append({
             'id': item.id,
             'category': item.category,
+            'subcategory': item.subcategory,
             'full_category': item.full_category,
             'description': item.description,
             'latitude': item.latitude,
@@ -250,7 +278,8 @@ def admin_inventory():
     for item in InventoryItem.query.filter(
         InventoryItem.status.in_(['approved', 'active'])
     ).all():
-        by_category[item.category] = by_category.get(item.category, 0) + 1
+        cat_key = f"{item.category}->{item.subcategory}"
+        by_category[cat_key] = by_category.get(cat_key, 0) + 1
     
     return render_template('inventory/admin.html',
                          items=items,

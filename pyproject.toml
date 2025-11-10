@@ -4,7 +4,7 @@ name = "tarragoneta"
 version = "0.1.0"
 description = "Plataforma ciudadana para iniciativas cívicas en Tarragona"
 readme = "README.md"
-requires-python = ">=3.8.1"
+requires-python = ">=3.9"
 dependencies = [
     "Flask==3.0.0",
     "Flask-SQLAlchemy==3.1.1",
@@ -16,11 +16,13 @@ dependencies = [
     "Flask-Babel==4.0.0",
     "python-dotenv==1.0.0",
     "email-validator>=2.1.0",
-    "Pillow>=11.0.0",
+    "Pillow==11.1.0",
     "gunicorn==21.2.0",
     "bcrypt==4.1.2",
     "bleach==6.1.0",
     "psycopg2-binary>=2.9.9",
+    "setuptools>=65.0.0",
+    "stripe>=12.0.0",
 ]
 
 [project.optional-dependencies]

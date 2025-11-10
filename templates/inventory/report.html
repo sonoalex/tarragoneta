@@ -51,6 +51,16 @@
                                 {% endif %}
                             </div>
                             
+                            <!-- Subcategory -->
+                            <div class="mb-4">
+                                <label for="subcategory" class="form-label fw-bold">{{ _('Subcategoria') }} *</label>
+                                {{ form.subcategory(class="form-select", id="subcategory", required=True, disabled=True) }}
+                                {% if form.subcategory.errors %}
+                                    <div class="text-danger small">{{ form.subcategory.errors[0] }}</div>
+                                {% endif %}
+                                <small class="text-muted">{{ _('Selecciona primero una categoría') }}</small>
+                            </div>
+                            
                             <!-- Description -->
                             <div class="mb-4">
                                 <label for="description" class="form-label fw-bold">{{ _('Descripció') }}</label>
@@ -149,9 +159,62 @@
             });
         });
         
-        // Form validation
+        // Category and subcategory handling
+        var categorySelect = document.getElementById('category');
+        var subcategorySelect = document.getElementById('subcategory');
+        
+        var subcategories = {
+            'palomas': [
+                {value: 'nido', label: '🪺 {{ _("Nido") }}'},
+                {value: 'excremento', label: '💩 {{ _("Excremento") }}'},
+                {value: 'plumas', label: '🪶 {{ _("Plumas") }}'}
+            ],
+            'basura': [
+                {value: 'basura_desborda', label: '🗑️ {{ _("Basura Desbordada") }}'},
+                {value: 'vertidos', label: '💧 {{ _("Vertidos") }}'}
+            ]
+        };
+        
+        // Function to load subcategories for a given category
+        function loadSubcategories(category) {
+            subcategorySelect.innerHTML = '<option value="">{{ _("Selecciona una subcategoría") }}</option>';
+            
+            if (category && subcategories[category]) {
+                subcategorySelect.disabled = false;
+                subcategories[category].forEach(function(sub) {
+                    var option = document.createElement('option');
+                    option.value = sub.value;
+                    option.textContent = sub.label;
+                    subcategorySelect.appendChild(option);
+                });
+            } else {
+                subcategorySelect.disabled = true;
+            }
+        }
+        
+        // Load subcategories on category change
+        categorySelect.addEventListener('change', function() {
+            loadSubcategories(this.value);
+        });
+        
+        // Load subcategories on page load if a category is already selected
+        var initialCategory = categorySelect.value;
+        if (initialCategory) {
+            loadSubcategories(initialCategory);
+        }
+        
+        // Form validation and enable subcategory before submit
         var form = document.querySelector('form');
         form.addEventListener('submit', function(e) {
+            // Enable subcategory field before submit (disabled fields are not submitted)
+            var subcategoryField = document.getElementById('subcategory');
+            if (subcategoryField.disabled) {
+                e.preventDefault();
+                alert('{{ _("Por favor, selecciona una categoría y subcategoría") }}');
+                return false;
+            }
+            subcategoryField.disabled = false; // Enable before submit
+            
             if (!document.getElementById('latitude').value || !document.getElementById('longitude').value) {
                 e.preventDefault();
                 alert('{{ _("Por favor, selecciona una ubicación en el mapa") }}');

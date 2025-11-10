@@ -61,6 +61,7 @@ class InitiativeForm(FlaskForm):
 
 class InventoryForm(FlaskForm):
     category = SelectField(_l('Category'), validators=[DataRequired()])
+    subcategory = SelectField(_l('Subcategory'), validators=[DataRequired()])
     description = TextAreaField(_l('Description'), validators=[Optional(), Length(max=500)])
     latitude = StringField(_l('Latitude'), validators=[DataRequired()])
     longitude = StringField(_l('Longitude'), validators=[DataRequired()])
@@ -69,25 +70,52 @@ class InventoryForm(FlaskForm):
     
     def __init__(self, *args, **kwargs):
         super(InventoryForm, self).__init__(*args, **kwargs)
-        # Set category choices for inventory items
+        # Set main category choices
         if has_request_context():
             self.category.choices = [
-                ('excremento', '💩 ' + str(_('Excremento'))),
+                ('palomas', '🕊️ ' + str(_('Palomas'))),
+                ('basura', '🗑️ ' + str(_('Basura')))
+            ]
+            # Set all possible subcategories (for validation)
+            # These will be filtered by JavaScript on the client side
+            self.subcategory.choices = [
+                # Palomas subcategories
                 ('nido', '🪺 ' + str(_('Nido'))),
-                ('paloma', '🕊️ ' + str(_('Paloma'))),
+                ('excremento', '💩 ' + str(_('Excremento'))),
                 ('plumas', '🪶 ' + str(_('Plumas'))),
-                ('basura_desborda', '🗑️ ' + str(_('Overflowing Trash'))),
-                ('vertidos', '💧 ' + str(_('Dumping'))),
-                ('otro', '📌 ' + str(_('Otro')))
+                # Basura subcategories
+                ('basura_desborda', '🗑️ ' + str(_('Basura Desbordada'))),
+                ('vertidos', '💧 ' + str(_('Vertidos')))
             ]
         else:
             self.category.choices = [
-                ('excremento', '💩 Excremento'),
-                ('nido', '🪺 Nido'),
-                ('paloma', '🕊️ Paloma'),
-                ('plumas', '🪶 Plumas'),
-                ('basura_desborda', '🗑️ Overflowing Trash'),
-                ('vertidos', '💧 Dumping'),
-                ('otro', '📌 Otro')
+                ('palomas', '🕊️ Palomas'),
+                ('basura', '🗑️ Basura')
             ]
+            self.subcategory.choices = [
+                ('nido', '🪺 Nido'),
+                ('excremento', '💩 Excremento'),
+                ('plumas', '🪶 Plumas'),
+                ('basura_desborda', '🗑️ Basura Desbordada'),
+                ('vertidos', '💧 Vertidos')
+            ]
+    
+    def validate_subcategory(self, field):
+        """Custom validation to ensure subcategory matches selected category"""
+        category = self.category.data
+        subcategory = field.data
+        
+        # Define valid subcategories for each category
+        valid_subcategories = {
+            'palomas': ['nido', 'excremento', 'plumas'],
+            'basura': ['basura_desborda', 'vertidos']
+        }
+        
+        if category and subcategory:
+            if category not in valid_subcategories:
+                from wtforms.validators import ValidationError
+                raise ValidationError(_('Categoría no válida'))
+            if subcategory not in valid_subcategories.get(category, []):
+                from wtforms.validators import ValidationError
+                raise ValidationError(_('Subcategoría no válida para esta categoría'))
 

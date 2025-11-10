@@ -650,3 +650,36 @@ msgstr "Brossa Desbordada"
 
 msgid "Abocaments"
 msgstr "Abocaments"
+
+msgid "Palomas"
+msgstr "Coloms"
+
+msgid "Basura"
+msgstr "Brossa"
+
+msgid "Nido"
+msgstr "Ni"
+
+msgid "Excremento"
+msgstr "Excrement"
+
+msgid "Plumas"
+msgstr "Plomes"
+
+msgid "Basura Desbordada"
+msgstr "Brossa Desbordada"
+
+msgid "Vertidos"
+msgstr "Abocaments"
+
+msgid "Selecciona una subcategoría"
+msgstr "Selecciona una subcategoria"
+
+msgid "Subcategorías de Palomas"
+msgstr "Subcategories de Coloms"
+
+msgid "Subcategorías de Basura"
+msgstr "Subcategories de Brossa"
+
+msgid "Totes les subcategorías"
+msgstr "Totes les subcategories"

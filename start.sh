@@ -35,7 +35,7 @@ flask db upgrade || {
 
 # Compilar traducciones
 echo "✓ Compilando traducciones..."
-python3 compile_translations.py || echo "⚠️  No se pudieron compilar traducciones (continuando...)"
+uv run python compile_translations.py || echo "⚠️  No se pudieron compilar traducciones (continuando...)"
 
 # Verificar usuario admin
 echo "✓ Verificando usuario admin..."

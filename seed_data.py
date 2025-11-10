@@ -97,14 +97,6 @@ DESCRIPTIONS = {
         'Nido en el árbol',
         'Nido en la estructura del edificio',
     ],
-    'paloma': [
-        'Grupo de palomas en la zona',
-        'Palomas anidando en el edificio',
-        'Concentración de palomas',
-        'Palomas en el monumento',
-        'Palomas en el parque',
-        'Palomas en la plaza',
-    ],
     'plumas': [
         'Plumas de palomas en el suelo',
         'Acumulación de plumas',
@@ -150,9 +142,16 @@ def generate_seed_data(num_items=50):
         else:
             reporter_id = admin_user.id
         
-        # Categories with weights (more excrementos and nidos for realism)
-        # Distribution: 30% excremento, 25% nido, 15% paloma, 10% plumas, 10% basura_desborda, 5% vertidos, 5% otro
-        categories = ['excremento'] * 15 + ['nido'] * 12 + ['paloma'] * 8 + ['plumas'] * 5 + ['basura_desborda'] * 5 + ['vertidos'] * 3 + ['otro'] * 2
+        # Categories and subcategories with weights
+        # Distribution: 
+        #   palomas: 40% excremento, 35% nido, 25% plumas (100% total)
+        #   basura: 65% basura_desborda, 35% vertidos (100% total)
+        category_subcategory_map = [
+            ('palomas', 'excremento')] * 20 + [
+            ('palomas', 'nido')] * 17 + [
+            ('palomas', 'plumas')] * 13 + [
+            ('basura', 'basura_desborda')] * 13 + [
+            ('basura', 'vertidos')] * 7
         
         # Status distribution for realism:
         # 60% approved (visible on map)
@@ -177,14 +176,14 @@ def generate_seed_data(num_items=50):
             latitude = location['lat'] + lat_offset
             longitude = location['lng'] + lng_offset
             
-            # Select random category
-            category = random.choice(categories)
+            # Select random category and subcategory
+            category, subcategory = random.choice(category_subcategory_map)
             
             # Select random status
             status = random.choice(statuses)
             
-            # Select random description
-            description = random.choice(DESCRIPTIONS[category])
+            # Select random description (using subcategory as key)
+            description = random.choice(DESCRIPTIONS[subcategory])
             
             # Random creation date (last 30 days)
             days_ago = random.randint(0, 30)
@@ -202,7 +201,8 @@ def generate_seed_data(num_items=50):
             existing = InventoryItem.query.filter(
                 db.func.abs(InventoryItem.latitude - latitude) < 0.0005,
                 db.func.abs(InventoryItem.longitude - longitude) < 0.0005,
-                InventoryItem.category == category
+                InventoryItem.category == category,
+                InventoryItem.subcategory == subcategory
             ).first()
             
             if existing:
@@ -213,24 +213,23 @@ def generate_seed_data(num_items=50):
             if random.random() < 0.4:
                 try:
                     # Use placeholder images from picsum.photos (random nature/urban images)
-                    # Different image sizes for different categories
+                    # Different image sizes for different subcategories
                     image_sizes = {
                         'excremento': (400, 300),
                         'nido': (300, 300),
-                        'paloma': (400, 400),
                         'plumas': (300, 200),
                         'basura_desborda': (400, 300),
                         'vertidos': (400, 300),
                         'otro': (400, 300)
                     }
-                    width, height = image_sizes.get(category, (400, 300))
+                    width, height = image_sizes.get(subcategory, (400, 300))
                     
                     # Use a seed based on item data to get consistent images
-                    seed = hash(f"{category}_{latitude}_{longitude}") % 1000
+                    seed = hash(f"{category}_{subcategory}_{latitude}_{longitude}") % 1000
                     image_url = f"https://picsum.photos/seed/{seed}/{width}/{height}"
                     
                     # Download image
-                    filename = f"seed_{datetime.now().timestamp()}_{items_created}_{category}.jpg"
+                    filename = f"seed_{datetime.now().timestamp()}_{items_created}_{category}_{subcategory}.jpg"
                     file_path = os.path.join(Config.UPLOAD_FOLDER, filename)
                     
                     # Ensure upload folder exists
@@ -248,6 +247,7 @@ def generate_seed_data(num_items=50):
             # Create item with random status
             item = InventoryItem(
                 category=category,
+                subcategory=subcategory,
                 description=description,
                 latitude=latitude,
                 longitude=longitude,
@@ -273,18 +273,20 @@ def generate_seed_data(num_items=50):
         for item in InventoryItem.query.filter(
             InventoryItem.status.in_(['approved', 'active'])
         ).all():
-            by_category[item.category] = by_category.get(item.category, 0) + 1
-        for cat, count in sorted(by_category.items()):
+            cat_key = f"{item.category}->{item.subcategory}"
+            by_category[cat_key] = by_category.get(cat_key, 0) + 1
+        for cat_key, count in sorted(by_category.items()):
+            # Extract subcategory for emoji
+            subcat = cat_key.split('->')[1] if '->' in cat_key else cat_key
             emoji = {
                 'excremento': '💩', 
                 'nido': '🪺', 
-                'paloma': '🕊️', 
                 'plumas': '🪶',
                 'basura_desborda': '🗑️',
                 'vertidos': '💧',
                 'otro': '📌'
-            }.get(cat, '📌')
-            print(f"      {emoji} {cat}: {count}")
+            }.get(subcat, '📌')
+            print(f"      {emoji} {cat_key}: {count}")
         
         print(f"   Status distribution:")
         by_status = {}

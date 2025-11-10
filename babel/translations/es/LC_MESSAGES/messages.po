@@ -650,3 +650,36 @@ msgstr "Basura Desbordada"
 
 msgid "Abocaments"
 msgstr "Vertidos"
+
+msgid "Palomas"
+msgstr "Palomas"
+
+msgid "Basura"
+msgstr "Basura"
+
+msgid "Nido"
+msgstr "Nido"
+
+msgid "Excremento"
+msgstr "Excremento"
+
+msgid "Plumas"
+msgstr "Plumas"
+
+msgid "Basura Desbordada"
+msgstr "Basura Desbordada"
+
+msgid "Vertidos"
+msgstr "Vertidos"
+
+msgid "Selecciona una subcategoría"
+msgstr "Selecciona una subcategoría"
+
+msgid "Subcategorías de Palomas"
+msgstr "Subcategorías de Palomas"
+
+msgid "Subcategorías de Basura"
+msgstr "Subcategorías de Basura"
+
+msgid "Totes les subcategorías"
+msgstr "Todas las subcategorías"

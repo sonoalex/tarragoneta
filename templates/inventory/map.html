@@ -66,10 +66,13 @@
                 <div class="stats-card">
                     <h5 class="fw-bold mb-3">{{ _('Per categoria') }}</h5>
                     <div>
-                        {% for cat, count in by_category.items() %}
+                        {% for cat_key, count in by_category.items() %}
+                        {% set parts = cat_key.split('->') %}
+                        {% set main_cat = parts[0] if parts|length > 0 else cat_key %}
+                        {% set sub_cat = parts[1] if parts|length > 1 else '' %}
                         <span class="badge bg-secondary me-2 mb-2" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
-                            {% if cat == 'excremento' %}💩{% elif cat == 'nido' %}🪺{% elif cat == 'paloma' %}🕊️{% elif cat == 'plumas' %}🪶{% else %}📌{% endif %}
-                            {{ cat|title }}: {{ count }}
+                            {% if sub_cat == 'excremento' %}💩{% elif sub_cat == 'nido' %}🪺{% elif sub_cat == 'plumas' %}🪶{% elif sub_cat == 'basura_desborda' %}🗑️{% elif sub_cat == 'vertidos' %}💧{% else %}📌{% endif %}
+                            {{ cat_key }}: {{ count }}
                         </span>
                         {% endfor %}
                     </div>
@@ -80,40 +83,82 @@
         <!-- Category Filter -->
         <div class="category-filter">
             <h5 class="fw-bold mb-3">{{ _('Filtrar per categoria') }}</h5>
-            <div>
+            
+            <!-- Main Categories -->
+            <div class="mb-3">
                 <a href="{{ url_for('inventory.inventory_map') }}" 
                    class="category-badge {% if not selected_category %}active{% endif %}">
                     {{ _('Totes') }}
                 </a>
-                <a href="{{ url_for('inventory.inventory_map', category='excremento') }}" 
-                   class="category-badge {% if selected_category == 'excremento' %}active{% endif %}">
-                    💩 {{ _('Excremento') }}
+                <a href="{{ url_for('inventory.inventory_map', category='palomas') }}" 
+                   class="category-badge {% if selected_category == 'palomas' %}active{% endif %}">
+                    🕊️ {{ _('Palomas') }}
+                    {% if selected_category == 'palomas' and by_main_category.get('palomas') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_main_category.get('palomas', 0) }}</span>
+                    {% endif %}
                 </a>
-                <a href="{{ url_for('inventory.inventory_map', category='nido') }}" 
-                   class="category-badge {% if selected_category == 'nido' %}active{% endif %}">
-                    🪺 {{ _('Nido') }}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='paloma') }}" 
-                   class="category-badge {% if selected_category == 'paloma' %}active{% endif %}">
-                    🕊️ {{ _('Paloma') }}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='plumas') }}" 
-                   class="category-badge {% if selected_category == 'plumas' %}active{% endif %}">
-                    🪶 {{ _('Plumas') }}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='basura_desborda') }}" 
-                   class="category-badge {% if selected_category == 'basura_desborda' %}active{% endif %}">
-                    🗑️ {{ _('Brossa Desbordada') }}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='vertidos') }}" 
-                   class="category-badge {% if selected_category == 'vertidos' %}active{% endif %}">
-                    💧 {{ _('Abocaments') }}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='otro') }}" 
-                   class="category-badge {% if selected_category == 'otro' %}active{% endif %}">
-                    📌 {{ _('Otro') }}
+                <a href="{{ url_for('inventory.inventory_map', category='basura') }}" 
+                   class="category-badge {% if selected_category == 'basura' %}active{% endif %}">
+                    🗑️ {{ _('Basura') }}
+                    {% if selected_category == 'basura' and by_main_category.get('basura') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_main_category.get('basura', 0) }}</span>
+                    {% endif %}
                 </a>
             </div>
+            
+            <!-- Subcategories (only show if a main category is selected) -->
+            {% if selected_category == 'palomas' %}
+            <div class="mt-3 pt-3 border-top">
+                <small class="text-muted d-block mb-2">{{ _('Subcategorías de Palomas') }}:</small>
+                <a href="{{ url_for('inventory.inventory_map', category='palomas') }}" 
+                   class="category-badge {% if not selected_subcategory %}active{% endif %}">
+                    {{ _('Totes les subcategorías') }}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='palomas', subcategory='nido') }}" 
+                   class="category-badge {% if selected_subcategory == 'nido' %}active{% endif %}">
+                    🪺 {{ _('Nido') }}
+                    {% if by_subcategory.get('nido') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('nido', 0) }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='palomas', subcategory='excremento') }}" 
+                   class="category-badge {% if selected_subcategory == 'excremento' %}active{% endif %}">
+                    💩 {{ _('Excremento') }}
+                    {% if by_subcategory.get('excremento') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('excremento', 0) }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='palomas', subcategory='plumas') }}" 
+                   class="category-badge {% if selected_subcategory == 'plumas' %}active{% endif %}">
+                    🪶 {{ _('Plumas') }}
+                    {% if by_subcategory.get('plumas') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('plumas', 0) }}</span>
+                    {% endif %}
+                </a>
+            </div>
+            {% elif selected_category == 'basura' %}
+            <div class="mt-3 pt-3 border-top">
+                <small class="text-muted d-block mb-2">{{ _('Subcategorías de Basura') }}:</small>
+                <a href="{{ url_for('inventory.inventory_map', category='basura') }}" 
+                   class="category-badge {% if not selected_subcategory %}active{% endif %}">
+                    {{ _('Totes les subcategorías') }}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='basura', subcategory='basura_desborda') }}" 
+                   class="category-badge {% if selected_subcategory == 'basura_desborda' %}active{% endif %}">
+                    🗑️ {{ _('Brossa Desbordada') }}
+                    {% if by_subcategory.get('basura_desborda') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('basura_desborda', 0) }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='basura', subcategory='vertidos') }}" 
+                   class="category-badge {% if selected_subcategory == 'vertidos' %}active{% endif %}">
+                    💧 {{ _('Abocaments') }}
+                    {% if by_subcategory.get('vertidos') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('vertidos', 0) }}</span>
+                    {% endif %}
+                </a>
+            </div>
+            {% endif %}
         </div>
 
         <!-- Map -->
@@ -167,7 +212,6 @@
             var colors = {
                 'excremento': '#8B4513',
                 'nido': '#D2691E',
-                'paloma': '#4682B4',
                 'plumas': '#708090',
                 'basura_desborda': '#FF6B35',
                 'vertidos': '#4ECDC4',
@@ -176,7 +220,6 @@
             var emojis = {
                 'excremento': '💩',
                 'nido': '🪺',
-                'paloma': '🕊️',
                 'plumas': '🪶',
                 'basura_desborda': '🗑️',
                 'vertidos': '💧',
@@ -237,7 +280,6 @@
             var emojis = {
                 'excremento': '💩',
                 'nido': '🪺',
-                'paloma': '🕊️',
                 'plumas': '🪶',
                 'basura_desborda': '🗑️',
                 'vertidos': '💧',
@@ -248,8 +290,12 @@
         
         // Load items from API
         var category = '{{ selected_category or "" }}';
-        var apiUrl = category ? 
-            `{{ url_for('inventory.api_items') }}?category=${category}` : 
+        var subcategory = '{{ selected_subcategory or "" }}';
+        var params = [];
+        if (category) params.push(`category=${category}`);
+        if (subcategory) params.push(`subcategory=${subcategory}`);
+        var apiUrl = params.length > 0 ? 
+            `{{ url_for('inventory.api_items') }}?${params.join('&')}` : 
             '{{ url_for('inventory.api_items') }}';
         
         fetch(apiUrl)
@@ -281,7 +327,7 @@
                     
                     var popupContent = `
                         <div style="min-width: 200px;">
-                            <h6 class="fw-bold mb-2">${getCategoryEmoji(item.category)} ${item.full_category}</h6>
+                            <h6 class="fw-bold mb-2">${getCategoryEmoji(item.subcategory)} ${item.full_category}</h6>
                             ${item.description ? `<p class="small mb-2">${item.description}</p>` : ''}
                             ${item.address ? `<p class="small text-muted mb-2"><i class="fas fa-map-marker-alt"></i> ${item.address}</p>` : ''}
                             ${item.image_path ? `<img src="/static/uploads/${item.image_path}" style="max-width: 100%; border-radius: 8px; margin-top: 0.5rem;" />` : ''}
@@ -297,7 +343,7 @@
                     `;
                     
                     var marker = L.marker([item.latitude, item.longitude], {
-                        icon: getCategoryIcon(item.category, item.image_path)
+                        icon: getCategoryIcon(item.subcategory, item.image_path)
                     });
                     
                     marker.bindPopup(popupContent);

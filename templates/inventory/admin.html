@@ -141,14 +141,13 @@
                             {% for item in items %}
                             <tr>
                                 <td>
-                                    {% if item.category == 'excremento' %}💩
-                                    {% elif item.category == 'nido' %}🪺
-                                    {% elif item.category == 'paloma' %}🕊️
-                                    {% elif item.category == 'plumas' %}🪶
-                                    {% elif item.category == 'basura_desborda' %}🗑️
-                                    {% elif item.category == 'vertidos' %}💧
+                                    {% if item.subcategory == 'excremento' %}💩
+                                    {% elif item.subcategory == 'nido' %}🪺
+                                    {% elif item.subcategory == 'plumas' %}🪶
+                                    {% elif item.subcategory == 'basura_desborda' %}🗑️
+                                    {% elif item.subcategory == 'vertidos' %}💧
                                     {% else %}📌{% endif %}
-                                    {{ get_category_name(item.category) }}
+                                    {{ item.full_category }}
                                 </td>
                                 <td>
                                     <small>

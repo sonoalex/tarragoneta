@@ -111,9 +111,10 @@ class Participation(db.Model):
     initiative_rel = db.relationship('Initiative', backref='anonymous_participants')
 
 class InventoryItem(db.Model):
-    """Items del inventario de palomas (nidos, excrementos, etc.)"""
+    """Items del inventario (palomas, basura, etc.)"""
     id = db.Column(db.Integer, primary_key=True)
-    category = db.Column(db.String(50), nullable=False)  # 'excremento', 'nido', etc.
+    category = db.Column(db.String(50), nullable=False)  # 'palomas', 'basura', etc.
+    subcategory = db.Column(db.String(50), nullable=False)  # 'nido', 'excremento', 'basura_desborda', 'vertidos', etc.
     description = db.Column(db.Text)
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
@@ -133,8 +134,8 @@ class InventoryItem(db.Model):
     
     @property
     def full_category(self):
-        """Return full category path: palomas->excremento"""
-        return f"palomas->{self.category}"
+        """Return full category path: category->subcategory"""
+        return f"{self.category}->{self.subcategory}"
     
     def has_user_voted(self, user_id):
         """Check if a user has already voted for this item"""
@@ -143,7 +144,7 @@ class InventoryItem(db.Model):
         return self.voters.filter_by(user_id=user_id).first() is not None
     
     def __repr__(self):
-        return f'<InventoryItem {self.category} at ({self.latitude}, {self.longitude})>'
+        return f'<InventoryItem {self.category}->{self.subcategory} at ({self.latitude}, {self.longitude})>'
 
 class InventoryVote(db.Model):
     """Track votes/importance for inventory items"""
