@@ -85,19 +85,21 @@ python3 compile_translations.py
 
 8. **Crear datos de ejemplo (opcional)**
 ```bash
+# Opción 1: Crear solo iniciativas de ejemplo
 flask create-sample-data
-```
 
-9. **Generar datos del inventario de palomas (opcional)**
-```bash
-# Generar 50 items de ejemplo
-python seed_data.py --count 50
+# Opción 2: Crear todo (iniciativas + inventario) - RECOMENDADO
+python3 seed_all.py
 
-# Generar 100 items
-python seed_data.py --count 100
+# Opción 3: Solo inventario
+python3 seed_all.py --inventory-only --inventory-count 50
 
-# Limpiar inventario existente y generar nuevos datos
-python seed_data.py --clear --count 50
+# Opción 4: Limpiar inventario y crear nuevo
+python3 seed_all.py --inventory-only --clear-inventory --inventory-count 100
+
+# Opción 5: Usar seed_data.py directamente (más opciones)
+python3 seed_data.py --count 50
+python3 seed_data.py --clear --count 100
 ```
 
 10. **Ejecutar la aplicación**
