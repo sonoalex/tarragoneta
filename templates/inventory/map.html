@@ -101,6 +101,14 @@
                    class="category-badge {% if selected_category == 'plumas' %}active{% endif %}">
                     🪶 {{ _('Plumas') }}
                 </a>
+                <a href="{{ url_for('inventory.inventory_map', category='basura_desborda') }}" 
+                   class="category-badge {% if selected_category == 'basura_desborda' %}active{% endif %}">
+                    🗑️ {{ _('Brossa Desbordada') }}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='vertidos') }}" 
+                   class="category-badge {% if selected_category == 'vertidos' %}active{% endif %}">
+                    💧 {{ _('Abocaments') }}
+                </a>
                 <a href="{{ url_for('inventory.inventory_map', category='otro') }}" 
                    class="category-badge {% if selected_category == 'otro' %}active{% endif %}">
                     📌 {{ _('Otro') }}
@@ -161,6 +169,8 @@
                 'nido': '#D2691E',
                 'paloma': '#4682B4',
                 'plumas': '#708090',
+                'basura_desborda': '#FF6B35',
+                'vertidos': '#4ECDC4',
                 'otro': '#696969'
             };
             var emojis = {
@@ -168,6 +178,8 @@
                 'nido': '🪺',
                 'paloma': '🕊️',
                 'plumas': '🪶',
+                'basura_desborda': '🗑️',
+                'vertidos': '💧',
                 'otro': '📌'
             };
             
@@ -227,6 +239,8 @@
                 'nido': '🪺',
                 'paloma': '🕊️',
                 'plumas': '🪶',
+                'basura_desborda': '🗑️',
+                'vertidos': '💧',
                 'otro': '📌'
             };
             return emojis[category] || '📌';

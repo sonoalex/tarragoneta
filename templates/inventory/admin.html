@@ -145,8 +145,10 @@
                                     {% elif item.category == 'nido' %}🪺
                                     {% elif item.category == 'paloma' %}🕊️
                                     {% elif item.category == 'plumas' %}🪶
+                                    {% elif item.category == 'basura_desborda' %}🗑️
+                                    {% elif item.category == 'vertidos' %}💧
                                     {% else %}📌{% endif %}
-                                    {{ item.category|title }}
+                                    {{ get_category_name(item.category) }}
                                 </td>
                                 <td>
                                     <small>
