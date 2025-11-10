@@ -75,31 +75,89 @@ def init_db_command():
 
 def create_sample_data():
     """Create sample data for testing."""
-    # Sample initiatives
+    from flask_babel import gettext as _
+    
+    # Sample initiatives with variety
     initiatives_data = [
         {
-            'title': 'Gran Limpieza de la Playa del Miracle',
-            'description': 'Únete a nosotros para una jornada de limpieza en nuestra querida playa. Traeremos bolsas y guantes, solo necesitas traer tu energía y compromiso con el medio ambiente.',
-            'location': 'Playa del Miracle, Tarragona',
+            'title': 'Gran Neteja de la Platja del Miracle',
+            'description': 'Uneix-te a nosaltres per a una jornada de neteja a la nostra estimada platja. Portarem bosses i guants, només necessites portar la teva energia i compromís amb el medi ambient.',
+            'location': 'Platja del Miracle, Tarragona',
             'category': 'limpieza',
             'date': datetime.now().date() + timedelta(days=7),
             'time': '10:00'
         },
         {
-            'title': 'Plantación de Árboles en el Parque de la Ciudad',
-            'description': 'Ayúdanos a reverdecer nuestra ciudad plantando nuevos árboles. Una actividad perfecta para familias y amantes de la naturaleza.',
+            'title': 'Plantació d\'Arbres al Parc de la Ciutat',
+            'description': 'Ajuda\'ns a reverdir la nostra ciutat plantant nous arbres. Una activitat perfecta per a famílies i amants de la naturalesa.',
             'location': 'Parc de la Ciutat, Tarragona',
             'category': 'espacios_verdes',
             'date': datetime.now().date() + timedelta(days=14),
             'time': '09:30'
         },
         {
-            'title': 'Taller de Reciclaje Creativo',
-            'description': 'Aprende a transformar residuos en arte y objetos útiles. Taller gratuito para todas las edades.',
-            'location': 'Centro Cívico de Torreforta',
+            'title': 'Taller de Reciclatge Creatiu',
+            'description': 'Aprèn a transformar residus en art i objectes útils. Taller gratuït per a totes les edats.',
+            'location': 'Centre Cívic de Torreforta',
             'category': 'reciclaje',
             'date': datetime.now().date() + timedelta(days=10),
             'time': '17:00'
+        },
+        {
+            'title': 'Acció contra la Brossa Desbordada',
+            'description': 'Identifiquem i reportem contenedors de brossa desbordats per millorar la gestió de residus a la ciutat.',
+            'location': 'Diverses ubicacions, Tarragona',
+            'category': 'basura_desborda',
+            'date': datetime.now().date() + timedelta(days=5),
+            'time': '18:00'
+        },
+        {
+            'title': 'Vigilància de Vertits Il·legals',
+            'description': 'Xarxa de ciutadans per detectar i reportar vertits il·legals de residus en zones no autoritzades.',
+            'location': 'Zones perifèriques, Tarragona',
+            'category': 'vertidos',
+            'date': datetime.now().date() + timedelta(days=12),
+            'time': '11:00'
+        },
+        {
+            'title': 'Bicicletada per la Mobilitat Sostenible',
+            'description': 'Ruta en bicicleta per promoure la mobilitat sostenible i reivindicar més carrils bici a Tarragona.',
+            'location': 'Rambla Nova, Tarragona',
+            'category': 'movilidad',
+            'date': datetime.now().date() + timedelta(days=21),
+            'time': '10:00'
+        },
+        {
+            'title': 'Taller d\'Educació Ambiental per a Nens',
+            'description': 'Taller interactiu per ensenyar als més petits la importància del reciclatge i el respecte al medi ambient.',
+            'location': 'Parc del Francolí, Tarragona',
+            'category': 'educacion',
+            'date': datetime.now().date() + timedelta(days=8),
+            'time': '16:00'
+        },
+        {
+            'title': 'Neteja del Centre Històric',
+            'description': 'Jornada de neteja col·lectiva del centre històric de Tarragona per mantenir la nostra ciutat neta i cívica.',
+            'location': 'Centre Històric, Tarragona',
+            'category': 'cultura',
+            'date': datetime.now().date() + timedelta(days=15),
+            'time': '09:00'
+        },
+        {
+            'title': 'Campanya de Sensibilització sobre Residus',
+            'description': 'Acció social per sensibilitzar sobre la importància de gestionar correctament els residus i evitar vertits il·legals.',
+            'location': 'Plaça de la Font, Tarragona',
+            'category': 'social',
+            'date': datetime.now().date() + timedelta(days=6),
+            'time': '12:00'
+        },
+        {
+            'title': 'Neteja de la Zona del Port',
+            'description': 'Iniciativa per netejar la zona del port i les platges properes de residus i plàstics.',
+            'location': 'Port de Tarragona',
+            'category': 'limpieza',
+            'date': datetime.now().date() + timedelta(days=20),
+            'time': '08:00'
         }
     ]
     
@@ -109,12 +167,12 @@ def create_sample_data():
         print("✗ Admin user not found. Please run 'flask init-db' first.")
         return
     
+    created = 0
     for data in initiatives_data:
-        # Generate slug from title
+        # Check if initiative with same slug already exists
         base_slug = generate_slug(data['title'])
         slug = base_slug
         counter = 1
-        # Ensure slug is unique
         while Initiative.query.filter_by(slug=slug).first():
             slug = f"{base_slug}-{counter}"
             counter += 1
@@ -123,7 +181,9 @@ def create_sample_data():
         data['slug'] = slug
         initiative = Initiative(creator_id=admin_user.id, **data)
         db.session.add(initiative)
+        created += 1
     
     db.session.commit()
+    print(f"✓ Created {created} sample initiatives")
     print("✓ Sample data created successfully!")
 

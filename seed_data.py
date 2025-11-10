@@ -111,10 +111,29 @@ DESCRIPTIONS = {
         'Plumas en la zona',
         'Restos de plumas',
     ],
+    'basura_desborda': [
+        'Contenedor de basura desbordado',
+        'Basura acumulada fuera del contenedor',
+        'Contenedor lleno con basura alrededor',
+        'Basura desbordada en la calle',
+        'Contenedor de reciclaje desbordado',
+        'Basura acumulada en la zona',
+        'Contenedor sin capacidad disponible',
+    ],
+    'vertidos': [
+        'Vertido ilegal de residuos',
+        'Basura vertida en zona no autorizada',
+        'Vertido de escombros',
+        'Residuos vertidos en el suelo',
+        'Vertido de materiales de construcción',
+        'Basura vertida en zona verde',
+        'Vertido ilegal detectado',
+    ],
     'otro': [
         'Problema relacionado con palomas',
         'Otro problema de palomas',
         'Situación relacionada con palomas',
+        'Otro problema urbano',
     ]
 }
 
@@ -132,8 +151,8 @@ def generate_seed_data(num_items=50):
             reporter_id = admin_user.id
         
         # Categories with weights (more excrementos and nidos for realism)
-        # Distribution: 40% excremento, 30% nido, 15% paloma, 10% plumas, 5% otro
-        categories = ['excremento'] * 20 + ['nido'] * 15 + ['paloma'] * 8 + ['plumas'] * 5 + ['otro'] * 2
+        # Distribution: 30% excremento, 25% nido, 15% paloma, 10% plumas, 10% basura_desborda, 5% vertidos, 5% otro
+        categories = ['excremento'] * 15 + ['nido'] * 12 + ['paloma'] * 8 + ['plumas'] * 5 + ['basura_desborda'] * 5 + ['vertidos'] * 3 + ['otro'] * 2
         
         # Status distribution for realism:
         # 60% approved (visible on map)
@@ -200,6 +219,8 @@ def generate_seed_data(num_items=50):
                         'nido': (300, 300),
                         'paloma': (400, 400),
                         'plumas': (300, 200),
+                        'basura_desborda': (400, 300),
+                        'vertidos': (400, 300),
                         'otro': (400, 300)
                     }
                     width, height = image_sizes.get(category, (400, 300))
@@ -254,7 +275,15 @@ def generate_seed_data(num_items=50):
         ).all():
             by_category[item.category] = by_category.get(item.category, 0) + 1
         for cat, count in sorted(by_category.items()):
-            emoji = {'excremento': '💩', 'nido': '🪺', 'paloma': '🕊️', 'plumas': '🪶', 'otro': '📌'}.get(cat, '📌')
+            emoji = {
+                'excremento': '💩', 
+                'nido': '🪺', 
+                'paloma': '🕊️', 
+                'plumas': '🪶',
+                'basura_desborda': '🗑️',
+                'vertidos': '💧',
+                'otro': '📌'
+            }.get(cat, '📌')
             print(f"      {emoji} {cat}: {count}")
         
         print(f"   Status distribution:")
