@@ -112,7 +112,11 @@ def report_item():
                 file = form.image.data
                 if file and allowed_file(file.filename):
                     filename = secure_filename(f"{datetime.now().timestamp()}_{file.filename}")
-                    file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                    upload_folder = current_app.config['UPLOAD_FOLDER']
+                    file_path = os.path.join(upload_folder, filename)
+                    print(f"DEBUG: Saving inventory file to: {file_path}")
+                    print(f"DEBUG: UPLOAD_FOLDER from config: {upload_folder}")
+                    print(f"DEBUG: file_path is absolute: {os.path.isabs(file_path)}")
                     file.save(file_path)
                     
                     # Optimize image
