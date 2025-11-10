@@ -57,15 +57,17 @@ def create_app(config_name=None):
     
     # In production (Railway), create symlink from static/uploads to volume mount
     # This allows Flask to serve files using url_for('static', filename='uploads/...')
-    if os.environ.get('RAILWAY_ENVIRONMENT') or os.environ.get('FLASK_ENV') == 'production':
+    if is_production and os.path.isabs(upload_folder):
         static_uploads = os.path.join(static_dir, 'uploads')
-        if not os.path.exists(static_uploads) and os.path.isabs(upload_folder):
+        if not os.path.exists(static_uploads):
             try:
                 os.symlink(upload_folder, static_uploads)
                 app.logger.info(f'Created symlink: {static_uploads} -> {upload_folder}')
             except (OSError, FileExistsError) as e:
                 # Symlink might already exist or creation failed
                 app.logger.warning(f'Could not create symlink: {e}')
+        else:
+            app.logger.info(f'Symlink already exists: {static_uploads}')
     
     # Initialize extensions
     init_extensions(app)
