@@ -8,7 +8,7 @@ Flask-Migrate==4.0.5
 Flask-Babel==4.0.0
 python-dotenv==1.0.0
 email-validator==2.1.0
-Pillow>=10.1.0
+Pillow>=10.2.0
 gunicorn==21.2.0
 bcrypt==3.2.2
 bleach==6.1.0
