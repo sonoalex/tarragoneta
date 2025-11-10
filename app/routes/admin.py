@@ -8,7 +8,7 @@ from app.models import Initiative, User, Participation, user_initiatives, Invent
 from app.extensions import db
 from app.forms import InitiativeForm
 from app.utils import sanitize_html, allowed_file, optimize_image
-from app.config import Config
+# Config.UPLOAD_FOLDER removed - using current_app.config['UPLOAD_FOLDER'] instead
 from flask_babel import gettext as _
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -65,7 +65,7 @@ def new_initiative():
             file = form.image.data
             if file and allowed_file(file.filename):
                 filename = secure_filename(f"{datetime.now().timestamp()}_{file.filename}")
-                file_path = os.path.join(Config.UPLOAD_FOLDER, filename)
+                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
                 file.save(file_path)
                 
                 # Optimize image
@@ -114,12 +114,12 @@ def edit_initiative(id):
             if file and allowed_file(file.filename):
                 # Delete old image if exists
                 if initiative.image_path:
-                    old_path = os.path.join(Config.UPLOAD_FOLDER, initiative.image_path)
+                    old_path = os.path.join(current_app.config['UPLOAD_FOLDER'], initiative.image_path)
                     if os.path.exists(old_path):
                         os.remove(old_path)
                 
                 filename = secure_filename(f"{datetime.now().timestamp()}_{file.filename}")
-                file_path = os.path.join(Config.UPLOAD_FOLDER, filename)
+                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
                 file.save(file_path)
                 
                 if optimize_image(file_path):
@@ -139,7 +139,7 @@ def delete_initiative(id):
     
     # Delete associated image if exists
     if initiative.image_path:
-        file_path = os.path.join(Config.UPLOAD_FOLDER, initiative.image_path)
+        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], initiative.image_path)
         if os.path.exists(file_path):
             os.remove(file_path)
     

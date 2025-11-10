@@ -9,7 +9,7 @@ from app.models import InventoryItem, InventoryVote
 from app.extensions import db
 from app.forms import InventoryForm
 from app.utils import sanitize_html, allowed_file, optimize_image
-from app.config import Config
+# Config.UPLOAD_FOLDER removed - using current_app.config['UPLOAD_FOLDER'] instead
 
 bp = Blueprint('inventory', __name__, url_prefix='/inventory')
 
@@ -112,7 +112,7 @@ def report_item():
                 file = form.image.data
                 if file and allowed_file(file.filename):
                     filename = secure_filename(f"{datetime.now().timestamp()}_{file.filename}")
-                    file_path = os.path.join(Config.UPLOAD_FOLDER, filename)
+                    file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
                     file.save(file_path)
                     
                     # Optimize image
@@ -322,7 +322,7 @@ def delete_item(id):
     
     # Delete associated image if exists
     if item.image_path:
-        file_path = os.path.join(Config.UPLOAD_FOLDER, item.image_path)
+        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], item.image_path)
         if os.path.exists(file_path):
             os.remove(file_path)
     
