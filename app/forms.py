@@ -11,7 +11,8 @@ class ExtendedRegisterForm(RegisterForm):
     username = StringField('Nombre de usuario', validators=[DataRequired(), Length(min=3, max=255)])
     
     def validate(self, extra_validators=None):
-        if not super().validate(extra_validators):
+        # Call parent validate without extra_validators to avoid signature mismatch
+        if not super().validate():
             return False
         
         # Check if username already exists
