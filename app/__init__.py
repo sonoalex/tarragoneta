@@ -6,7 +6,7 @@ from app.config import config
 from app.extensions import init_extensions
 from app.routes import main, initiatives, admin, donations, inventory
 from app.forms import ExtendedRegisterForm
-from app.utils import get_category_name
+from app.utils import get_category_name, get_inventory_category_name
 from flask_security.signals import user_registered
 from flask_babel import gettext as _
 
@@ -88,7 +88,7 @@ def create_app(config_name=None):
         except Exception:
             pass  # Ignore errors in context processor
         
-        return dict(_=_, get_locale=current_locale, get_category_name=get_category_name, pending_initiatives_count=pending_count)
+        return dict(_=_, get_locale=current_locale, get_category_name=get_category_name, get_inventory_category_name=get_inventory_category_name, pending_initiatives_count=pending_count)
     
     # Error handlers
     from flask import render_template, request
@@ -120,27 +120,30 @@ def create_app(config_name=None):
         return render_template('profile.html', participated=participated, created=created)
     
     # Configure logging
+    # Create logs directory if it doesn't exist
+    if not os.path.exists('logs'):
+        os.mkdir('logs')
+    
+    # File handler (both development and production)
+    file_handler = RotatingFileHandler(
+        'logs/tarragoneta.log',
+        maxBytes=10240000,  # 10MB
+        backupCount=10
+    )
+    file_handler.setFormatter(logging.Formatter(
+        '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+    ))
+    file_handler.setLevel(logging.INFO)
+    app.logger.addHandler(file_handler)
+    
     if not app.debug:
-        # Production logging - log to file
-        if not os.path.exists('logs'):
-            os.mkdir('logs')
-        
-        file_handler = RotatingFileHandler(
-            'logs/tarragoneta.log',
-            maxBytes=10240000,  # 10MB
-            backupCount=10
-        )
-        file_handler.setFormatter(logging.Formatter(
-            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
-        ))
-        file_handler.setLevel(logging.INFO)
-        app.logger.addHandler(file_handler)
+        # Production logging - only file
         app.logger.setLevel(logging.INFO)
         # Only log startup message if not silenced
         if not os.environ.get('FLASK_SILENT_STARTUP'):
             app.logger.info('Tarragoneta startup')
     else:
-        # Development logging - log to console with more detail
+        # Development logging - console + file
         console_handler = logging.StreamHandler()
         console_handler.setFormatter(logging.Formatter(
             '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'

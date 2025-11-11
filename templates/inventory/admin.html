@@ -147,7 +147,7 @@
                                     {% elif item.subcategory == 'basura_desborda' %}🗑️
                                     {% elif item.subcategory == 'vertidos' %}💧
                                     {% else %}📌{% endif %}
-                                    {{ item.full_category }}
+                                    {{ get_inventory_category_name(item.category, item.subcategory) }}
                                 </td>
                                 <td>
                                     <small>

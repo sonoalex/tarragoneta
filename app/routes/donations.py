@@ -1,7 +1,10 @@
+from time import timezone
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app
 from flask_babel import gettext as _
-from app.extensions import db
+from app.extensions import db, csrf
 import stripe
+import os
+from stripe._error import SignatureVerificationError
 
 bp = Blueprint('donations', __name__, url_prefix='/donate')
 
@@ -76,86 +79,132 @@ def donate_success():
     return render_template('donate_success.html')
 
 @bp.route('/webhook', methods=['POST'])
+@csrf.exempt  # Stripe webhooks don't include CSRF tokens
 def stripe_webhook():
     """Handle Stripe webhook events"""
-    payload = request.get_data()
-    sig_header = request.headers.get('Stripe-Signature')
-    endpoint_secret = current_app.config.get('STRIPE_WEBHOOK_SECRET')
-    
-    if not endpoint_secret:
-        current_app.logger.warning('Stripe webhook called but webhook secret not configured')
-        return jsonify({'error': 'Webhook secret not configured'}), 400
-    
     try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, endpoint_secret
-        )
-        current_app.logger.info(f'Stripe webhook received: {event["type"]}')
-    except ValueError as e:
-        # Invalid payload
-        current_app.logger.error(f'Invalid Stripe webhook payload: {str(e)}')
-        return jsonify({'error': 'Invalid payload'}), 400
-    except stripe.error.SignatureVerificationError as e:
-        # Invalid signature
-        current_app.logger.error(f'Invalid Stripe webhook signature: {str(e)}')
-        return jsonify({'error': 'Invalid signature'}), 400
+        payload = request.get_data()
+        sig_header = request.headers.get('Stripe-Signature')
+        
+        # Get secret from environment (fresh load) or config
+        endpoint_secret = os.environ.get('STRIPE_WEBHOOK_SECRET') or current_app.config.get('STRIPE_WEBHOOK_SECRET')
+        
+        if not endpoint_secret:
+            current_app.logger.warning('Stripe webhook called but webhook secret not configured')
+            return jsonify({'error': 'Webhook secret not configured'}), 400
+        
+        try:
+            event = stripe.Webhook.construct_event(
+                payload, sig_header, endpoint_secret
+            )
+            current_app.logger.info(f'Stripe webhook received: {event["type"]}')
+        except ValueError as e:
+            # Invalid payload
+            current_app.logger.error(f'Invalid Stripe webhook payload: {str(e)}', exc_info=True)
+            return jsonify({'error': 'Invalid payload'}), 400
+        except SignatureVerificationError as e:
+            # Invalid signature
+            current_app.logger.error(f'Invalid Stripe webhook signature: {str(e)}', exc_info=True)
+            return jsonify({'error': 'Invalid signature'}), 400
+    except Exception as e:
+        current_app.logger.error(f'Error in webhook handler: {str(e)}', exc_info=True)
+        return jsonify({'error': 'Internal server error'}), 500
     
     # Handle the event
-    if event['type'] == 'checkout.session.completed':
-        session = event['data']['object']
-        current_app.logger.info(f'Payment successful for session: {session["id"]}, amount: {session.get("amount_total", 0)/100}€')
-        
-        # Save donation to database
-        from app.models import Donation
-        from datetime import datetime
-        
-        # Check if donation already exists
-        existing_donation = Donation.query.filter_by(stripe_session_id=session['id']).first()
-        if not existing_donation:
-            donation = Donation(
-                amount=session.get('amount_total', 0),
-                currency=session.get('currency', 'eur'),
-                email=session.get('customer_details', {}).get('email') or session.get('metadata', {}).get('user_email'),
-                stripe_session_id=session['id'],
-                stripe_payment_intent_id=session.get('payment_intent'),
-                status='completed',
-                donation_type=session.get('metadata', {}).get('donation_type', 'voluntary'),
-                completed_at=datetime.utcnow()
-            )
+    event_type = event.get('type', 'unknown')
+    try:
+        if event['type'] == 'checkout.session.completed':
+            session = event['data']['object']
+            session_id = session.get('id', 'unknown')
+            amount_total = session.get('amount_total', 0)
+            current_app.logger.info(f'Payment successful for session: {session_id}, amount: {amount_total/100}€')
             
-            # Try to link to user if email matches
-            if donation.email:
-                from app.models import User
-                user = User.query.filter_by(email=donation.email).first()
-                if user:
-                    donation.user_id = user.id
+            # Save donation to database
+            from app.models import Donation
+            from datetime import datetime
             
-            db.session.add(donation)
-            db.session.commit()
-            current_app.logger.info(f'Donation saved: {donation.id} - {donation.amount_euros}€')
+            try:
+                # Check if donation already exists
+                existing_donation = Donation.query.filter_by(stripe_session_id=session_id).first()
+                if not existing_donation:
+                    # Get email safely
+                    customer_details = session.get('customer_details') or {}
+                    metadata = session.get('metadata') or {}
+                    email = customer_details.get('email') or metadata.get('user_email') or None
+                    
+                    donation = Donation(
+                        amount=amount_total,
+                        currency=session.get('currency', 'eur'),
+                        email=email,
+                        stripe_session_id=session_id,
+                        stripe_payment_intent_id=session.get('payment_intent'),
+                        status='completed',
+                        donation_type=metadata.get('donation_type', 'voluntary'),
+                        completed_at=datetime.utcnow()
+                    )
+                    
+                    # Try to link to user if email matches
+                    if donation.email:
+                        from app.models import User
+                        user = User.query.filter_by(email=donation.email).first()
+                        if user:
+                            donation.user_id = user.id
+                    
+                    db.session.add(donation)
+                    db.session.commit()
+                    current_app.logger.info(f'Donation saved: {donation.id} - {donation.amount_euros}€')
+                else:
+                    # Update existing donation
+                    existing_donation.status = 'completed'
+                    existing_donation.completed_at = datetime.now(timezone.utc)
+                    if session.get('payment_intent'):
+                        existing_donation.stripe_payment_intent_id = session.get('payment_intent')
+                    db.session.commit()
+                    current_app.logger.info(f'Donation updated: {existing_donation.id}')
+            except Exception as e:
+                current_app.logger.error(f'Error saving donation for session {session_id}: {str(e)}', exc_info=True)
+                db.session.rollback()
+                raise  # Re-raise to be caught by outer try/except
+        
+        elif event['type'] == 'payment_intent.succeeded':
+            # Additional confirmation when payment intent succeeds
+            payment_intent = event['data']['object']
+            current_app.logger.info(f'Payment intent succeeded: {payment_intent["id"]}')
+        
+        elif event['type'] == 'payment_intent.created':
+            # Log but don't process (will be handled by checkout.session.completed)
+            payment_intent = event['data']['object']
+            current_app.logger.debug(f'Payment intent created: {payment_intent["id"]}')
+        
+        elif event['type'] == 'charge.refunded':
+            # Handle refunds
+            charge = event['data']['object']
+            from app.models import Donation
+            donation = Donation.query.filter_by(stripe_payment_intent_id=charge.get('payment_intent')).first()
+            if donation:
+                donation.status = 'refunded'
+                db.session.commit()
+                current_app.logger.info(f'Donation refunded: {donation.id}')
+        
+        elif event['type'] == 'charge.succeeded':
+            # Log but don't process (will be handled by checkout.session.completed)
+            charge = event['data']['object']
+            current_app.logger.debug(f'Charge succeeded: {charge["id"]}')
+        
+        elif event['type'] == 'charge.updated':
+            # Log but don't process (informational only)
+            charge = event['data']['object']
+            current_app.logger.debug(f'Charge updated: {charge["id"]}')
+        
         else:
-            # Update existing donation
-            existing_donation.status = 'completed'
-            existing_donation.completed_at = datetime.utcnow()
-            if session.get('payment_intent'):
-                existing_donation.stripe_payment_intent_id = session.get('payment_intent')
-            db.session.commit()
-            current_app.logger.info(f'Donation updated: {existing_donation.id}')
+            # Log unhandled events but don't fail
+            current_app.logger.debug(f'Unhandled event type: {event["type"]}')
+        
+        return jsonify({'status': 'success'}), 200
     
-    elif event['type'] == 'payment_intent.succeeded':
-        # Additional confirmation when payment intent succeeds
-        payment_intent = event['data']['object']
-        current_app.logger.info(f'Payment intent succeeded: {payment_intent["id"]}')
-    
-    elif event['type'] == 'charge.refunded':
-        # Handle refunds
-        charge = event['data']['object']
-        from app.models import Donation
-        donation = Donation.query.filter_by(stripe_payment_intent_id=charge.get('payment_intent')).first()
-        if donation:
-            donation.status = 'refunded'
-            db.session.commit()
-            current_app.logger.info(f'Donation refunded: {donation.id}')
-    
-    return jsonify({'status': 'success'}), 200
+    except Exception as e:
+        current_app.logger.error(f'Error processing webhook event {event_type}: {str(e)}', exc_info=True)
+        db.session.rollback()
+        # Still return 200 to prevent Stripe from retrying excessively, but log the error
+        return jsonify({'status': 'error', 'message': str(e)}), 200
 

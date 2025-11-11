@@ -658,7 +658,7 @@ msgid "Basura"
 msgstr "Brossa"
 
 msgid "Nido"
-msgstr "Ni"
+msgstr "Niu"
 
 msgid "Excremento"
 msgstr "Excrement"

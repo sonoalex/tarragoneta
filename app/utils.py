@@ -67,6 +67,32 @@ def get_category_name(category_key):
     }
     return category_names.get(category_key, category_key)
 
+def get_inventory_category_name(category, subcategory=None):
+    """Get translated inventory category and subcategory names"""
+    from flask_babel import gettext as _
+    
+    # Main categories
+    main_categories = {
+        'palomas': _('Palomas'),
+        'basura': _('Basura')
+    }
+    
+    # Subcategories
+    subcategories = {
+        'excremento': _('Excremento'),
+        'nido': _('Nido'),
+        'plumas': _('Plumas'),
+        'basura_desborda': _('Basura Desbordada'),
+        'vertidos': _('Vertidos'),
+        'otro': _('Otro')
+    }
+    
+    main_name = main_categories.get(category, category)
+    if subcategory:
+        sub_name = subcategories.get(subcategory, subcategory)
+        return f"{main_name} → {sub_name}"
+    return main_name
+
 def generate_slug(title):
     """Generate a URL-friendly slug from title"""
     if not title:

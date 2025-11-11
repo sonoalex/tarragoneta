@@ -8,7 +8,7 @@ import os
 from app.models import InventoryItem, InventoryVote
 from app.extensions import db
 from app.forms import InventoryForm
-from app.utils import sanitize_html, allowed_file, optimize_image
+from app.utils import sanitize_html, allowed_file, optimize_image, get_inventory_category_name
 # Config.UPLOAD_FOLDER removed - using current_app.config['UPLOAD_FOLDER'] instead
 
 bp = Blueprint('inventory', __name__, url_prefix='/inventory')
@@ -163,7 +163,7 @@ def api_items():
             'id': item.id,
             'category': item.category,
             'subcategory': item.subcategory,
-            'full_category': item.full_category,
+            'full_category': get_inventory_category_name(item.category, item.subcategory),
             'description': item.description,
             'latitude': item.latitude,
             'longitude': item.longitude,
@@ -231,7 +231,7 @@ def api_pending_items():
             'id': item.id,
             'category': item.category,
             'subcategory': item.subcategory,
-            'full_category': item.full_category,
+            'full_category': get_inventory_category_name(item.category, item.subcategory),
             'description': item.description,
             'latitude': item.latitude,
             'longitude': item.longitude,
