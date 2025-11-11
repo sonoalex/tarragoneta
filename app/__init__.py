@@ -50,7 +50,7 @@ def create_app(config_name=None):
     
     # Hook to save username on registration
     @user_registered.connect_via(app)
-    def on_user_registered(sender, user, confirm_token, form_data):
+    def on_user_registered(sender, user, confirmation_token, form_data):
         """Save username when user registers"""
         if 'username' in form_data:
             user.username = form_data['username']
