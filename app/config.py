@@ -83,6 +83,11 @@ class Config:
     # ADMIN_EMAIL is already defined above for notifications
     ADMIN_USER_EMAIL = os.environ.get('ADMIN_USER_EMAIL', 'admin@tarragoneta.org')  # Email for admin user account
     ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', None)  # Must be set in production, defaults to None for security
+    
+    # Redis configuration for background jobs (email queue)
+    REDIS_URL = os.environ.get('REDIS_URL', os.environ.get('REDISCLOUD_URL', 'redis://localhost:6379/0'))
+    # Use background jobs for emails (set to False to send synchronously)
+    USE_EMAIL_QUEUE = os.environ.get('USE_EMAIL_QUEUE', 'True').lower() in ('true', '1', 'yes')
 
 class DevelopmentConfig(Config):
     """Development configuration"""

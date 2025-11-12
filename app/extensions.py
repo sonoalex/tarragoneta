@@ -13,6 +13,10 @@ babel = Babel()
 security = Security()
 mail = Mail()
 
+# Redis and RQ queue (initialized in init_extensions)
+redis_conn = None
+email_queue = None
+
 # Will be set after models are imported
 user_datastore = None
 
@@ -54,6 +58,23 @@ def init_extensions(app):
     
     # Initialize Flask-Mail
     mail.init_app(app)
+    
+    # Initialize Redis and RQ queue for background jobs
+    global redis_conn, email_queue
+    try:
+        from redis import Redis
+        from rq import Queue
+        
+        redis_url = app.config.get('REDIS_URL', 'redis://localhost:6379/0')
+        redis_conn = Redis.from_url(redis_url, decode_responses=True)
+        # Test connection
+        redis_conn.ping()
+        email_queue = Queue('emails', connection=redis_conn)
+        app.logger.info('Redis and email queue initialized successfully')
+    except Exception as e:
+        app.logger.warning(f'Redis not available, emails will be sent synchronously: {str(e)}')
+        redis_conn = None
+        email_queue = None
     
     # Initialize Flask-Security (needs models)
     from app.models import User, Role
