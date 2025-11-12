@@ -48,7 +48,7 @@ def init_database():
                 print("   Set ADMIN_PASSWORD environment variable for security.")
             
             admin_user = user_datastore.create_user(
-                email=app.config.get('ADMIN_EMAIL', 'admin@tarragoneta.org'),
+                email=app.config.get('ADMIN_USER_EMAIL', 'admin@tarragoneta.org'),
                 username='admin',
                 password=admin_password,
                 active=True,

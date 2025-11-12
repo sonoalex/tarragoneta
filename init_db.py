@@ -69,7 +69,7 @@ def init_database():
             print("✓ Roles creados")
         
         # Crear usuario admin si no existe
-        admin_email = app.config.get('ADMIN_EMAIL', 'admin@tarragoneta.org')
+        admin_email = app.config.get('ADMIN_USER_EMAIL', 'admin@tarragoneta.org')
         admin_password = app.config.get('ADMIN_PASSWORD')
         
         admin_user = User.query.filter_by(email=admin_email).first()

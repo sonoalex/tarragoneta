@@ -39,7 +39,7 @@ def init_db_command():
     
     # Create admin user if it doesn't exist
     from flask import current_app
-    admin_email = current_app.config.get('ADMIN_EMAIL', 'admin@tarragoneta.org')
+    admin_email = current_app.config.get('ADMIN_USER_EMAIL', 'admin@tarragoneta.org')
     admin_password = current_app.config.get('ADMIN_PASSWORD')
     
     admin_user = User.query.filter_by(email=admin_email).first()
