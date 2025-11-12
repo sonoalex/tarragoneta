@@ -16,18 +16,26 @@ def run_worker():
     redis_url = os.environ.get('REDIS_URL', os.environ.get('REDISCLOUD_URL', 'redis://localhost:6379/0'))
     
     with app.app_context():
-        redis_conn = Redis.from_url(redis_url, decode_responses=True)
-        queue = Queue('emails', connection=redis_conn)
-        
-        print("🚀 Starting RQ worker for email queue...")
-        print(f"📧 Listening on queue: emails")
-        print(f"🔗 Redis: {redis_url.split('@')[-1] if '@' in redis_url else redis_url}")
-        print("")
-        print("Press Ctrl+C to stop the worker")
-        print("")
-        
-        worker = Worker([queue], connection=redis_conn)
-        worker.work()
+        try:
+            redis_conn = Redis.from_url(redis_url, decode_responses=True)
+            # Test connection
+            redis_conn.ping()
+            queue = Queue('emails', connection=redis_conn)
+            
+            print("🚀 Starting RQ worker for email queue...")
+            print(f"📧 Listening on queue: emails")
+            print(f"🔗 Redis: {redis_url.split('@')[-1] if '@' in redis_url else redis_url}")
+            print("")
+            print("Press Ctrl+C to stop the worker")
+            print("")
+            
+            worker = Worker([queue], connection=redis_conn)
+            worker.work()
+        except Exception as e:
+            print(f"❌ Error connecting to Redis: {str(e)}")
+            print("   Make sure Redis is running and REDIS_URL is configured correctly")
+            import sys
+            sys.exit(1)
 
 if __name__ == '__main__':
     run_worker()
