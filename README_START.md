@@ -55,7 +55,7 @@ flask run --host=0.0.0.0 --port=5000 --debug
 ## Credenciales por Defecto
 
 - **Email**: `admin@tarragoneta.org`
-- **Password**: `admin123`
+- **Password**: `admin123` (solo desarrollo - **cambiar en producción**)
 
 ## Solución de Problemas
 

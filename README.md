@@ -143,7 +143,7 @@ pip install -r requirements.txt
 ### Credenciales por Defecto
 
 - **Usuario Admin**: admin@tarragoneta.org
-- **Contraseña**: admin123
+- **Contraseña**: admin123 (solo desarrollo - **cambiar en producción**)
 
 ⚠️ **Importante**: Cambiar estas credenciales en producción
 

@@ -165,7 +165,7 @@ def seed_all():
         print("  - View inventory map at: http://127.0.0.1:5000/inventory/map")
         print("  - Admin dashboard: http://127.0.0.1:5000/admin/dashboard")
         print("  - User management: http://127.0.0.1:5000/admin/users")
-        print("  - Admin login: admin@tarragoneta.org / admin123")
+        print("  - Admin login: admin@tarragoneta.org / admin123 (desarrollo - cambiar en producción)")
         print("  - Test users: user1@test.com / test123, etc.")
 
 if __name__ == '__main__':

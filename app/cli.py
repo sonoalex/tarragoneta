@@ -38,38 +38,51 @@ def init_db_command():
         print("✓ Roles created")
     
     # Create admin user if it doesn't exist
-    admin_user = User.query.filter_by(email='admin@tarragoneta.org').first()
+    from flask import current_app
+    admin_email = current_app.config.get('ADMIN_EMAIL', 'admin@tarragoneta.org')
+    admin_password = current_app.config.get('ADMIN_PASSWORD')
+    
+    admin_user = User.query.filter_by(email=admin_email).first()
     if not admin_user:
+        if not admin_password:
+            # Solo en desarrollo: usar password por defecto
+            if current_app.config.get('ENV') == 'development':
+                admin_password = 'admin123'
+                print("Creating admin user (development)...")
+            else:
+                print("⚠️  ADMIN_PASSWORD not configured. Skipping admin user creation.")
+                print("   Set ADMIN_PASSWORD environment variable for production.")
+                return
+        
         print("Creating admin user...")
         admin_role = Role.query.filter_by(name='admin').first()
         if admin_role:
             # Use user_datastore.create_user - Flask-Security handles password hashing
             admin_user = user_datastore.create_user(
-                email='admin@tarragoneta.org',
+                email=admin_email,
                 username='admin',
-                password='admin123',  # Flask-Security hashes this automatically
+                password=admin_password,
                 active=True,
                 confirmed_at=datetime.now(),
                 roles=[admin_role]
             )
             db.session.commit()
             print("✓ Admin user created")
-            print("  Email: admin@tarragoneta.org")
-            print("  Password: admin123")
+            if current_app.config.get('ENV') == 'development':
+                print(f"  Email: {admin_email}")
+                print(f"  Password: {admin_password} (change after first login!)")
         else:
             print("✗ Admin role not found. Please create roles first.")
     else:
-        # Ensure admin is active and password is correct
-        print("Admin user exists. Verifying password...")
-        if not verify_password('admin123', admin_user.password):
-            print("  Password hash invalid. Regenerating...")
-            admin_user.password = hash_password('admin123')
+        # Ensure admin is active (don't reset password if user exists)
+        print("Admin user exists. Verifying status...")
+        if not admin_user.active:
             admin_user.active = True
             admin_user.confirmed_at = datetime.now()
             db.session.commit()
-            print("  ✓ Password regenerated")
+            print("  ✓ Admin user activated")
         else:
-            print("  ✓ Password is valid")
+            print("  ✓ Admin user is active")
     
     print("Database initialized successfully!")
 

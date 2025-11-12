@@ -69,22 +69,40 @@ def init_database():
             print("✓ Roles creados")
         
         # Crear usuario admin si no existe
-        admin_user = User.query.filter_by(email='admin@tarragoneta.org').first()
+        admin_email = app.config.get('ADMIN_EMAIL', 'admin@tarragoneta.org')
+        admin_password = app.config.get('ADMIN_PASSWORD')
+        
+        admin_user = User.query.filter_by(email=admin_email).first()
         if not admin_user:
+            if not admin_password:
+                # Solo en desarrollo: usar password por defecto si no está configurado
+                import secrets
+                if app.config.get('ENV') == 'development':
+                    admin_password = 'admin123'  # Solo para desarrollo local
+                    print("👤 Creando usuario admin (desarrollo)...")
+                    print("⚠️  Usando contraseña por defecto. Cambia la contraseña después del primer login!")
+                else:
+                    print("⚠️  ADMIN_PASSWORD no configurado. No se creará usuario admin.")
+                    print("   Configura ADMIN_PASSWORD en variables de entorno para producción.")
+                    return
+            
             print("👤 Creando usuario admin...")
             from app.extensions import user_datastore
             admin_role = Role.query.filter_by(name='admin').first()
             
             admin_user = user_datastore.create_user(
-                email='admin@tarragoneta.org',
+                email=admin_email,
                 username='admin',
-                password='admin123',
+                password=admin_password,
                 active=True,
                 confirmed_at=datetime.now(),
                 roles=[admin_role]
             )
             db.session.commit()
             print("✓ Usuario admin creado")
+            if app.config.get('ENV') == 'development':
+                print(f"   Email: {admin_email}")
+                print(f"   Password: {admin_password}")
         
         print("✅ Base de datos inicializada!")
 

@@ -78,6 +78,10 @@ class Config:
     
     # Inventory auto-resolve settings
     INVENTORY_AUTO_RESOLVE_THRESHOLD = int(os.environ.get('INVENTORY_AUTO_RESOLVE_THRESHOLD', '3'))  # Minimum "ya no está" reports to auto-resolve
+    
+    # Admin user configuration (for initial setup only)
+    ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@tarragoneta.org')
+    ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', None)  # Must be set in production, defaults to None for security
 
 class DevelopmentConfig(Config):
     """Development configuration"""

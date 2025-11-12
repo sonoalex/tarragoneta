@@ -41,10 +41,16 @@ def init_database():
             admin_role = Role.query.filter_by(name='admin').first()
             
             # Create admin user
+            # Get admin password from config or use default for development
+            admin_password = app.config.get('ADMIN_PASSWORD', 'admin123')
+            if app.config.get('ENV') == 'production' and admin_password == 'admin123':
+                print("⚠️  WARNING: Using default admin password in production!")
+                print("   Set ADMIN_PASSWORD environment variable for security.")
+            
             admin_user = user_datastore.create_user(
-                email='admin@tarragoneta.org',
+                email=app.config.get('ADMIN_EMAIL', 'admin@tarragoneta.org'),
                 username='admin',
-                password=hash_password('admin123'),
+                password=admin_password,
                 active=True,
                 confirmed_at=datetime.now(),
                 roles=[admin_role]
@@ -52,8 +58,9 @@ def init_database():
             
             db.session.commit()
             print("✓ Admin user created")
-            print("  Email: admin@tarragoneta.org")
-            print("  Password: admin123")
+            print(f"  Email: {admin_user.email}")
+            if app.config.get('ENV') == 'development':
+                print(f"  Password: {admin_password}")
             print("  ⚠️  Please change the password after first login!")
         
         # Create sample initiatives if none exist
