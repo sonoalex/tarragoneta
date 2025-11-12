@@ -140,7 +140,7 @@ def api_items():
     category = request.args.get('category')
     subcategory = request.args.get('subcategory')
     
-    # Only return approved or active items
+    # Only return approved or active items (not resolved)
     query = InventoryItem.query.filter(
         InventoryItem.status.in_(['approved', 'active'])
     )
@@ -159,6 +159,10 @@ def api_items():
         has_voted = item.has_user_voted(user_id) if user_id else False
         # Ensure importance_count is never None
         importance_count = item.importance_count if item.importance_count is not None else 0
+        # Check if user has reported "ya no está"
+        has_resolved = item.has_user_resolved(user_id) if user_id else False
+        resolved_count = item.resolved_count if item.resolved_count is not None else 0
+        
         items_data.append({
             'id': item.id,
             'category': item.category,
@@ -171,6 +175,8 @@ def api_items():
             'image_path': item.image_path,
             'importance_count': importance_count,
             'has_voted': has_voted,
+            'resolved_count': resolved_count,
+            'has_resolved': has_resolved,
             'created_at': item.created_at.isoformat() if item.created_at else None
         })
     
@@ -191,6 +197,17 @@ def vote_item(item_id):
     if item.has_user_voted(current_user.id):
         return jsonify({'error': _('Ya has votado este item')}), 400
     
+    # If user has reported "ya no está", remove that report first (mutually exclusive)
+    if item.has_user_resolved(current_user.id):
+        resolved_report = item.resolved_by.filter_by(user_id=current_user.id).first()
+        if resolved_report:
+            db.session.delete(resolved_report)
+            # Decrement resolved count
+            if item.resolved_count and item.resolved_count > 0:
+                item.resolved_count -= 1
+            else:
+                item.resolved_count = 0
+    
     # Create vote
     vote = InventoryVote(item_id=item.id, user_id=current_user.id)
     db.session.add(vote)
@@ -206,7 +223,66 @@ def vote_item(item_id):
     return jsonify({
         'success': True,
         'importance_count': item.importance_count,
+        'resolved_count': item.resolved_count if item.resolved_count is not None else 0,
+        'has_resolved': False,  # Now false since we removed it
         'message': _('Voto registrado correctamente')
+    })
+
+@bp.route('/<int:item_id>/resolve', methods=['POST'])
+@login_required
+def resolve_item(item_id):
+    """Reportar que un item "ya no está" (resuelto)"""
+    from app.extensions import csrf
+    from app.models import InventoryResolved
+    
+    item = InventoryItem.query.get_or_404(item_id)
+    
+    # Check if user has already reported "ya no está"
+    if item.has_user_resolved(current_user.id):
+        return jsonify({'error': _('Ya has reportado que este item ya no está')}), 400
+    
+    # Don't allow resolving if item is already resolved
+    if item.status == 'resolved':
+        return jsonify({'error': _('Este item ya está marcado como resuelto')}), 400
+    
+    # If user has voted "encara hi és", remove that vote first (mutually exclusive)
+    if item.has_user_voted(current_user.id):
+        vote = item.voters.filter_by(user_id=current_user.id).first()
+        if vote:
+            db.session.delete(vote)
+            # Decrement importance count
+            if item.importance_count and item.importance_count > 0:
+                item.importance_count -= 1
+            else:
+                item.importance_count = 0
+    
+    # Create resolved report
+    resolved = InventoryResolved(item_id=item.id, user_id=current_user.id)
+    db.session.add(resolved)
+    
+    # Increment resolved count
+    if item.resolved_count is None:
+        item.resolved_count = 0
+    item.resolved_count += 1
+    
+    # Check if we should auto-resolve (minimum threshold reached)
+    auto_resolve_threshold = current_app.config.get('INVENTORY_AUTO_RESOLVE_THRESHOLD', 3)
+    if item.resolved_count >= auto_resolve_threshold and item.status in ['approved', 'active']:
+        item.status = 'resolved'
+        current_app.logger.info(f'Item {item.id} auto-resolved after {item.resolved_count} "ya no está" reports')
+    
+    db.session.commit()
+    
+    current_app.logger.info(f'User {current_user.id} reported item {item.id} as resolved (count: {item.resolved_count})')
+    
+    return jsonify({
+        'success': True,
+        'resolved_count': item.resolved_count,
+        'importance_count': item.importance_count if item.importance_count is not None else 0,
+        'has_voted': False,  # Now false since we removed it
+        'status': item.status,
+        'auto_resolved': item.status == 'resolved',
+        'message': _('Reporte registrado correctamente') if item.status != 'resolved' else _('Item marcado como resuelto automáticamente')
     })
 
 @bp.route('/admin/pending-map')
@@ -298,8 +374,8 @@ def admin_inventory():
 @bp.route('/admin/<int:id>/resolve', methods=['POST'])
 @login_required
 @roles_required('admin')
-def resolve_item(id):
-    """Marcar item como resuelto"""
+def admin_resolve_item(id):
+    """Marcar item como resuelto (admin)"""
     item = InventoryItem.query.get_or_404(id)
     item.status = 'resolved'
     item.updated_at = datetime.now()

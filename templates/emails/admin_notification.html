@@ -1,0 +1,46 @@
+{% extends "emails/base.html" %}
+
+{% block content %}
+<h2>{{ _('Notificació de Tarragoneta') }}</h2>
+
+<p>{{ _('Hola administrador/a,') }}</p>
+
+<p>{{ _('Tens una nova notificació a la plataforma:') }}</p>
+
+<div class="highlight-box">
+    <p><strong>{{ _('Tipus') }}:</strong> {{ notification_type }}</p>
+    {% if data %}
+    <div style="margin-top: 15px;">
+        {% if data.name %}
+        <p><strong>{{ _('Nom') }}:</strong> {{ data.name }}</p>
+        {% endif %}
+        {% if data.email %}
+        <p><strong>{{ _('Email') }}:</strong> <a href="mailto:{{ data.email }}">{{ data.email }}</a></p>
+        {% endif %}
+        {% if data.subject %}
+        <p><strong>{{ _('Assumpte') }}:</strong> {{ data.subject }}</p>
+        {% endif %}
+        {% if data.message %}
+        <p><strong>{{ _('Missatge') }}:</strong></p>
+        <div style="background-color: #FFFFFF; padding: 15px; border-radius: 8px; margin-top: 10px; white-space: pre-wrap;">{{ data.message }}</div>
+        {% endif %}
+        {% if data.phone %}
+        <p><strong>{{ _('Telèfon') }}:</strong> {{ data.phone }}</p>
+        {% endif %}
+        {% for key, value in data.items() %}
+            {% if key not in ['name', 'email', 'subject', 'message', 'phone'] %}
+            <p><strong>{{ key }}:</strong> {{ value }}</p>
+            {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ url_for('admin.admin_dashboard', _external=True) }}" class="button">{{ _('Veure panell d\'administració') }}</a>
+</div>
+
+<p>{{ _('Gràcies!') }}<br>
+<strong>L'equip de Tarragoneta</strong></p>
+{% endblock %}
+

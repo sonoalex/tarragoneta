@@ -25,11 +25,16 @@
                         <h1 class="h3 fw-bold mb-4">{{ _('Reportar nou item al inventari') }}</h1>
                         
                         <div class="map-instructions">
-                            <p class="mb-0">
-                                <i class="fas fa-info-circle me-2"></i>
-                                <strong>{{ _('Instruccions') }}:</strong> 
-                                {{ _('Fes clic al mapa per seleccionar la ubicació exacta del problema') }}
-                            </p>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <p class="mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>{{ _('Instruccions') }}:</strong> 
+                                    {{ _('Fes clic al mapa o usa la teva ubicació actual') }}
+                                </p>
+                                <button type="button" class="btn btn-sm btn-primary" id="use-current-location-btn">
+                                    <i class="fas fa-crosshairs me-1"></i>{{ _('Usar ubicació actual') }}
+                                </button>
+                            </div>
                         </div>
                         
                         <div id="map"></div>
@@ -72,9 +77,23 @@
                             
                             <!-- Image -->
                             <div class="mb-4">
-                                <label for="image" class="form-label fw-bold">{{ _('Foto') }}</label>
-                                {{ form.image(class="form-control", id="image", accept="image/*") }}
-                                <small class="text-muted">{{ _('Formatos aceptados: JPG, PNG, GIF. La imagen será optimizada automáticamente.') }}</small>
+                                <label class="form-label fw-bold">{{ _('Foto') }}</label>
+                                <div class="d-flex gap-2 mb-2">
+                                    <button type="button" class="btn btn-outline-primary flex-fill" id="camera-btn">
+                                        <i class="fas fa-camera me-2"></i>{{ _('Fer foto ara') }}
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary flex-fill" id="upload-btn">
+                                        <i class="fas fa-upload me-2"></i>{{ _('Pujar foto') }}
+                                    </button>
+                                </div>
+                                {{ form.image(class="form-control d-none", id="image", accept="image/*") }}
+                                <div id="image-preview" class="mt-3" style="display: none;">
+                                    <img id="preview-img" src="" alt="Preview" style="max-width: 100%; max-height: 300px; border-radius: 8px; border: 2px solid var(--border-color);">
+                                    <button type="button" class="btn btn-sm btn-outline-danger mt-2" id="remove-image-btn">
+                                        <i class="fas fa-times me-1"></i>{{ _('Eliminar foto') }}
+                                    </button>
+                                </div>
+                                <small class="text-muted d-block mt-2">{{ _('Formatos aceptados: JPG, PNG, GIF. La imagen será optimizada automáticamente.') }}</small>
                                 {% if form.image.errors %}
                                     <div class="text-danger small">{{ form.image.errors[0] }}</div>
                                 {% endif %}
@@ -119,11 +138,8 @@
             maxZoom: 19
         }).addTo(map);
         
-        // Click handler
-        map.on('click', function(e) {
-            var lat = e.latlng.lat;
-            var lng = e.latlng.lng;
-            
+        // Function to set location and update UI
+        function setLocation(lat, lng) {
             // Update hidden inputs
             document.getElementById('latitude').value = lat;
             document.getElementById('longitude').value = lng;
@@ -136,6 +152,9 @@
             // Add new marker
             marker = L.marker([lat, lng]).addTo(map);
             marker.bindPopup('{{ _("Ubicació seleccionada") }}').openPopup();
+            
+            // Center map on location
+            map.setView([lat, lng], 16);
             
             // Geocode to get address
             fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`, {
@@ -157,6 +176,64 @@
                 document.getElementById('location-display').style.display = 'block';
                 document.getElementById('submit-btn').disabled = false;
             });
+        }
+        
+        // Click handler - mark location on map
+        map.on('click', function(e) {
+            setLocation(e.latlng.lat, e.latlng.lng);
+        });
+        
+        // Use current location button
+        var useCurrentLocationBtn = document.getElementById('use-current-location-btn');
+        useCurrentLocationBtn.addEventListener('click', function() {
+            if (!navigator.geolocation) {
+                alert('{{ _("La geolocalización no está disponible en tu navegador") }}');
+                return;
+            }
+            
+            // Show loading state
+            var originalText = useCurrentLocationBtn.innerHTML;
+            useCurrentLocationBtn.disabled = true;
+            useCurrentLocationBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ _("Obtenint ubicació...") }}';
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    var lat = position.coords.latitude;
+                    var lng = position.coords.longitude;
+                    
+                    // Validate coordinates (Tarragona area approximately)
+                    if (40.5 <= lat && lat <= 41.5 && 0.5 <= lng && lng <= 2.0) {
+                        setLocation(lat, lng);
+                    } else {
+                        alert('{{ _("Tu ubicación está fuera del área de Tarragona. Por favor, marca la ubicación en el mapa.") }}');
+                    }
+                    
+                    // Restore button
+                    useCurrentLocationBtn.disabled = false;
+                    useCurrentLocationBtn.innerHTML = originalText;
+                },
+                function(error) {
+                    console.error('Error getting location:', error);
+                    var errorMsg = '{{ _("Error al obtener la ubicación") }}';
+                    if (error.code === error.PERMISSION_DENIED) {
+                        errorMsg = '{{ _("Permiso de ubicación denegado. Por favor, marca la ubicación en el mapa.") }}';
+                    } else if (error.code === error.POSITION_UNAVAILABLE) {
+                        errorMsg = '{{ _("Ubicación no disponible. Por favor, marca la ubicación en el mapa.") }}';
+                    } else if (error.code === error.TIMEOUT) {
+                        errorMsg = '{{ _("Tiempo de espera agotado. Por favor, marca la ubicación en el mapa.") }}';
+                    }
+                    alert(errorMsg);
+                    
+                    // Restore button
+                    useCurrentLocationBtn.disabled = false;
+                    useCurrentLocationBtn.innerHTML = originalText;
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
         });
         
         // Category and subcategory handling
@@ -202,6 +279,182 @@
         if (initialCategory) {
             loadSubcategories(initialCategory);
         }
+        
+        // Image handling - Camera and Upload buttons
+        var imageInput = document.getElementById('image');
+        var cameraBtn = document.getElementById('camera-btn');
+        var uploadBtn = document.getElementById('upload-btn');
+        var imagePreview = document.getElementById('image-preview');
+        var previewImg = document.getElementById('preview-img');
+        var removeImageBtn = document.getElementById('remove-image-btn');
+        
+        // Camera button - open camera directly
+        cameraBtn.addEventListener('click', function() {
+            // Check if getUserMedia is available
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                // Open camera directly
+                navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'environment' // Use back camera on mobile
+                    } 
+                })
+                .then(function(stream) {
+                    // Create camera preview modal
+                    showCameraModal(stream);
+                })
+                .catch(function(error) {
+                    console.error('Error accessing camera:', error);
+                    // Fallback to file input with capture
+                    var input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.capture = 'environment';
+                    input.style.display = 'none';
+                    input.addEventListener('change', function(e) {
+                        if (e.target.files && e.target.files[0]) {
+                            handleImageSelection(e.target.files[0]);
+                        }
+                    });
+                    document.body.appendChild(input);
+                    input.click();
+                    document.body.removeChild(input);
+                });
+            } else {
+                // Fallback for browsers without getUserMedia
+                var input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.capture = 'environment';
+                input.style.display = 'none';
+                input.addEventListener('change', function(e) {
+                    if (e.target.files && e.target.files[0]) {
+                        handleImageSelection(e.target.files[0]);
+                    }
+                });
+                document.body.appendChild(input);
+                input.click();
+                document.body.removeChild(input);
+            }
+        });
+        
+        // Function to show camera modal
+        function showCameraModal(stream) {
+            // Create modal
+            var modal = document.createElement('div');
+            modal.className = 'modal fade show';
+            modal.style.display = 'block';
+            modal.style.backgroundColor = 'rgba(0,0,0,0.8)';
+            modal.innerHTML = `
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">{{ _('Fer foto') }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body text-center p-0">
+                            <video id="camera-preview" autoplay playsinline style="width: 100%; max-height: 500px; background: #000;"></video>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <button type="button" class="btn btn-danger" id="cancel-camera-btn">
+                                <i class="fas fa-times me-2"></i>{{ _('Cancel·lar') }}
+                            </button>
+                            <button type="button" class="btn btn-primary btn-lg" id="capture-btn" style="border-radius: 50px; width: 70px; height: 70px;">
+                                <i class="fas fa-camera fa-2x"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            var video = modal.querySelector('#camera-preview');
+            video.srcObject = stream;
+            var cameraStream = stream;
+            
+            // Capture button
+            modal.querySelector('#capture-btn').addEventListener('click', function() {
+                // Create canvas to capture frame
+                var canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                var ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0);
+                
+                // Convert to blob
+                canvas.toBlob(function(blob) {
+                    // Stop camera stream
+                    cameraStream.getTracks().forEach(track => track.stop());
+                    
+                    // Create file from blob
+                    var file = new File([blob], 'camera-photo.jpg', { type: 'image/jpeg' });
+                    handleImageSelection(file);
+                    
+                    // Remove modal
+                    modal.remove();
+                }, 'image/jpeg', 0.9);
+            });
+            
+            // Cancel button
+            modal.querySelector('#cancel-camera-btn').addEventListener('click', function() {
+                cameraStream.getTracks().forEach(track => track.stop());
+                modal.remove();
+            });
+            
+            // Close on backdrop click
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    cameraStream.getTracks().forEach(track => track.stop());
+                    modal.remove();
+                }
+            });
+        }
+        
+        // Upload button - select from files
+        uploadBtn.addEventListener('click', function() {
+            imageInput.click();
+        });
+        
+        // Handle file selection from upload button
+        imageInput.addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                handleImageSelection(e.target.files[0]);
+            }
+        });
+        
+        // Function to handle image selection and preview
+        function handleImageSelection(file) {
+            // Validate file type
+            if (!file.type.match('image.*')) {
+                alert('{{ _("Por favor, selecciona un archivo de imagen válido") }}');
+                return;
+            }
+            
+            // Validate file size (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('{{ _("La imagen es demasiado grande. Máximo 10MB") }}');
+                return;
+            }
+            
+            // Set file to the hidden input
+            var dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            imageInput.files = dataTransfer.files;
+            
+            // Show preview
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                imagePreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // Remove image button
+        removeImageBtn.addEventListener('click', function() {
+            imageInput.value = '';
+            imagePreview.style.display = 'none';
+            previewImg.src = '';
+        });
         
         // Form validation and enable subcategory before submit
         var form = document.querySelector('form');

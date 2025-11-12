@@ -293,6 +293,13 @@ def approve_initiative(id):
     initiative.status = 'approved'
     db.session.commit()
     
+    # Send approval email
+    try:
+        from app.services.email_service import EmailService
+        EmailService.send_initiative_approved(initiative, initiative.creator)
+    except Exception as e:
+        current_app.logger.error(f'Error sending initiative approval email: {str(e)}', exc_info=True)
+    
     current_app.logger.info(f'{current_user.id} approved initiative {id}')
     flash(_('Iniciativa aprobada correctamente'), 'success')
     return redirect(url_for('admin.pending_initiatives', page=request.args.get('page', 1)))
@@ -309,7 +316,15 @@ def reject_initiative(id):
         return redirect(url_for('admin.pending_initiatives'))
     
     initiative.status = 'rejected'
+    reason = request.form.get('reason', None)
     db.session.commit()
+    
+    # Send rejection email
+    try:
+        from app.services.email_service import EmailService
+        EmailService.send_initiative_rejected(initiative, initiative.creator, reason)
+    except Exception as e:
+        current_app.logger.error(f'Error sending initiative rejection email: {str(e)}', exc_info=True)
     
     current_app.logger.info(f'{current_user.id} rejected initiative {id}')
     flash(_('Iniciativa rechazada'), 'info')
@@ -403,6 +418,14 @@ def approve_item(id):
     item.updated_at = datetime.utcnow()
     db.session.commit()
     
+    # Send approval email if reporter exists
+    if item.reporter:
+        try:
+            from app.services.email_service import EmailService
+            EmailService.send_inventory_item_approved(item, item.reporter.email)
+        except Exception as e:
+            current_app.logger.error(f'Error sending inventory approval email: {str(e)}', exc_info=True)
+    
     current_app.logger.info(f'Admin {current_user.id} approved inventory item {item.id}')
     flash(_('Item aprobado correctamente'), 'success')
     # Redirect back to pending page with pagination (from form data or args)
@@ -423,7 +446,16 @@ def reject_item(id):
     
     item.status = 'rejected'
     item.updated_at = datetime.utcnow()
+    reason = request.form.get('reason', None)
     db.session.commit()
+    
+    # Send rejection email if reporter exists
+    if item.reporter:
+        try:
+            from app.services.email_service import EmailService
+            EmailService.send_inventory_item_rejected(item, item.reporter.email, reason)
+        except Exception as e:
+            current_app.logger.error(f'Error sending inventory rejection email: {str(e)}', exc_info=True)
     
     current_app.logger.info(f'Admin {current_user.id} rejected inventory item {item.id}')
     flash(_('Item rechazado'), 'info')

@@ -72,7 +72,7 @@
                         {% set sub_cat = parts[1] if parts|length > 1 else '' %}
                         <span class="badge bg-secondary me-2 mb-2" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
                             {% if sub_cat == 'excremento' %}💩{% elif sub_cat == 'nido' %}🪺{% elif sub_cat == 'plumas' %}🪶{% elif sub_cat == 'basura_desborda' %}🗑️{% elif sub_cat == 'vertidos' %}💧{% else %}📌{% endif %}
-                            {{ cat_key }}: {{ count }}
+                            {{ get_inventory_category_name(main_cat, sub_cat) }}: {{ count }}
                         </span>
                         {% endfor %}
                     </div>
@@ -303,24 +303,51 @@
             .then(items => {
                 items.forEach(function(item) {
                     var voteButton = '';
+                    var resolveButton = '';
                     var isAuthenticated = {{ 'true' if current_user.is_authenticated else 'false' }};
                     
                     if (isAuthenticated) {
+                        // Vote button (Encara hi és) - disabled if user has reported "ya no está"
                         if (item.has_voted) {
                             voteButton = `
-                                <div class="mt-2 pt-2 border-top">
-                                    <button class="btn btn-sm btn-outline-secondary w-100" disabled>
-                                        <i class="fas fa-check me-1"></i>{{ _('Ja has votat') }}
-                                    </button>
-                                </div>
+                                <button class="btn btn-sm btn-primary flex-fill vote-btn" disabled>
+                                    +1
+                                </button>
+                            `;
+                        } else if (item.has_resolved) {
+                            // User has reported "ya no está", so voting is disabled
+                            voteButton = `
+                                <button class="btn btn-sm btn-outline-primary flex-fill" disabled>
+                                    +1
+                                </button>
                             `;
                         } else {
                             voteButton = `
-                                <div class="mt-2 pt-2 border-top">
-                                    <button class="btn btn-sm btn-primary w-100 vote-btn" data-item-id="${item.id}">
-                                        <i class="fas fa-thumbs-up me-1"></i>{{ _('Confirmar importància') }}
-                                    </button>
-                                </div>
+                                <button class="btn btn-sm btn-primary flex-fill vote-btn" data-item-id="${item.id}">
+                                    +1
+                                </button>
+                            `;
+                        }
+                        
+                        // Resolve button (Ya no está) - disabled if user has voted
+                        if (item.has_resolved) {
+                            resolveButton = `
+                                <button class="btn btn-sm btn-warning flex-fill resolve-btn rounded-pill" disabled>
+                                    <i class="fas fa-times-circle me-1"></i>{{ _('Ja no hi és') }}
+                                </button>
+                            `;
+                        } else if (item.has_voted) {
+                            // User has voted "encara hi és", so resolving is disabled
+                            resolveButton = `
+                                <button class="btn btn-sm btn-outline-warning flex-fill rounded-pill" disabled>
+                                    <i class="fas fa-times-circle me-1"></i>{{ _('Ja no hi és') }}
+                                </button>
+                            `;
+                        } else {
+                            resolveButton = `
+                                <button class="btn btn-sm btn-warning flex-fill resolve-btn rounded-pill" data-item-id="${item.id}">
+                                    <i class="fas fa-times-circle me-1"></i>{{ _('Ja no hi és') }}
+                                </button>
                             `;
                         }
                     }
@@ -338,7 +365,20 @@
                                 </span>
                                 <span class="small text-muted">${new Date(item.created_at).toLocaleDateString('ca-ES')}</span>
                             </div>
-                            ${voteButton}
+                            ${item.resolved_count > 0 ? `
+                                <div class="mt-2 pt-2 border-top">
+                                    <span class="small text-warning">
+                                        <i class="fas fa-times-circle me-1"></i>
+                                        <strong>${item.resolved_count}</strong> {{ _('reportat que ja no hi és') }}
+                                    </span>
+                                </div>
+                            ` : ''}
+                            ${voteButton || resolveButton ? `
+                                <div class="mt-2 pt-2 border-top d-flex gap-2">
+                                    ${voteButton}
+                                    ${resolveButton}
+                                </div>
+                            ` : ''}
                         </div>
                     `;
                     
@@ -358,7 +398,7 @@
                     map.fitBounds(group.getBounds().pad(0.1));
                 }
                 
-                // Handle vote button clicks
+                // Handle vote and resolve button clicks
                 map.on('popupopen', function(e) {
                     var popup = e.popup;
                     var content = popup.getContent();
@@ -369,6 +409,14 @@
                             btn.addEventListener('click', function() {
                                 var itemId = this.getAttribute('data-item-id');
                                 voteForItem(itemId, this);
+                            });
+                        });
+                        
+                        // Re-bind resolve buttons after popup opens
+                        document.querySelectorAll('.resolve-btn').forEach(function(btn) {
+                            btn.addEventListener('click', function() {
+                                var itemId = this.getAttribute('data-item-id');
+                                resolveItem(itemId, this);
                             });
                         });
                     }, 100);
@@ -398,16 +446,59 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Update button
+                    // Update vote button - keep it active but disabled
                     button.disabled = true;
-                    button.classList.remove('btn-primary');
-                    button.classList.add('btn-outline-secondary');
-                    button.innerHTML = '<i class="fas fa-check me-1"></i>{{ _("Ja has votat") }}';
+                    // Keep btn-primary class to show it's selected
+                    button.innerHTML = '+1';
                     
                     // Update importance count in popup
-                    var countElement = button.closest('.border-top').previousElementSibling.querySelector('strong');
+                    var popupContent = button.closest('.leaflet-popup-content');
+                    var countElement = popupContent.querySelector('.d-flex .small strong');
+                    if (!countElement) {
+                        // Try finding it in the stats section
+                        var statsSection = button.closest('.border-top').previousElementSibling;
+                        if (statsSection) {
+                            countElement = statsSection.querySelector('strong');
+                        }
+                    }
                     if (countElement) {
                         countElement.textContent = data.importance_count;
+                    }
+                    
+                    // Disable resolve button if it exists (mutually exclusive)
+                    var resolveBtn = button.closest('.d-flex').querySelector('.resolve-btn');
+                    if (resolveBtn) {
+                        resolveBtn.disabled = true;
+                        resolveBtn.classList.remove('btn-warning');
+                        resolveBtn.classList.add('btn-outline-warning');
+                        // Ensure rounded-pill class is present
+                        if (!resolveBtn.classList.contains('rounded-pill')) {
+                            resolveBtn.classList.add('rounded-pill');
+                        }
+                    }
+                    
+                    // Update resolved count if it changed
+                    if (data.resolved_count !== undefined) {
+                        var popupContent = button.closest('.leaflet-popup-content');
+                        var resolvedCountDiv = popupContent.querySelector('.resolved-count-display');
+                        if (resolvedCountDiv && data.resolved_count === 0) {
+                            resolvedCountDiv.remove();
+                        } else if (data.resolved_count > 0) {
+                            if (!resolvedCountDiv) {
+                                resolvedCountDiv = document.createElement('div');
+                                resolvedCountDiv.className = 'mt-2 pt-2 border-top resolved-count-display';
+                                var buttonsDiv = button.closest('.d-flex').closest('.border-top');
+                                if (buttonsDiv) {
+                                    buttonsDiv.parentNode.insertBefore(resolvedCountDiv, buttonsDiv);
+                                }
+                            }
+                            resolvedCountDiv.innerHTML = `
+                                <span class="small text-warning">
+                                    <i class="fas fa-times-circle me-1"></i>
+                                    <strong>${data.resolved_count}</strong> {{ _('reportat que ja no hi és') }}
+                                </span>
+                            `;
+                        }
                     }
                     
                     // Show success message
@@ -417,16 +508,11 @@
                         <i class="fas fa-check-circle me-2"></i>${data.message}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     `;
-                    button.closest('.border-top').after(alert);
-                    
-                    // Reload items to update all markers
-                    setTimeout(function() {
-                        location.reload();
-                    }, 1500);
+                    button.closest('.d-flex').closest('.border-top').after(alert);
                 } else {
                     alert(data.error || '{{ _("Error al votar") }}');
                     button.disabled = false;
-                    button.innerHTML = '<i class="fas fa-thumbs-up me-1"></i>{{ _("Confirmar importància") }}';
+                    button.innerHTML = '+1';
                 }
             })
             .catch(error => {
@@ -434,6 +520,115 @@
                 alert('{{ _("Error al votar. Intenta-ho de nou.") }}');
                 button.disabled = false;
                 button.innerHTML = '<i class="fas fa-thumbs-up me-1"></i>{{ _("Confirmar importància") }}';
+            });
+        }
+        
+        // Resolve function (ya no está)
+        function resolveItem(itemId, button) {
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ _("Processant...") }}';
+            
+            // Get CSRF token
+            var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || 
+                           document.querySelector('input[name="csrf_token"]')?.value || 
+                           '{{ csrf_token() }}';
+            
+            fetch(`{{ url_for('inventory.resolve_item', item_id=0) }}`.replace('0', itemId), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `csrf_token=${encodeURIComponent(csrfToken)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update resolve button state - keep it active but disabled
+                    button.disabled = true;
+                    // Keep btn-warning class to show it's selected
+                    // Ensure rounded-pill class is present
+                    if (!button.classList.contains('rounded-pill')) {
+                        button.classList.add('rounded-pill');
+                    }
+                    
+                    // Disable vote button if it exists (mutually exclusive)
+                    var voteBtn = button.closest('.d-flex').querySelector('.vote-btn');
+                    if (voteBtn) {
+                        voteBtn.disabled = true;
+                        voteBtn.classList.remove('btn-primary');
+                        voteBtn.classList.add('btn-outline-primary');
+                    }
+                    
+                    // Update importance count if it changed
+                    if (data.importance_count !== undefined) {
+                        var popupContent = button.closest('.leaflet-popup-content');
+                        var countElement = popupContent.querySelector('.d-flex .small strong');
+                        if (!countElement) {
+                            // Try finding it in the stats section
+                            var statsSection = button.closest('.border-top').previousElementSibling;
+                            if (statsSection) {
+                                countElement = statsSection.querySelector('strong');
+                            }
+                        }
+                        if (countElement) {
+                            countElement.textContent = data.importance_count;
+                        }
+                    }
+                    
+                    // Update resolved count in popup
+                    var popupContent = button.closest('.leaflet-popup-content');
+                    if (popupContent) {
+                        // Find or create resolved count display
+                        var resolvedCountDiv = popupContent.querySelector('.resolved-count-display');
+                        if (!resolvedCountDiv) {
+                            // Create it if it doesn't exist
+                            resolvedCountDiv = document.createElement('div');
+                            resolvedCountDiv.className = 'mt-2 pt-2 border-top resolved-count-display';
+                            var buttonsDiv = button.closest('.d-flex').closest('.border-top');
+                            if (buttonsDiv) {
+                                buttonsDiv.parentNode.insertBefore(resolvedCountDiv, buttonsDiv);
+                            }
+                        }
+                        resolvedCountDiv.innerHTML = `
+                            <span class="small text-warning">
+                                <i class="fas fa-times-circle me-1"></i>
+                                <strong>${data.resolved_count}</strong> {{ _('reportat que ja no hi és') }}
+                            </span>
+                        `;
+                    }
+                    
+                    // If auto-resolved, show message and reload items
+                    if (data.auto_resolved) {
+                        setTimeout(function() {
+                            alert('{{ _("Aquest item s\'ha tancat automàticament després de múltiples confirmacions que ja no hi és.") }}');
+                            // Reload items to update map
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        // Show success message
+                        var alert = document.createElement('div');
+                        alert.className = 'alert alert-success alert-dismissible fade show mt-2';
+                        alert.innerHTML = `
+                            <i class="fas fa-check-circle me-2"></i>${data.message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        `;
+                        button.closest('.d-flex').closest('.border-top').after(alert);
+                    }
+                } else {
+                    alert(data.error || '{{ _("Error al reportar") }}');
+                    button.disabled = false;
+                    // Ensure rounded-pill class is present
+                    if (!button.classList.contains('rounded-pill')) {
+                        button.classList.add('rounded-pill');
+                    }
+                    button.innerHTML = '<i class="fas fa-times-circle me-1"></i>{{ _("Ja no hi és") }}';
+                }
+            })
+            .catch(error => {
+                console.error('Error resolving item:', error);
+                alert('{{ _("Error al reportar. Intenta-ho de nou.") }}');
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-times-circle me-1"></i>{{ _("Ja no hi és") }}';
             });
         }
     });

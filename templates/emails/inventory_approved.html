@@ -1,0 +1,29 @@
+{% extends "emails/base.html" %}
+
+{% block content %}
+<h2>{{ _('El teu reportatge ha estat aprovat!') }} ✅</h2>
+
+<p>{{ _('Hola') }},</p>
+
+<p>{{ _('El teu reportatge ha estat revisat i aprovat. Ja està visible al mapa de Tarragoneta.') }}</p>
+
+<div class="info-box">
+    <p><strong>{{ _('Categoria') }}:</strong> {{ item.full_category }}</p>
+    {% if item.address %}
+    <p><strong>{{ _('Ubicació') }}:</strong> {{ item.address }}</p>
+    {% endif %}
+    {% if item.description %}
+    <p><strong>{{ _('Descripció') }}:</strong> {{ item.description }}</p>
+    {% endif %}
+</div>
+
+<p>{{ _('Gràcies per ajudar a millorar la nostra ciutat! El teu reportatge ajuda a identificar problemes i trobar solucions.') }}</p>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ item_url }}" class="button">{{ _('Veure al mapa') }}</a>
+</div>
+
+<p>{{ _('Gràcies per la teva contribució!') }}<br>
+<strong>L'equip de Tarragoneta</strong></p>
+{% endblock %}
+

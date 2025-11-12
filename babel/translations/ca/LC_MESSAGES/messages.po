@@ -683,3 +683,30 @@ msgstr "Subcategories de Brossa"
 
 msgid "Totes les subcategorías"
 msgstr "Totes les subcategories"
+
+msgid "Encara hi és"
+msgstr "Encara hi és"
+
+msgid "Fer foto ara"
+msgstr "Fer foto ara"
+
+msgid "Pujar foto"
+msgstr "Pujar foto"
+
+msgid "Eliminar foto"
+msgstr "Eliminar foto"
+
+msgid "Usar ubicació actual"
+msgstr "Usar ubicació actual"
+
+msgid "Obtenint ubicació..."
+msgstr "Obtenint ubicació..."
+
+msgid "Ja no hi és"
+msgstr "Ja no hi és"
+
+msgid "Ja has reportat que no hi és"
+msgstr "Ja has reportat que no hi és"
+
+msgid "reportat que ja no hi és"
+msgstr "reportat que ja no hi és"

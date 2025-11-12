@@ -3,6 +3,7 @@ from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
 from flask_babel import Babel
 from flask_security import Security, SQLAlchemyUserDatastore
+from flask_mail import Mail
 
 # Initialize extensions (will be initialized in app factory)
 db = SQLAlchemy()
@@ -10,6 +11,7 @@ migrate = Migrate()
 csrf = CSRFProtect()
 babel = Babel()
 security = Security()
+mail = Mail()
 
 # Will be set after models are imported
 user_datastore = None
@@ -49,6 +51,9 @@ def init_extensions(app):
     app.config['BABEL_TRANSLATION_DIRECTORIES'] = translations_dir
     
     babel.init_app(app, locale_selector=get_locale)
+    
+    # Initialize Flask-Mail
+    mail.init_app(app)
     
     # Initialize Flask-Security (needs models)
     from app.models import User, Role

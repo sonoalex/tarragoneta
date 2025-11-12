@@ -1,0 +1,26 @@
+{% extends "emails/base.html" %}
+
+{% block content %}
+<h2>{{ _('Informació sobre la teva iniciativa') }}</h2>
+
+<p>{{ _('Hola') }} {{ user.username or user.email }},</p>
+
+<p>{{ _('Hem revisat la teva iniciativa però, lamentablement, no hem pogut aprovar-la en aquest moment.') }}</p>
+
+<div class="info-box">
+    <h3 style="margin-top: 0;">{{ initiative.title }}</h3>
+    {% if reason %}
+    <p><strong>{{ _('Motiu') }}:</strong> {{ reason }}</p>
+    {% endif %}
+</div>
+
+<p>{{ _('Si tens preguntes o vols més informació, no dubtis a contactar-nos. Estem aquí per ajudar-te.') }}</p>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ url_for('main.contact', _external=True) }}" class="button button-secondary">{{ _('Contactar') }}</a>
+</div>
+
+<p>{{ _('Gràcies per la teva comprensió.') }}<br>
+<strong>L'equip de Tarragoneta</strong></p>
+{% endblock %}
+

@@ -1,0 +1,41 @@
+{% extends "emails/base.html" %}
+
+{% block content %}
+<h2>{{ _('Gràcies per la teva donació!') }} 💚</h2>
+
+<p>{% if user %}{{ _('Hola') }} {{ user.username or user.email }},{% else %}{{ _('Hola') }},{% endif %}</p>
+
+<p>{{ _('Volem agrair-te la teva generosa donació a Tarragoneta. El teu suport ens ajuda a continuar millorant la nostra ciutat.') }}</p>
+
+<div class="highlight-box">
+    <h3 style="margin-top: 0;">{{ _('Detalls de la donació') }}</h3>
+    <p style="font-size: 18px; margin: 10px 0;">
+        <strong>{{ _('Quantitat') }}:</strong> {{ amount }}€
+    </p>
+    <p style="margin: 10px 0;">
+        <strong>{{ _('Data') }}:</strong> {{ donation.completed_at.strftime('%d/%m/%Y %H:%M') if donation.completed_at else _('Ara mateix') }}
+    </p>
+    <p style="margin: 10px 0;">
+        <strong>{{ _('Estat') }}:</strong> {{ _('Completada') }}
+    </p>
+</div>
+
+<p>{{ _('La teva donació contribueix a:') }}</p>
+<ul>
+    <li>{{ _('Mantenir la plataforma activa') }}</li>
+    <li>{{ _('Organitzar més iniciatives cíviques') }}</li>
+    <li>{{ _('Millorar les funcionalitats de la plataforma') }}</li>
+    <li>{{ _('Fomentar la participació ciutadana') }}</li>
+    <li>{{ _('Mantenir l\'inventari actualitzat de l\'estat de la ciutat') }} ({{ _('palomes, brossa i més') }})</li>
+</ul>
+
+<p>{{ _('Gràcies per formar part d\'aquest projecte.') }}</p>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ url_for('main.index', _external=True) }}" class="button">{{ _('Visitar la plataforma') }}</a>
+</div>
+
+<p>{{ _('Un abraç,') }}<br>
+<strong>L'equip de Tarragoneta</strong></p>
+{% endblock %}
+

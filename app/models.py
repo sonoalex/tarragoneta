@@ -122,6 +122,7 @@ class InventoryItem(db.Model):
     image_path = db.Column(db.String(300))
     status = db.Column(db.String(20), default='pending')  # 'pending', 'approved', 'rejected', 'active', 'resolved', 'removed'
     importance_count = db.Column(db.Integer, default=0)  # Contador de importancia/votos
+    resolved_count = db.Column(db.Integer, default=0)  # Contador de "ya no está"
     created_at = db.Column(db.DateTime(), default=datetime.utcnow)
     updated_at = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -131,6 +132,7 @@ class InventoryItem(db.Model):
     # Relationships
     reporter = db.relationship('User', backref='reported_items')
     voters = db.relationship('InventoryVote', backref='item', lazy='dynamic', cascade='all, delete-orphan')
+    resolved_by = db.relationship('InventoryResolved', backref='item', lazy='dynamic', cascade='all, delete-orphan')
     
     @property
     def full_category(self):
@@ -142,6 +144,12 @@ class InventoryItem(db.Model):
         if not user_id:
             return False
         return self.voters.filter_by(user_id=user_id).first() is not None
+    
+    def has_user_resolved(self, user_id):
+        """Check if a user has already reported this item as resolved"""
+        if not user_id:
+            return False
+        return self.resolved_by.filter_by(user_id=user_id).first() is not None
     
     def __repr__(self):
         return f'<InventoryItem {self.category}->{self.subcategory} at ({self.latitude}, {self.longitude})>'
@@ -161,6 +169,22 @@ class InventoryVote(db.Model):
     
     def __repr__(self):
         return f'<InventoryVote user:{self.user_id} item:{self.item_id}>'
+
+class InventoryResolved(db.Model):
+    """Track "ya no está" reports for inventory items"""
+    id = db.Column(db.Integer, primary_key=True)
+    item_id = db.Column(db.Integer, db.ForeignKey('inventory_item.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_at = db.Column(db.DateTime(), default=datetime.utcnow)
+    
+    # Relationships
+    user = db.relationship('User', backref='inventory_resolved')
+    
+    # Unique constraint: one "ya no está" report per user per item
+    __table_args__ = (db.UniqueConstraint('item_id', 'user_id', name='unique_item_user_resolved'),)
+    
+    def __repr__(self):
+        return f'<InventoryResolved user:{self.user_id} item:{self.item_id}>'
 
 class Donation(db.Model):
     """Track donations received through Stripe"""

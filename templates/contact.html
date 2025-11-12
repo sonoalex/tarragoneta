@@ -21,6 +21,7 @@
                     <div class="card-body p-5">
                         <form method="POST" action="{{ url_for('main.contact') }}" class="needs-validation" novalidate>
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="form_token" value="{{ session.get('contact_form_token', '') }}">
                             
                             <div class="row g-3 mb-3">
                                 <div class="col-md-6">
@@ -242,15 +243,30 @@
 </section>
 
 <script>
-// Bootstrap form validation
+// Bootstrap form validation with double-submit protection
 (function() {
     'use strict';
     var forms = document.querySelectorAll('.needs-validation');
     Array.prototype.slice.call(forms).forEach(function(form) {
+        var isSubmitting = false;
         form.addEventListener('submit', function(event) {
+            if (isSubmitting) {
+                event.preventDefault();
+                event.stopPropagation();
+                return false;
+            }
+            
             if (!form.checkValidity()) {
                 event.preventDefault();
                 event.stopPropagation();
+            } else {
+                // Prevent double submission
+                isSubmitting = true;
+                var submitButton = form.querySelector('button[type="submit"]');
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ _("Enviant...") }}';
+                }
             }
             form.classList.add('was-validated');
         }, false);

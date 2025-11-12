@@ -1,0 +1,25 @@
+{% extends "emails/base.html" %}
+
+{% block content %}
+<h2>{{ _('Informació sobre el teu reportatge') }}</h2>
+
+<p>{{ _('Hola') }},</p>
+
+<p>{{ _('Hem revisat el teu reportatge però, lamentablement, no hem pogut aprovar-lo en aquest moment.') }}</p>
+
+{% if reason %}
+<div class="info-box">
+    <p><strong>{{ _('Motiu') }}:</strong> {{ reason }}</p>
+</div>
+{% endif %}
+
+<p>{{ _('Si tens preguntes o vols més informació, no dubtis a contactar-nos.') }}</p>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ url_for('main.contact', _external=True) }}" class="button button-secondary">{{ _('Contactar') }}</a>
+</div>
+
+<p>{{ _('Gràcies per la teva comprensió.') }}<br>
+<strong>L'equip de Tarragoneta</strong></p>
+{% endblock %}
+

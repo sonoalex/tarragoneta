@@ -1,0 +1,25 @@
+{% extends "emails/base.html" %}
+
+{% block content %}
+<h2>{{ _('Gràcies per contactar amb Tarragoneta') }}</h2>
+
+<p>{{ _('Hola') }},</p>
+
+<p>{{ _('Hem rebut el teu missatge i l\'hem revisat. Ens posarem en contacte amb tu aviat.') }}</p>
+
+{% if contact_subject %}
+<div class="info-box">
+    <p><strong>{{ _('Assumpte') }}:</strong> {{ contact_subject }}</p>
+</div>
+{% endif %}
+
+<p>{{ _('Mentrestant, pots explorar la plataforma i les iniciatives disponibles. També pots reportar l\'estat actual de la ciutat al nostre inventari (palomes, brossa i més coses en el futur).') }}</p>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ url_for('main.index', _external=True) }}" class="button">{{ _('Visitar la plataforma') }}</a>
+</div>
+
+<p>{{ _('Gràcies per contactar-nos!') }}<br>
+<strong>L'equip de Tarragoneta</strong></p>
+{% endblock %}
+

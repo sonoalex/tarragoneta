@@ -50,10 +50,70 @@ def about():
 def contact():
     from flask import current_app
     if request.method == 'POST':
-        # Handle contact form submission
-        current_app.logger.info(f'Contact form submitted: {request.form.get("subject", "unknown")} from {request.form.get("email", "anonymous")}')
-        flash('Gracias por tu mensaje. Te responderemos pronto.', 'success')
+        # Check for duplicate submission using session token
+        form_token = request.form.get('form_token', '')
+        session_token = session.get('contact_form_token')
+        
+        if form_token and form_token == session_token:
+            # This is a duplicate submission, ignore it
+            current_app.logger.warning(f'Duplicate contact form submission detected from {request.form.get("email", "unknown")}')
+            flash(_('El formulari ja s\'ha enviat. Si us plau, espera uns segons.'), 'info')
+            return redirect(url_for('main.contact'))
+        
+        # Generate new token for this submission
+        import secrets
+        new_token = secrets.token_hex(16)
+        session['contact_form_token'] = new_token
+        
+        # Get form data
+        name = request.form.get('name', '')
+        email = request.form.get('email', '')
+        subject = request.form.get('subject', '')
+        message = request.form.get('message', '')
+        phone = request.form.get('phone', '')
+        
+        # Validate required fields
+        if not name or not email or not message:
+            flash(_('Si us plau, omple tots els camps obligatoris'), 'error')
+            return redirect(url_for('main.contact'))
+        
+        # Log contact form submission
+        current_app.logger.info(f'Contact form submitted: {subject} from {email} ({name})')
+        
+        # Send confirmation email to user (only if email is different from admin)
+        admin_email = current_app.config.get('ADMIN_EMAIL', 'latarragoneta@gmail.com')
+        if email and email.lower() != admin_email.lower():
+            try:
+                from app.services.email_service import EmailService
+                EmailService.send_contact_form_response(email, subject, message)
+            except Exception as e:
+                current_app.logger.error(f'Error sending contact confirmation email: {str(e)}', exc_info=True)
+        
+        # Send notification to admin (optional - you can configure admin email)
+        if admin_email:
+            try:
+                from app.services.email_service import EmailService
+                EmailService.send_admin_notification(
+                    admin_email,
+                    'Nou missatge de contacte',
+                    {
+                        'name': name,
+                        'email': email,
+                        'subject': subject,
+                        'message': message,
+                        'phone': phone if phone else 'No proporcionat'
+                    }
+                )
+            except Exception as e:
+                current_app.logger.error(f'Error sending admin notification: {str(e)}', exc_info=True)
+        
+        flash(_('Gràcies pel teu missatge. Et respondrem aviat.'), 'success')
         return redirect(url_for('main.contact'))
+    
+    # Generate form token for GET request (to prevent double submission)
+    if 'contact_form_token' not in session:
+        import secrets
+        session['contact_form_token'] = secrets.token_hex(16)
     
     # Get subject from query parameter (for donation banner)
     subject_param = request.args.get('subject', '')

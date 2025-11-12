@@ -1,0 +1,28 @@
+{% extends "emails/base.html" %}
+
+{% block content %}
+<h2>{{ _('Recordatori: La teva iniciativa és demà!') }} 📅</h2>
+
+<p>{{ _('Hola') }} {{ user.username or user.email }},</p>
+
+<p>{{ _('Volíem recordar-te que la teva iniciativa té lloc demà.') }}</p>
+
+<div class="highlight-box">
+    <h3 style="margin-top: 0;">{{ initiative.title }}</h3>
+    <p><strong>{{ _('Data') }}:</strong> {{ initiative.date.strftime('%d/%m/%Y') if initiative.date else _('Per determinar') }}</p>
+    {% if initiative.time %}
+    <p><strong>{{ _('Hora') }}:</strong> {{ initiative.time }}</p>
+    {% endif %}
+    <p><strong>{{ _('Ubicació') }}:</strong> {{ initiative.location }}</p>
+</div>
+
+<p>{{ _('Assegura\'t de tenir tot preparat per a l\'esdeveniment. Pots revisar els participants i actualitzar la informació si cal.') }}</p>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ initiative_url }}" class="button">{{ _('Veure la iniciativa') }}</a>
+</div>
+
+<p>{{ _('Molts ànims amb la iniciativa!') }}<br>
+<strong>L'equip de Tarragoneta</strong></p>
+{% endblock %}
+

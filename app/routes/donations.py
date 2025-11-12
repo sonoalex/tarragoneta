@@ -144,6 +144,7 @@ def stripe_webhook():
                     )
                     
                     # Try to link to user if email matches
+                    user = None
                     if donation.email:
                         from app.models import User
                         user = User.query.filter_by(email=donation.email).first()
@@ -153,6 +154,13 @@ def stripe_webhook():
                     db.session.add(donation)
                     db.session.commit()
                     current_app.logger.info(f'Donation saved: {donation.id} - {donation.amount_euros}€')
+                    
+                    # Send donation confirmation email
+                    try:
+                        from app.services.email_service import EmailService
+                        EmailService.send_donation_confirmation(donation, user)
+                    except Exception as e:
+                        current_app.logger.error(f'Error sending donation confirmation email: {str(e)}', exc_info=True)
                 else:
                     # Update existing donation
                     existing_donation.status = 'completed'

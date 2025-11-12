@@ -50,12 +50,21 @@ def create_app(config_name=None):
     
     # Hook to save username on registration
     @user_registered.connect_via(app)
-    def on_user_registered(sender, user, confirmation_token, form_data):
+    def on_user_registered(sender, user, form_data, **kwargs):
         """Save username when user registers"""
+        # Accept both confirm_token and confirmation_token for compatibility
+        # kwargs may contain: confirm_token, confirmation_token, etc.
         if 'username' in form_data:
             user.username = form_data['username']
             from app.extensions import db
             db.session.commit()
+        
+        # Send welcome email
+        try:
+            from app.services.email_service import EmailService
+            EmailService.send_welcome_email(user)
+        except Exception as e:
+            app.logger.error(f'Error sending welcome email: {str(e)}', exc_info=True)
     
     # Register blueprints
     app.register_blueprint(main.bp)

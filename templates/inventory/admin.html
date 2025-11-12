@@ -219,7 +219,7 @@
                                             </button>
                                         </form>
                                         {% elif item.status == 'approved' or item.status == 'active' %}
-                                        <form method="POST" action="{{ url_for('inventory.resolve_item', id=item.id) }}" style="display: inline;">
+                                        <form method="POST" action="{{ url_for('inventory.admin_resolve_item', id=item.id) }}" style="display: inline;">
                                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                             <input type="hidden" name="page" value="{{ page }}">
                                             <input type="hidden" name="status" value="{{ status_filter }}">

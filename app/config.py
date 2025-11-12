@@ -62,6 +62,22 @@ class Config:
     STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY', '')
     STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')
     STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
+    
+    # Mail configuration (Gmail)
+    MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+    MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
+    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'True').lower() in ('true', '1', 'yes')
+    MAIL_USE_SSL = os.environ.get('MAIL_USE_SSL', 'False').lower() in ('true', '1', 'yes')
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME', 'hola@latarragoneta.com')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', '')  # App password from Google
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'Tarragoneta <hola@latarragoneta.com>')
+    MAIL_SUPPRESS_SEND = os.environ.get('MAIL_SUPPRESS_SEND', 'False').lower() in ('true', '1', 'yes')
+    
+    # Admin email for notifications
+    ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'hola@latarragoneta.com')
+    
+    # Inventory auto-resolve settings
+    INVENTORY_AUTO_RESOLVE_THRESHOLD = int(os.environ.get('INVENTORY_AUTO_RESOLVE_THRESHOLD', '3'))  # Minimum "ya no está" reports to auto-resolve
 
 class DevelopmentConfig(Config):
     """Development configuration"""
