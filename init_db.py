@@ -33,10 +33,30 @@ def init_database():
             upgrade()
             print("✓ Migraciones aplicadas")
         except Exception as e:
+            print(f"⚠️  Error aplicando migraciones: {str(e)}")
             # Si no hay migraciones o fallan, crear tablas directamente
             print("📦 Creando tablas...")
             db.create_all()
             print("✓ Tablas creadas")
+        
+        # Verificar y añadir columnas faltantes manualmente (fallback)
+        try:
+            from sqlalchemy import inspect, text
+            inspector = inspect(db.engine)
+            columns = [col['name'] for col in inspector.get_columns('inventory_item')]
+            
+            # Verificar si falta resolved_count
+            if 'resolved_count' not in columns:
+                print("🔧 Añadiendo columna resolved_count a inventory_item...")
+                if db.engine.dialect.name == 'postgresql':
+                    db.session.execute(text('ALTER TABLE inventory_item ADD COLUMN IF NOT EXISTS resolved_count INTEGER DEFAULT 0'))
+                else:
+                    db.session.execute(text('ALTER TABLE inventory_item ADD COLUMN resolved_count INTEGER DEFAULT 0'))
+                db.session.commit()
+                print("✓ Columna resolved_count añadida")
+        except Exception as e:
+            print(f"⚠️  Error verificando/añadiendo columnas: {str(e)}")
+            db.session.rollback()
         
         # Crear roles si no existen
         if not Role.query.first():
