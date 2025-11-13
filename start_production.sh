@@ -4,6 +4,14 @@
 # Don't use set -e because we want to handle errors gracefully
 set +e
 
+# Check if this is a worker service
+# Railway sets RAILWAY_SERVICE_NAME automatically
+if [ "$RAILWAY_SERVICE_NAME" = "worker" ] || [ -n "$RUN_WORKER" ]; then
+    echo "🚀 Starting RQ worker for email queue..."
+    python worker.py
+    exit $?
+fi
+
 echo "🚀 Starting Tarragoneta in production mode..."
 
 # Compile translations (migrations are handled by Procfile release phase)
