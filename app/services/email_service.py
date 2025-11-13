@@ -11,6 +11,18 @@ from datetime import datetime
 import functools
 
 
+def send_email_task(to, subject, template, **kwargs):
+    """
+    Task function for RQ worker (must be at module level for RQ to import it)
+    This function is called by the worker to send emails
+    """
+    from app import create_app
+    app = create_app()
+    
+    with app.app_context():
+        return EmailService._send_email_sync(to, subject, template, **kwargs)
+
+
 class EmailService:
     """Service for sending emails with Tarragoneta branding"""
     
@@ -70,8 +82,9 @@ class EmailService:
                 serialized_kwargs = EmailService._serialize_kwargs(kwargs)
                 
                 # Enqueue the email job
+                # Use the module-level function that RQ can import
                 job = email_queue.enqueue(
-                    'app.services.email_service.EmailService._send_email_sync',
+                    'app.services.email_service.send_email_task',
                     to, subject, template,
                     **serialized_kwargs,
                     job_timeout=300  # 5 minutes timeout

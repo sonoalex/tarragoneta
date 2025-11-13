@@ -54,16 +54,25 @@ def contact():
         form_token = request.form.get('form_token', '')
         session_token = session.get('contact_form_token')
         
+        # If tokens match, it's a valid first submission
+        # If they don't match (or token is missing), it could be a duplicate or invalid
         if form_token and form_token == session_token:
-            # This is a duplicate submission, ignore it
-            current_app.logger.warning(f'Duplicate contact form submission detected from {request.form.get("email", "unknown")}')
+            # Valid submission - process it and generate new token
+            # Generate new token AFTER processing to prevent duplicates
+            import secrets
+            new_token = secrets.token_hex(16)
+            session['contact_form_token'] = new_token
+        elif form_token and session_token:
+            # Token mismatch - likely a duplicate submission
+            current_app.logger.info(f'Duplicate contact form submission prevented from {request.form.get("email", "unknown")}')
             flash(_('El formulari ja s\'ha enviat. Si us plau, espera uns segons.'), 'info')
             return redirect(url_for('main.contact'))
-        
-        # Generate new token for this submission
-        import secrets
-        new_token = secrets.token_hex(16)
-        session['contact_form_token'] = new_token
+        else:
+            # No token in form or session - generate new one and allow submission
+            # (could be first time or session expired)
+            import secrets
+            new_token = secrets.token_hex(16)
+            session['contact_form_token'] = new_token
         
         # Get form data
         name = request.form.get('name', '')
