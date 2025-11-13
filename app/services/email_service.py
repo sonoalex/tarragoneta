@@ -69,9 +69,29 @@ class EmailService:
             )
             
             current_app.logger.info(f'[EMAIL DEBUG] Sending email to {to}...')
-            mail.send(msg)
-            current_app.logger.info(f'Email sent successfully to {to}: {subject}')
-            return True
+            
+            # Send with timeout handling
+            import signal
+            
+            def timeout_handler(signum, frame):
+                raise TimeoutError(f'Email send timeout after {current_app.config.get("MAIL_TIMEOUT", 10)} seconds')
+            
+            # Set timeout (only on Unix systems)
+            if hasattr(signal, 'SIGALRM'):
+                signal.signal(signal.SIGALRM, timeout_handler)
+                signal.alarm(current_app.config.get('MAIL_TIMEOUT', 10))
+            
+            try:
+                mail.send(msg)
+                if hasattr(signal, 'SIGALRM'):
+                    signal.alarm(0)  # Cancel timeout
+                current_app.logger.info(f'Email sent successfully to {to}: {subject}')
+                return True
+            except TimeoutError as e:
+                if hasattr(signal, 'SIGALRM'):
+                    signal.alarm(0)  # Cancel timeout
+                current_app.logger.error(f'Email send timeout for {to}: {str(e)}')
+                raise
         except Exception as e:
             current_app.logger.error(f'Error sending email to {to}: {str(e)}', exc_info=True)
             return False

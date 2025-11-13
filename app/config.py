@@ -72,6 +72,8 @@ class Config:
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', '')  # App password from Google
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'Tarragoneta <hola@latarragoneta.com>')
     MAIL_SUPPRESS_SEND = os.environ.get('MAIL_SUPPRESS_SEND', 'False').lower() in ('true', '1', 'yes')
+    # Timeout for SMTP connection (in seconds)
+    MAIL_TIMEOUT = int(os.environ.get('MAIL_TIMEOUT', '10'))
     
     # Admin email for notifications
     ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'hola@latarragoneta.com')

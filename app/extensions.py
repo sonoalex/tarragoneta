@@ -59,6 +59,23 @@ def init_extensions(app):
     # Initialize Flask-Mail
     mail.init_app(app)
     
+    # Configure SMTP timeout if specified
+    if app.config.get('MAIL_TIMEOUT'):
+        # Flask-Mail uses smtplib internally, we need to patch it
+        import smtplib
+        original_smtp = smtplib.SMTP
+        
+        def patched_smtp(*args, **kwargs):
+            # Add timeout to SMTP connection
+            if 'timeout' not in kwargs:
+                kwargs['timeout'] = app.config.get('MAIL_TIMEOUT', 10)
+            return original_smtp(*args, **kwargs)
+        
+        # Only patch if not already patched
+        if not hasattr(smtplib.SMTP, '_tarragoneta_patched'):
+            smtplib.SMTP = patched_smtp
+            smtplib.SMTP._tarragoneta_patched = True
+    
     # Initialize Redis and RQ queue for background jobs
     global redis_conn, email_queue
     try:
