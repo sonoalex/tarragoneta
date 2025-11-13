@@ -88,6 +88,12 @@ class Config:
     REDIS_URL = os.environ.get('REDIS_URL', os.environ.get('REDISCLOUD_URL', 'redis://localhost:6379/0'))
     # Use background jobs for emails (set to False to send synchronously)
     USE_EMAIL_QUEUE = os.environ.get('USE_EMAIL_QUEUE', 'True').lower() in ('true', '1', 'yes')
+    
+    # Server name for URL generation outside request context (needed for email templates)
+    # Railway provides RAILWAY_PUBLIC_DOMAIN or use custom domain
+    SERVER_NAME = os.environ.get('SERVER_NAME', os.environ.get('RAILWAY_PUBLIC_DOMAIN'))
+    PREFERRED_URL_SCHEME = os.environ.get('PREFERRED_URL_SCHEME', 'https')
+    APPLICATION_ROOT = os.environ.get('APPLICATION_ROOT', '/')
 
 class DevelopmentConfig(Config):
     """Development configuration"""

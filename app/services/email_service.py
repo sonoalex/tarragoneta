@@ -19,8 +19,11 @@ def send_email_task(to, subject, template, **kwargs):
     from app import create_app
     app = create_app()
     
+    # Create a request context for URL generation
     with app.app_context():
-        return EmailService._send_email_sync(to, subject, template, **kwargs)
+        # Push a request context to allow url_for with _external=True
+        with app.test_request_context():
+            return EmailService._send_email_sync(to, subject, template, **kwargs)
 
 
 class EmailService:
