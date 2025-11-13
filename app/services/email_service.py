@@ -40,7 +40,15 @@ class EmailService:
             template: Template name (without .html)
             **kwargs: Additional context variables for the template (may contain serialized objects)
         """
-        if current_app.config.get('MAIL_SUPPRESS_SEND', False):
+        # Log mail configuration status
+        mail_suppress = current_app.config.get('MAIL_SUPPRESS_SEND', False)
+        mail_server = current_app.config.get('MAIL_SERVER', 'not set')
+        mail_username = current_app.config.get('MAIL_USERNAME', 'not set')
+        mail_password_set = bool(current_app.config.get('MAIL_PASSWORD', ''))
+        
+        current_app.logger.info(f'[EMAIL DEBUG] Suppress: {mail_suppress}, Server: {mail_server}, Username: {mail_username}, Password: {"set" if mail_password_set else "NOT SET"}')
+        
+        if mail_suppress:
             current_app.logger.info(f'[EMAIL SUPPRESSED] To: {to}, Subject: {subject}')
             return True
         
@@ -52,12 +60,15 @@ class EmailService:
             recipient_email = to if isinstance(to, str) else ', '.join(to)
             deserialized_kwargs['recipient_email'] = recipient_email
             
+            current_app.logger.info(f'[EMAIL DEBUG] Creating message for {to}...')
             msg = Message(
                 subject=subject,
                 recipients=[to] if isinstance(to, str) else to,
                 html=render_template(f'emails/{template}.html', **deserialized_kwargs),
                 sender=current_app.config.get('MAIL_DEFAULT_SENDER', 'Tarragoneta <hola@tarragoneta.com>')
             )
+            
+            current_app.logger.info(f'[EMAIL DEBUG] Sending email to {to}...')
             mail.send(msg)
             current_app.logger.info(f'Email sent successfully to {to}: {subject}')
             return True
