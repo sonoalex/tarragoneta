@@ -70,28 +70,45 @@ class EmailService:
             
             current_app.logger.info(f'[EMAIL DEBUG] Sending email to {to}...')
             
-            # Send with timeout handling
-            import signal
+            # Send email with timeout using threading
+            import threading
+            import queue as queue_module
             
-            def timeout_handler(signum, frame):
-                raise TimeoutError(f'Email send timeout after {current_app.config.get("MAIL_TIMEOUT", 10)} seconds')
+            result_queue = queue_module.Queue()
+            error_queue = queue_module.Queue()
             
-            # Set timeout (only on Unix systems)
-            if hasattr(signal, 'SIGALRM'):
-                signal.signal(signal.SIGALRM, timeout_handler)
-                signal.alarm(current_app.config.get('MAIL_TIMEOUT', 10))
+            def send_email_thread():
+                try:
+                    mail.send(msg)
+                    result_queue.put(True)
+                except Exception as e:
+                    error_queue.put(e)
             
-            try:
-                mail.send(msg)
-                if hasattr(signal, 'SIGALRM'):
-                    signal.alarm(0)  # Cancel timeout
+            # Start thread
+            thread = threading.Thread(target=send_email_thread, daemon=True)
+            thread.start()
+            
+            # Wait for result with timeout
+            timeout = current_app.config.get('MAIL_TIMEOUT', 10)
+            thread.join(timeout=timeout)
+            
+            if thread.is_alive():
+                # Thread is still running - timeout occurred
+                current_app.logger.error(f'Email send timeout for {to} after {timeout} seconds')
+                return False
+            
+            # Check for errors
+            if not error_queue.empty():
+                error = error_queue.get()
+                raise error
+            
+            # Check for success
+            if not result_queue.empty():
                 current_app.logger.info(f'Email sent successfully to {to}: {subject}')
                 return True
-            except TimeoutError as e:
-                if hasattr(signal, 'SIGALRM'):
-                    signal.alarm(0)  # Cancel timeout
-                current_app.logger.error(f'Email send timeout for {to}: {str(e)}')
-                raise
+            else:
+                current_app.logger.error(f'Email send failed for {to}: unknown error')
+                return False
         except Exception as e:
             current_app.logger.error(f'Error sending email to {to}: {str(e)}', exc_info=True)
             return False
