@@ -66,7 +66,8 @@ def init_extensions(app):
         from rq import Queue
         
         redis_url = app.config.get('REDIS_URL', 'redis://localhost:6379/0')
-        redis_conn = Redis.from_url(redis_url, decode_responses=True)
+        # Don't use decode_responses=True for RQ - it handles serialization internally
+        redis_conn = Redis.from_url(redis_url, decode_responses=False)
         # Test connection
         redis_conn.ping()
         email_queue = Queue('emails', connection=redis_conn)

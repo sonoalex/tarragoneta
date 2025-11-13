@@ -17,7 +17,8 @@ def run_worker():
     
     with app.app_context():
         try:
-            redis_conn = Redis.from_url(redis_url, decode_responses=True)
+            # Don't use decode_responses=True for RQ - it handles serialization internally
+            redis_conn = Redis.from_url(redis_url, decode_responses=False)
             # Test connection
             redis_conn.ping()
             queue = Queue('emails', connection=redis_conn)
