@@ -5,7 +5,7 @@ Run this as a separate process in Railway
 """
 import os
 from redis import Redis
-from rq import Worker, Queue, Connection
+from rq import Worker, Queue
 from app import create_app
 
 # Create app context for worker
