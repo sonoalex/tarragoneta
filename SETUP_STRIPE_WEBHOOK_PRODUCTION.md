@@ -18,9 +18,9 @@ En staging/producción, el webhook se configura directamente en el **Dashboard d
 2. Haz clic en **"Add endpoint"** o **"+ Add endpoint"**
 3. Configura el endpoint:
    - **Endpoint URL**: `https://tu-dominio-staging.com/donate/webhook`
-     - Ejemplo: `https://tarragoneta-staging.railway.app/donate/webhook`
-     - Ejemplo: `https://tarragoneta.railway.app/donate/webhook` (producción)
-   - **Description**: "Tarragoneta - Donations Webhook" (opcional)
+     - Ejemplo: `https://tarracograf-staging.railway.app/donate/webhook`
+     - Ejemplo: `https://tarracograf.railway.app/donate/webhook` (producción)
+   - **Description**: "Tarracograf - Donations Webhook" (opcional)
    - **Events to send**: Selecciona los eventos específicos:
      - ✅ `checkout.session.completed`
      - ✅ `payment_intent.succeeded`

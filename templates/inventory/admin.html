@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ _('Administrar Inventari') }} - Tarragoneta{% endblock %}
+{% block title %}{{ _('Administrar Inventari') }} - Tarracograf{% endblock %}
 
 {% block content %}
 <section class="py-5" style="background: var(--bg-cream); padding-top: 120px;">
@@ -141,12 +141,8 @@
                             {% for item in items %}
                             <tr>
                                 <td>
-                                    {% if item.subcategory == 'excremento' %}💩
-                                    {% elif item.subcategory == 'nido' %}🪺
-                                    {% elif item.subcategory == 'plumas' %}🪶
-                                    {% elif item.subcategory == 'basura_desborda' %}🗑️
-                                    {% elif item.subcategory == 'vertidos' %}💧
-                                    {% else %}📌{% endif %}
+                                    {% set icon_class, color_class = get_inventory_icon(item.category, item.subcategory) %}
+                                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>
                                     {{ get_inventory_category_name(item.category, item.subcategory) }}
                                 </td>
                                 <td>

@@ -1,7 +1,15 @@
 #!/usr/bin/env python
 """
-Script completo para generar datos de seed para desarrollo local
-Incluye iniciativas y datos de inventario
+Script orquestador para generar todos los datos de seed para desarrollo local.
+
+Este script coordina la creación de:
+- Usuarios de prueba
+- Iniciativas de ejemplo
+- Datos de inventario
+
+Para datos específicos, usa los módulos individuales:
+- seed_data.py: Datos de inventario
+- app.cli.create_sample_data: Iniciativas
 """
 import os
 import sys
@@ -165,7 +173,7 @@ def seed_all():
         print("  - View inventory map at: http://127.0.0.1:5000/inventory/map")
         print("  - Admin dashboard: http://127.0.0.1:5000/admin/dashboard")
         print("  - User management: http://127.0.0.1:5000/admin/users")
-        print("  - Admin login: admin@tarragoneta.org / admin123 (desarrollo - cambiar en producción)")
+        print("  - Admin login: hola@tarracograf.cat / admin123 (desarrollo - cambiar en producción)")
         print("  - Test users: user1@test.com / test123, etc.")
 
 if __name__ == '__main__':
@@ -178,7 +186,7 @@ if __name__ == '__main__':
     parser.add_argument('--users-only', action='store_true', help='Only create test users')
     parser.add_argument('--inventory-count', type=int, default=50, help='Number of inventory items (default: 50)')
     parser.add_argument('--clear-inventory', action='store_true', help='Clear existing inventory items before creating new ones')
-    parser.add_argument('--reset-db', action='store_true', help='Delete SQLite database and recreate everything')
+    parser.add_argument('--reset-db', action='store_true', help='Reset database (drop all tables and recreate)')
     
     args = parser.parse_args()
     
@@ -187,10 +195,11 @@ if __name__ == '__main__':
         # Reset database if requested
         if args.reset_db:
             print("🗑️  Resetting database...")
-            db_file = app.config.get('SQLALCHEMY_DATABASE_URI', '').replace('sqlite:///', '')
-            if db_file and os.path.exists(db_file):
-                os.remove(db_file)
-                print(f"✅ Deleted {db_file}")
+            print("⚠️  This will drop all tables. Make sure you have a backup!")
+            from app.models import *
+            db.drop_all()
+            db.create_all()
+            print("✅ Database reset complete")
             
             # Reinitialize database
             print("📦 Reinitializing database...")

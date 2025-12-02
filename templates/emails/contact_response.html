@@ -1,7 +1,7 @@
 {% extends "emails/base.html" %}
 
 {% block content %}
-<h2>{{ _('Gràcies per contactar amb Tarragoneta') }}</h2>
+<h2>{{ _('Gràcies per contactar amb Tarracograf') }}</h2>
 
 <p>{{ _('Hola') }},</p>
 
@@ -13,13 +13,13 @@
 </div>
 {% endif %}
 
-<p>{{ _('Mentrestant, pots explorar la plataforma i les iniciatives disponibles. També pots reportar l\'estat actual de la ciutat al nostre inventari (palomes, brossa i més coses en el futur).') }}</p>
+<p>{{ _('Mentrestant, pots explorar la plataforma i les iniciatives disponibles. També pots reportar l\'estat actual de la ciutat al nostre inventari (coloms, brossa i més coses en el futur).') }}</p>
 
 <div style="text-align: center; margin: 30px 0;">
     <a href="{{ url_for('main.index', _external=True) }}" class="button">{{ _('Visitar la plataforma') }}</a>
 </div>
 
 <p>{{ _('Gràcies per contactar-nos!') }}<br>
-<strong>L'equip de Tarragoneta</strong></p>
+<strong>L'equip de Tarracograf</strong></p>
 {% endblock %}
 

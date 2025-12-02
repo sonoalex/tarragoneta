@@ -62,7 +62,7 @@ def get_category_name(category_key):
         'educacion': _('Environmental Education'),
         'cultura': _('Culture and Civics'),
         'social': _('Social Action'),
-        'basura_desborda': _('Overflowing Trash'),
+        'basura_desbordada': _('Brossa Desbordada'),
         'vertidos': _('Dumping')
     }
     return category_names.get(category_key, category_key)
@@ -71,20 +71,20 @@ def get_inventory_category_name(category, subcategory=None):
     """Get translated inventory category and subcategory names"""
     from flask_babel import gettext as _
     
-    # Main categories
+    # Main categories (en catalán por defecto)
     main_categories = {
-        'palomas': _('Palomas'),
-        'basura': _('Basura')
+        'palomas': _('Coloms'),
+        'basura': _('Brossa')
     }
     
-    # Subcategories
+    # Subcategories (en catalán por defecto)
     subcategories = {
-        'excremento': _('Excremento'),
-        'nido': _('Nido'),
-        'plumas': _('Plumas'),
-        'basura_desborda': _('Basura Desbordada'),
-        'vertidos': _('Vertidos'),
-        'otro': _('Otro')
+        'excremento': _('Excrement'),
+        'nido': _('Niu'),
+        'plumas': _('Plomes'),
+        'basura_desbordada': _('Brossa Desbordada'),
+        'vertidos': _('Abocaments'),
+        'otro': _('Altres')
     }
     
     main_name = main_categories.get(category, category)
@@ -92,6 +92,47 @@ def get_inventory_category_name(category, subcategory=None):
         sub_name = subcategories.get(subcategory, subcategory)
         return f"{main_name} → {sub_name}"
     return main_name
+
+def get_inventory_icon(category, subcategory=None):
+    """
+    Get Font Awesome icon class for inventory category/subcategory.
+    Returns a tuple of (icon_class, color_class) for use in templates.
+    
+    Args:
+        category: Main category (e.g., 'palomas', 'basura')
+        subcategory: Optional subcategory (e.g., 'nido', 'excremento', 'plumas', 'basura_desbordada', 'vertidos')
+    
+    Returns:
+        tuple: (icon_class, color_class) e.g., ('fa-dove', 'text-primary')
+    """
+    # Mapping: (category, subcategory) -> (icon_class, color_class)
+    icon_mapping = {
+        # Palomas
+        ('palomas', 'nido'): ('fa-home', 'text-primary'),
+        ('palomas', 'excremento'): ('fa-biohazard', 'text-danger'),
+        ('palomas', 'plumas'): ('fa-feather', 'text-info'),
+        ('palomas', None): ('fa-dove', 'text-primary'),
+        ('palomas', 'otro'): ('fa-dove', 'text-primary'),
+        
+        # Basura
+        ('basura', 'basura_desbordada'): ('fa-trash-alt', 'text-warning'),
+        ('basura', 'vertidos'): ('fa-tint', 'text-danger'),
+        ('basura', None): ('fa-trash', 'text-secondary'),
+        ('basura', 'otro'): ('fa-trash', 'text-secondary'),
+    }
+    
+    # Try to get icon for specific category+subcategory combination
+    key = (category, subcategory)
+    if key in icon_mapping:
+        return icon_mapping[key]
+    
+    # Fallback to category only
+    key = (category, None)
+    if key in icon_mapping:
+        return icon_mapping[key]
+    
+    # Default fallback
+    return ('fa-circle', 'text-secondary')
 
 def generate_slug(title):
     """Generate a URL-friendly slug from title"""
@@ -109,4 +150,47 @@ def generate_slug(title):
     if not slug:
         slug = 'untitled'
     return slug
+
+# Mapeo entre valores en catalán (URLs) y valores técnicos (BD)
+CATEGORY_URL_TO_DB = {
+    'coloms': 'palomas',
+    'brossa': 'basura',
+}
+
+CATEGORY_DB_TO_URL = {v: k for k, v in CATEGORY_URL_TO_DB.items()}
+
+SUBCATEGORY_URL_TO_DB = {
+    'niu': 'nido',
+    'excrement': 'excremento',
+    'plomes': 'plumas',
+    'brossa_desbordada': 'basura_desbordada',
+    'abocaments': 'vertidos',
+    'altres': 'otro',
+}
+
+SUBCATEGORY_DB_TO_URL = {v: k for k, v in SUBCATEGORY_URL_TO_DB.items()}
+
+def normalize_category_from_url(category_url):
+    """Convierte el valor de categoría de la URL (catalán) al valor técnico de BD"""
+    if not category_url:
+        return None
+    return CATEGORY_URL_TO_DB.get(category_url, category_url)
+
+def normalize_subcategory_from_url(subcategory_url):
+    """Convierte el valor de subcategoría de la URL (catalán) al valor técnico de BD"""
+    if not subcategory_url:
+        return None
+    return SUBCATEGORY_URL_TO_DB.get(subcategory_url, subcategory_url)
+
+def category_to_url(category_db):
+    """Convierte el valor técnico de categoría a valor de URL (catalán)"""
+    if not category_db:
+        return None
+    return CATEGORY_DB_TO_URL.get(category_db, category_db)
+
+def subcategory_to_url(subcategory_db):
+    """Convierte el valor técnico de subcategoría a valor de URL (catalán)"""
+    if not subcategory_db:
+        return None
+    return SUBCATEGORY_DB_TO_URL.get(subcategory_db, subcategory_db)
 

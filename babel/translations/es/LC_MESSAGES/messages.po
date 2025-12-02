@@ -1,4 +1,4 @@
-# Spanish translations for Tarragoneta
+# Spanish translations for Tarracograf
 msgid ""
 msgstr ""
 "Language: es\n"
@@ -37,7 +37,7 @@ msgid "Junts construïm la Tarragona que volem"
 msgstr "Juntos construimos la Tarragona que queremos"
 
 msgid "Uneix-te a les iniciatives ciutadanes que estan transformant la nostra ciutat. Cada acció compta, cada persona suma. Sigues part del canvi!"
-msgstr "Únete a las iniciativas ciudadanas que están transformando nuestra ciudad. Cada acción cuenta, cada persona suma. ¡Sé parte del cambio!"
+msgstr "La radiografía de la ciudad. Visualiza iniciativas ciudadanas, reporta problemas de limpieza y participa en la mejora de Tarragona."
 
 msgid "Iniciatives Actives"
 msgstr "Iniciativas Activas"
@@ -417,8 +417,8 @@ msgstr "¿Estás seguro de eliminar esta iniciativa?"
 msgid "No hi ha iniciatives encara"
 msgstr "No hay iniciativas aún"
 
-msgid "Ajuda'ns a mantenir Tarragoneta"
-msgstr "Ayúdanos a mantener Tarragoneta"
+msgid "Ajuda'ns a mantenir Tarracograf"
+msgstr "Ayúdanos a mantener Tarracograf"
 
 msgid "Les donacions voluntàries ens ajuden a cobrir els costos del servidor i mantenir la plataforma gratuïta per a tothom."
 msgstr "Las donaciones voluntarias nos ayudan a cubrir los costos del servidor y mantener la plataforma gratuita para todos."
@@ -459,8 +459,8 @@ msgstr "Donación realizada"
 msgid "Gràcies per la teva donació!"
 msgstr "¡Gracias por tu donación!"
 
-msgid "La teva donació ens ajuda a mantenir Tarragoneta gratuïta per a tothom."
-msgstr "Tu donación nos ayuda a mantener Tarragoneta gratuita para todos."
+msgid "La teva donació ens ajuda a mantenir Tarracograf gratuïta per a tothom."
+msgstr "Tu donación nos ayuda a mantener Tarracograf gratuita para todos."
 
 msgid "Tornar a l'inici"
 msgstr "Volver al inicio"
@@ -480,8 +480,8 @@ msgstr "Error inesperado. Por favor, inténtalo de nuevo."
 msgid "Les donacions voluntàries ens ajuden a cobrir els costos del servidor."
 msgstr "Las donaciones voluntarias nos ayudan a cubrir los costos del servidor."
 
-msgid "Donación a Tarragoneta"
-msgstr "Donación a Tarragoneta"
+msgid "Donación a Tarracograf"
+msgstr "Donación a Tarracograf"
 
 msgid "Donación voluntaria para mantener la plataforma"
 msgstr "Donación voluntaria para mantener la plataforma"
@@ -489,11 +489,11 @@ msgstr "Donación voluntaria para mantener la plataforma"
 msgid "Fem la"
 msgstr "Hacemos la"
 
-msgid "Tarragoneta - Plataforma ciutadana per a iniciatives cíviques a Tarragona"
-msgstr "Tarragoneta - Plataforma ciudadana para iniciativas cívicas en Tarragona"
+msgid "Tarracograf - Plataforma ciutadana per a iniciatives cíviques a Tarragona"
+msgstr "Tarracograf - Radiografía de la ciudad de Tarragona"
 
-msgid "Sobre Tarragoneta"
-msgstr "Sobre Tarragoneta"
+msgid "Sobre Tarracograf"
+msgstr "Sobre Tarracograf"
 
 msgid "Som una plataforma ciutadana compromesa amb la transformació de Tarragona en una ciutat més neta, sostenible i cívica."
 msgstr "Somos una plataforma ciudadana comprometida con la transformación de Tarragona en una ciudad más limpia, sostenible y cívica."
@@ -573,8 +573,8 @@ msgstr "Cada acción cuenta. Tu participación puede marcar la diferencia en la 
 msgid "Explorar Iniciatives"
 msgstr "Explorar Iniciativas"
 
-msgid "Tarragoneta - Junts per una ciutat millor"
-msgstr "Tarragoneta - Juntos por una ciudad mejor"
+msgid "Tarracograf - Junts per una ciutat millor"
+msgstr "Tarracograf - Radiografía de la ciudad"
 
 msgid "Title"
 msgstr "Título"
@@ -683,3 +683,114 @@ msgstr "Subcategorías de Basura"
 
 msgid "Totes les subcategorías"
 msgstr "Todas las subcategorías"
+
+msgid "Iniciar Sesión"
+msgstr "Iniciar Sesión"
+
+msgid "Accede a tu cuenta para participar en iniciativas y gestionar tu perfil"
+msgstr "Accede a tu cuenta para participar en iniciativas y gestionar tu perfil"
+
+msgid "¿No tienes cuenta?"
+msgstr "¿No tienes cuenta?"
+
+msgid "Regístrate aquí"
+msgstr "Regístrate aquí"
+
+msgid "Crear Cuenta"
+msgstr "Crear Cuenta"
+
+msgid "Únete a la comunidad de Tarracograf y participa en iniciativas ciudadanas"
+msgstr "Únete a la comunidad de Tarracograf y participa en iniciativas ciudadanas"
+
+msgid "La contraseña debe tener al menos 8 caracteres"
+msgstr "La contraseña debe tener al menos 8 caracteres"
+
+msgid "Confirma tu contraseña"
+msgstr "Confirma tu contraseña"
+
+msgid "¿Ya tienes cuenta?"
+msgstr "¿Ya tienes cuenta?"
+
+msgid "Inicia sesión aquí"
+msgstr "Inicia sesión aquí"
+
+msgid "Nombre de usuario"
+msgstr "Nombre de usuario"
+
+msgid "Este nombre de usuario ya está en uso"
+msgstr "Este nombre de usuario ya está en uso"
+
+msgid "tu@email.com"
+msgstr "tu@email.com"
+
+msgid "Tu contraseña"
+msgstr "Tu contraseña"
+
+msgid "Tu nombre de usuario"
+msgstr "Tu nombre de usuario"
+
+msgid "Mínimo 8 caracteres"
+msgstr "Mínimo 8 caracteres"
+
+msgid "Reportatges Actius"
+msgstr "Reportajes Activos"
+
+msgid "Problemàtiques"
+msgstr "Problemáticas"
+
+msgid "Veure Mapa del Inventari"
+msgstr "Ver Mapa del Inventario"
+
+msgid "Reportar Problema"
+msgstr "Reportar Problema"
+
+msgid "Uneix-te per Reportar"
+msgstr "Únete para Reportar"
+
+msgid "Radiografia Ciutat"
+msgstr "Radiografía Ciudad"
+
+msgid "Radiografia de la Ciutat"
+msgstr "Radiografía de la Ciudad"
+
+msgid "Visualitza i reporta problemes de neteja, palomes i altres incidències a Tarragona"
+msgstr "Visualiza y reporta problemas de limpieza, palomas y otras incidencias en Tarragona"
+
+msgid "Problemes de Brossa"
+msgstr "Problemas de Basura"
+
+msgid "Problemes de Palomes"
+msgstr "Problemas de Palomas"
+
+msgid "Total Reportatges"
+msgstr "Total Reportajes"
+
+msgid "Ciutadans Actius"
+msgstr "Ciudadanos Activos"
+
+msgid "Explorar Mapa"
+msgstr "Explorar Mapa"
+
+msgid "Reportar Nou Problema"
+msgstr "Reportar Nuevo Problema"
+
+msgid "Registra't per Reportar"
+msgstr "Regístrate para Reportar"
+
+msgid "Reportatges Recents"
+msgstr "Reportajes Recientes"
+
+msgid "Últims problemes reportats pels ciutadans"
+msgstr "Últimos problemas reportados por los ciudadanos"
+
+msgid "Veure Tots"
+msgstr "Ver Todos"
+
+msgid "Iniciatives Ciutadanes"
+msgstr "Iniciativas Ciudadanas"
+
+msgid "Veure Més"
+msgstr "Ver Más"
+
+msgid "Filtrar"
+msgstr "Filtrar"

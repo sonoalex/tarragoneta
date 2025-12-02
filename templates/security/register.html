@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Registrarse - Tarragoneta{% endblock %}
+{% block title %}{{ _('Registrarse') }} - Tarracograf{% endblock %}
 
 {% block content %}
 <section class="py-5">
@@ -11,9 +11,9 @@
                     <div class="card-body p-5">
                         <div class="text-center mb-4">
                             <div class="mb-3" style="font-size: 3rem;">🌱</div>
-                            <h1 class="h3 fw-bold mb-2">Crear Cuenta</h1>
+                            <h1 class="h3 fw-bold mb-2">{{ _('Crear Cuenta') }}</h1>
                             <p class="text-muted">
-                                Únete a la comunidad de Tarragoneta y participa en iniciativas ciudadanas
+                                {{ _('Únete a la comunidad de Tarracograf y participa en iniciativas ciudadanas') }}
                             </p>
                         </div>
                         
@@ -22,7 +22,7 @@
                             
                             <div class="mb-3">
                                 {{ register_user_form.email.label(class="form-label fw-bold") }}
-                                {{ register_user_form.email(class="form-control form-control-lg", placeholder="tu@email.com") }}
+                                {{ register_user_form.email(class="form-control form-control-lg", placeholder=_('tu@email.com')) }}
                                 {% if register_user_form.email.errors %}
                                     <div class="text-danger small mt-1">
                                         {% for error in register_user_form.email.errors %}
@@ -34,7 +34,7 @@
                             
                             <div class="mb-3">
                                 {{ register_user_form.username.label(class="form-label fw-bold") }}
-                                {{ register_user_form.username(class="form-control form-control-lg", placeholder="Tu nombre de usuario") }}
+                                {{ register_user_form.username(class="form-control form-control-lg", placeholder=_('Tu nombre de usuario')) }}
                                 {% if register_user_form.username.errors %}
                                     <div class="text-danger small mt-1">
                                         {% for error in register_user_form.username.errors %}
@@ -46,7 +46,7 @@
                             
                             <div class="mb-3">
                                 {{ register_user_form.password.label(class="form-label fw-bold") }}
-                                {{ register_user_form.password(class="form-control form-control-lg", placeholder="Mínimo 8 caracteres") }}
+                                {{ register_user_form.password(class="form-control form-control-lg", placeholder=_('Mínimo 8 caracteres')) }}
                                 {% if register_user_form.password.errors %}
                                     <div class="text-danger small mt-1">
                                         {% for error in register_user_form.password.errors %}
@@ -54,13 +54,13 @@
                                         {% endfor %}
                                     </div>
                                 {% endif %}
-                                <small class="form-text text-muted">La contraseña debe tener al menos 8 caracteres</small>
+                                <small class="form-text text-muted">{{ _('La contraseña debe tener al menos 8 caracteres') }}</small>
                             </div>
                             
                             {% if register_user_form.password_confirm %}
                             <div class="mb-4">
                                 {{ register_user_form.password_confirm.label(class="form-label fw-bold") }}
-                                {{ register_user_form.password_confirm(class="form-control form-control-lg", placeholder="Confirma tu contraseña") }}
+                                {{ register_user_form.password_confirm(class="form-control form-control-lg", placeholder=_('Confirma tu contraseña')) }}
                                 {% if register_user_form.password_confirm.errors %}
                                     <div class="text-danger small mt-1">
                                         {% for error in register_user_form.password_confirm.errors %}
@@ -72,15 +72,15 @@
                             {% endif %}
                             
                             <button type="submit" class="btn btn-success btn-lg w-100 mb-3">
-                                <i class="fas fa-user-plus me-2"></i>Crear Cuenta
+                                <i class="fas fa-user-plus me-2"></i>{{ _('Crear Cuenta') }}
                             </button>
                         </form>
                         
                         <div class="text-center">
                             <p class="text-muted mb-0">
-                                ¿Ya tienes cuenta? 
+                                {{ _('¿Ya tienes cuenta?') }} 
                                 <a href="{{ url_for('security.login') }}" class="text-decoration-none fw-bold">
-                                    <i class="fas fa-sign-in-alt me-1"></i>Inicia sesión aquí
+                                    <i class="fas fa-sign-in-alt me-1"></i>{{ _('Inicia sesión aquí') }}
                                 </a>
                             </p>
                         </div>

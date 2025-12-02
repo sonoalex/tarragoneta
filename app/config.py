@@ -13,8 +13,8 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', secrets.token_hex(32))
     
     # Database configuration
-    # Railway provides DATABASE_URL, but we need to handle PostgreSQL vs SQLite
-    database_url = os.environ.get('DATABASE_URL', 'sqlite:///tarragoneta.db')
+    # Railway provides DATABASE_URL
+    database_url = os.environ.get('DATABASE_URL', 'postgresql://tarracograf:tarracograf_dev@localhost:5432/tarracograf')
     # Railway uses postgres:// but SQLAlchemy needs postgresql://
     if database_url.startswith('postgres://'):
         database_url = database_url.replace('postgres://', 'postgresql://', 1)
@@ -26,7 +26,7 @@ class Config:
     }
     
     # Security
-    SECURITY_PASSWORD_SALT = os.environ.get('SECURITY_PASSWORD_SALT', 'tarragoneta-salt-2024')
+    SECURITY_PASSWORD_SALT = os.environ.get('SECURITY_PASSWORD_SALT', 'tarracograf-salt-2024')
     SECURITY_PASSWORD_HASH = 'bcrypt'
     SECURITY_REGISTERABLE = True
     SECURITY_SEND_REGISTER_EMAIL = False
@@ -63,39 +63,42 @@ class Config:
     STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')
     STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
     
-    # Mail configuration (Gmail)
-    MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
-    MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
-    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'True').lower() in ('true', '1', 'yes')
-    MAIL_USE_SSL = os.environ.get('MAIL_USE_SSL', 'False').lower() in ('true', '1', 'yes')
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME', 'hola@latarragoneta.com')
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', '')  # App password from Google
-    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'Tarragoneta <hola@latarragoneta.com>')
+    # Mail configuration (Hostinger)
+    MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.hostinger.com')
+    MAIL_PORT = int(os.environ.get('MAIL_PORT', 465))  # 465 for SSL, 587 for TLS
+    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'False').lower() in ('true', '1', 'yes')  # Use False for SSL (port 465)
+    MAIL_USE_SSL = os.environ.get('MAIL_USE_SSL', 'True').lower() in ('true', '1', 'yes')  # Use True for SSL (port 465)
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME', 'hola@tarracograf.cat')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', '')  # Email account password
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'Tarracograf <hola@tarracograf.cat>')
     MAIL_SUPPRESS_SEND = os.environ.get('MAIL_SUPPRESS_SEND', 'False').lower() in ('true', '1', 'yes')
     # Timeout for SMTP connection (in seconds)
     MAIL_TIMEOUT = int(os.environ.get('MAIL_TIMEOUT', '10'))
     
     # Admin email for notifications
-    ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'hola@latarragoneta.com')
+    ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'hola@tarracograf.cat')
     
     # Inventory auto-resolve settings
     INVENTORY_AUTO_RESOLVE_THRESHOLD = int(os.environ.get('INVENTORY_AUTO_RESOLVE_THRESHOLD', '3'))  # Minimum "ya no está" reports to auto-resolve
     
     # Admin user configuration (for initial setup only)
     # ADMIN_EMAIL is already defined above for notifications
-    ADMIN_USER_EMAIL = os.environ.get('ADMIN_USER_EMAIL', 'admin@tarragoneta.org')  # Email for admin user account
+    ADMIN_USER_EMAIL = os.environ.get('ADMIN_USER_EMAIL', 'hola@tarracograf.cat')  # Email for admin user account
     ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', None)  # Must be set in production, defaults to None for security
     
-    # Redis configuration for background jobs (email queue)
-    REDIS_URL = os.environ.get('REDIS_URL', os.environ.get('REDISCLOUD_URL', 'redis://localhost:6379/0'))
-    # Use background jobs for emails (set to False to send synchronously)
-    USE_EMAIL_QUEUE = os.environ.get('USE_EMAIL_QUEUE', 'True').lower() in ('true', '1', 'yes')
+    # Email provider configuration
+    # Options: 'smtp', 'console'
+    # In local development, use 'smtp' (recommended)
+    # In production, use 'smtp'
+    # Use 'console' only for testing (emails printed to console)
+    # Default to 'smtp' for local development
+    EMAIL_PROVIDER = os.environ.get('EMAIL_PROVIDER', 'smtp')
     
-    # Server name for URL generation outside request context (needed for email templates)
-    # Railway provides RAILWAY_PUBLIC_DOMAIN or use custom domain
-    SERVER_NAME = os.environ.get('SERVER_NAME', os.environ.get('RAILWAY_PUBLIC_DOMAIN'))
-    PREFERRED_URL_SCHEME = os.environ.get('PREFERRED_URL_SCHEME', 'https')
-    APPLICATION_ROOT = os.environ.get('APPLICATION_ROOT', '/')
+    # Celery configuration
+    CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+    CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
+    # Use Celery for async email sending (default: True)
+    MAIL_USE_SSL=True
 
 class DevelopmentConfig(Config):
     """Development configuration"""

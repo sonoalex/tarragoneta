@@ -13,9 +13,7 @@ babel = Babel()
 security = Security()
 mail = Mail()
 
-# Redis and RQ queue (initialized in init_extensions)
-redis_conn = None
-email_queue = None
+# Email providers are initialized on-demand via app/providers/__init__.py
 
 # Will be set after models are imported
 user_datastore = None
@@ -27,18 +25,7 @@ def init_extensions(app):
     # Initialize SQLAlchemy with engine options if configured
     engine_options = app.config.get('SQLALCHEMY_ENGINE_OPTIONS', {})
     db.init_app(app)
-    if engine_options:
-        # Apply engine options to the database engine
-        from sqlalchemy import event
-        from sqlalchemy.engine import Engine
-        
-        @event.listens_for(Engine, "connect")
-        def set_sqlite_pragma(dbapi_conn, connection_record):
-            # SQLite specific optimizations
-            if 'sqlite' in app.config['SQLALCHEMY_DATABASE_URI']:
-                cursor = dbapi_conn.cursor()
-                cursor.execute("PRAGMA foreign_keys=ON")
-                cursor.close()
+    # Engine options are automatically applied via SQLALCHEMY_ENGINE_OPTIONS in config
     
     migrate.init_app(app, db)
     csrf.init_app(app)
@@ -57,42 +44,56 @@ def init_extensions(app):
     babel.init_app(app, locale_selector=get_locale)
     
     # Initialize Flask-Mail
+    # Flask-Mail handles SMTP connections internally
+    # Timeout is handled at the thread level in SMTPEmailProvider
     mail.init_app(app)
     
-    # Configure SMTP timeout if specified
-    if app.config.get('MAIL_TIMEOUT'):
-        # Flask-Mail uses smtplib internally, we need to patch it
-        import smtplib
-        original_smtp = smtplib.SMTP
-        
-        def patched_smtp(*args, **kwargs):
-            # Add timeout to SMTP connection
-            if 'timeout' not in kwargs:
-                kwargs['timeout'] = app.config.get('MAIL_TIMEOUT', 10)
-            return original_smtp(*args, **kwargs)
-        
-        # Only patch if not already patched
-        if not hasattr(smtplib.SMTP, '_tarragoneta_patched'):
-            smtplib.SMTP = patched_smtp
-            smtplib.SMTP._tarragoneta_patched = True
+    # Initialize Dependency Injection Container
+    from app.container import get_container
+    from app.providers.base import EmailProvider
+    from app.providers.smtp_provider import SMTPEmailProvider
+    from app.providers.console_provider import ConsoleEmailProvider
     
-    # Initialize Redis and RQ queue for background jobs
-    global redis_conn, email_queue
-    try:
-        from redis import Redis
-        from rq import Queue
-        
-        redis_url = app.config.get('REDIS_URL', 'redis://localhost:6379/0')
-        # Don't use decode_responses=True for RQ - it handles serialization internally
-        redis_conn = Redis.from_url(redis_url, decode_responses=False)
-        # Test connection
-        redis_conn.ping()
-        email_queue = Queue('emails', connection=redis_conn)
-        app.logger.info('Redis and email queue initialized successfully')
-    except Exception as e:
-        app.logger.warning(f'Redis not available, emails will be sent synchronously: {str(e)}')
-        redis_conn = None
-        email_queue = None
+    container = get_container()
+    
+    # Select email provider based on configuration
+    provider_name = app.config.get('EMAIL_PROVIDER', 'smtp').lower()
+    selected_provider = None
+    
+    app.logger.info(f'Email provider configuration: EMAIL_PROVIDER={provider_name}')
+    
+    # Select provider based on configuration
+    if provider_name == 'smtp':
+        provider = SMTPEmailProvider()
+        if provider.is_available(app=app):
+            selected_provider = provider
+            app.logger.info('SMTP provider selected')
+        else:
+            app.logger.warning('SMTP provider requested but not available, falling back to console')
+            selected_provider = ConsoleEmailProvider()
+    
+    elif provider_name == 'console':
+        selected_provider = ConsoleEmailProvider()
+        app.logger.info('Console provider selected')
+    
+    else:
+        # Unknown provider, default to SMTP, fallback to console
+        app.logger.warning(f'Unknown email provider: {provider_name}, trying SMTP...')
+        provider = SMTPEmailProvider()
+        if provider.is_available(app=app):
+            selected_provider = provider
+            app.logger.info('Using SMTP provider (fallback)')
+        else:
+            app.logger.warning('SMTP not available, using console provider')
+            selected_provider = ConsoleEmailProvider()
+    
+    # Register the selected provider instance
+    container.register_instance(
+        'email_provider',
+        selected_provider,
+        service_type=EmailProvider
+    )
+    app.logger.info(f'Dependency Injection container initialized with {selected_provider.__class__.__name__}')
     
     # Initialize Flask-Security (needs models)
     from app.models import User, Role

@@ -68,7 +68,7 @@ Reinicia Flask para que cargue la nueva variable de entorno.
 4. Verifica en la base de datos:
 
 ```bash
-sqlite3 tarragoneta.db "SELECT id, amount, email, status, created_at FROM donation ORDER BY created_at DESC LIMIT 5;"
+psql $DATABASE_URL -c "SELECT id, amount, email, status, created_at FROM donation ORDER BY created_at DESC LIMIT 5;"
 ```
 
 ## Verificar que funciona
@@ -95,7 +95,7 @@ INFO: Donation saved: 1 - 5.0€
 ### Base de datos
 
 ```bash
-sqlite3 tarragoneta.db "SELECT * FROM donation;"
+psql $DATABASE_URL -c "SELECT * FROM donation;"
 ```
 
 Deberías ver la donación con `status='completed'`.
@@ -120,6 +120,6 @@ El webhook secret no coincide. Asegúrate de usar el que Stripe CLI muestra (emp
 ### La donación no se guarda
 
 1. Revisa los logs de Flask para ver errores
-2. Verifica que la tabla `donation` existe: `sqlite3 tarragoneta.db ".tables"`
+2. Verifica que la tabla `donation` existe: `psql $DATABASE_URL -c "\dt"`
 3. Verifica que las migraciones están aplicadas: `uv run flask db current`
 

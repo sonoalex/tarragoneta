@@ -1,7 +1,16 @@
 #!/bin/bash
-# Script para arrancar Tarragoneta
+# Script para arrancar Tarracograf
 
-echo "🚀 Iniciando Tarragoneta..."
+echo "🚀 Iniciando Tarracograf..."
+echo ""
+
+# Iniciar servicios Docker si están disponibles
+if command -v docker &> /dev/null && [ -f docker-compose.yml ]; then
+    echo "🐳 Iniciando servicios Docker (PostgreSQL y Redis)..."
+    docker-compose up -d postgres redis 2>/dev/null || echo "⚠️  No se pudieron iniciar los servicios Docker"
+    echo "⏳ Esperando a que los servicios estén listos..."
+    sleep 3
+fi
 echo ""
 
 # Activar entorno virtual si existe
@@ -26,7 +35,7 @@ echo ""
 echo "✅ Todo listo! Arrancando servidor..."
 echo ""
 echo "📝 Credenciales (desarrollo):"
-echo "   Email: admin@tarragoneta.org"
+echo "   Email: hola@tarracograf.cat"
 echo "   Password: admin123 (cambiar después del primer login)"
 echo ""
 echo "🌐 Servidor en: http://127.0.0.1:5000"

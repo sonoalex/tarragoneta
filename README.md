@@ -1,4 +1,4 @@
-# 🌱 Tarragoneta - Plataforma de Iniciativas Ciudadanas
+# 🌱 Tarracograf - Radiografía de la Ciudad
 
 ![Python](https://img.shields.io/badge/Python-3.8.1%2B-blue)
 ![Flask](https://img.shields.io/badge/Flask-3.0.0-green)
@@ -7,7 +7,7 @@
 
 ## 📋 Descripción
 
-**Tarragoneta** es una plataforma web diseñada para conectar ciudadanos comprometidos con iniciativas que mejoren la ciudad de Tarragona. La aplicación facilita la organización y participación en actividades de limpieza, reciclaje, espacios verdes, y otras acciones cívicas.
+**Tarracograf** es una plataforma web diseñada para hacer una radiografía del estado de la ciudad de Tarragona. La aplicación permite visualizar tanto iniciativas ciudadanas como el estado de limpieza y suciedad de la ciudad.
 
 ### ✨ Características Principales
 
@@ -36,8 +36,8 @@
 
 1. **Clonar el repositorio**
 ```bash
-git clone https://github.com/tu-usuario/tarragoneta.git
-cd tarragoneta
+git clone https://github.com/tu-usuario/tarracograf.git
+cd tarracograf
 ```
 
 2. **Crear entorno virtual con uv**
@@ -142,7 +142,7 @@ pip install -r requirements.txt
 
 ### Credenciales por Defecto
 
-- **Usuario Admin**: admin@tarragoneta.org
+- **Usuario Admin**: hola@tarracograf.cat
 - **Contraseña**: admin123 (solo desarrollo - **cambiar en producción**)
 
 ⚠️ **Importante**: Cambiar estas credenciales en producción
@@ -150,7 +150,7 @@ pip install -r requirements.txt
 ## 📁 Estructura del Proyecto
 
 ```
-tarragoneta/
+tarracograf/
 │
 ├── app.py                  # Aplicación principal Flask
 ├── seed_data.py           # Script para generar datos de ejemplo del inventario
@@ -239,7 +239,7 @@ La aplicación incluye un sistema de logging configurado:
 - Activación del debugger de Flask
 
 ### Modo Producción (DEBUG=False)
-- Logs en archivo rotativo (`logs/tarragoneta.log`)
+- Logs en archivo rotativo (`logs/tarracograf.log`)
 - Rotación automática (10MB por archivo, 10 backups)
 - Nivel de log INFO
 - Información de errores sin exponer detalles sensibles
@@ -301,7 +301,7 @@ Railway es una plataforma de despliegue que facilita el proceso de publicación 
 3. **Añadir base de datos PostgreSQL** (⚠️ **OBLIGATORIO**)
    - En Railway Dashboard → "New" → "Database" → "Add PostgreSQL"
    - Railway automáticamente configurará `DATABASE_URL`
-   - **IMPORTANTE**: Sin PostgreSQL, la app usará SQLite que no persiste entre despliegues
+   - **IMPORTANTE**: Se requiere PostgreSQL con PostGIS para el funcionamiento completo
    - El release phase inicializará automáticamente las tablas en el primer despliegue
 
 4. **Desplegar**
@@ -377,7 +377,7 @@ STRIPE_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxx
 4. Verifica en la base de datos que la donación se guardó:
 
 ```bash
-sqlite3 tarragoneta.db "SELECT * FROM donation;"
+psql $DATABASE_URL -c "SELECT * FROM donation;"
 ```
 
 ### Notas
@@ -488,9 +488,9 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 
 ## 📞 Contacto
 
-- **Email**: info@tarragoneta.org
-- **Website**: https://tarragoneta.org
-- **Twitter**: @tarragoneta
+- **Email**: hola@tarracograf.cat
+- **Website**: https://tarracograf.cat
+- **Twitter**: @tarracograf
 
 ## 🙏 Agradecimientos
 

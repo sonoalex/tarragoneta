@@ -69,15 +69,22 @@ def init_database():
             print("✓ Roles creados")
         
         # Crear usuario admin si no existe
-        admin_email = app.config.get('ADMIN_USER_EMAIL', 'admin@tarragoneta.org')
+        admin_email = app.config.get('ADMIN_USER_EMAIL', 'hola@tarracograf.cat')
         admin_password = app.config.get('ADMIN_PASSWORD')
         
+        # Verificar si el usuario admin ya existe (por email o username)
         admin_user = User.query.filter_by(email=admin_email).first()
-        if not admin_user:
+        admin_user_by_username = User.query.filter_by(username='admin').first()
+        
+        if admin_user:
+            print(f"✓ Usuario admin ya existe (email: {admin_email})")
+        elif admin_user_by_username:
+            print(f"✓ Usuario admin ya existe (username: admin)")
+        else:
+            # Usuario no existe, crearlo
             if not admin_password:
                 # Solo en desarrollo: usar password por defecto si no está configurado
-                import secrets
-                if app.config.get('ENV') == 'development':
+                if app.config.get('ENV') == 'development' or app.config.get('FLASK_ENV') == 'development':
                     admin_password = 'admin123'  # Solo para desarrollo local
                     print("👤 Creando usuario admin (desarrollo)...")
                     print("⚠️  Usando contraseña por defecto. Cambia la contraseña después del primer login!")
@@ -90,19 +97,29 @@ def init_database():
             from app.extensions import user_datastore
             admin_role = Role.query.filter_by(name='admin').first()
             
-            admin_user = user_datastore.create_user(
-                email=admin_email,
-                username='admin',
-                password=admin_password,
-                active=True,
-                confirmed_at=datetime.now(),
-                roles=[admin_role]
-            )
-            db.session.commit()
-            print("✓ Usuario admin creado")
-            if app.config.get('ENV') == 'development':
-                print(f"   Email: {admin_email}")
-                print(f"   Password: {admin_password}")
+            try:
+                admin_user = user_datastore.create_user(
+                    email=admin_email,
+                    username='admin',
+                    password=admin_password,
+                    active=True,
+                    confirmed_at=datetime.now(),
+                    roles=[admin_role]
+                )
+                db.session.commit()
+                print("✓ Usuario admin creado")
+                if app.config.get('ENV') == 'development' or app.config.get('FLASK_ENV') == 'development':
+                    print(f"   Email: {admin_email}")
+                    print(f"   Password: {admin_password}")
+            except Exception as e:
+                db.session.rollback()
+                # Si falla por constraint, el usuario probablemente ya existe
+                if 'UNIQUE constraint' in str(e) or 'IntegrityError' in str(type(e).__name__):
+                    print(f"⚠️  Usuario admin ya existe (error de constraint: {str(e)})")
+                    print(f"   Email: {admin_email}")
+                else:
+                    print(f"⚠️  Error creando usuario admin: {str(e)}")
+                    raise
         
         print("✅ Base de datos inicializada!")
 

@@ -8,7 +8,7 @@ from app.extensions import db
 from app.models import User
 
 class ExtendedRegisterForm(RegisterForm):
-    username = StringField('Nombre de usuario', validators=[DataRequired(), Length(min=3, max=255)])
+    username = StringField(_l('Nombre de usuario'), validators=[DataRequired(), Length(min=3, max=255)])
     
     def validate(self, extra_validators=None):
         # Call parent validate without extra_validators to avoid signature mismatch
@@ -17,7 +17,7 @@ class ExtendedRegisterForm(RegisterForm):
         
         # Check if username already exists
         if User.query.filter_by(username=self.username.data).first():
-            self.username.errors.append('Este nombre de usuario ya está en uso')
+            self.username.errors.append(_('Este nombre de usuario ya está en uso'))
             return False
         
         return True
@@ -63,7 +63,7 @@ class InitiativeForm(FlaskForm):
                 ('educacion', '📚 ' + str(_('Environmental Education'))),
                 ('cultura', '🎭 ' + str(_('Culture and Civics'))),
                 ('social', '🤝 ' + str(_('Social Action'))),
-                ('basura_desborda', '🗑️ ' + str(_('Overflowing Trash'))),
+                ('basura_desbordada', '🗑️ ' + str(_('Brossa Desbordada'))),
                 ('vertidos', '💧 ' + str(_('Dumping')))
             ]
         else:
@@ -76,7 +76,7 @@ class InitiativeForm(FlaskForm):
                 ('educacion', '📚 Environmental Education'),
                 ('cultura', '🎭 Culture and Civics'),
                 ('social', '🤝 Social Action'),
-                ('basura_desborda', '🗑️ Overflowing Trash'),
+                ('basura_desbordada', '🗑️ Brossa Desbordada'),
                 ('vertidos', '💧 Dumping')
             ]
 
@@ -101,12 +101,12 @@ class InventoryForm(FlaskForm):
             # These will be filtered by JavaScript on the client side
             self.subcategory.choices = [
                 # Palomas subcategories
-                ('nido', '🪺 ' + str(_('Nido'))),
-                ('excremento', '💩 ' + str(_('Excremento'))),
-                ('plumas', '🪶 ' + str(_('Plumas'))),
+                ('nido', '🪺 ' + str(_('Niul'))),
+                ('excremento', '💩 ' + str(_('Excrement'))),
+                ('plumas', '🪶 ' + str(_('Plomes'))),
                 # Basura subcategories
-                ('basura_desborda', '🗑️ ' + str(_('Basura Desbordada'))),
-                ('vertidos', '💧 ' + str(_('Vertidos')))
+                ('basura_desbordada', '🗑️ ' + str(_('Brossa Desbordada'))),
+                ('vertidos', '💧 ' + str(_('Abocaments')))
             ]
         else:
             self.category.choices = [
@@ -114,11 +114,11 @@ class InventoryForm(FlaskForm):
                 ('basura', '🗑️ Basura')
             ]
             self.subcategory.choices = [
-                ('nido', '🪺 Nido'),
-                ('excremento', '💩 Excremento'),
-                ('plumas', '🪶 Plumas'),
-                ('basura_desborda', '🗑️ Basura Desbordada'),
-                ('vertidos', '💧 Vertidos')
+                ('nido', '🪺 Niul'),
+                ('excremento', '💩 Excrement'),
+                ('plumas', '🪶 Plomes'),
+                ('basura_desbordada', '🗑️ Brossa Desbordada'),
+                ('vertidos', '💧 Abocaments')
             ]
     
     def validate_subcategory(self, field):
@@ -129,7 +129,7 @@ class InventoryForm(FlaskForm):
         # Define valid subcategories for each category
         valid_subcategories = {
             'palomas': ['nido', 'excremento', 'plumas'],
-            'basura': ['basura_desborda', 'vertidos']
+            'basura': ['basura_desbordada', 'vertidos']
         }
         
         if category and subcategory:

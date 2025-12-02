@@ -3,9 +3,9 @@
 {% block content %}
 <h2>{{ _('Gràcies per la teva donació!') }} 💚</h2>
 
-<p>{% if user %}{{ _('Hola') }} {{ user.username or user.email }},{% else %}{{ _('Hola') }},{% endif %}</p>
+<p>{% if username %}{{ _('Hola') }} {{ username }},{% else %}{{ _('Hola') }},{% endif %}</p>
 
-<p>{{ _('Volem agrair-te la teva generosa donació a Tarragoneta. El teu suport ens ajuda a continuar millorant la nostra ciutat.') }}</p>
+<p>{{ _('Volem agrair-te la teva generosa donació a Tarracograf. El teu suport ens ajuda a continuar millorant la nostra ciutat.') }}</p>
 
 <div class="highlight-box">
     <h3 style="margin-top: 0;">{{ _('Detalls de la donació') }}</h3>
@@ -13,7 +13,7 @@
         <strong>{{ _('Quantitat') }}:</strong> {{ amount }}€
     </p>
     <p style="margin: 10px 0;">
-        <strong>{{ _('Data') }}:</strong> {{ donation.completed_at.strftime('%d/%m/%Y %H:%M') if donation.completed_at else _('Ara mateix') }}
+        <strong>{{ _('Data') }}:</strong> {{ donation_date or _('Ara mateix') }}
     </p>
     <p style="margin: 10px 0;">
         <strong>{{ _('Estat') }}:</strong> {{ _('Completada') }}
@@ -26,7 +26,7 @@
     <li>{{ _('Organitzar més iniciatives cíviques') }}</li>
     <li>{{ _('Millorar les funcionalitats de la plataforma') }}</li>
     <li>{{ _('Fomentar la participació ciutadana') }}</li>
-    <li>{{ _('Mantenir l\'inventari actualitzat de l\'estat de la ciutat') }} ({{ _('palomes, brossa i més') }})</li>
+    <li>{{ _('Mantenir l\'inventari actualitzat de l\'estat de la ciutat') }} ({{ _('coloms, brossa i més') }})</li>
 </ul>
 
 <p>{{ _('Gràcies per formar part d\'aquest projecte.') }}</p>
@@ -36,6 +36,6 @@
 </div>
 
 <p>{{ _('Un abraç,') }}<br>
-<strong>L'equip de Tarragoneta</strong></p>
+<strong>L'equip de Tarracograf</strong></p>
 {% endblock %}
 

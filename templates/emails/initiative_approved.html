@@ -3,14 +3,14 @@
 {% block content %}
 <h2>{{ _('La teva iniciativa ha estat aprovada!') }} ✅</h2>
 
-<p>{{ _('Hola') }} {{ user.username or user.email }},</p>
+<p>{{ _('Hola') }} {{ username }},</p>
 
-<p>{{ _('Tenim bones notícies! La teva iniciativa ha estat revisada i aprovada per l\'equip de Tarragoneta.') }}</p>
+<p>{{ _('Tenim bones notícies! La teva iniciativa ha estat revisada i aprovada per l\'equip de Tarracograf.') }}</p>
 
 <div class="info-box">
-    <h3 style="margin-top: 0;">{{ initiative.title }}</h3>
-    <p><strong>{{ _('Data') }}:</strong> {{ initiative.date.strftime('%d/%m/%Y') if initiative.date else _('Per determinar') }}</p>
-    <p><strong>{{ _('Ubicació') }}:</strong> {{ initiative.location }}</p>
+    <h3 style="margin-top: 0;">{{ initiative_title }}</h3>
+    <p><strong>{{ _('Data') }}:</strong> {{ initiative_date or _('Per determinar') }}</p>
+    <p><strong>{{ _('Ubicació') }}:</strong> {{ initiative_location }}</p>
 </div>
 
 <p>{{ _('La teva iniciativa ja està visible a la plataforma i altres ciutadans poden unir-s\'hi.') }}</p>
@@ -19,9 +19,9 @@
     <a href="{{ initiative_url }}" class="button">{{ _('Veure la iniciativa') }}</a>
 </div>
 
-<p>{{ _('Recorda que pots gestionar la teva iniciativa des del teu panell d\'usuari. També pots reportar l\'estat actual de la ciutat al nostre inventari') }} ({{ _('palomes, brossa i més') }}).</p>
+<p>{{ _('Recorda que pots gestionar la teva iniciativa des del teu panell d\'usuari. També pots reportar l\'estat actual de la ciutat al nostre inventari') }} ({{ _('coloms, brossa i més') }}).</p>
 
 <p>{{ _('Gràcies per contribuir a millorar Tarragona!') }}<br>
-<strong>L'equip de Tarragoneta</strong></p>
+<strong>L'equip de Tarracograf</strong></p>
 {% endblock %}
 

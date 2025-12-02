@@ -1,6 +1,6 @@
 # Configuración del proyecto para uv
 [project]
-name = "tarragoneta"
+name = "tarracograf"
 version = "0.1.0"
 description = "Plataforma ciudadana para iniciativas cívicas en Tarragona"
 readme = "README.md"

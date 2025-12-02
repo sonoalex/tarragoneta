@@ -1,6 +1,6 @@
 # Configurar Gmail para Envío de Emails
 
-Este documento explica cómo configurar Gmail para enviar emails desde Tarragoneta.
+Este documento explica cómo configurar Gmail para enviar emails desde Tarracograf.
 
 ## ⚠️ Error 535: Username and Password not accepted
 
@@ -23,7 +23,7 @@ Si ves este error, significa que las credenciales de Gmail no son válidas. Sigu
    - O desde Seguridad → Verificación en 2 pasos → Contraseñas de aplicaciones
 2. Selecciona:
    - **Aplicación**: "Correo"
-   - **Dispositivo**: "Otro (nombre personalizado)" → Escribe "Tarragoneta"
+   - **Dispositivo**: "Otro (nombre personalizado)" → Escribe "Tarracograf"
 3. Haz clic en **Generar**
 4. **Copia la contraseña de 16 caracteres** que aparece (sin espacios)
    - Ejemplo: `abcd efgh ijkl mnop` → `abcdefghijklmnop`
@@ -37,9 +37,9 @@ MAIL_SERVER=smtp.gmail.com
 MAIL_PORT=587
 MAIL_USE_TLS=True
 MAIL_USE_SSL=False
-MAIL_USERNAME=hola@latarragoneta.com
+MAIL_USERNAME=hola@tarracograf.cat
 MAIL_PASSWORD=abcdefghijklmnop  # ← Pega aquí la App Password de 16 caracteres
-MAIL_DEFAULT_SENDER=Tarragoneta <hola@latarragoneta.com>
+MAIL_DEFAULT_SENDER=Tarracograf <hola@tarracograf.cat>
 MAIL_SUPPRESS_SEND=False
 ```
 
@@ -101,11 +101,11 @@ En Railway, añade estas variables de entorno:
    - `MAIL_PORT=587`
    - `MAIL_USE_TLS=True`
    - `MAIL_USE_SSL=False`
-   - `MAIL_USERNAME=hola@latarragoneta.com`
+   - `MAIL_USERNAME=hola@tarracograf.cat`
    - `MAIL_PASSWORD=tu-app-password-de-16-caracteres`
-   - `MAIL_DEFAULT_SENDER=Tarragoneta <hola@latarragoneta.com>`
+   - `MAIL_DEFAULT_SENDER=Tarracograf <hola@tarracograf.cat>`
    - `MAIL_SUPPRESS_SEND=False`
-   - `ADMIN_EMAIL=hola@latarragoneta.com` (opcional)
+   - `ADMIN_EMAIL=hola@tarracograf.cat` (opcional)
 
 ## 🔐 Seguridad
 

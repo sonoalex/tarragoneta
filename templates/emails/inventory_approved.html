@@ -5,15 +5,15 @@
 
 <p>{{ _('Hola') }},</p>
 
-<p>{{ _('El teu reportatge ha estat revisat i aprovat. Ja està visible al mapa de Tarragoneta.') }}</p>
+<p>{{ _('El teu reportatge ha estat revisat i aprovat. Ja està visible al mapa de Tarracograf.') }}</p>
 
 <div class="info-box">
-    <p><strong>{{ _('Categoria') }}:</strong> {{ item.full_category }}</p>
-    {% if item.address %}
-    <p><strong>{{ _('Ubicació') }}:</strong> {{ item.address }}</p>
+    <p><strong>{{ _('Categoria') }}:</strong> {{ item_full_category }}</p>
+    {% if item_address %}
+    <p><strong>{{ _('Ubicació') }}:</strong> {{ item_address }}</p>
     {% endif %}
-    {% if item.description %}
-    <p><strong>{{ _('Descripció') }}:</strong> {{ item.description }}</p>
+    {% if item_description %}
+    <p><strong>{{ _('Descripció') }}:</strong> {{ item_description }}</p>
     {% endif %}
 </div>
 
@@ -24,6 +24,6 @@
 </div>
 
 <p>{{ _('Gràcies per la teva contribució!') }}<br>
-<strong>L'equip de Tarragoneta</strong></p>
+<strong>L'equip de Tarracograf</strong></p>
 {% endblock %}
 

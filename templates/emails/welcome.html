@@ -1,16 +1,30 @@
 {% extends "emails/base.html" %}
 
 {% block content %}
-<h2>{{ _('Benvingut/da a Tarragoneta!') }} 🌱</h2>
+<h2>{{ _('Benvingut/da a Tarracograf!') }} 🌱</h2>
 
-<p>{{ _('Hola') }} {{ user.username or user.email }},</p>
+<p>{{ _('Hola') }} {{ username }},</p>
 
-<p>{{ _('Estem molt contents de tenir-te a la comunitat de Tarragoneta! Ara pots formar part de les iniciatives que milloren la nostra ciutat.') }}</p>
+<p>{{ _('Estem molt contents de tenir-te a la comunitat de Tarracograf! Ara pots formar part de les iniciatives que milloren la nostra ciutat.') }}</p>
 
+{% if confirmation_url %}
+<div class="highlight-box">
+    <p><strong>{{ _('Confirma el teu correu electrònic') }}</strong></p>
+    <p>{{ _('Per completar el registre, si us plau confirma el teu correu electrònic fent clic al botó de sota:') }}</p>
+    <div style="text-align: center; margin: 20px 0;">
+        <a href="{{ confirmation_url }}" class="button">{{ _('Confirmar correu electrònic') }}</a>
+    </div>
+    <p style="font-size: 14px; color: #666; margin-top: 15px;">
+        {{ _('O copia i enganxa aquest enllaç al teu navegador:') }}<br>
+        <a href="{{ confirmation_url }}" style="color: #4A9B5C; word-break: break-all;">{{ confirmation_url }}</a>
+    </p>
+</div>
+{% else %}
 <div class="info-box">
     <p><strong>{{ _('El teu compte està actiu') }}</strong></p>
     <p>{{ _('Ja pots iniciar sessió i començar a participar en les iniciatives cíviques de Tarragona.') }}</p>
 </div>
+{% endif %}
 
 <p>{{ _('Què pots fer ara?') }}</p>
 <ul>
@@ -19,7 +33,7 @@
     <li>{{ _('Participar en activitats comunitàries') }}</li>
     <li>{{ _('Reportar l\'estat actual de la ciutat al nostre inventari') }}:
         <ul style="margin-top: 10px; margin-left: 20px;">
-            <li>{{ _('Palomes: nius, excrements, plomes') }}</li>
+            <li>{{ _('Coloms: nius, excrements, plomes') }}</li>
             <li>{{ _('Brossa: contenidors desbordats, abocaments') }}</li>
             <li>{{ _('I més coses en el futur') }}</li>
         </ul>
@@ -33,6 +47,6 @@
 <p>{{ _('Si tens alguna pregunta, no dubtis a contactar-nos.') }}</p>
 
 <p>{{ _('Benvingut/da a la comunitat!') }}<br>
-<strong>L'equip de Tarragoneta</strong></p>
+<strong>L'equip de Tarracograf</strong></p>
 {% endblock %}
 

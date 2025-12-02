@@ -8,18 +8,18 @@
 <p>{{ _('Gràcies per unir-te a la iniciativa!') }}</p>
 
 <div class="info-box">
-    <h3 style="margin-top: 0;">{{ initiative.title }}</h3>
-    <p><strong>{{ _('Data') }}:</strong> {{ initiative.date.strftime('%d/%m/%Y') if initiative.date else _('Per determinar') }}</p>
-    {% if initiative.time %}
-    <p><strong>{{ _('Hora') }}:</strong> {{ initiative.time }}</p>
+    <h3 style="margin-top: 0;">{{ initiative_title }}</h3>
+    <p><strong>{{ _('Data') }}:</strong> {{ initiative_date or _('Per determinar') }}</p>
+    {% if initiative_time %}
+    <p><strong>{{ _('Hora') }}:</strong> {{ initiative_time }}</p>
     {% endif %}
-    <p><strong>{{ _('Ubicació') }}:</strong> {{ initiative.location }}</p>
+    <p><strong>{{ _('Ubicació') }}:</strong> {{ initiative_location }}</p>
 </div>
 
 <p>{{ _('Ens veiem allà! Si tens alguna pregunta, no dubtis a contactar-nos.') }}</p>
 
 <div class="info-box" style="margin-top: 25px;">
-    <p><strong>{{ _('Recorda') }}:</strong> {{ _('També pots reportar l\'estat actual de la ciutat al nostre inventari') }} - {{ _('palomes') }} ({{ _('nius, excrements, plomes') }}), {{ _('brossa') }} ({{ _('contenidors desbordats, abocaments') }}) {{ _('i més coses en el futur') }}.</p>
+    <p><strong>{{ _('Recorda') }}:</strong> {{ _('També pots reportar l\'estat actual de la ciutat al nostre inventari') }} - {{ _('coloms') }} ({{ _('nius, excrements, plomes') }}), {{ _('brossa') }} ({{ _('contenidors desbordats, abocaments') }}) {{ _('i més coses en el futur') }}.</p>
 </div>
 
 <div style="text-align: center; margin: 30px 0;">
@@ -27,6 +27,6 @@
 </div>
 
 <p>{{ _('Gràcies per participar!') }}<br>
-<strong>L'equip de Tarragoneta</strong></p>
+<strong>L'equip de Tarracograf</strong></p>
 {% endblock %}
 

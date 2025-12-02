@@ -3,11 +3,65 @@ from flask_security import login_required, current_user
 from flask_babel import gettext as _
 from app.models import Initiative, Comment, Participation
 from app.extensions import db
-from app.utils import sanitize_html
+from app.utils import sanitize_html, get_category_name
 from app.forms import InitiativeForm
 from datetime import datetime
 
 bp = Blueprint('initiatives', __name__)
+
+@bp.route('/iniciatives')
+def list_initiatives():
+    """Lista todas las iniciativas con filtros"""
+    # Get filter parameters
+    category = request.args.get('category')
+    status = request.args.get('status', 'active')
+    page = request.args.get('page', 1, type=int)
+    per_page = 12
+    
+    # Build query
+    query = Initiative.query
+    
+    # Only show approved initiatives to public
+    query = query.filter(Initiative.status == 'approved')
+    
+    if status == 'upcoming':
+        query = query.filter(Initiative.date >= datetime.now().date())
+    elif status == 'past':
+        query = query.filter(Initiative.date < datetime.now().date())
+    
+    if category:
+        query = query.filter(Initiative.category == category)
+    
+    # Pagination
+    pagination = query.order_by(Initiative.date.asc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+    initiatives = pagination.items
+    
+    # Get statistics
+    total_initiatives = Initiative.query.filter(Initiative.status == 'approved').count()
+    
+    # Count participants (from Participation table and user_initiatives association)
+    from app.models import user_initiatives
+    participation_count = db.session.query(db.func.count(Participation.id)).scalar() or 0
+    user_participation_count = db.session.query(db.func.count(db.func.distinct(user_initiatives.c.user_id))).scalar() or 0
+    total_participants = participation_count + user_participation_count
+    
+    # Get categories for filter
+    categories = db.session.query(Initiative.category).filter(
+        Initiative.status == 'approved'
+    ).distinct().all()
+    category_list = [cat[0] for cat in categories]
+    
+    return render_template('initiatives/list.html',
+                         initiatives=initiatives,
+                         pagination=pagination,
+                         total_initiatives=total_initiatives,
+                         total_participants=total_participants,
+                         categories=category_list,
+                         selected_category=category,
+                         selected_status=status,
+                         get_category_name=get_category_name)
 
 @bp.route('/initiative/create', methods=['GET', 'POST'])
 @login_required

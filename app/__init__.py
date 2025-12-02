@@ -1,14 +1,11 @@
 import os
-import logging
-from logging.handlers import RotatingFileHandler
-from flask import Flask, render_template, request, session
+from flask import Flask
 from app.config import config
 from app.extensions import init_extensions
 from app.routes import main, initiatives, admin, donations, inventory
 from app.forms import ExtendedRegisterForm
-from app.utils import get_category_name, get_inventory_category_name
 from flask_security.signals import user_registered
-from flask_babel import gettext as _
+from app.core import register_cli_commands, register_context_processors, register_error_handlers, setup_logging
 
 def create_app(config_name=None):
     """Application factory pattern"""
@@ -44,6 +41,16 @@ def create_app(config_name=None):
     # Initialize extensions
     init_extensions(app)
     
+    # Initialize Celery
+    from app.celery_app import make_celery
+    from app.tasks.email_tasks import init_tasks
+    celery = make_celery(app)
+    app.celery = celery
+    
+    # Register Celery tasks
+    send_email_task = init_tasks(celery)
+    app.send_email_task = send_email_task
+    
     # Setup Flask-Security with custom form
     from app.extensions import user_datastore, security
     security.init_app(app, user_datastore, register_form=ExtendedRegisterForm)
@@ -51,13 +58,24 @@ def create_app(config_name=None):
     # Hook to save username on registration
     @user_registered.connect_via(app)
     def on_user_registered(sender, user, form_data, **kwargs):
-        """Save username when user registers"""
-        # Accept both confirm_token and confirmation_token for compatibility
-        # kwargs may contain: confirm_token, confirmation_token, etc.
+        """Save username and assign default 'user' role when user registers"""
+        from app.extensions import db, user_datastore
+        from app.models import Role
+        
+        # Save username if provided
         if 'username' in form_data:
             user.username = form_data['username']
-            from app.extensions import db
-            db.session.commit()
+        
+        # Assign default 'user' role if user doesn't have any roles
+        if not user.roles:
+            user_role = Role.query.filter_by(name='user').first()
+            if user_role:
+                user_datastore.add_role_to_user(user, user_role)
+                app.logger.info(f'Assigned default "user" role to {user.email}')
+            else:
+                app.logger.warning('Default "user" role not found. User registered without roles.')
+        
+        db.session.commit()
         
         # Send welcome email
         try:
@@ -73,50 +91,14 @@ def create_app(config_name=None):
     app.register_blueprint(donations.bp)
     app.register_blueprint(inventory.bp)
     
-    # Context processor for templates
-    @app.context_processor
-    def inject_gettext():
-        def current_locale():
-            """Get current locale string for templates"""
-            try:
-                from flask_babel import get_locale as babel_get_locale
-                locale = babel_get_locale()
-                locale_str = str(locale) if locale else 'ca'
-                return locale_str
-            except Exception as e:
-                app.logger.warning(f"Error in current_locale(): {e}")
-                return session.get('language', 'ca')
-        
-        # Get pending initiatives count for admin/moderator
-        pending_count = 0
-        try:
-            from flask_security import current_user
-            if current_user.is_authenticated and (current_user.has_role('admin') or current_user.has_role('moderator')):
-                from app.models import Initiative
-                pending_count = Initiative.query.filter(Initiative.status == 'pending').count()
-        except Exception:
-            pass  # Ignore errors in context processor
-        
-        return dict(_=_, get_locale=current_locale, get_category_name=get_category_name, get_inventory_category_name=get_inventory_category_name, pending_initiatives_count=pending_count)
+    # Register CLI commands
+    register_cli_commands(app)
     
-    # Error handlers
-    from flask import render_template, request
-    @app.errorhandler(404)
-    def not_found_error(error):
-        app.logger.warning(f'404 error: {request.url}')
-        return render_template('errors/404.html'), 404
+    # Register context processors
+    register_context_processors(app)
     
-    @app.errorhandler(500)
-    def internal_error(error):
-        from app.extensions import db
-        db.session.rollback()
-        app.logger.error(f'500 error: {str(error)}', exc_info=True)
-        return render_template('errors/500.html'), 500
-    
-    @app.errorhandler(403)
-    def forbidden_error(error):
-        app.logger.warning(f'403 error: {request.url}')
-        return render_template('errors/403.html'), 403
+    # Register error handlers
+    register_error_handlers(app)
     
     # Profile route (simple, can be moved to auth blueprint later)
     from flask_security import login_required, current_user
@@ -129,77 +111,7 @@ def create_app(config_name=None):
         return render_template('profile.html', participated=participated, created=created)
     
     # Configure logging
-    # Create logs directory if it doesn't exist
-    if not os.path.exists('logs'):
-        os.mkdir('logs')
-    
-    # File handler (both development and production)
-    file_handler = RotatingFileHandler(
-        'logs/tarragoneta.log',
-        maxBytes=10240000,  # 10MB
-        backupCount=10
-    )
-    file_handler.setFormatter(logging.Formatter(
-        '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
-    ))
-    file_handler.setLevel(logging.INFO)
-    app.logger.addHandler(file_handler)
-    
-    if not app.debug:
-        # Production logging - only file
-        app.logger.setLevel(logging.INFO)
-        # Only log startup message if not silenced
-        if not os.environ.get('FLASK_SILENT_STARTUP'):
-            app.logger.info('Tarragoneta startup')
-    else:
-        # Development logging - console + file
-        console_handler = logging.StreamHandler()
-        console_handler.setFormatter(logging.Formatter(
-            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
-        ))
-        console_handler.setLevel(logging.DEBUG)
-        app.logger.addHandler(console_handler)
-        app.logger.setLevel(logging.DEBUG)
-        # Only log startup message if not silenced
-        if not os.environ.get('FLASK_SILENT_STARTUP'):
-            app.logger.info('Tarragoneta startup (DEBUG mode)')
-    
-    # Get database URI for logging and warnings
-    db_uri = app.config['SQLALCHEMY_DATABASE_URI']
-    
-    # Log configuration on startup (only if not silenced)
-    if not os.environ.get('FLASK_SILENT_STARTUP'):
-        app.logger.info(f"Environment: {app.config['ENV']}")
-        app.logger.info(f"Debug mode: {app.config['DEBUG']}")
-        # Mask password in logs
-        if '@' in db_uri:
-            # Hide password from connection string
-            import re
-            db_uri_display = re.sub(r':([^:@]+)@', r':****@', db_uri)
-        else:
-            db_uri_display = db_uri
-        app.logger.info(f"Database: {db_uri_display}")
-        
-        # Log environment variables status (for debugging)
-        env_vars_to_check = ['SECRET_KEY', 'SECURITY_PASSWORD_SALT', 'STRIPE_PUBLISHABLE_KEY', 'STRIPE_SECRET_KEY']
-        app.logger.info("Environment variables status:")
-        for var in env_vars_to_check:
-            value = os.environ.get(var)
-            if value:
-                # Mask sensitive values
-                if 'SECRET' in var or 'KEY' in var or 'SALT' in var:
-                    masked = value[:4] + '****' + value[-4:] if len(value) > 8 else '****'
-                    app.logger.info(f"  ✓ {var}: {masked} (set)")
-                else:
-                    app.logger.info(f"  ✓ {var}: {value[:20]}... (set)")
-            else:
-                app.logger.warning(f"  ✗ {var}: not set (using default)")
-    
-    # Warn if using SQLite in production (but allow it for staging)
-    if app.config['ENV'] == 'production' and 'sqlite' in db_uri.lower():
-        app.logger.warning("⚠️  Using SQLite in production (staging mode).")
-        app.logger.info("   This is OK for testing, but data will be lost on each deployment.")
-        app.logger.info("   For production, add PostgreSQL in Railway.")
+    setup_logging(app)
     
     return app
 

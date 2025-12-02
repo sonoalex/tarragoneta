@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ _('Reportar Item') }} - Tarragoneta{% endblock %}
+{% block title %}{{ _('Reportar Item') }} - Tarracograf{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
@@ -159,7 +159,7 @@
             // Geocode to get address
             fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`, {
                 headers: {
-                    'User-Agent': 'Tarragoneta/1.0'
+                    'User-Agent': 'Tarracograf/1.0'
                 }
             })
             .then(response => response.json())
@@ -247,7 +247,7 @@
                 {value: 'plumas', label: '🪶 {{ _("Plumas") }}'}
             ],
             'basura': [
-                {value: 'basura_desborda', label: '🗑️ {{ _("Basura Desbordada") }}'},
+                {value: 'basura_desbordada', label: '🗑️ {{ _("Brossa Desbordada") }}'},
                 {value: 'vertidos', label: '💧 {{ _("Vertidos") }}'}
             ]
         };

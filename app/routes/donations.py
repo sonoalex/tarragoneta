@@ -41,7 +41,7 @@ def donate():
                     'price_data': {
                         'currency': 'eur',
                         'product_data': {
-                            'name': _('Donación a Tarragoneta'),
+                            'name': _('Donación a Tarracograf'),
                             'description': _('Donación voluntaria para mantener la plataforma'),
                         },
                         'unit_amount': amount,

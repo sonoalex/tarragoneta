@@ -5,10 +5,10 @@ from flask_babel import gettext as _
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import os
-from app.models import InventoryItem, InventoryVote
+from app.models import InventoryItem, InventoryVote, District, Section
 from app.extensions import db
 from app.forms import InventoryForm
-from app.utils import sanitize_html, allowed_file, optimize_image, get_inventory_category_name
+from app.utils import sanitize_html, allowed_file, optimize_image, get_inventory_category_name, normalize_category_from_url, normalize_subcategory_from_url, category_to_url, subcategory_to_url
 # Config.UPLOAD_FOLDER removed - using current_app.config['UPLOAD_FOLDER'] instead
 
 bp = Blueprint('inventory', __name__, url_prefix='/inventory')
@@ -16,9 +16,13 @@ bp = Blueprint('inventory', __name__, url_prefix='/inventory')
 @bp.route('')
 def inventory_map():
     """Mapa principal del inventario"""
-    # Get filter parameters
-    category = request.args.get('category')
-    subcategory = request.args.get('subcategory')
+    # Get filter parameters from URL (en catalán)
+    category_url = request.args.get('category')
+    subcategory_url = request.args.get('subcategory')
+    
+    # Convertir de valores URL (catalán) a valores técnicos (BD)
+    category = normalize_category_from_url(category_url)
+    subcategory = normalize_subcategory_from_url(subcategory_url)
     
     # Build query - only show approved or active items
     query = InventoryItem.query.filter(
@@ -74,8 +78,8 @@ def inventory_map():
                          by_category=by_category,
                          by_main_category=by_main_category,
                          by_subcategory=by_subcategory,
-                         selected_category=category,
-                         selected_subcategory=subcategory)
+                         selected_category=category_url,  # Usar valor de URL para los templates
+                         selected_subcategory=subcategory_url)  # Usar valor de URL para los templates
 
 @bp.route('/report', methods=['GET', 'POST'])
 @login_required
@@ -137,8 +141,12 @@ def report_item():
 @bp.route('/api/items')
 def api_items():
     """API endpoint para obtener items del inventario (para el mapa)"""
-    category = request.args.get('category')
-    subcategory = request.args.get('subcategory')
+    category_url = request.args.get('category')
+    subcategory_url = request.args.get('subcategory')
+    
+    # Convertir de valores URL (catalán) a valores técnicos (BD)
+    category = normalize_category_from_url(category_url)
+    subcategory = normalize_subcategory_from_url(subcategory_url)
     
     # Only return approved or active items (not resolved)
     query = InventoryItem.query.filter(
@@ -181,6 +189,46 @@ def api_items():
         })
     
     return jsonify(items_data)
+
+@bp.route('/api/sections')
+def api_sections():
+    """API endpoint para obtener todas las secciones con sus polígonos"""
+    try:
+        from shapely import wkt
+        import json
+        
+        sections = Section.query.join(District).order_by(Section.district_code, Section.code).all()
+        
+        result = []
+        for section in sections:
+            if section.polygon:
+                try:
+                    # Parsear WKT a geometría Shapely
+                    geom = wkt.loads(section.polygon)
+                    
+                    # Convertir a GeoJSON
+                    geojson = json.loads(json.dumps(geom.__geo_interface__))
+                    
+                    result.append({
+                        'id': section.id,
+                        'code': section.code,
+                        'district_code': section.district_code,
+                        'district_name': section.district.name,
+                        'name': section.name or f"Secció {section.code}",
+                        'full_code': section.full_code,
+                        'geometry': geojson
+                    })
+                except Exception as e:
+                    current_app.logger.warning(f"Error parsing polygon for section {section.id}: {e}")
+                    continue
+        
+        return jsonify(result)
+    except ImportError:
+        current_app.logger.error("Shapely not available for WKT parsing")
+        return jsonify({'error': 'WKT parsing not available'}), 500
+    except Exception as e:
+        current_app.logger.error(f"Error in api_sections: {e}")
+        return jsonify({'error': str(e)}), 500
 
 @bp.route('/<int:item_id>/vote', methods=['POST'])
 @login_required

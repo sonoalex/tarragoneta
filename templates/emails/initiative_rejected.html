@@ -3,12 +3,12 @@
 {% block content %}
 <h2>{{ _('Informació sobre la teva iniciativa') }}</h2>
 
-<p>{{ _('Hola') }} {{ user.username or user.email }},</p>
+<p>{{ _('Hola') }} {{ username }},</p>
 
 <p>{{ _('Hem revisat la teva iniciativa però, lamentablement, no hem pogut aprovar-la en aquest moment.') }}</p>
 
 <div class="info-box">
-    <h3 style="margin-top: 0;">{{ initiative.title }}</h3>
+    <h3 style="margin-top: 0;">{{ initiative_title }}</h3>
     {% if reason %}
     <p><strong>{{ _('Motiu') }}:</strong> {{ reason }}</p>
     {% endif %}
@@ -21,6 +21,6 @@
 </div>
 
 <p>{{ _('Gràcies per la teva comprensió.') }}<br>
-<strong>L'equip de Tarragoneta</strong></p>
+<strong>L'equip de Tarracograf</strong></p>
 {% endblock %}
 

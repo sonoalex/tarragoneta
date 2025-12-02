@@ -1,4 +1,4 @@
-# 🚀 Cómo Arrancar Tarragoneta
+# 🚀 Cómo Arrancar Tarracograf
 
 ## Opción 1: Script Automático (Recomendado)
 
@@ -54,7 +54,7 @@ flask run --host=0.0.0.0 --port=5000 --debug
 
 ## Credenciales por Defecto
 
-- **Email**: `admin@tarragoneta.org`
+- **Email**: `hola@tarracograf.cat`
 - **Password**: `admin123` (solo desarrollo - **cambiar en producción**)
 
 ## Solución de Problemas
@@ -78,7 +78,7 @@ python fix_admin.py
 
 ### Reiniciar desde cero
 ```bash
-rm instance/tarragoneta.db
+# Para resetear la base de datos, usa: docker-compose down -v
 rm -rf migrations/versions/*
 flask db init
 flask db migrate -m "Initial migration"

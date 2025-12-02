@@ -2,6 +2,16 @@ from datetime import datetime
 from flask_security import UserMixin, RoleMixin
 from app.extensions import db
 
+# Import GeoAlchemy2 for PostGIS support
+try:
+    from geoalchemy2 import Geometry
+    from geoalchemy2.shape import from_shape
+    from shapely.geometry import shape as shapely_shape
+    POSTGIS_AVAILABLE = True
+except ImportError:
+    POSTGIS_AVAILABLE = False
+    Geometry = None
+
 # Association table for many-to-many relationship between users and roles
 roles_users = db.Table('roles_users',
     db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
@@ -110,11 +120,114 @@ class Participation(db.Model):
     
     initiative_rel = db.relationship('Initiative', backref='anonymous_participants')
 
+class District(db.Model):
+    """Distritos administrativos de Tarragona"""
+    __tablename__ = 'district'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(10), unique=True, nullable=False)  # '01', '02', etc.
+    name = db.Column(db.String(100), nullable=False)  # 'Districte 1', etc.
+    created_at = db.Column(db.DateTime(), default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    sections = db.relationship('Section', backref='district', lazy='dynamic', cascade='all, delete-orphan')
+    
+    def __repr__(self):
+        return f'<District {self.code}: {self.name}>'
+
+class Section(db.Model):
+    """Secciones administrativas dentro de un distrito"""
+    __tablename__ = 'section'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(10), nullable=False)  # '001', '002', etc.
+    district_code = db.Column(db.String(10), db.ForeignKey('district.code'), nullable=False)
+    name = db.Column(db.String(100))  # Nombre descriptivo (opcional)
+    
+    # PostGIS geometry column for the polygon
+    # Stored as Text (WKT format) - will be converted to PostGIS Geometry in PostgreSQL
+    polygon = db.Column(db.Text, nullable=False)
+    
+    created_at = db.Column(db.DateTime(), default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    items = db.relationship('InventoryItem', backref='section', lazy='dynamic')
+    
+    # Unique constraint: one section per code per district
+    __table_args__ = (db.UniqueConstraint('district_code', 'code', name='unique_district_section'),)
+    
+    @property
+    def full_code(self):
+        """Return full code: district_code-section_code"""
+        return f"{self.district_code}-{self.code}"
+    
+    @staticmethod
+    def find_section_for_point(lat, lng):
+        """Encontrar sección que contiene un punto usando PostGIS o Shapely (WKT)"""
+        try:
+            from sqlalchemy import func
+            from app.extensions import db
+            
+            # Verificar si estamos usando PostgreSQL
+            db_url = str(db.engine.url)
+            is_postgresql = 'postgresql' in db_url
+            
+            # Intentar usar PostGIS si está disponible y es PostgreSQL
+            if is_postgresql and POSTGIS_AVAILABLE and Geometry:
+                try:
+                    # Convertir WKT a PostGIS Geometry en la consulta
+                    point = func.ST_SetSRID(func.ST_MakePoint(lng, lat), 4326)
+                    # Buscar sección que contiene el punto usando ST_GeomFromText para convertir WKT
+                    section = Section.query.filter(
+                        func.ST_Contains(
+                            func.ST_GeomFromText(Section.polygon, 4326),
+                            point
+                        )
+                    ).first()
+                    if section:
+                        return section
+                except Exception as e:
+                    # Si PostGIS falla, continuar con Shapely
+                    import logging
+                    logging.getLogger(__name__).debug(f"PostGIS query failed, trying Shapely: {e}")
+            
+            # Fallback: usar Shapely para verificar polígonos WKT
+            if POSTGIS_AVAILABLE:
+                try:
+                    from shapely import wkt
+                    from shapely.geometry import Point
+                    
+                    point = Point(lng, lat)
+                    
+                    # Buscar todas las secciones y verificar manualmente
+                    sections = Section.query.all()
+                    for section in sections:
+                        if section.polygon:
+                            try:
+                                geom = wkt.loads(section.polygon)
+                                if geom.contains(point):
+                                    return section
+                            except Exception:
+                                continue
+                except ImportError:
+                    pass
+            
+            return None
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).debug(f"Error finding section: {e}")
+            return None
+    
+    def __repr__(self):
+        return f'<Section {self.full_code}: {self.name or "Sin nombre"}>'
+
 class InventoryItem(db.Model):
     """Items del inventario (palomas, basura, etc.)"""
     id = db.Column(db.Integer, primary_key=True)
     category = db.Column(db.String(50), nullable=False)  # 'palomas', 'basura', etc.
-    subcategory = db.Column(db.String(50), nullable=False)  # 'nido', 'excremento', 'basura_desborda', 'vertidos', etc.
+    subcategory = db.Column(db.String(50), nullable=False)  # 'nido', 'excremento', 'basura_desbordada', 'vertidos', etc.
     description = db.Column(db.Text)
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
@@ -128,6 +241,13 @@ class InventoryItem(db.Model):
     
     # Foreign key (opcional - puede ser anónimo)
     reporter_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    
+    # Foreign key to section (nuevo)
+    section_id = db.Column(db.Integer, db.ForeignKey('section.id'), nullable=True)
+    
+    # PostGIS point geometry (nuevo)
+    # Por ahora nullable, se puede usar PostGIS si está disponible
+    location = None  # Se puede añadir en migración si PostGIS está disponible
     
     # Relationships
     reporter = db.relationship('User', backref='reported_items')
@@ -150,6 +270,17 @@ class InventoryItem(db.Model):
         if not user_id:
             return False
         return self.resolved_by.filter_by(user_id=user_id).first() is not None
+    
+    def assign_section(self):
+        """Asignar automáticamente la sección basándose en las coordenadas"""
+        if self.section_id:
+            return True  # Ya tiene sección asignada
+        
+        section = Section.find_section_for_point(self.latitude, self.longitude)
+        if section:
+            self.section_id = section.id
+            return True
+        return False
     
     def __repr__(self):
         return f'<InventoryItem {self.category}->{self.subcategory} at ({self.latitude}, {self.longitude})>'

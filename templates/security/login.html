@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Iniciar Sesión - Tarragoneta{% endblock %}
+{% block title %}{{ _('Iniciar Sesión') }} - Tarracograf{% endblock %}
 
 {% block content %}
 <section class="py-5">
@@ -11,9 +11,9 @@
                     <div class="card-body p-5">
                         <div class="text-center mb-4">
                             <div class="mb-3" style="font-size: 3rem;">🌱</div>
-                            <h1 class="h3 fw-bold mb-2">Iniciar Sesión</h1>
+                            <h1 class="h3 fw-bold mb-2">{{ _('Iniciar Sesión') }}</h1>
                             <p class="text-muted">
-                                Accede a tu cuenta para participar en iniciativas y gestionar tu perfil
+                                {{ _('Accede a tu cuenta para participar en iniciativas y gestionar tu perfil') }}
                             </p>
                         </div>
                         
@@ -22,7 +22,7 @@
                             
                             <div class="mb-3">
                                 {{ login_user_form.email.label(class="form-label fw-bold") }}
-                                {{ login_user_form.email(class="form-control form-control-lg", placeholder="tu@email.com") }}
+                                {{ login_user_form.email(class="form-control form-control-lg", placeholder=_('tu@email.com')) }}
                                 {% if login_user_form.email.errors %}
                                     <div class="text-danger small mt-1">
                                         {% for error in login_user_form.email.errors %}
@@ -34,7 +34,7 @@
                             
                             <div class="mb-3">
                                 {{ login_user_form.password.label(class="form-label fw-bold") }}
-                                {{ login_user_form.password(class="form-control form-control-lg", placeholder="Tu contraseña") }}
+                                {{ login_user_form.password(class="form-control form-control-lg", placeholder=_('Tu contraseña')) }}
                                 {% if login_user_form.password.errors %}
                                     <div class="text-danger small mt-1">
                                         {% for error in login_user_form.password.errors %}
@@ -52,15 +52,15 @@
                             </div>
                             
                             <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
-                                <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                                <i class="fas fa-sign-in-alt me-2"></i>{{ _('Iniciar Sesión') }}
                             </button>
                         </form>
                         
                         <div class="text-center">
                             <p class="text-muted mb-0">
-                                ¿No tienes cuenta? 
+                                {{ _('¿No tienes cuenta?') }} 
                                 <a href="{{ url_for('security.register') }}" class="text-decoration-none fw-bold">
-                                    <i class="fas fa-user-plus me-1"></i>Regístrate aquí
+                                    <i class="fas fa-user-plus me-1"></i>{{ _('Regístrate aquí') }}
                                 </a>
                             </p>
                         </div>

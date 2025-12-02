@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Tarragoneta - Iniciativas Ciudadanas para una Ciudad Mejor{% endblock %}
+{% block title %}Tarracograf - Radiografía de la Ciudad{% endblock %}
 
 {% block content %}
 <!-- Hero Section - Two Column Layout -->
@@ -12,13 +12,13 @@
                 <div class="hero-visual">
                     <div class="hero-visual-bg"></div>
                     <!-- Placeholder image -->
-                    <img src="https://picsum.photos/600/600?random=1" alt="Tarragoneta" class="hero-image" style="position: relative; z-index: 1; width: 100%; height: 100%; object-fit: cover; border-radius: 20px;">
+                    <img src="https://picsum.photos/600/600?random=1" alt="Tarracograf" class="hero-image" style="position: relative; z-index: 1; width: 100%; height: 100%; object-fit: cover; border-radius: 20px;">
                     <!-- Speech bubbles -->
                     <div class="speech-bubble" style="top: 10%; left: 10%;">
-                        {{ _('Nova Iniciativa') }}
+                        {{ _('Reportar Problema') }}
                     </div>
                     <div class="speech-bubble" style="bottom: 20%; right: 10%;">
-                        Tarragona
+                        {{ _('Radiografia Ciutat') }}
                     </div>
                 </div>
             </div>
@@ -27,35 +27,38 @@
             <div class="col-lg-6">
                 <div class="hero-content">
                     <h1 class="hero-title">
-                        {{ _('Fem la') }} <span class="highlight">Tarragoneta</span><span class="dot">.</span>
+                        <span class="highlight">Tarracograf</span><span class="dot">.</span>
                     </h1>
                     <p class="hero-subtitle">
-                        {{ _('Uneix-te a les iniciatives ciutadanes que estan transformant la nostra ciutat. Cada acció compta, cada persona suma. Sigues part del canvi!') }}
+                        {{ _('La radiografia de la ciutat. Reporta problemes de neteja, visualitza l\'estat de la ciutat i participa en la millora de Tarragona.') }}
                     </p>
                     
                     <div class="hero-stats">
                         <div class="stat-item">
+                            <span class="stat-number">{{ total_inventory_items }}</span>
+                            <span class="stat-label">{{ _('Reportatges Actius') }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">{{ inventory_by_category.get('palomas', 0) + inventory_by_category.get('basura', 0) }}</span>
+                            <span class="stat-label">{{ _('Problemàtiques') }}</span>
+                        </div>
+                        <div class="stat-item">
                             <span class="stat-number">{{ total_initiatives }}</span>
-                            <span class="stat-label">{{ _('Iniciatives Actives') }}</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">{{ total_participants }}+</span>
-                            <span class="stat-label">{{ _('Ciutadans Compromesos') }}</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">{{ active_categories }}</span>
-                            <span class="stat-label">{{ _('Àrees d\'Acció') }}</span>
+                            <span class="stat-label">{{ _('Iniciatives') }}</span>
                         </div>
                     </div>
                     
-                    <div class="mt-4">
-                        {% if not current_user.is_authenticated %}
-                            <a href="{{ url_for('security.register') }}" class="btn btn-primary btn-lg">
-                                {{ _('Uneix-te al Moviment') }}
+                    <div class="mt-4 d-flex gap-3 flex-wrap">
+                        <a href="{{ url_for('inventory.inventory_map') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-map me-2"></i>{{ _('Veure Mapa del Inventari') }}
+                        </a>
+                        {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('inventory.report_item') }}" class="btn btn-success btn-lg">
+                                <i class="fas fa-plus me-2"></i>{{ _('Reportar Problema') }}
                             </a>
                         {% else %}
-                            <a href="#initiatives" class="btn btn-outline-primary btn-lg">
-                                {{ _('Veure Iniciatives') }}
+                            <a href="{{ url_for('security.register') }}" class="btn btn-outline-primary btn-lg">
+                                {{ _('Uneix-te per Reportar') }}
                             </a>
                         {% endif %}
                     </div>
@@ -65,44 +68,130 @@
     </div>
 </section>
 
-<!-- Features Section - Simplified -->
-<section class="py-5" style="background: var(--bg-white);">
+<!-- Inventory Featured Section - Prominent -->
+<section id="inventory" class="py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
     <div class="container">
-        <div class="row g-4">
-            <div class="col-md-4 text-center">
-                <div class="p-4">
-                    <img src="https://picsum.photos/200/200?random=10" alt="Sostenibilitat" class="mb-3 rounded-circle" style="width: 120px; height: 120px; object-fit: cover;">
-                    <h4 class="fw-bold mb-3">{{ _('Sostenibilitat') }}</h4>
-                    <p class="text-muted" style="font-size: 0.95rem;">{{ _('Iniciatives que cuiden el nostre medi ambient i promouen pràctiques ecològiques.') }}</p>
+        <div class="text-center mb-5">
+            <h2 class="fw-bold mb-3 text-white">{{ _('Radiografia de la Ciutat') }}</h2>
+            <p class="lead text-white-50">{{ _('Visualitza i reporta problemes de neteja, palomes i altres incidències a Tarragona') }}</p>
+        </div>
+        
+        <div class="row g-4 mb-5">
+            <div class="col-md-3 text-center">
+                <div class="p-4 bg-white bg-opacity-10 rounded-4">
+                    <div class="mb-3" style="font-size: 3.5rem;">
+                        <i class="fas fa-trash-alt text-white"></i>
+                    </div>
+                    <h4 class="fw-bold text-white mb-2">{{ inventory_by_category.get('basura', 0) }}</h4>
+                    <p class="text-white-50 mb-0">{{ _('Problemes de Brossa') }}</p>
                 </div>
             </div>
-            <div class="col-md-4 text-center">
-                <div class="p-4">
-                    <img src="https://picsum.photos/200/200?random=20" alt="Comunitat" class="mb-3 rounded-circle" style="width: 120px; height: 120px; object-fit: cover;">
-                    <h4 class="fw-bold mb-3">{{ _('Comunitat') }}</h4>
-                    <p class="text-muted" style="font-size: 0.95rem;">{{ _('Connecta amb veïns compromesos i construeix una xarxa ciutadana forta.') }}</p>
+            <div class="col-md-3 text-center">
+                <div class="p-4 bg-white bg-opacity-10 rounded-4">
+                    <div class="mb-3" style="font-size: 3.5rem;">
+                        <i class="fas fa-dove text-white"></i>
+                    </div>
+                    <h4 class="fw-bold text-white mb-2">{{ inventory_by_category.get('palomas', 0) }}</h4>
+                    <p class="text-white-50 mb-0">{{ _('Problemes de Palomes') }}</p>
                 </div>
             </div>
-            <div class="col-md-4 text-center">
-                <div class="p-4">
-                    <img src="https://picsum.photos/200/200?random=30" alt="Acció" class="mb-3 rounded-circle" style="width: 120px; height: 120px; object-fit: cover;">
-                    <h4 class="fw-bold mb-3">{{ _('Acció') }}</h4>
-                    <p class="text-muted" style="font-size: 0.95rem;">{{ _('Transforma les bones intencions en accions concretes i mesurables.') }}</p>
+            <div class="col-md-3 text-center">
+                <div class="p-4 bg-white bg-opacity-10 rounded-4">
+                    <div class="mb-3" style="font-size: 3.5rem;">
+                        <i class="fas fa-map-marker-alt text-white"></i>
+                    </div>
+                    <h4 class="fw-bold text-white mb-2">{{ total_inventory_items }}</h4>
+                    <p class="text-white-50 mb-0">{{ _('Total Reportatges') }}</p>
                 </div>
             </div>
+            <div class="col-md-3 text-center">
+                <div class="p-4 bg-white bg-opacity-10 rounded-4">
+                    <div class="mb-3" style="font-size: 3.5rem;">
+                        <i class="fas fa-users text-white"></i>
+                    </div>
+                    <h4 class="fw-bold text-white mb-2">{{ total_participants }}+</h4>
+                    <p class="text-white-50 mb-0">{{ _('Ciutadans Actius') }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <a href="{{ url_for('inventory.inventory_map') }}" class="btn btn-light btn-lg px-5 me-3">
+                <i class="fas fa-map-marked-alt me-2"></i>{{ _('Explorar Mapa') }}
+            </a>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('inventory.report_item') }}" class="btn btn-outline-light btn-lg px-5">
+                    <i class="fas fa-plus-circle me-2"></i>{{ _('Reportar Nou Problema') }}
+                </a>
+            {% else %}
+                <a href="{{ url_for('security.register') }}" class="btn btn-outline-light btn-lg px-5">
+                    <i class="fas fa-user-plus me-2"></i>{{ _('Registra\'t per Reportar') }}
+                </a>
+            {% endif %}
         </div>
     </div>
 </section>
 
-<!-- Filters Section - Cleaner -->
-<section class="py-4" style="background: var(--bg-cream);">
+<!-- Recent Inventory Items Section -->
+{% if recent_inventory_items %}
+<section class="py-5" style="background: var(--bg-white);">
     <div class="container">
-        <div class="filters-section">
-            <h3 class="mb-4 text-center fw-bold">{{ _('Troba la teva causa') }}</h3>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-2">{{ _('Reportatges Recents') }}</h3>
+                <p class="text-muted mb-0">{{ _('Últims problemes reportats pels ciutadans') }}</p>
+            </div>
+            <a href="{{ url_for('inventory.inventory_map') }}" class="btn btn-outline-primary">
+                {{ _('Veure Tots') }} <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+        
+        <div class="row g-3">
+            {% for item in recent_inventory_items[:6] %}
+            <div class="col-6 col-md-4 col-lg-2">
+                <div class="card border-0 shadow-sm h-100 text-center">
+                    <div class="card-body p-3">
+                        <div class="mb-2" style="font-size: 2rem;">
+                            {% set icon_class, color_class = get_inventory_icon(item.category, item.subcategory) %}
+                            <i class="fas {{ icon_class }} {{ color_class }}"></i>
+                        </div>
+                        <h6 class="card-title small fw-bold mb-1" style="font-size: 0.75rem;">{{ get_inventory_category_name(item.category, item.subcategory) }}</h6>
+                        {% if item.address %}
+                        <p class="card-text small text-muted mb-2" style="font-size: 0.7rem;">
+                            <i class="fas fa-map-marker-alt me-1"></i>{{ item.address[:18] }}{% if item.address|length > 18 %}...{% endif %}
+                        </p>
+                        {% endif %}
+                        <a href="{{ url_for('inventory.inventory_map', category=category_to_url(item.category), subcategory=subcategory_to_url(item.subcategory)) }}" class="btn btn-sm btn-outline-primary w-100" style="font-size: 0.75rem;">
+                            {{ _('Veure') }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Initiatives Section - Secondary Position -->
+<section id="initiatives" class="py-5" style="background: var(--bg-cream);">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-2">{{ _('Iniciatives Ciutadanes') }}</h3>
+                <p class="text-muted mb-0">{{ _('Descobreix com pots contribuir al canvi positiu a la nostra ciutat') }}</p>
+            </div>
+            <a href="{{ url_for('initiatives.list_initiatives') }}" class="btn btn-outline-primary">
+                {{ _('Veure Totes') }} <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+        
+        <!-- Filters for Initiatives -->
+        <div class="mb-4">
             <form method="GET" action="{{ url_for('main.index') }}" class="row g-3">
-                <div class="col-md-5">
-                    <label class="form-label fw-bold">{{ _('Categoria') }}</label>
-                    <select name="category" class="form-select" onchange="this.form.submit()">
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold">{{ _('Categoria') }}</label>
+                    <select name="category" class="form-select form-select-sm" onchange="this.form.submit()">
                         <option value="">{{ _('Totes les categories') }}</option>
                         <option value="limpieza" {% if selected_category == 'limpieza' %}selected{% endif %}>{{ _('Neteja') }}</option>
                         <option value="reciclaje" {% if selected_category == 'reciclaje' %}selected{% endif %}>{{ _('Reciclatge') }}</option>
@@ -111,73 +200,61 @@
                         <option value="educacion" {% if selected_category == 'educacion' %}selected{% endif %}>{{ _('Educació Ambiental') }}</option>
                         <option value="cultura" {% if selected_category == 'cultura' %}selected{% endif %}>{{ _('Cultura i Civisme') }}</option>
                         <option value="social" {% if selected_category == 'social' %}selected{% endif %}>{{ _('Acció Social') }}</option>
-                        <option value="basura_desborda" {% if selected_category == 'basura_desborda' %}selected{% endif %}>{{ _('Brossa Desbordada') }}</option>
-                        <option value="vertidos" {% if selected_category == 'vertidos' %}selected{% endif %}>{{ _('Abocaments') }}</option>
                     </select>
                 </div>
-                <div class="col-md-5">
-                    <label class="form-label fw-bold">{{ _('Estat') }}</label>
-                    <select name="status" class="form-select" onchange="this.form.submit()">
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold">{{ _('Estat') }}</label>
+                    <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
                         <option value="active" {% if selected_status == 'active' %}selected{% endif %}>{{ _('Totes') }}</option>
                         <option value="upcoming" {% if selected_status == 'upcoming' %}selected{% endif %}>{{ _('Pròximes') }}</option>
                         <option value="past" {% if selected_status == 'past' %}selected{% endif %}>{{ _('Passades') }}</option>
                     </select>
                 </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100">
-                        {{ _('Buscar') }}
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        {{ _('Filtrar') }}
                     </button>
                 </div>
             </form>
         </div>
-    </div>
-</section>
-
-<!-- Initiatives Section -->
-<section id="initiatives" class="py-5" style="background: var(--bg-cream);">
-    <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="fw-bold mb-3">{{ _('Iniciatives Ciutadanes Actives') }}</h2>
-            <p class="text-muted lead">{{ _('Descobreix com pots contribuir al canvi positiu a la nostra ciutat') }}</p>
-        </div>
         
         {% if initiatives %}
-            <div class="initiatives-grid">
+            <div class="row g-4">
                 {% for initiative in initiatives %}
-                    <article class="card initiative-card h-100">
-                        <div class="initiative-image position-relative">
-                            {% if initiative.image_path %}
-                                <img src="{{ url_for('static', filename='uploads/' + initiative.image_path) }}" 
-                                     alt="{{ initiative.title }}" class="w-100 h-100" style="object-fit: cover;" loading="lazy">
-                            {% else %}
-                                <img src="https://picsum.photos/400/300?random={{ initiative.id }}" 
-                                     alt="{{ initiative.title }}" class="w-100 h-100" style="object-fit: cover;" loading="lazy">
-                            {% endif %}
-                        </div>
+                <div class="col-md-6 col-lg-4">
+                    <article class="card border-0 shadow-sm h-100">
+                        {% if initiative.image_path %}
+                            <img src="{{ url_for('static', filename='uploads/' + initiative.image_path) }}" 
+                                 alt="{{ initiative.title }}" class="card-img-top" style="height: 180px; object-fit: cover;" loading="lazy">
+                        {% else %}
+                            <img src="https://picsum.photos/400/300?random={{ initiative.id }}" 
+                                 alt="{{ initiative.title }}" class="card-img-top" style="height: 180px; object-fit: cover;" loading="lazy">
+                        {% endif %}
                         
-                        <div class="card-body d-flex flex-column p-4">
-                            <div class="mb-3">
-                                <span class="initiative-category">
+                        <div class="card-body d-flex flex-column p-3">
+                            <div class="mb-2">
+                                <span class="badge bg-primary">
                                     {{ get_category_name(initiative.category) }}
                                 </span>
                             </div>
                             
-                            <h3 class="card-title h5 fw-bold mb-3" style="line-height: 1.3;">{{ initiative.title }}</h3>
+                            <h5 class="card-title fw-bold mb-2" style="font-size: 1rem; line-height: 1.3;">{{ initiative.title }}</h5>
                             
-                            <p class="card-text text-muted flex-grow-1 mb-3" style="font-size: 0.95rem; line-height: 1.6;">
-                                {{ initiative.description[:120] }}{% if initiative.description|length > 120 %}...{% endif %}
+                            <p class="card-text text-muted flex-grow-1 mb-2" style="font-size: 0.85rem; line-height: 1.5;">
+                                {{ initiative.description[:100] }}{% if initiative.description|length > 100 %}...{% endif %}
                             </p>
                             
-                            <div class="mb-3 small text-muted">
-                                <div class="mb-1">{{ initiative.location }}</div>
-                                <div>{{ initiative.date.strftime('%d/%m/%Y') }}{% if initiative.time %} · {{ initiative.time }}{% endif %}</div>
+                            <div class="mb-2 small text-muted">
+                                <div><i class="fas fa-map-marker-alt me-1"></i>{{ initiative.location }}</div>
+                                <div><i class="fas fa-calendar me-1"></i>{{ initiative.date.strftime('%d/%m/%Y') }}{% if initiative.time %} · {{ initiative.time }}{% endif %}</div>
                             </div>
                             
-                            <a href="{{ url_for('initiatives.initiative_detail', slug=initiative.slug) }}" class="btn btn-primary w-100 mt-auto">
+                            <a href="{{ url_for('initiatives.initiative_detail', slug=initiative.slug) }}" class="btn btn-outline-primary btn-sm w-100 mt-auto">
                                 {{ _('Veure detalls') }}
                             </a>
                         </div>
                     </article>
+                </div>
                 {% endfor %}
             </div>
         {% else %}

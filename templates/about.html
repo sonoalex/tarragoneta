@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}{{ _('Sobre Nosaltres') }} - Tarragoneta{% endblock %}
+{% block title %}{{ _('Sobre Nosaltres') }} - Tarracograf{% endblock %}
 
 {% block content %}
 <section class="container mt-5">
     <div class="bg-white p-5" style="border-radius: var(--border-radius); box-shadow: var(--shadow-md);">
         <h1 class="text-center mb-4">
             <i class="fas fa-heart text-primary"></i> 
-            {{ _('Sobre Tarragoneta') }}
+            {{ _('Sobre Tarracograf') }}
         </h1>
         
         <p class="lead text-center mb-5">
@@ -37,37 +37,49 @@
         
         <div class="initiatives-grid">
             <div class="p-4 bg-light text-center" style="border-radius: var(--border-radius);">
-                <div class="mb-3" style="font-size: 3rem;">🤝</div>
+                <div class="mb-3" style="font-size: 3rem;">
+                    <i class="fas fa-handshake text-primary"></i>
+                </div>
                 <h4>{{ _('Col·laboració') }}</h4>
                 <p>{{ _('Creiem en el poder de l\'acció col·lectiva per generar canvis significatius.') }}</p>
             </div>
             
             <div class="p-4 bg-light text-center" style="border-radius: var(--border-radius);">
-                <div class="mb-3" style="font-size: 3rem;">🌱</div>
+                <div class="mb-3" style="font-size: 3rem;">
+                    <i class="fas fa-seedling text-success"></i>
+                </div>
                 <h4>{{ _('Sostenibilitat') }}</h4>
                 <p>{{ _('Promovem accions que respectin i protegeixin el nostre medi ambient urbà.') }}</p>
             </div>
             
             <div class="p-4 bg-light text-center" style="border-radius: var(--border-radius);">
-                <div class="mb-3" style="font-size: 3rem;">💪</div>
+                <div class="mb-3" style="font-size: 3rem;">
+                    <i class="fas fa-fist-raised text-danger"></i>
+                </div>
                 <h4>{{ _('Compromís') }}</h4>
                 <p>{{ _('Fomentem la responsabilitat individual i col·lectiva amb la nostra ciutat.') }}</p>
             </div>
             
             <div class="p-4 bg-light text-center" style="border-radius: var(--border-radius);">
-                <div class="mb-3" style="font-size: 3rem;">🎯</div>
+                <div class="mb-3" style="font-size: 3rem;">
+                    <i class="fas fa-bullseye text-warning"></i>
+                </div>
                 <h4>{{ _('Acció') }}</h4>
                 <p>{{ _('Transformem les bones intencions en accions concretes i mesurables.') }}</p>
             </div>
             
             <div class="p-4 bg-light text-center" style="border-radius: var(--border-radius);">
-                <div class="mb-3" style="font-size: 3rem;">🏛️</div>
+                <div class="mb-3" style="font-size: 3rem;">
+                    <i class="fas fa-landmark text-info"></i>
+                </div>
                 <h4>{{ _('Civisme') }}</h4>
                 <p>{{ _('Promovem el respecte mutu i la convivència harmònica en espais públics.') }}</p>
             </div>
             
             <div class="p-4 bg-light text-center" style="border-radius: var(--border-radius);">
-                <div class="mb-3" style="font-size: 3rem;">✨</div>
+                <div class="mb-3" style="font-size: 3rem;">
+                    <i class="fas fa-star text-warning"></i>
+                </div>
                 <h4>{{ _('Transparència') }}</h4>
                 <p>{{ _('Operem amb total obertura sobre les nostres activitats i impacte.') }}</p>
             </div>

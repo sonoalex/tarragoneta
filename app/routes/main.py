@@ -1,6 +1,6 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
 from flask_babel import gettext as _
-from app.models import Initiative, Comment, Participation, user_initiatives
+from app.models import Initiative, Comment, Participation, user_initiatives, InventoryItem
 from app.extensions import db
 from datetime import datetime
 
@@ -8,11 +8,11 @@ bp = Blueprint('main', __name__)
 
 @bp.route('/')
 def index():
-    # Get filter parameters
+    # Get filter parameters for initiatives
     category = request.args.get('category')
     status = request.args.get('status', 'active')
     
-    # Build query
+    # Build query for initiatives
     query = Initiative.query
     
     # Only show approved initiatives to public
@@ -26,10 +26,27 @@ def index():
     if category:
         query = query.filter(Initiative.category == category)
     
-    initiatives = query.order_by(Initiative.date.asc()).all()
+    initiatives = query.order_by(Initiative.date.asc()).limit(6).all()  # Limit to 6 for homepage
     
-    # Get statistics
-    total_initiatives = Initiative.query.count()
+    # Get inventory statistics (for hero section)
+    total_inventory_items = InventoryItem.query.filter(
+        InventoryItem.status.in_(['approved', 'active'])
+    ).count()
+    
+    # Get inventory by category
+    inventory_by_category = {}
+    for item in InventoryItem.query.filter(
+        InventoryItem.status.in_(['approved', 'active'])
+    ).all():
+        inventory_by_category[item.category] = inventory_by_category.get(item.category, 0) + 1
+    
+    # Get recent inventory items (for featured section)
+    recent_inventory_items = InventoryItem.query.filter(
+        InventoryItem.status.in_(['approved', 'active'])
+    ).order_by(InventoryItem.created_at.desc()).limit(8).all()
+    
+    # Get statistics for initiatives (for secondary section)
+    total_initiatives = Initiative.query.filter(Initiative.status == 'approved').count()
     total_participants = db.session.query(db.func.count(user_initiatives.c.user_id)).scalar() or 0
     total_participants += Participation.query.count()
     active_categories = db.session.query(Initiative.category).distinct().count()
@@ -40,7 +57,10 @@ def index():
                          total_participants=total_participants,
                          active_categories=active_categories,
                          selected_category=category,
-                         selected_status=status)
+                         selected_status=status,
+                         total_inventory_items=total_inventory_items,
+                         inventory_by_category=inventory_by_category,
+                         recent_inventory_items=recent_inventory_items)
 
 @bp.route('/about')
 def about():
@@ -90,7 +110,7 @@ def contact():
         current_app.logger.info(f'Contact form submitted: {subject} from {email} ({name})')
         
         # Send confirmation email to user (only if email is different from admin)
-        admin_email = current_app.config.get('ADMIN_EMAIL', 'latarragoneta@gmail.com')
+        admin_email = current_app.config.get('ADMIN_EMAIL', 'hola@tarracograf.cat')
         if email and email.lower() != admin_email.lower():
             try:
                 from app.services.email_service import EmailService
@@ -127,6 +147,45 @@ def contact():
     # Get subject from query parameter (for donation banner)
     subject_param = request.args.get('subject', '')
     return render_template('contact.html', default_subject=subject_param)
+
+@bp.route('/confirm-email/<token>')
+def confirm_email(token):
+    """Confirm user email with token from welcome email"""
+    from app.models import User
+    from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
+    
+    try:
+        serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+        email = serializer.loads(
+            token,
+            salt=current_app.config.get('SECURITY_PASSWORD_SALT', 'tarracograf-salt-2024'),
+            max_age=86400 * 7  # Token válido por 7 días
+        )
+        
+        user = User.query.filter_by(email=email).first_or_404()
+        
+        if user.confirmed_at:
+            flash(_('El teu correu electrònic ja està confirmat.'), 'info')
+            return redirect(url_for('security.login'))
+        
+        # Confirm user
+        user.confirmed_at = datetime.utcnow()
+        db.session.commit()
+        
+        current_app.logger.info(f'User {user.id} ({user.email}) confirmed email via token')
+        flash(_('Correu electrònic confirmat correctament! Ja pots iniciar sessió.'), 'success')
+        return redirect(url_for('security.login'))
+        
+    except SignatureExpired:
+        flash(_('El enllaç de confirmació ha expirat. Si us plau, contacta amb l\'administrador o sol·licita un nou enllaç.'), 'error')
+        return redirect(url_for('main.contact'))
+    except BadSignature:
+        flash(_('El enllaç de confirmació no és vàlid. Si us plau, contacta amb l\'administrador.'), 'error')
+        return redirect(url_for('main.contact'))
+    except Exception as e:
+        current_app.logger.error(f'Error confirming email: {str(e)}', exc_info=True)
+        flash(_('Hi ha hagut un error al confirmar el correu. Si us plau, contacta amb l\'administrador.'), 'error')
+        return redirect(url_for('main.contact'))
 
 @bp.route('/set_language/<lang>')
 def set_language(lang):

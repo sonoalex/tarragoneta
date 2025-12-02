@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ _('Gestió d\'Usuaris') }} - Tarragoneta{% endblock %}
+{% block title %}{{ _('Gestió d\'Usuaris') }} - Tarracograf{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
@@ -153,6 +153,7 @@
                                         <!-- Toggle Active -->
                                         {% if user.id != current_user.id %}
                                         <form method="POST" action="{{ url_for('admin.toggle_user_active', id=user.id) }}" class="d-inline">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                             <button type="submit" class="btn btn-sm {% if user.active %}btn-outline-danger{% else %}btn-outline-success{% endif %}" 
                                                     title="{% if user.active %}{{ _('Desactivar') }}{% else %}{{ _('Activar') }}{% endif %}">
                                                 <i class="fas fa-{% if user.active %}ban{% else %}check{% endif %}"></i>
@@ -163,6 +164,7 @@
                                         <!-- Confirm User -->
                                         {% if not user.confirmed_at %}
                                         <form method="POST" action="{{ url_for('admin.confirm_user', id=user.id) }}" class="d-inline">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                             <button type="submit" class="btn btn-sm btn-outline-success" title="{{ _('Confirmar') }}">
                                                 <i class="fas fa-check-circle"></i>
                                             </button>
@@ -179,6 +181,7 @@
                                                 {% for role in all_roles %}
                                                 <li>
                                                     <form method="POST" action="{{ url_for('admin.change_user_role', id=user.id) }}" class="d-inline">
+                                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                                         <input type="hidden" name="role" value="{{ role.name }}">
                                                         {% set is_current_role = role in user.roles %}
                                                         {% set is_admin_user = user.id == current_user.id %}

@@ -1,6 +1,15 @@
 #!/usr/bin/env python
 """
-Script para generar datos de ejemplo del inventario de palomas en Tarragona
+Script para generar datos de ejemplo del inventario (palomas, basura, etc.) en Tarragona.
+
+Este script:
+- Genera items de inventario con coordenadas reales de Tarragona
+- Asigna automáticamente la sección administrativa basándose en las coordenadas
+- Crea imágenes de ejemplo (opcional)
+- Distribuye items por categorías y estados de forma realista
+
+Uso:
+    python seed_data.py --count 50 --clear
 """
 import os
 import sys
@@ -13,7 +22,7 @@ import shutil
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from app import create_app
-from app.models import InventoryItem, User
+from app.models import InventoryItem, User, Section
 from app.extensions import db
 from app.config import Config
 
@@ -103,7 +112,7 @@ DESCRIPTIONS = {
         'Plumas en la zona',
         'Restos de plumas',
     ],
-    'basura_desborda': [
+    'basura_desbordada': [
         'Contenedor de basura desbordado',
         'Basura acumulada fuera del contenedor',
         'Contenedor lleno con basura alrededor',
@@ -135,7 +144,7 @@ def generate_seed_data(num_items=50):
     
     with app.app_context():
         # Get admin user or create a dummy user for reporting
-        admin_user = User.query.filter_by(email='admin@tarragoneta.org').first()
+        admin_user = User.query.filter_by(email='hola@tarracograf.cat').first()
         if not admin_user:
             print("⚠️  Admin user not found. Creating items without reporter...")
             reporter_id = None
@@ -145,12 +154,12 @@ def generate_seed_data(num_items=50):
         # Categories and subcategories with weights
         # Distribution: 
         #   palomas: 40% excremento, 35% nido, 25% plumas (100% total)
-        #   basura: 65% basura_desborda, 35% vertidos (100% total)
+        #   basura: 65% basura_desbordada, 35% vertidos (100% total)
         category_subcategory_map = [
             ('palomas', 'excremento')] * 20 + [
             ('palomas', 'nido')] * 17 + [
             ('palomas', 'plumas')] * 13 + [
-            ('basura', 'basura_desborda')] * 13 + [
+            ('basura', 'basura_desbordada')] * 13 + [
             ('basura', 'vertidos')] * 7
         
         # Status distribution for realism:
@@ -218,7 +227,7 @@ def generate_seed_data(num_items=50):
                         'excremento': (400, 300),
                         'nido': (300, 300),
                         'plumas': (300, 200),
-                        'basura_desborda': (400, 300),
+                        'basura_desbordada': (400, 300),
                         'vertidos': (400, 300),
                         'otro': (400, 300)
                     }
@@ -260,14 +269,26 @@ def generate_seed_data(num_items=50):
                 image_path=image_path  # Add image path if available
             )
             
+            # Intentar asignar sección automáticamente basándose en coordenadas
+            try:
+                item.assign_section()
+            except Exception as e:
+                # Si falla la asignación, continuar sin sección
+                print(f"  ⚠️  Could not assign section for item at ({latitude}, {longitude}): {e}")
+            
             db.session.add(item)
             items_created += 1
         
         db.session.commit()
         
+        # Estadísticas de asignación de secciones
+        items_with_section = InventoryItem.query.filter(InventoryItem.section_id.isnot(None)).count()
+        
         print(f"✅ Created {items_created} inventory items")
         if images_downloaded > 0:
             print(f"   📷 Downloaded {images_downloaded} images")
+        if items_with_section > 0:
+            print(f"   🗺️  {items_with_section} items assigned to sections")
         print(f"   Categories distribution:")
         by_category = {}
         for item in InventoryItem.query.filter(
@@ -282,7 +303,7 @@ def generate_seed_data(num_items=50):
                 'excremento': '💩', 
                 'nido': '🪺', 
                 'plumas': '🪶',
-                'basura_desborda': '🗑️',
+                'basura_desbordada': '🗑️',
                 'vertidos': '💧',
                 'otro': '📌'
             }.get(subcat, '📌')

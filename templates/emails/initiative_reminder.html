@@ -3,17 +3,17 @@
 {% block content %}
 <h2>{{ _('Recordatori: La teva iniciativa és demà!') }} 📅</h2>
 
-<p>{{ _('Hola') }} {{ user.username or user.email }},</p>
+<p>{{ _('Hola') }} {{ username }},</p>
 
 <p>{{ _('Volíem recordar-te que la teva iniciativa té lloc demà.') }}</p>
 
 <div class="highlight-box">
-    <h3 style="margin-top: 0;">{{ initiative.title }}</h3>
-    <p><strong>{{ _('Data') }}:</strong> {{ initiative.date.strftime('%d/%m/%Y') if initiative.date else _('Per determinar') }}</p>
-    {% if initiative.time %}
-    <p><strong>{{ _('Hora') }}:</strong> {{ initiative.time }}</p>
+    <h3 style="margin-top: 0;">{{ initiative_title }}</h3>
+    <p><strong>{{ _('Data') }}:</strong> {{ initiative_date or _('Per determinar') }}</p>
+    {% if initiative_time %}
+    <p><strong>{{ _('Hora') }}:</strong> {{ initiative_time }}</p>
     {% endif %}
-    <p><strong>{{ _('Ubicació') }}:</strong> {{ initiative.location }}</p>
+    <p><strong>{{ _('Ubicació') }}:</strong> {{ initiative_location }}</p>
 </div>
 
 <p>{{ _('Assegura\'t de tenir tot preparat per a l\'esdeveniment. Pots revisar els participants i actualitzar la informació si cal.') }}</p>
@@ -23,6 +23,6 @@
 </div>
 
 <p>{{ _('Molts ànims amb la iniciativa!') }}<br>
-<strong>L'equip de Tarragoneta</strong></p>
+<strong>L'equip de Tarracograf</strong></p>
 {% endblock %}
 

@@ -1,6 +1,6 @@
-# Lista de Emails de Tarragoneta
+# Lista de Emails de Tarracograf
 
-Este documento lista todos los emails que se envían desde la plataforma Tarragoneta.
+Este documento lista todos los emails que se envían desde la plataforma Tarracograf.
 
 ## 📧 Emails Implementados
 
@@ -94,9 +94,9 @@ Este documento lista todos los emails que se envían desde la plataforma Tarrago
 MAIL_SERVER=smtp.gmail.com
 MAIL_PORT=587
 MAIL_USE_TLS=True
-MAIL_USERNAME=hola@tarragoneta.com
+MAIL_USERNAME=hola@tarracograf.cat
 MAIL_PASSWORD=tu-app-password-de-google
-MAIL_DEFAULT_SENDER=Tarragoneta <hola@tarragoneta.com>
+MAIL_DEFAULT_SENDER=Tarracograf <hola@tarracograf.cat>
 
 # Para desarrollo (no envía emails reales)
 MAIL_SUPPRESS_SEND=True

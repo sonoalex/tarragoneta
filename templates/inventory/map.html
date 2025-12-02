@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ _('Inventari de Coloms') }} - Tarragoneta{% endblock %}
+{% block title %}{{ _('Inventari de Coloms') }} - Tarracograf{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
@@ -71,7 +71,8 @@
                         {% set main_cat = parts[0] if parts|length > 0 else cat_key %}
                         {% set sub_cat = parts[1] if parts|length > 1 else '' %}
                         <span class="badge bg-secondary me-2 mb-2" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
-                            {% if sub_cat == 'excremento' %}💩{% elif sub_cat == 'nido' %}🪺{% elif sub_cat == 'plumas' %}🪶{% elif sub_cat == 'basura_desborda' %}🗑️{% elif sub_cat == 'vertidos' %}💧{% else %}📌{% endif %}
+                            {% set icon_class, color_class = get_inventory_icon(main_cat, sub_cat) %}
+                            <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>
                             {{ get_inventory_category_name(main_cat, sub_cat) }}: {{ count }}
                         </span>
                         {% endfor %}
@@ -90,69 +91,76 @@
                    class="category-badge {% if not selected_category %}active{% endif %}">
                     {{ _('Totes') }}
                 </a>
-                <a href="{{ url_for('inventory.inventory_map', category='palomas') }}" 
-                   class="category-badge {% if selected_category == 'palomas' %}active{% endif %}">
-                    🕊️ {{ _('Palomas') }}
-                    {% if selected_category == 'palomas' and by_main_category.get('palomas') %}
+                <a href="{{ url_for('inventory.inventory_map', category='coloms') }}" 
+                   class="category-badge {% if selected_category == 'coloms' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('palomas') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Coloms') }}
+                    {% if selected_category == 'coloms' and by_main_category.get('palomas') %}
                         <span class="badge bg-light text-dark ms-1">{{ by_main_category.get('palomas', 0) }}</span>
                     {% endif %}
                 </a>
-                <a href="{{ url_for('inventory.inventory_map', category='basura') }}" 
-                   class="category-badge {% if selected_category == 'basura' %}active{% endif %}">
-                    🗑️ {{ _('Basura') }}
-                    {% if selected_category == 'basura' and by_main_category.get('basura') %}
+                <a href="{{ url_for('inventory.inventory_map', category='brossa') }}" 
+                   class="category-badge {% if selected_category == 'brossa' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('basura') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Brossa') }}
+                    {% if selected_category == 'brossa' and by_main_category.get('basura') %}
                         <span class="badge bg-light text-dark ms-1">{{ by_main_category.get('basura', 0) }}</span>
                     {% endif %}
                 </a>
             </div>
             
             <!-- Subcategories (only show if a main category is selected) -->
-            {% if selected_category == 'palomas' %}
+            {% if selected_category == 'coloms' %}
             <div class="mt-3 pt-3 border-top">
-                <small class="text-muted d-block mb-2">{{ _('Subcategorías de Palomas') }}:</small>
-                <a href="{{ url_for('inventory.inventory_map', category='palomas') }}" 
+                <small class="text-muted d-block mb-2">{{ _('Subcategorías de Coloms') }}:</small>
+                <a href="{{ url_for('inventory.inventory_map', category='coloms') }}" 
                    class="category-badge {% if not selected_subcategory %}active{% endif %}">
                     {{ _('Totes les subcategorías') }}
                 </a>
-                <a href="{{ url_for('inventory.inventory_map', category='palomas', subcategory='nido') }}" 
-                   class="category-badge {% if selected_subcategory == 'nido' %}active{% endif %}">
-                    🪺 {{ _('Nido') }}
+                <a href="{{ url_for('inventory.inventory_map', category='coloms', subcategory='niu') }}" 
+                   class="category-badge {% if selected_subcategory == 'niu' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('palomas', 'nido') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Niu') }}
                     {% if by_subcategory.get('nido') %}
                         <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('nido', 0) }}</span>
                     {% endif %}
                 </a>
-                <a href="{{ url_for('inventory.inventory_map', category='palomas', subcategory='excremento') }}" 
-                   class="category-badge {% if selected_subcategory == 'excremento' %}active{% endif %}">
-                    💩 {{ _('Excremento') }}
+                <a href="{{ url_for('inventory.inventory_map', category='coloms', subcategory='excrement') }}" 
+                   class="category-badge {% if selected_subcategory == 'excrement' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('palomas', 'excremento') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Excrement') }}
                     {% if by_subcategory.get('excremento') %}
                         <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('excremento', 0) }}</span>
                     {% endif %}
                 </a>
-                <a href="{{ url_for('inventory.inventory_map', category='palomas', subcategory='plumas') }}" 
-                   class="category-badge {% if selected_subcategory == 'plumas' %}active{% endif %}">
-                    🪶 {{ _('Plumas') }}
+                <a href="{{ url_for('inventory.inventory_map', category='coloms', subcategory='plomes') }}" 
+                   class="category-badge {% if selected_subcategory == 'plomes' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('palomas', 'plumas') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Plomes') }}
                     {% if by_subcategory.get('plumas') %}
                         <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('plumas', 0) }}</span>
                     {% endif %}
                 </a>
             </div>
-            {% elif selected_category == 'basura' %}
+            {% elif selected_category == 'brossa' %}
             <div class="mt-3 pt-3 border-top">
-                <small class="text-muted d-block mb-2">{{ _('Subcategorías de Basura') }}:</small>
-                <a href="{{ url_for('inventory.inventory_map', category='basura') }}" 
+                <small class="text-muted d-block mb-2">{{ _('Subcategorías de Brossa') }}:</small>
+                <a href="{{ url_for('inventory.inventory_map', category='brossa') }}" 
                    class="category-badge {% if not selected_subcategory %}active{% endif %}">
                     {{ _('Totes les subcategorías') }}
                 </a>
-                <a href="{{ url_for('inventory.inventory_map', category='basura', subcategory='basura_desborda') }}" 
-                   class="category-badge {% if selected_subcategory == 'basura_desborda' %}active{% endif %}">
-                    🗑️ {{ _('Brossa Desbordada') }}
-                    {% if by_subcategory.get('basura_desborda') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('basura_desborda', 0) }}</span>
+                <a href="{{ url_for('inventory.inventory_map', category='brossa', subcategory='brossa_desbordada') }}" 
+                   class="category-badge {% if selected_subcategory == 'brossa_desbordada' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('basura', 'basura_desbordada') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Brossa Desbordada') }}
+                    {% if by_subcategory.get('basura_desbordada') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('basura_desbordada', 0) }}</span>
                     {% endif %}
                 </a>
-                <a href="{{ url_for('inventory.inventory_map', category='basura', subcategory='vertidos') }}" 
-                   class="category-badge {% if selected_subcategory == 'vertidos' %}active{% endif %}">
-                    💧 {{ _('Abocaments') }}
+                <a href="{{ url_for('inventory.inventory_map', category='brossa', subcategory='abocaments') }}" 
+                   class="category-badge {% if selected_subcategory == 'abocaments' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('basura', 'vertidos') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Abocaments') }}
                     {% if by_subcategory.get('vertidos') %}
                         <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('vertidos', 0) }}</span>
                     {% endif %}
@@ -204,27 +212,124 @@
             maxZoom: 19
         }).addTo(map);
         
+        // Colores para cada distrito (9 distritos) - Colores más vibrantes y distintos
+        var districtColors = [
+            '#E74C3C', // Districte 1 - Rojo fuerte
+            '#1ABC9C', // Districte 2 - Turquesa fuerte
+            '#3498DB', // Districte 3 - Azul fuerte
+            '#E67E22', // Districte 4 - Naranja fuerte
+            '#2ECC71', // Districte 5 - Verde fuerte
+            '#F1C40F', // Districte 6 - Amarillo fuerte
+            '#9B59B6', // Districte 7 - Púrpura fuerte
+            '#16A085', // Districte 8 - Verde esmeralda
+            '#D35400'  // Districte 9 - Naranja oscuro
+        ];
+        
+        // Función para obtener color del distrito
+        function getDistrictColor(districtCode) {
+            var districtNum = parseInt(districtCode) - 1;
+            if (districtNum >= 0 && districtNum < districtColors.length) {
+                return districtColors[districtNum];
+            }
+            return '#CCCCCC'; // Color por defecto
+        }
+        
+        // Función para convertir GeoJSON a Leaflet layer
+        function geoJsonToLeaflet(geojson) {
+            if (geojson.type === 'Polygon') {
+                // Convertir coordenadas de [lng, lat] a [lat, lng] para Leaflet
+                var latlngs = geojson.coordinates[0].map(function(coord) {
+                    return [coord[1], coord[0]]; // [lat, lng]
+                });
+                return L.polygon(latlngs);
+            }
+            return null;
+        }
+        
+        // Cargar y dibujar secciones
+        var sectionsLayer = L.layerGroup();
+        fetch('{{ url_for("inventory.api_sections") }}')
+            .then(response => response.json())
+            .then(sections => {
+                sections.forEach(function(section) {
+                    if (section.geometry) {
+                        var polygon = geoJsonToLeaflet(section.geometry);
+                        if (polygon) {
+                            var color = getDistrictColor(section.district_code);
+                            polygon.setStyle({
+                                fillColor: color,
+                                fillOpacity: 0.5,  // Más opaco para colores más fuertes
+                                color: color,
+                                weight: 1.5,  // Borde delgado
+                                opacity: 0.9  // Borde ligeramente transparente
+                            });
+                            
+                            // Popup con información de la sección
+                            polygon.bindPopup(`
+                                <div style="min-width: 150px;">
+                                    <h6 class="fw-bold mb-1">${section.district_name}</h6>
+                                    <p class="small mb-0">${section.name}</p>
+                                    <p class="small text-muted mb-0">Código: ${section.full_code}</p>
+                                </div>
+                            `);
+                            
+                            sectionsLayer.addLayer(polygon);
+                        }
+                    }
+                });
+                
+                // Añadir capa de secciones al mapa
+                map.addLayer(sectionsLayer);
+            })
+            .catch(error => {
+                console.error('Error loading sections:', error);
+            });
+        
         // Create marker cluster group
         var markers = L.markerClusterGroup();
         
+        // Category icons mapping (matches Python get_inventory_icon function)
+        function getCategoryIconInfo(category, subcategory) {
+            var iconMapping = {
+                // Palomas
+                'palomas_nido': { icon: 'fa-home', color: '#007bff' },
+                'palomas_excremento': { icon: 'fa-biohazard', color: '#dc3545' },
+                'palomas_plumas': { icon: 'fa-feather', color: '#17a2b8' },
+                'palomas_': { icon: 'fa-dove', color: '#007bff' },
+                'palomas_otro': { icon: 'fa-dove', color: '#007bff' },
+                // Basura
+                'basura_basura_desbordada': { icon: 'fa-trash-alt', color: '#ffc107' },
+                'basura_vertidos': { icon: 'fa-tint', color: '#dc3545' },
+                'basura_': { icon: 'fa-trash', color: '#6c757d' },
+                'basura_otro': { icon: 'fa-trash', color: '#6c757d' }
+            };
+            
+            var key = (category || '') + '_' + (subcategory || '');
+            if (iconMapping[key]) {
+                return iconMapping[key];
+            }
+            // Fallback to category only
+            key = (category || '') + '_';
+            if (iconMapping[key]) {
+                return iconMapping[key];
+            }
+            // Default fallback
+            return { icon: 'fa-circle', color: '#6c757d' };
+        }
+        
         // Category icons with optional image
-        function getCategoryIcon(category, imagePath) {
+        function getCategoryIcon(category, subcategory, imagePath) {
             var colors = {
                 'excremento': '#8B4513',
                 'nido': '#D2691E',
                 'plumas': '#708090',
-                'basura_desborda': '#FF6B35',
+                'brossa_desbordada': '#FF6B35',
                 'vertidos': '#4ECDC4',
                 'otro': '#696969'
             };
-            var emojis = {
-                'excremento': '💩',
-                'nido': '🪺',
-                'plumas': '🪶',
-                'basura_desborda': '🗑️',
-                'vertidos': '💧',
-                'otro': '📌'
-            };
+            
+            var iconInfo = getCategoryIconInfo(category, subcategory);
+            var color = colors[subcategory] || iconInfo.color || '#696969';
             
             var size = 40; // Size for custom markers
             var iconSize = [size, size];
@@ -240,7 +345,7 @@
                                       border: 3px solid white;
                                       box-shadow: 0 2px 6px rgba(0,0,0,0.4);
                                       overflow: hidden;
-                                      background-color: ${colors[category] || '#696969'};
+                                      background-color: ${color};
                                       display: flex;
                                       align-items: center;
                                       justify-content: center;">
@@ -250,17 +355,17 @@
                                             object-fit: cover;
                                             border-radius: 50%;" 
                                      alt="${category}"
-                                     onerror="this.style.display='none'; this.parentElement.innerHTML='${emojis[category] || '📌'}'; this.parentElement.style.fontSize='20px';">
+                                     onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\\'fas ${iconInfo.icon}\\' style=\\'color: white; font-size: 18px;\\'></i>';">
                             </div>`,
                     iconSize: iconSize,
                     iconAnchor: iconAnchor
                 });
             }
             
-            // Default icon with emoji
+            // Default icon with Font Awesome
             return L.divIcon({
                 className: 'custom-marker',
-                html: `<div style="background-color: ${colors[category] || '#696969'}; 
+                html: `<div style="background-color: ${color}; 
                                   width: ${size}px; 
                                   height: ${size}px; 
                                   border-radius: 50%; 
@@ -268,27 +373,15 @@
                                   box-shadow: 0 2px 4px rgba(0,0,0,0.3);
                                   display: flex;
                                   align-items: center;
-                                  justify-content: center;
-                                  font-size: 18px;">${emojis[category] || '📌'}</div>`,
+                                  justify-content: center;">
+                                <i class="fas ${iconInfo.icon}" style="color: white; font-size: 18px;"></i>
+                            </div>`,
                 iconSize: iconSize,
                 iconAnchor: iconAnchor
             });
         }
         
-        // Category emojis
-        function getCategoryEmoji(category) {
-            var emojis = {
-                'excremento': '💩',
-                'nido': '🪺',
-                'plumas': '🪶',
-                'basura_desborda': '🗑️',
-                'vertidos': '💧',
-                'otro': '📌'
-            };
-            return emojis[category] || '📌';
-        }
-        
-        // Load items from API
+        // Load items from API (usar valores de URL en catalán)
         var category = '{{ selected_category or "" }}';
         var subcategory = '{{ selected_subcategory or "" }}';
         var params = [];
@@ -352,9 +445,10 @@
                         }
                     }
                     
+                    var iconInfo = getCategoryIconInfo(item.category, item.subcategory);
                     var popupContent = `
                         <div style="min-width: 200px;">
-                            <h6 class="fw-bold mb-2">${getCategoryEmoji(item.subcategory)} ${item.full_category}</h6>
+                            <h6 class="fw-bold mb-2"><i class="fas ${iconInfo.icon} ${iconInfo.color ? 'text-primary' : ''} me-1"></i>${item.full_category}</h6>
                             ${item.description ? `<p class="small mb-2">${item.description}</p>` : ''}
                             ${item.address ? `<p class="small text-muted mb-2"><i class="fas fa-map-marker-alt"></i> ${item.address}</p>` : ''}
                             ${item.image_path ? `<img src="/static/uploads/${item.image_path}" style="max-width: 100%; border-radius: 8px; margin-top: 0.5rem;" />` : ''}
@@ -383,7 +477,7 @@
                     `;
                     
                     var marker = L.marker([item.latitude, item.longitude], {
-                        icon: getCategoryIcon(item.subcategory, item.image_path)
+                        icon: getCategoryIcon(item.category, item.subcategory, item.image_path)
                     });
                     
                     marker.bindPopup(popupContent);

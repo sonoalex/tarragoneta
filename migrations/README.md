@@ -27,7 +27,7 @@ Las migraciones están ordenadas por la cadena de `down_revision` y tienen times
    - Fecha: 2025-11-10 11:34:22
    - Añade campo `subcategory` a `inventory_item`
    - Migra datos existentes a estructura jerárquica (category->subcategory)
-   - Compatible con PostgreSQL (producción) y SQLite (desarrollo)
+   - Compatible con PostgreSQL (producción y desarrollo)
    - Revision ID: `8eac5677c563`
    - Revises: `4908fda2abca`
 
@@ -55,7 +55,6 @@ release: python compile_translations.py && flask db upgrade || python init_db.py
 ## Notas Importantes
 
 - **PostgreSQL en Producción**: Las migraciones están optimizadas para PostgreSQL
-- **SQLite en Desarrollo**: Compatible pero con limitaciones (ej: no se puede cambiar NOT NULL después de crear la columna)
 - **Fallback**: Si las migraciones fallan, `init_db.py` intentará crear la columna `subcategory` manualmente
 
 ## Crear Nueva Migración

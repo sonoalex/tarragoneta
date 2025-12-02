@@ -1,114 +1,68 @@
 """
-Email service for Tarragoneta
+Email service for Tarracograf
 Handles all email sending with consistent styling
-Supports both synchronous and asynchronous (queue) sending
+Uses provider pattern for flexible email delivery (SMTP, Console)
+Uses Celery for asynchronous email sending when available
 """
-from flask import render_template, current_app, url_for, copy_current_request_context
-from flask_mail import Message
+import os
+from flask import render_template, current_app, url_for
 from flask_babel import gettext as _
-from app.extensions import mail, email_queue, redis_conn
-from datetime import datetime
-import functools
+from app.container import provide
+from app.providers.base import EmailProvider
+from typing import TYPE_CHECKING
 
-
-def send_email_task(to, subject, template, **kwargs):
-    """
-    Task function for RQ worker (must be at module level for RQ to import it)
-    This function is called by the worker to send emails
-    """
-    from app import create_app
-    app = create_app()
-    
-    # Create a request context for URL generation
-    with app.app_context():
-        # Push a request context to allow url_for with _external=True
-        with app.test_request_context():
-            return EmailService._send_email_sync(to, subject, template, **kwargs)
+if TYPE_CHECKING:
+    from app.providers.base import EmailProvider
 
 
 class EmailService:
-    """Service for sending emails with Tarragoneta branding"""
+    """Service for sending emails with Tarracograf branding"""
     
     @staticmethod
-    def _send_email_sync(to, subject, template, **kwargs):
+    def _send_email_direct(to, subject, template, **kwargs):
         """
-        Internal method to send email synchronously (used by queue worker)
-        
-        Args:
-            to: Email address or list of addresses
-            subject: Email subject
-            template: Template name (without .html)
-            **kwargs: Additional context variables for the template (may contain serialized objects)
+        Send an email directly using the provider (without Celery).
+        Used when Celery is disabled or when called from within a Celery task.
         """
-        # Log mail configuration status
-        mail_suppress = current_app.config.get('MAIL_SUPPRESS_SEND', False)
-        mail_server = current_app.config.get('MAIL_SERVER', 'not set')
-        mail_username = current_app.config.get('MAIL_USERNAME', 'not set')
-        mail_password_set = bool(current_app.config.get('MAIL_PASSWORD', ''))
-        
-        current_app.logger.info(f'[EMAIL DEBUG] Suppress: {mail_suppress}, Server: {mail_server}, Username: {mail_username}, Password: {"set" if mail_password_set else "NOT SET"}')
-        
-        if mail_suppress:
-            current_app.logger.info(f'[EMAIL SUPPRESSED] To: {to}, Subject: {subject}')
-            return True
-        
+        # Render the email template
+        # Flask can generate external URLs without request context if SERVER_NAME is configured
+        # If not configured, we'll create a minimal request context
         try:
-            # Deserialize kwargs (convert IDs back to objects if needed)
-            deserialized_kwargs = EmailService._deserialize_kwargs(kwargs)
-            
-            # Add recipient_email to template context
-            recipient_email = to if isinstance(to, str) else ', '.join(to)
-            deserialized_kwargs['recipient_email'] = recipient_email
-            
-            current_app.logger.info(f'[EMAIL DEBUG] Creating message for {to}...')
-            msg = Message(
-                subject=subject,
-                recipients=[to] if isinstance(to, str) else to,
-                html=render_template(f'emails/{template}.html', **deserialized_kwargs),
-                sender=current_app.config.get('MAIL_DEFAULT_SENDER', 'Tarragoneta <hola@tarragoneta.com>')
-            )
-            
-            current_app.logger.info(f'[EMAIL DEBUG] Sending email to {to}...')
-            
-            # Send email with timeout using threading
-            import threading
-            import queue as queue_module
-            
-            result_queue = queue_module.Queue()
-            error_queue = queue_module.Queue()
-            
-            def send_email_thread():
-                try:
-                    mail.send(msg)
-                    result_queue.put(True)
-                except Exception as e:
-                    error_queue.put(e)
-            
-            # Start thread
-            thread = threading.Thread(target=send_email_thread, daemon=True)
-            thread.start()
-            
-            # Wait for result with timeout
-            timeout = current_app.config.get('MAIL_TIMEOUT', 10)
-            thread.join(timeout=timeout)
-            
-            if thread.is_alive():
-                # Thread is still running - timeout occurred
-                current_app.logger.error(f'Email send timeout for {to} after {timeout} seconds')
-                return False
-            
-            # Check for errors
-            if not error_queue.empty():
-                error = error_queue.get()
-                raise error
-            
-            # Check for success
-            if not result_queue.empty():
-                current_app.logger.info(f'Email sent successfully to {to}: {subject}')
-                return True
+            # Check if SERVER_NAME is configured (standard Flask way)
+            if current_app.config.get('SERVER_NAME'):
+                # Flask can generate external URLs directly
+                html = render_template(f'emails/{template}.html', **kwargs)
             else:
-                current_app.logger.error(f'Email send failed for {to}: unknown error')
+                # Fallback: create a minimal request context
+                # Extract domain from BASE_URL if available, otherwise use default
+                base_url = os.environ.get('BASE_URL') or current_app.config.get('BASE_URL')
+                if base_url:
+                    # Parse BASE_URL to get scheme and host
+                    from urllib.parse import urlparse
+                    parsed = urlparse(base_url)
+                    with current_app.test_request_context(
+                        base_url=base_url,
+                        environ_base={'SERVER_NAME': parsed.netloc or 'localhost:5000'}
+                    ):
+                        html = render_template(f'emails/{template}.html', **kwargs)
+                else:
+                    # Last resort: use test_request_context with defaults
+                    with current_app.test_request_context():
+                        html = render_template(f'emails/{template}.html', **kwargs)
+        except Exception as e:
+            current_app.logger.error(f'Error rendering email template {template}: {str(e)}', exc_info=True)
+            return False
+        
+        # Get the email provider from DI container
+        try:
+            provider = provide('email_provider')
+            if not provider:
+                current_app.logger.error('Email provider not available')
                 return False
+            
+            # Send email via provider
+            result = provider.send_email(to, subject, html)
+            return result
         except Exception as e:
             current_app.logger.error(f'Error sending email to {to}: {str(e)}', exc_info=True)
             return False
@@ -116,7 +70,7 @@ class EmailService:
     @staticmethod
     def send_email(to, subject, template, **kwargs):
         """
-        Send an email using a template (queued if Redis is available)
+        Send an email using a template (asynchronously via Celery if enabled)
         
         Args:
             to: Email address or list of addresses
@@ -124,118 +78,51 @@ class EmailService:
             template: Template name (without .html)
             **kwargs: Additional context variables for the template
         """
-        use_queue = current_app.config.get('USE_EMAIL_QUEUE', True)
+        # Check if Celery should be used
+        use_celery = current_app.config.get('USE_CELERY_FOR_EMAILS', True)
         
-        # If queue is enabled and available, use it
-        if use_queue and email_queue and redis_conn:
-            try:
-                # Serialize kwargs (convert objects to IDs if needed)
-                serialized_kwargs = EmailService._serialize_kwargs(kwargs)
-                
-                # Enqueue the email job
-                # Use the module-level function that RQ can import
-                job = email_queue.enqueue(
-                    'app.services.email_service.send_email_task',
-                    to, subject, template,
-                    **serialized_kwargs,
-                    job_timeout=300  # 5 minutes timeout
-                )
-                current_app.logger.info(f'Email queued for {to}: {subject} (Job ID: {job.id})')
-                return True
-            except Exception as e:
-                current_app.logger.warning(f'Failed to queue email, sending synchronously: {str(e)}')
-                # Fallback to synchronous sending
-                return EmailService._send_email_sync(to, subject, template, **kwargs)
-        else:
-            # Send synchronously if queue is disabled or unavailable
-            return EmailService._send_email_sync(to, subject, template, **kwargs)
-    
-    @staticmethod
-    def _serialize_kwargs(kwargs):
-        """
-        Serialize kwargs for queue (convert model objects to IDs and URLs to strings)
-        """
-        serialized = {}
-        for key, value in kwargs.items():
-            # Skip None values
-            if value is None:
-                continue
-            # If it's a model instance, convert to ID
-            elif hasattr(value, 'id'):
-                serialized[f'{key}_id'] = value.id
-                serialized[f'{key}_type'] = value.__class__.__name__
-            # If it's a datetime, convert to ISO string
-            elif isinstance(value, datetime):
-                serialized[key] = value.isoformat()
-            # If it's a URL (from url_for), it's already a string
-            elif isinstance(value, str) and (value.startswith('http://') or value.startswith('https://')):
-                serialized[key] = value
-            # Otherwise, keep as is (strings, numbers, etc.)
-            else:
-                serialized[key] = value
-        return serialized
-    
-    @staticmethod
-    def _deserialize_kwargs(kwargs):
-        """
-        Deserialize kwargs from queue (convert IDs back to model objects)
-        """
-        from app.models import User, Donation, Initiative, InventoryItem
+        if not use_celery:
+            # Send directly without Celery
+            return EmailService._send_email_direct(to, subject, template, **kwargs)
         
-        deserialized = {}
-        model_map = {
-            'User': User,
-            'Donation': Donation,
-            'Initiative': Initiative,
-            'InventoryItem': InventoryItem
-        }
+        # Get Celery task from app (use getattr instead of .get() to avoid Flask setup restrictions)
+        send_email_task = getattr(current_app, 'send_email_task', None)
+        if not send_email_task:
+            current_app.logger.warning('Celery task not available, falling back to direct send')
+            return EmailService._send_email_direct(to, subject, template, **kwargs)
         
-        # Track which keys we've processed
-        processed_keys = set()
-        
-        for key, value in kwargs.items():
-            # Check if this is a serialized object (has _id and _type)
-            if key.endswith('_id'):
-                base_key = key[:-3]  # Remove '_id'
-                type_key = f'{base_key}_type'
-                
-                if type_key in kwargs:
-                    model_name = kwargs[type_key]
-                    if model_name in model_map:
-                        model_class = model_map[model_name]
-                        try:
-                            obj = model_class.query.get(value)
-                            if obj:
-                                deserialized[base_key] = obj
-                                processed_keys.add(key)
-                                processed_keys.add(type_key)
-                        except Exception as e:
-                            current_app.logger.warning(f'Could not deserialize {base_key}: {str(e)}')
-                            deserialized[base_key] = None
-                            processed_keys.add(key)
-                            processed_keys.add(type_key)
-                else:
-                    # Just an ID without type, keep as is
-                    deserialized[key] = value
-            elif key.endswith('_type'):
-                # Skip type keys (already processed with _id)
-                if key not in processed_keys:
-                    processed_keys.add(key)
-            else:
-                # Regular value, keep as is
-                deserialized[key] = value
-        
-        return deserialized
+        # Enqueue email task (kwargs should already be JSON-serializable)
+        task = send_email_task.delay(to, subject, template, **kwargs)
+        current_app.logger.info(f'Email task enqueued to {to}: {subject} (task_id: {task.id})')
+        return True
     
     @staticmethod
     def send_welcome_email(user):
-        """Send welcome email after registration"""
+        """Send welcome email after registration with confirmation link"""
+        try:
+            login_url = url_for('security.login', _external=True)
+        except:
+            login_url = None
+        
+        # Generate confirmation token if user is not confirmed
+        confirmation_url = None
+        if not user.confirmed_at:
+            try:
+                from itsdangerous import URLSafeTimedSerializer
+                serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+                token = serializer.dumps(user.email, salt=current_app.config.get('SECURITY_PASSWORD_SALT', 'tarracograf-salt-2024'))
+                confirmation_url = url_for('main.confirm_email', token=token, _external=True)
+            except Exception as e:
+                current_app.logger.error(f'Error generating confirmation token: {str(e)}', exc_info=True)
+        
         return EmailService.send_email(
             to=user.email,
-            subject=_('Benvingut/da a Tarragoneta! 🌱'),
+            subject=_('Benvingut/da a Tarracograf! 🌱'),
             template='welcome',
-            user=user,
-            login_url=url_for('security.login', _external=True)
+            username=user.username or user.email,
+            user_email=user.email,
+            login_url=login_url,
+            confirmation_url=confirmation_url
         )
     
     @staticmethod
@@ -250,9 +137,10 @@ class EmailService:
             to=recipient,
             subject=_('Gràcies per la teva donació! 💚'),
             template='donation_confirmation',
-            donation=donation,
-            user=user,
-            amount=donation.amount_euros if hasattr(donation, 'amount_euros') else None
+            username=user.username if user else None,
+            user_email=user.email if user else None,
+            amount=donation.amount_euros if hasattr(donation, 'amount_euros') else None,
+            donation_date=donation.completed_at.strftime('%d/%m/%Y %H:%M') if hasattr(donation, 'completed_at') and donation.completed_at else None
         )
     
     @staticmethod
@@ -260,14 +148,17 @@ class EmailService:
         """Send email when initiative is approved"""
         try:
             initiative_url = url_for('initiatives.detail', id=initiative.id, _external=True)
-        except:
+        except Exception:
             initiative_url = None
         return EmailService.send_email(
             to=user.email,
             subject=_('La teva iniciativa ha estat aprovada! ✅'),
             template='initiative_approved',
-            initiative=initiative,
-            user=user,
+            username=user.username or user.email,
+            user_email=user.email,
+            initiative_title=initiative.title,
+            initiative_date=initiative.date.strftime('%d/%m/%Y') if initiative.date else None,
+            initiative_location=initiative.location,
             initiative_url=initiative_url
         )
     
@@ -278,8 +169,9 @@ class EmailService:
             to=user.email,
             subject=_('Informació sobre la teva iniciativa'),
             template='initiative_rejected',
-            initiative=initiative,
-            user=user,
+            username=user.username or user.email,
+            user_email=user.email,
+            initiative_title=initiative.title,
             reason=reason
         )
     
@@ -288,14 +180,18 @@ class EmailService:
         """Send reminder email before initiative date"""
         try:
             initiative_url = url_for('initiatives.detail', id=initiative.id, _external=True)
-        except:
+        except Exception:
             initiative_url = None
         return EmailService.send_email(
             to=user.email,
             subject=_('Recordatori: La teva iniciativa és demà! 📅'),
             template='initiative_reminder',
-            initiative=initiative,
-            user=user,
+            username=user.username or user.email,
+            user_email=user.email,
+            initiative_title=initiative.title,
+            initiative_date=initiative.date.strftime('%d/%m/%Y') if initiative.date else None,
+            initiative_time=str(initiative.time) if hasattr(initiative, 'time') and initiative.time else None,
+            initiative_location=initiative.location,
             initiative_url=initiative_url
         )
     
@@ -304,13 +200,16 @@ class EmailService:
         """Send confirmation email to initiative participant"""
         try:
             initiative_url = url_for('initiatives.detail', id=initiative.id, _external=True)
-        except:
+        except Exception:
             initiative_url = None
         return EmailService.send_email(
             to=participant_email,
             subject=_('Confirmació de participació en iniciativa'),
             template='participant_confirmation',
-            initiative=initiative,
+            initiative_title=initiative.title,
+            initiative_date=initiative.date.strftime('%d/%m/%Y') if initiative.date else None,
+            initiative_time=str(initiative.time) if hasattr(initiative, 'time') and initiative.time else None,
+            initiative_location=initiative.location,
             participant_name=participant_name,
             initiative_url=initiative_url
         )
@@ -320,13 +219,24 @@ class EmailService:
         """Send email when inventory item is approved"""
         try:
             item_url = url_for('inventory.inventory_map', category=item.category, subcategory=item.subcategory, _external=True)
-        except:
+        except Exception:
             item_url = None
+        
+        # Get full category name for display
+        from app.utils import get_inventory_category_name, get_inventory_subcategory_name
+        category_name = get_inventory_category_name(item.category)
+        subcategory_name = get_inventory_subcategory_name(item.category, item.subcategory) if item.subcategory else None
+        full_category = f"{category_name}" + (f" - {subcategory_name}" if subcategory_name else "")
+        
         return EmailService.send_email(
             to=reporter_email,
             subject=_('El teu reportatge ha estat aprovat! ✅'),
             template='inventory_approved',
-            item=item,
+            item_category=item.category,
+            item_subcategory=item.subcategory,
+            item_full_category=full_category,
+            item_address=item.address,
+            item_description=item.description,
             item_url=item_url
         )
     
@@ -337,7 +247,9 @@ class EmailService:
             to=reporter_email,
             subject=_('Informació sobre el teu reportatge'),
             template='inventory_rejected',
-            item=item,
+            item_category=item.category,
+            item_subcategory=item.subcategory,
+            item_description=item.description,
             reason=reason
         )
     
@@ -346,7 +258,7 @@ class EmailService:
         """Send response to contact form submission"""
         return EmailService.send_email(
             to=contact_email,
-            subject=_('Gràcies per contactar amb Tarragoneta'),
+            subject=_('Gràcies per contactar amb Tarracograf'),
             template='contact_response',
             contact_email=contact_email,
             contact_subject=subject,  # Renamed to avoid conflict with email subject
@@ -358,7 +270,7 @@ class EmailService:
         """Send notification to admin"""
         return EmailService.send_email(
             to=admin_email,
-            subject=_('Notificació de Tarragoneta'),
+            subject=_('Notificació de Tarracograf'),
             template='admin_notification',
             notification_type=notification_type,
             data=data
