@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ _('Inventari de Coloms') }} - Tarracograf{% endblock %}
+{% block title %}{{ _('Inventari') }} - Tarracograf{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
@@ -49,8 +49,8 @@
     <div class="container">
         <div class="row mb-4">
             <div class="col-12">
-                <h1 class="display-5 fw-bold mb-3">{{ _('Inventari de Coloms') }}</h1>
-                <p class="lead text-muted">{{ _('Mapa col·laboratiu per reportar i visualitzar problemes relacionats amb coloms a Tarragona') }}</p>
+                <h1 class="display-5 fw-bold mb-3">{{ _('Inventari') }}</h1>
+                <p class="lead text-muted">{{ _('Mapa col·laboratiu per reportar i visualitzar problemes de la ciutat de Tarragona') }}</p>
             </div>
         </div>
 
@@ -107,6 +107,54 @@
                         <span class="badge bg-light text-dark ms-1">{{ by_main_category.get('basura', 0) }}</span>
                     {% endif %}
                 </a>
+                <a href="{{ url_for('inventory.inventory_map', category='gossos') }}" 
+                   class="category-badge {% if selected_category == 'gossos' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('perros') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Gossos') }}
+                    {% if selected_category == 'gossos' and by_main_category.get('perros') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_main_category.get('perros', 0) }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='material_deteriorat') }}" 
+                   class="category-badge {% if selected_category == 'material_deteriorat' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('material_deteriorat') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Material Deteriorat') }}
+                    {% if selected_category == 'material_deteriorat' and by_main_category.get('material_deteriorat') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_main_category.get('material_deteriorat', 0) }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='bruticia') }}" 
+                   class="category-badge {% if selected_category == 'bruticia' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('bruticia') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Brutícia') }}
+                    {% if selected_category == 'bruticia' and by_main_category.get('bruticia') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_main_category.get('bruticia', 0) }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='mobiliari_urba') }}" 
+                   class="category-badge {% if selected_category == 'mobiliari_urba' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('mobiliari_urba') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Mobiliari Urbà') }}
+                    {% if selected_category == 'mobiliari_urba' and by_main_category.get('mobiliari_urba') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_main_category.get('mobiliari_urba', 0) }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='vegetacio') }}" 
+                   class="category-badge {% if selected_category == 'vegetacio' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('vegetacio') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Vegetació') }}
+                    {% if selected_category == 'vegetacio' and by_main_category.get('vegetacio') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_main_category.get('vegetacio', 0) }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='infraestructura') }}" 
+                   class="category-badge {% if selected_category == 'infraestructura' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('infraestructura') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Infraestructura') }}
+                    {% if selected_category == 'infraestructura' and by_main_category.get('infraestructura') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_main_category.get('infraestructura', 0) }}</span>
+                    {% endif %}
+                </a>
             </div>
             
             <!-- Subcategories (only show if a main category is selected) -->
@@ -149,12 +197,12 @@
                    class="category-badge {% if not selected_subcategory %}active{% endif %}">
                     {{ _('Totes les subcategorías') }}
                 </a>
-                <a href="{{ url_for('inventory.inventory_map', category='brossa', subcategory='brossa_desbordada') }}" 
-                   class="category-badge {% if selected_subcategory == 'brossa_desbordada' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('basura', 'basura_desbordada') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Brossa Desbordada') }}
-                    {% if by_subcategory.get('basura_desbordada') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('basura_desbordada', 0) }}</span>
+                <a href="{{ url_for('inventory.inventory_map', category='brossa', subcategory='escombreries_desbordades') }}" 
+                   class="category-badge {% if selected_subcategory == 'escombreries_desbordades' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('basura', 'escombreries_desbordades') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Escombreries Desbordades') }}
+                    {% if by_subcategory.get('escombreries_desbordades') or by_subcategory.get('basura_desbordada') %}
+                        <span class="badge bg-light text-dark ms-1">{{ (by_subcategory.get('escombreries_desbordades', 0) + by_subcategory.get('basura_desbordada', 0)) }}</span>
                     {% endif %}
                 </a>
                 <a href="{{ url_for('inventory.inventory_map', category='brossa', subcategory='abocaments') }}" 
@@ -163,6 +211,198 @@
                     <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Abocaments') }}
                     {% if by_subcategory.get('vertidos') %}
                         <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('vertidos', 0) }}</span>
+                    {% endif %}
+                </a>
+            </div>
+            {% elif selected_category == 'gossos' %}
+            <div class="mt-3 pt-3 border-top">
+                <small class="text-muted d-block mb-2">{{ _('Subcategorías de Gossos') }}:</small>
+                <a href="{{ url_for('inventory.inventory_map', category='gossos') }}" 
+                   class="category-badge {% if not selected_subcategory %}active{% endif %}">
+                    {{ _('Totes les subcategorías') }}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='gossos', subcategory='excrements') }}" 
+                   class="category-badge {% if selected_subcategory == 'excrements' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('perros', 'excrements') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Excrements') }}
+                    {% if by_subcategory.get('excrements') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('excrements', 0) }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='gossos', subcategory='pixades') }}" 
+                   class="category-badge {% if selected_subcategory == 'pixades' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('perros', 'pixades') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Pixades') }}
+                    {% if by_subcategory.get('pixades') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('pixades', 0) }}</span>
+                    {% endif %}
+                </a>
+            </div>
+            {% elif selected_category == 'material_deteriorat' %}
+            <div class="mt-3 pt-3 border-top">
+                <small class="text-muted d-block mb-2">{{ _('Subcategorías de Material Deteriorat') }}:</small>
+                <a href="{{ url_for('inventory.inventory_map', category='material_deteriorat') }}" 
+                   class="category-badge {% if not selected_subcategory %}active{% endif %}">
+                    {{ _('Totes les subcategorías') }}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='material_deteriorat', subcategory='faroles') }}" 
+                   class="category-badge {% if selected_subcategory == 'faroles' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('material_deteriorat', 'faroles') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Faroles') }}
+                    {% if by_subcategory.get('faroles') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('faroles', 0) }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='material_deteriorat', subcategory='bancs') }}" 
+                   class="category-badge {% if selected_subcategory == 'bancs' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('material_deteriorat', 'bancs') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Bancs') }}
+                    {% if by_subcategory.get('bancs') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('bancs', 0) }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='material_deteriorat', subcategory='senyals') }}" 
+                   class="category-badge {% if selected_subcategory == 'senyals' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('material_deteriorat', 'senyals') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Senyals') }}
+                    {% if by_subcategory.get('senyals') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('senyals', 0) }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='material_deteriorat', subcategory='paviment') }}" 
+                   class="category-badge {% if selected_subcategory == 'paviment' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('material_deteriorat', 'paviment') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Paviment') }}
+                    {% if by_subcategory.get('paviment') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('paviment', 0) }}</span>
+                    {% endif %}
+                </a>
+            </div>
+            {% elif selected_category == 'bruticia' %}
+            <div class="mt-3 pt-3 border-top">
+                <small class="text-muted d-block mb-2">{{ _('Subcategorías de Brutícia') }}:</small>
+                <a href="{{ url_for('inventory.inventory_map', category='bruticia') }}" 
+                   class="category-badge {% if not selected_subcategory %}active{% endif %}">
+                    {{ _('Totes les subcategorías') }}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='bruticia', subcategory='terra') }}" 
+                   class="category-badge {% if selected_subcategory == 'terra' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('bruticia', 'terra') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Terra') }}
+                    {% if by_subcategory.get('terra') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('terra', 0) }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='bruticia', subcategory='fulles') }}" 
+                   class="category-badge {% if selected_subcategory == 'fulles' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('bruticia', 'fulles') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Fulles') }}
+                    {% if by_subcategory.get('fulles') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('fulles', 0) }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='bruticia', subcategory='grafit') }}" 
+                   class="category-badge {% if selected_subcategory == 'grafit' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('bruticia', 'grafit') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Grafit') }}
+                    {% if by_subcategory.get('grafit') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('grafit', 0) }}</span>
+                    {% endif %}
+                </a>
+            </div>
+            {% elif selected_category == 'mobiliari_urba' %}
+            <div class="mt-3 pt-3 border-top">
+                <small class="text-muted d-block mb-2">{{ _('Subcategorías de Mobiliari Urbà') }}:</small>
+                <a href="{{ url_for('inventory.inventory_map', category='mobiliari_urba') }}" 
+                   class="category-badge {% if not selected_subcategory %}active{% endif %}">
+                    {{ _('Totes les subcategorías') }}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='mobiliari_urba', subcategory='papereres') }}" 
+                   class="category-badge {% if selected_subcategory == 'papereres' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('mobiliari_urba', 'papereres') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Papereres') }}
+                    {% if by_subcategory.get('papereres') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('papereres', 0) }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='mobiliari_urba', subcategory='parades') }}" 
+                   class="category-badge {% if selected_subcategory == 'parades' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('mobiliari_urba', 'parades') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Parades') }}
+                    {% if by_subcategory.get('parades') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('parades', 0) }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='mobiliari_urba', subcategory='bancs') }}" 
+                   class="category-badge {% if selected_subcategory == 'bancs' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('mobiliari_urba', 'bancs') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Bancs') }}
+                    {% if by_subcategory.get('bancs') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('bancs', 0) }}</span>
+                    {% endif %}
+                </a>
+            </div>
+            {% elif selected_category == 'vegetacio' %}
+            <div class="mt-3 pt-3 border-top">
+                <small class="text-muted d-block mb-2">{{ _('Subcategorías de Vegetació') }}:</small>
+                <a href="{{ url_for('inventory.inventory_map', category='vegetacio') }}" 
+                   class="category-badge {% if not selected_subcategory %}active{% endif %}">
+                    {{ _('Totes les subcategorías') }}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='vegetacio', subcategory='arbres') }}" 
+                   class="category-badge {% if selected_subcategory == 'arbres' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('vegetacio', 'arbres') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Arbres') }}
+                    {% if by_subcategory.get('arbres') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('arbres', 0) }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='vegetacio', subcategory='arbustos') }}" 
+                   class="category-badge {% if selected_subcategory == 'arbustos' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('vegetacio', 'arbustos') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Arbustos') }}
+                    {% if by_subcategory.get('arbustos') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('arbustos', 0) }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='vegetacio', subcategory='gespa') }}" 
+                   class="category-badge {% if selected_subcategory == 'gespa' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('vegetacio', 'gespa') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Gespa') }}
+                    {% if by_subcategory.get('gespa') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('gespa', 0) }}</span>
+                    {% endif %}
+                </a>
+            </div>
+            {% elif selected_category == 'infraestructura' %}
+            <div class="mt-3 pt-3 border-top">
+                <small class="text-muted d-block mb-2">{{ _('Subcategorías de Infraestructura') }}:</small>
+                <a href="{{ url_for('inventory.inventory_map', category='infraestructura') }}" 
+                   class="category-badge {% if not selected_subcategory %}active{% endif %}">
+                    {{ _('Totes les subcategorías') }}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='infraestructura', subcategory='carreteres') }}" 
+                   class="category-badge {% if selected_subcategory == 'carreteres' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('infraestructura', 'carreteres') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Carreteres') }}
+                    {% if by_subcategory.get('carreteres') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('carreteres', 0) }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='infraestructura', subcategory='voreres') }}" 
+                   class="category-badge {% if selected_subcategory == 'voreres' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('infraestructura', 'voreres') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Voreres') }}
+                    {% if by_subcategory.get('voreres') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('voreres', 0) }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('inventory.inventory_map', category='infraestructura', subcategory='enllumenat') }}" 
+                   class="category-badge {% if selected_subcategory == 'enllumenat' %}active{% endif %}">
+                    {% set icon_class, color_class = get_inventory_icon('infraestructura', 'enllumenat') %}
+                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Enllumenat') }}
+                    {% if by_subcategory.get('enllumenat') %}
+                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('enllumenat', 0) }}</span>
                     {% endif %}
                 </a>
             </div>
@@ -204,7 +444,12 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize map centered on Tarragona
-        var map = L.map('map').setView([41.1189, 1.2445], 13);
+        // maxBounds se establecerá después de cargar el boundary
+        var map = L.map('map', {
+            center: [41.1189, 1.2445],
+            zoom: 13,
+            maxZoom: 19
+        });
         
         // Add OpenStreetMap tiles
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -242,6 +487,16 @@
                     return [coord[1], coord[0]]; // [lat, lng]
                 });
                 return L.polygon(latlngs);
+            } else if (geojson.type === 'MultiPolygon') {
+                // Manejar MultiPolygon: crear un layer group con múltiples polígonos
+                var layerGroup = L.layerGroup();
+                geojson.coordinates.forEach(function(polygonCoords) {
+                    var latlngs = polygonCoords[0].map(function(coord) {
+                        return [coord[1], coord[0]]; // [lat, lng]
+                    });
+                    layerGroup.addLayer(L.polygon(latlngs));
+                });
+                return layerGroup;
             }
             return null;
         }
@@ -285,6 +540,88 @@
                 console.error('Error loading sections:', error);
             });
         
+        // Cargar y dibujar boundary de la ciudad
+        var boundaryLayer = L.layerGroup();
+        fetch('{{ url_for("inventory.api_boundary") }}')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Boundary data received:', data);
+                if (data.error) {
+                    console.error('Boundary API error:', data.error);
+                    return;
+                }
+                if (data.geometry) {
+                    var polygon = geoJsonToLeaflet(data.geometry);
+                    if (polygon) {
+                        // Si es un LayerGroup (MultiPolygon), aplicar estilo a cada capa
+                        if (polygon instanceof L.LayerGroup) {
+                            polygon.eachLayer(function(layer) {
+                                layer.setStyle({
+                                    fillColor: '#4A9B5C',  // Verde de Tarracograf
+                                    fillOpacity: 0.1,      // Muy transparente
+                                    color: '#4A9B5C',      // Borde verde
+                                    weight: 5,             // Borde más grueso para el boundary
+                                    opacity: 0.9,          // Borde más opaco
+                                    dashArray: '10, 5'     // Línea punteada para diferenciarlo
+                                });
+                                layer.bindPopup(`
+                                    <div style="min-width: 150px;">
+                                        <h6 class="fw-bold mb-1">${data.name || 'Tarragona'}</h6>
+                                        <p class="small text-muted mb-0">Límite de la ciudad</p>
+                                        ${data.calculated_at ? `<p class="small text-muted mb-0">Calculado: ${new Date(data.calculated_at).toLocaleDateString()}</p>` : ''}
+                                    </div>
+                                `);
+                            });
+                        } else {
+                            // Si es un Polygon simple
+                            polygon.setStyle({
+                                fillColor: '#4A9B5C',  // Verde de Tarracograf
+                                fillOpacity: 0.1,      // Muy transparente
+                                color: '#4A9B5C',      // Borde verde
+                                weight: 5,             // Borde más grueso para el boundary
+                                opacity: 0.9,          // Borde más opaco
+                                dashArray: '10, 5'     // Línea punteada para diferenciarlo
+                            });
+                            
+                            // Popup con información del boundary
+                            polygon.bindPopup(`
+                                <div style="min-width: 150px;">
+                                    <h6 class="fw-bold mb-1">${data.name || 'Tarragona'}</h6>
+                                    <p class="small text-muted mb-0">Límite de la ciudad</p>
+                                    ${data.calculated_at ? `<p class="small text-muted mb-0">Calculado: ${new Date(data.calculated_at).toLocaleDateString()}</p>` : ''}
+                                </div>
+                            `);
+                        }
+                        
+                        boundaryLayer.addLayer(polygon);
+                        map.addLayer(boundaryLayer);
+                        console.log('Boundary added to map');
+                        
+                        // Establecer maxBounds para limitar el movimiento del mapa
+                        if (data.bounds) {
+                            var maxBounds = L.latLngBounds(
+                                data.bounds.southwest,  // [lat, lng]
+                                data.bounds.northeast   // [lat, lng]
+                            );
+                            map.setMaxBounds(maxBounds);
+                            console.log('Map bounds restricted to:', maxBounds);
+                        }
+                    } else {
+                        console.error('Failed to convert boundary geometry to Leaflet layer');
+                    }
+                } else {
+                    console.error('No geometry in boundary data');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading boundary:', error);
+            });
+        
         // Create marker cluster group
         var markers = L.markerClusterGroup();
         
@@ -298,7 +635,7 @@
                 'palomas_': { icon: 'fa-dove', color: '#007bff' },
                 'palomas_otro': { icon: 'fa-dove', color: '#007bff' },
                 // Basura
-                'basura_basura_desbordada': { icon: 'fa-trash-alt', color: '#ffc107' },
+                'basura_escombreries_desbordades': { icon: 'fa-trash-alt', color: '#ffc107' },
                 'basura_vertidos': { icon: 'fa-tint', color: '#dc3545' },
                 'basura_': { icon: 'fa-trash', color: '#6c757d' },
                 'basura_otro': { icon: 'fa-trash', color: '#6c757d' }

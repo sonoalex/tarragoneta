@@ -1,4 +1,9 @@
-# Spanish translations for Tarracograf
+# Translations template for PROJECT.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
@@ -6,9 +11,7 @@ msgstr ""
 "POT-Creation-Date: 2025-12-03 12:23+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language: es\n"
-"Language-Team: es <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -16,44 +19,43 @@ msgstr ""
 
 #: app/forms.py:11
 msgid "Nombre de usuario"
-msgstr "Nombre de usuario"
+msgstr ""
 
 #: app/forms.py:20
 msgid "Este nombre de usuario ya está en uso"
-msgstr "Este nombre de usuario ya está en uso"
+msgstr ""
 
 #: app/forms.py:26
 msgid "Title"
-msgstr "Título"
+msgstr ""
 
 #: app/forms.py:27 app/forms.py:86
 msgid "Description"
-msgstr "Descripción"
+msgstr ""
 
 #: app/forms.py:28
 msgid "Location"
-msgstr "Ubicación"
+msgstr ""
 
 #: app/forms.py:29 app/forms.py:84
 msgid "Category"
-msgstr "Categoría"
+msgstr ""
 
 #: app/forms.py:30
 msgid "Date"
-msgstr "Fecha"
+msgstr ""
 
 #: app/forms.py:31
 msgid "Time"
-msgstr "Hora"
+msgstr ""
 
 #: app/forms.py:32
 msgid "Image"
-msgstr "Imagen"
+msgstr ""
 
 #: app/forms.py:33
-#, fuzzy
 msgid "Status"
-msgstr "Estado"
+msgstr ""
 
 #: app/forms.py:41 templates/admin/analytics_purchases.html:203
 #: templates/admin/dashboard.html:275 templates/admin/donations.html:108
@@ -73,23 +75,20 @@ msgstr ""
 
 #: app/forms.py:44 templates/admin/dashboard.html:287
 #: templates/profile.html:279
-#, fuzzy
 msgid "Activa"
-msgstr "Actúa"
+msgstr ""
 
 #: app/forms.py:45 templates/admin/dashboard.html:291
-#, fuzzy
 msgid "Cancel·lada"
-msgstr "Cancelar"
+msgstr ""
 
 #: app/forms.py:59 app/utils.py:58
 msgid "Cleaning"
 msgstr ""
 
 #: app/forms.py:60 app/utils.py:59
-#, fuzzy
 msgid "Recycling"
-msgstr "Reciclaje"
+msgstr ""
 
 #: app/forms.py:61 app/utils.py:60
 msgid "Green Spaces"
@@ -104,43 +103,38 @@ msgid "Environmental Education"
 msgstr ""
 
 #: app/forms.py:64 app/utils.py:63
-#, fuzzy
 msgid "Culture and Civics"
-msgstr "Cultura y Civismo"
+msgstr ""
 
 #: app/forms.py:65 app/utils.py:64
-#, fuzzy
 msgid "Social Action"
-msgstr "Ubicación"
+msgstr ""
 
 #: app/forms.py:66 app/forms.py:114 app/utils.py:65 app/utils.py:93
 #: app/utils.py:138 templates/inventory/map.html:155
 #: templates/inventory/report.html:250
 msgid "Brossa Desbordada"
-msgstr "Basura Desbordada"
+msgstr ""
 
 #: app/forms.py:67 app/utils.py:66
 msgid "Dumping"
-msgstr "Vertidos"
+msgstr ""
 
 #: app/forms.py:85
-#, fuzzy
 msgid "Subcategory"
-msgstr "Categoría"
+msgstr ""
 
 #: app/forms.py:87
-#, fuzzy
 msgid "Latitude"
-msgstr "Título"
+msgstr ""
 
 #: app/forms.py:88
 msgid "Longitude"
 msgstr ""
 
 #: app/forms.py:89
-#, fuzzy
 msgid "Address"
-msgstr "Otros"
+msgstr ""
 
 #: app/forms.py:90
 msgid "Photo"
@@ -150,9 +144,8 @@ msgstr ""
 #: templates/admin/analytics_inventory_by_zone.html:46
 #: templates/admin/analytics_trends.html:35
 #: templates/admin/analytics_trends.html:66 templates/inventory/map.html:97
-#, fuzzy
 msgid "Coloms"
-msgstr "Compromiso"
+msgstr ""
 
 #: app/forms.py:98 app/routes/analytics.py:326 app/utils.py:77
 #: templates/admin/analytics_inventory_by_zone.html:47
@@ -163,27 +156,27 @@ msgstr ""
 
 #: app/forms.py:99 app/utils.py:78
 msgid "Gossos"
-msgstr "Perros"
+msgstr ""
 
 #: app/forms.py:100 app/utils.py:79
 msgid "Material Deteriorat"
-msgstr "Material Deteriorado"
+msgstr ""
 
 #: app/forms.py:101 app/utils.py:80
 msgid "Brutícia"
-msgstr "Suciedad"
+msgstr ""
 
 #: app/forms.py:102 app/utils.py:81
 msgid "Mobiliari Urbà"
-msgstr "Mobiliario Urbano"
+msgstr ""
 
 #: app/forms.py:103 app/utils.py:82
 msgid "Vegetació"
-msgstr "Vegetación"
+msgstr ""
 
 #: app/forms.py:104 app/utils.py:83
 msgid "Infraestructura"
-msgstr "Infraestructura"
+msgstr ""
 
 #: app/forms.py:110 app/utils.py:90 app/utils.py:135
 #: templates/inventory/map.html:123
@@ -192,103 +185,90 @@ msgstr ""
 
 #: app/forms.py:111 app/utils.py:89 app/utils.py:134
 #: templates/inventory/map.html:131
-#, fuzzy
 msgid "Excrement"
-msgstr "Excremento"
+msgstr ""
 
 #: app/forms.py:112 app/utils.py:91 app/utils.py:136
 #: templates/inventory/map.html:139
-#, fuzzy
 msgid "Plomes"
-msgstr "Palomas"
+msgstr ""
 
 #: app/forms.py:115 app/utils.py:94 app/utils.py:139
 #: templates/inventory/map.html:163
 msgid "Abocaments"
-msgstr "Vertidos"
+msgstr ""
 
 #: app/forms.py:117 app/utils.py:96 app/utils.py:141
-#, fuzzy
 msgid "Excrements"
-msgstr "Excrementos"
+msgstr ""
 
 #: app/forms.py:118 app/utils.py:97 app/utils.py:142
-#, fuzzy
 msgid "Pixades"
-msgstr "Orina"
+msgstr ""
 
 #: app/forms.py:120 app/utils.py:99 app/utils.py:144
-#, fuzzy
 msgid "Faroles"
-msgstr "Farolas"
+msgstr ""
 
 #: app/forms.py:121 app/utils.py:100 app/utils.py:145
 msgid "Bancs"
-msgstr "Bancos"
+msgstr ""
 
 #: app/forms.py:122 app/utils.py:101 app/utils.py:146
 msgid "Senyals"
-msgstr "Señales"
+msgstr ""
 
 #: app/forms.py:123 app/utils.py:102 app/utils.py:147
 msgid "Paviment"
-msgstr "Pavimento"
+msgstr ""
 
 #: app/forms.py:125 app/utils.py:104 app/utils.py:149
-#, fuzzy
 msgid "Terra"
-msgstr "Tierra"
+msgstr ""
 
 #: app/forms.py:126 app/utils.py:105 app/utils.py:150
 msgid "Fulles"
-msgstr "Hojas"
+msgstr ""
 
 #: app/forms.py:127 app/utils.py:106 app/utils.py:151
 msgid "Grafit"
-msgstr "Grafiti"
+msgstr ""
 
 #: app/forms.py:129 app/utils.py:108 app/utils.py:153
 msgid "Papereres"
-msgstr "Papeleras"
+msgstr ""
 
 #: app/forms.py:130 app/utils.py:109 app/utils.py:154
-#, fuzzy
 msgid "Parades"
-msgstr "Paradas"
+msgstr ""
 
 #: app/forms.py:132 app/utils.py:111 app/utils.py:156
-#, fuzzy
 msgid "Arbres"
-msgstr "Árboles"
+msgstr ""
 
 #: app/forms.py:133 app/utils.py:112 app/utils.py:157
-#, fuzzy
 msgid "Arbustos"
-msgstr "Arbustos"
+msgstr ""
 
 #: app/forms.py:134 app/utils.py:113 app/utils.py:158
-#, fuzzy
 msgid "Gespa"
-msgstr "Césped"
+msgstr ""
 
 #: app/forms.py:136 app/utils.py:115 app/utils.py:160
-#, fuzzy
 msgid "Carreteres"
-msgstr "Carreteras"
+msgstr ""
 
 #: app/forms.py:137 app/utils.py:116 app/utils.py:161
-#, fuzzy
 msgid "Voreres"
-msgstr "Aceras"
+msgstr ""
 
 #: app/forms.py:138 app/utils.py:117 app/utils.py:162
 msgid "Enllumenat"
-msgstr "Alumbrado"
+msgstr ""
 
 #: app/forms.py:204
-#, fuzzy
 msgid "Categoría no válida"
-msgstr "Categoría"
+msgstr ""
 
 #: app/forms.py:207
 msgid "Subcategoría no válida para esta categoría"
@@ -297,21 +277,19 @@ msgstr ""
 #: app/routes/analytics.py:327 app/utils.py:119 app/utils.py:164
 #: templates/admin/analytics_trends.html:68 templates/contact.html:70
 msgid "Altres"
-msgstr "Otros"
+msgstr ""
 
 #: app/routes/admin.py:221
 msgid "No puedes desactivar tu propia cuenta"
 msgstr ""
 
 #: app/routes/admin.py:227
-#, fuzzy
 msgid "activado"
-msgstr "Actúa"
+msgstr ""
 
 #: app/routes/admin.py:227
-#, fuzzy
 msgid "desactivado"
-msgstr "Descripción"
+msgstr ""
 
 #: app/routes/admin.py:229
 #, python-brace-format
@@ -319,32 +297,28 @@ msgid "Usuario {} correctamente"
 msgstr ""
 
 #: app/routes/admin.py:241
-#, fuzzy
 msgid "Este usuario ya está confirmado"
-msgstr "Este nombre de usuario ya está en uso"
+msgstr ""
 
 #: app/routes/admin.py:248
 msgid "Usuario confirmado correctamente"
 msgstr ""
 
 #: app/routes/admin.py:290 app/routes/admin.py:315
-#, fuzzy
 msgid "Esta iniciativa ya ha sido procesada"
-msgstr "Esta iniciativa ya ha finalizado"
+msgstr ""
 
 #: app/routes/admin.py:304
 msgid "Iniciativa aprobada correctamente"
 msgstr ""
 
 #: app/routes/admin.py:330
-#, fuzzy
 msgid "Iniciativa rechazada"
-msgstr "Iniciativas relacionadas"
+msgstr ""
 
 #: app/routes/admin.py:345
-#, fuzzy
 msgid "Debes seleccionar un rol"
-msgstr "Selecciona un asunto"
+msgstr ""
 
 #: app/routes/admin.py:350
 msgid "No puedes cambiar tu propio rol de administrador"
@@ -393,9 +367,8 @@ msgid "Districte"
 msgstr ""
 
 #: app/routes/analytics.py:215
-#, fuzzy
 msgid "Secció"
-msgstr "Acción"
+msgstr ""
 
 #: app/routes/analytics.py:216
 msgid "Codi Secció"
@@ -412,21 +385,20 @@ msgstr ""
 #: templates/inventory/admin.html:413 templates/inventory/report.html:52
 #: templates/profile.html:197
 msgid "Categoria"
-msgstr "Categoría"
+msgstr ""
 
 #: app/routes/analytics.py:218 app/routes/analytics.py:422
 #: templates/admin/analytics_inventory_by_zone.html:115
 #: templates/admin/analytics_top_categories.html:63
 #: templates/inventory/report.html:61
-#, fuzzy
 msgid "Subcategoria"
-msgstr "Categoría"
+msgstr ""
 
 #: app/routes/analytics.py:219 templates/emails/inventory_approved.html:16
 #: templates/initiative_detail.html:110 templates/inventory/admin.html:162
 #: templates/inventory/admin.html:415 templates/inventory/report.html:71
 msgid "Descripció"
-msgstr "Descripción"
+msgstr ""
 
 #: app/routes/analytics.py:220
 #: templates/admin/analytics_inventory_by_zone.html:116
@@ -445,9 +417,8 @@ msgstr ""
 #: app/routes/analytics.py:223
 #: templates/admin/analytics_inventory_by_zone.html:117
 #: templates/inventory/admin.html:164
-#, fuzzy
 msgid "Importància"
-msgstr "Participa"
+msgstr ""
 
 #: app/routes/analytics.py:224
 #: templates/admin/analytics_inventory_by_zone.html:118
@@ -474,13 +445,12 @@ msgstr ""
 #: templates/initiative_detail.html:55 templates/inventory/admin.html:167
 #: templates/profile.html:200
 msgid "Data"
-msgstr "Fecha"
+msgstr ""
 
 #: app/routes/analytics.py:324 app/routes/analytics.py:423
 #: templates/admin/analytics_trends.html:65 templates/inventory/admin.html:36
-#, fuzzy
 msgid "Total"
-msgstr "Título"
+msgstr ""
 
 #: app/routes/analytics.py:424 templates/admin/analytics_top_categories.html:65
 msgid "Zones Afectades"
@@ -491,11 +461,10 @@ msgid "Tipus de report no especificat"
 msgstr ""
 
 #: app/routes/analytics.py:456
-#, fuzzy
 msgid ""
 "El sistema de pagos no està configurat. Si us plau, contacta amb "
 "nosaltres."
-msgstr "El sistema de pagos no está configurado. Por favor, contacta con nosotros."
+msgstr ""
 
 #: app/routes/analytics.py:476
 msgid "Descàrrega de Report - Tarracograf"
@@ -507,9 +476,9 @@ msgid "Report: {report_type}"
 msgstr ""
 
 #: app/routes/analytics.py:512
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "Error al processar el pagament: {error}"
-msgstr "Error al procesar el pago: {error}"
+msgstr ""
 
 #: app/routes/analytics.py:516
 msgid "Error inesperat. Si us plau, torna-ho a intentar."
@@ -541,28 +510,28 @@ msgstr ""
 
 #: app/routes/donations.py:21
 msgid "La cantidad mínima es 1€"
-msgstr "La cantidad mínima es 1€"
+msgstr ""
 
 #: app/routes/donations.py:28
 msgid "El sistema de pagos no está configurado. Por favor, contacta con nosotros."
-msgstr "El sistema de pagos no está configurado. Por favor, contacta con nosotros."
+msgstr ""
 
 #: app/routes/donations.py:44
 msgid "Donación a Tarracograf"
-msgstr "Donación a Tarracograf"
+msgstr ""
 
 #: app/routes/donations.py:45
 msgid "Donación voluntaria para mantener la plataforma"
-msgstr "Donación voluntaria para mantener la plataforma"
+msgstr ""
 
 #: app/routes/donations.py:66
 #, python-brace-format
 msgid "Error al procesar el pago: {error}"
-msgstr "Error al procesar el pago: {error}"
+msgstr ""
 
 #: app/routes/donations.py:70
 msgid "Error inesperado. Por favor, inténtalo de nuevo."
-msgstr "Error inesperado. Por favor, inténtalo de nuevo."
+msgstr ""
 
 #: app/routes/initiatives.py:115
 msgid ""
@@ -595,9 +564,8 @@ msgid "Error: coordenadas inválidas"
 msgstr ""
 
 #: app/routes/inventory.py:150
-#, fuzzy
 msgid "Error al reportar el item. Por favor, inténtalo de nuevo."
-msgstr "Error inesperado. Por favor, inténtalo de nuevo."
+msgstr ""
 
 #: app/routes/inventory.py:340
 msgid "Ya has votado este item"
@@ -628,9 +596,8 @@ msgid "Item marcado como resuelto"
 msgstr ""
 
 #: app/routes/inventory.py:550
-#, fuzzy
 msgid "Item eliminado"
-msgstr "Eliminar"
+msgstr ""
 
 #: app/routes/main.py:88
 msgid "El formulari ja s'ha enviat. Si us plau, espera uns segons."
@@ -645,9 +612,8 @@ msgid "Gràcies pel teu missatge. Et respondrem aviat."
 msgstr ""
 
 #: app/routes/main.py:173
-#, fuzzy
 msgid "El teu correu electrònic ja està confirmat."
-msgstr "Tu email"
+msgstr ""
 
 #: app/routes/main.py:181
 msgid "Correu electrònic confirmat correctament! Ja pots iniciar sessió."
@@ -672,14 +638,12 @@ msgid ""
 msgstr ""
 
 #: app/services/email_service.py:120
-#, fuzzy
 msgid "Benvingut/da a Tarracograf! 🌱"
-msgstr "Donación a Tarracograf"
+msgstr ""
 
 #: app/services/email_service.py:138
-#, fuzzy
 msgid "Gràcies per la teva donació! 💚"
-msgstr "¡Gracias por tu donación!"
+msgstr ""
 
 #: app/services/email_service.py:155
 msgid "La teva iniciativa ha estat aprovada! ✅"
@@ -687,9 +651,8 @@ msgstr ""
 
 #: app/services/email_service.py:170
 #: templates/emails/initiative_rejected.html:4
-#, fuzzy
 msgid "Informació sobre la teva iniciativa"
-msgstr "Información sobre voluntariado"
+msgstr ""
 
 #: app/services/email_service.py:187
 msgid "Recordatori: La teva iniciativa és demà! 📅"
@@ -704,35 +667,31 @@ msgid "El teu reportatge ha estat aprovat! ✅"
 msgstr ""
 
 #: app/services/email_service.py:248 templates/emails/inventory_rejected.html:4
-#, fuzzy
 msgid "Informació sobre el teu reportatge"
-msgstr "Información sobre voluntariado"
+msgstr ""
 
 #: app/services/email_service.py:261 templates/emails/contact_response.html:4
-#, fuzzy
 msgid "Gràcies per contactar amb Tarracograf"
-msgstr "Donación a Tarracograf"
+msgstr ""
 
 #: templates/about.html:3 templates/base.html:57
 #: templates/includes/footer.html:58
 msgid "Sobre Nosaltres"
-msgstr "Nosotros"
+msgstr ""
 
 #: templates/about.html:10 templates/includes/footer.html:6
 msgid "Sobre Tarracograf"
-msgstr "Sobre Tarracograf"
+msgstr ""
 
 #: templates/about.html:14
 msgid ""
 "Som una plataforma ciutadana compromesa amb la transformació de Tarragona"
 " en una ciutat més neta, sostenible i cívica."
 msgstr ""
-"Somos una plataforma ciudadana comprometida con la transformación de "
-"Tarragona en una ciudad más limpia, sostenible y cívica."
 
 #: templates/about.html:19
 msgid "La Nostra Missió"
-msgstr "Nuestra Misión"
+msgstr ""
 
 #: templates/about.html:21
 msgid ""
@@ -740,13 +699,10 @@ msgid ""
 "entorn urbà, fomentant la participació activa en la construcció d'una "
 "Tarragona més habitable i sostenible per a tothom."
 msgstr ""
-"Conectar a ciudadanos comprometidos con iniciativas que mejoren nuestro "
-"entorno urbano, fomentando la participación activa en la construcción de "
-"una Tarragona más habitable y sostenible para todos."
 
 #: templates/about.html:26
 msgid "La Nostra Visió"
-msgstr "Nuestra Visión"
+msgstr ""
 
 #: templates/about.html:28
 msgid ""
@@ -754,29 +710,24 @@ msgid ""
 "activament al canvi positiu, creant una xarxa ciutadana forta que impulsi"
 " la transformació sostenible de la nostra ciutat."
 msgstr ""
-"Ser el punto de encuentro digital donde cada tarraconense pueda "
-"contribuir activamente al cambio positivo, creando una red ciudadana "
-"fuerte que impulse la transformación sostenible de nuestra ciudad."
 
 #: templates/about.html:35
 msgid "Els Nostres Valors"
-msgstr "Nuestros Valores"
+msgstr ""
 
 #: templates/about.html:43
 msgid "Col·laboració"
-msgstr "Colaboración"
+msgstr ""
 
 #: templates/about.html:44
 msgid ""
 "Creiem en el poder de l'acció col·lectiva per generar canvis "
 "significatius."
 msgstr ""
-"Creemos en el poder de la acción colectiva para generar cambios "
-"significativos."
 
 #: templates/about.html:51
 msgid "Sostenibilitat"
-msgstr "Sostenibilidad"
+msgstr ""
 
 #: templates/about.html:52
 msgid "Promovem accions que respectin i protegeixin el nostre medi ambient urbà."
@@ -784,109 +735,102 @@ msgstr ""
 
 #: templates/about.html:59
 msgid "Compromís"
-msgstr "Compromiso"
+msgstr ""
 
 #: templates/about.html:60
 msgid "Fomentem la responsabilitat individual i col·lectiva amb la nostra ciutat."
-msgstr "Fomentamos la responsabilidad individual y colectiva con nuestra ciudad."
+msgstr ""
 
 #: templates/about.html:67
 msgid "Acció"
-msgstr "Acción"
+msgstr ""
 
 #: templates/about.html:68
-#, fuzzy
 msgid "Transformem les bones intencions en accions concretes i mesurables."
-msgstr "Transforma las buenas intenciones en acciones concretas y medibles."
+msgstr ""
 
 #: templates/about.html:75
 msgid "Civisme"
-msgstr "Civismo"
+msgstr ""
 
 #: templates/about.html:76
 msgid "Promovem el respecte mutu i la convivència harmònica en espais públics."
 msgstr ""
-"Promovemos el respeto mutuo y la convivencia armoniosa en espacios "
-"públicos."
 
 #: templates/about.html:83
 msgid "Transparència"
-msgstr "Transparencia"
+msgstr ""
 
 #: templates/about.html:84
 msgid "Operem amb total obertura sobre les nostres activitats i impacte."
-msgstr "Operamos con total apertura sobre nuestras actividades e impacto."
+msgstr ""
 
 #: templates/about.html:89
 msgid "Com Funciona?"
-msgstr "¿Cómo Funciona?"
+msgstr ""
 
 #: templates/about.html:95
 msgid "Descobreix"
-msgstr "Descubre"
+msgstr ""
 
 #: templates/about.html:96
 msgid "Explora les iniciatives actives a la teva ciutat"
-msgstr "Explora las iniciativas activas en tu ciudad"
+msgstr ""
 
 #: templates/about.html:103
 msgid "Participa"
-msgstr "Participa"
+msgstr ""
 
 #: templates/about.html:104
 msgid "Uneix-te a les iniciatives que et motivin"
-msgstr "Únete a las iniciativas que te motiven"
+msgstr ""
 
 #: templates/about.html:111
 msgid "Actua"
-msgstr "Actúa"
+msgstr ""
 
 #: templates/about.html:112
 msgid "Col·labora amb altres ciutadans compromesos"
-msgstr "Colabora con otros ciudadanos comprometidos"
+msgstr ""
 
 #: templates/about.html:119
 msgid "Impacta"
-msgstr "Impacta"
+msgstr ""
 
 #: templates/about.html:120
 msgid "Genera canvis positius a la teva comunitat"
-msgstr "Genera cambios positivos en tu comunidad"
+msgstr ""
 
 #: templates/about.html:126
 msgid "Uneix-te al Moviment!"
-msgstr "¡Únete al Movimiento!"
+msgstr ""
 
 #: templates/about.html:128
 msgid ""
 "Cada acció compta. La teva participació pot marcar la diferència en la "
 "construcció d'una Tarragona millor per a tothom."
 msgstr ""
-"Cada acción cuenta. Tu participación puede marcar la diferencia en la "
-"construcción de una Tarragona mejor para todos."
 
 #: templates/about.html:131
 msgid "Explorar Iniciatives"
-msgstr "Explorar Iniciativas"
+msgstr ""
 
 #: templates/base.html:7
-#, fuzzy
 msgid "Tarracograf - Radiografia de la ciutat de Tarragona"
-msgstr "Radiografía de la Ciudad"
+msgstr ""
 
 #: templates/base.html:8
-#, fuzzy
 msgid "Tarracograf - Radiografia de la ciutat"
-msgstr "Radiografía de la Ciudad"
+msgstr ""
 
 #: templates/base.html:46 templates/includes/footer.html:38
 msgid "Inici"
-msgstr "Inicio"
+msgstr ""
 
 #: templates/base.html:52 templates/index.html:209
 #: templates/initiatives/list.html:56
 msgid "Pròximes"
-msgstr "Próximas"
+msgstr ""
 
 #: templates/base.html:62 templates/includes/footer.html:53
 #: templates/reports/public.html:3
@@ -896,7 +840,7 @@ msgstr ""
 #: templates/base.html:67 templates/contact.html:3
 #: templates/includes/footer.html:70 templates/includes/footer.html:101
 msgid "Contacte"
-msgstr "Contacto"
+msgstr ""
 
 #: templates/base.html:73 templates/includes/footer.html:48
 #: templates/inventory/map.html:3 templates/inventory/map.html:52
@@ -904,162 +848,154 @@ msgid "Inventari"
 msgstr ""
 
 #: templates/base.html:78
-#, fuzzy
 msgid "Veure Mapa"
-msgstr "Ver Más"
+msgstr ""
 
 #: templates/base.html:84 templates/inventory/report.html:3
-#, fuzzy
 msgid "Reportar Item"
-msgstr "Reportar Problema"
+msgstr ""
 
 #: templates/base.html:90
-#, fuzzy
 msgid "Iniciar sessió per reportar"
-msgstr "Únete para Reportar"
+msgstr ""
 
 #: templates/base.html:98 templates/inventory/map.html:193
-#, fuzzy
 msgid "Administrar"
-msgstr "Panel de Administración"
+msgstr ""
 
 #: templates/base.html:156 templates/includes/footer.html:81
 #: templates/profile.html:3
 msgid "El Meu Perfil"
-msgstr "Mi Perfil"
+msgstr ""
 
 #: templates/admin/dashboard.html:3 templates/base.html:164
 msgid "Admin"
-msgstr "Admin"
+msgstr ""
 
 #: templates/base.html:172
 msgid "Sortir"
-msgstr "Salir"
+msgstr ""
 
 #: templates/base.html:180 templates/includes/footer.html:87
 msgid "Accedir"
-msgstr "Acceder"
+msgstr ""
 
 #: templates/base.html:185 templates/includes/footer.html:92
 msgid "Registrar-se"
-msgstr "Registrarse"
+msgstr ""
 
 #: templates/base.html:204 templates/donate.html:17
 msgid "Ajuda'ns a mantenir Tarracograf"
-msgstr "Ayúdanos a mantener Tarracograf"
+msgstr ""
 
 #: templates/base.html:205 templates/donate.html:19
 msgid ""
 "Les donacions voluntàries ens ajuden a cobrir els costos del servidor i "
 "mantenir la plataforma gratuïta per a tothom."
 msgstr ""
-"Las donaciones voluntarias nos ayudan a cubrir los costos del servidor y "
-"mantener la plataforma gratuita para todos."
 
 #: templates/base.html:211 templates/donate.html:3
 #: templates/includes/footer.html:75
 msgid "Donar"
-msgstr "Donar"
+msgstr ""
 
 #: templates/contact.html:13
 msgid "Contacta amb Nosaltres"
-msgstr "Contáctanos"
+msgstr ""
 
 #: templates/contact.html:16
 msgid ""
 "Tens una idea per millorar la ciutat? Vols organitzar una iniciativa? "
 "Necessites més informació? Estem aquí per escoltar-te!"
 msgstr ""
-"¿Tienes una idea para mejorar la ciudad? ¿Quieres organizar una "
-"iniciativa? ¿Necesitas más información? ¡Estamos aquí para escucharte!"
 
 #: templates/contact.html:29 templates/initiative_detail.html:229
 msgid "Nom complet"
-msgstr "Nombre completo"
+msgstr ""
 
 #: templates/contact.html:36 templates/initiative_detail.html:231
 msgid "El teu nom"
-msgstr "Tu nombre"
+msgstr ""
 
 #: templates/contact.html:38
 msgid "Si us plau, introdueix el teu nom"
-msgstr "Por favor, introduce tu nombre"
+msgstr ""
 
 #: templates/contact.html:53
 msgid "Si us plau, introdueix un email vàlid"
-msgstr "Por favor, introduce un email válido"
+msgstr ""
 
 #: templates/contact.html:60 templates/emails/admin_notification.html:21
 #: templates/emails/contact_response.html:12
 msgid "Assumpte"
-msgstr "Asunto"
+msgstr ""
 
 #: templates/contact.html:63
 msgid "Selecciona un assumpte"
-msgstr "Selecciona un asunto"
+msgstr ""
 
 #: templates/contact.html:64
 msgid "Donació voluntària"
-msgstr "Donación voluntaria"
+msgstr ""
 
 #: templates/contact.html:65
 msgid "Proposar una iniciativa"
-msgstr "Proponer una iniciativa"
+msgstr ""
 
 #: templates/contact.html:66
 msgid "Col·laboració amb associació/col·lectiu"
-msgstr "Colaboración con asociación/colectivo"
+msgstr ""
 
 #: templates/contact.html:67
 msgid "Informació sobre voluntariat"
-msgstr "Información sobre voluntariado"
+msgstr ""
 
 #: templates/contact.html:68
 msgid "Suggeriments i millores"
-msgstr "Sugerencias y mejoras"
+msgstr ""
 
 #: templates/contact.html:69
 msgid "Reportar un problema"
-msgstr "Reportar un problema"
+msgstr ""
 
 #: templates/contact.html:73
 msgid "Si us plau, selecciona un assumpte"
-msgstr "Por favor, selecciona un asunto"
+msgstr ""
 
 #: templates/contact.html:79 templates/emails/admin_notification.html:24
 msgid "Missatge"
-msgstr "Mensaje"
+msgstr ""
 
 #: templates/contact.html:86
 msgid "Explica'ns en què podem ajudar-te..."
-msgstr "Cuéntanos en qué podemos ayudarte..."
+msgstr ""
 
 #: templates/contact.html:88
 msgid "Si us plau, escriu un missatge"
-msgstr "Por favor, escribe un mensaje"
+msgstr ""
 
 #: templates/contact.html:94 templates/emails/admin_notification.html:28
 #: templates/initiative_detail.html:241
 msgid "Telèfon"
-msgstr "Teléfono"
+msgstr ""
 
 #: templates/admin/new_initiative.html:124
 #: templates/admin/new_initiative.html:164 templates/contact.html:94
 #: templates/donate.html:68 templates/initiatives/create.html:118
 #: templates/initiatives/create.html:138
 msgid "opcional"
-msgstr "opcional"
+msgstr ""
 
 #: templates/contact.html:105
 msgid "Enviar Missatge"
-msgstr "Enviar Mensaje"
+msgstr ""
 
 #: templates/admin/dashboard.html:156 templates/admin/donations.html:68
 #: templates/admin/users.html:89 templates/contact.html:125
 #: templates/donate.html:68 templates/emails/admin_notification.html:18
 #: templates/initiative_detail.html:235
 msgid "Email"
-msgstr "Email"
+msgstr ""
 
 #: templates/admin/pending_initiatives.html:62 templates/contact.html:140
 #: templates/emails/initiative_approved.html:13
@@ -1069,23 +1005,23 @@ msgstr "Email"
 #: templates/initiative_detail.html:46 templates/initiative_detail.html:85
 #: templates/inventory/admin.html:161 templates/inventory/admin.html:418
 msgid "Ubicació"
-msgstr "Ubicación"
+msgstr ""
 
 #: templates/contact.html:141
 msgid "Espanya"
-msgstr "España"
+msgstr ""
 
 #: templates/contact.html:155
 msgid "Segueix-nos"
-msgstr "Síguenos"
+msgstr ""
 
 #: templates/contact.html:182
 msgid "Preguntes Freqüents"
-msgstr "Preguntas Frecuentes"
+msgstr ""
 
 #: templates/contact.html:189
 msgid "Com puc proposar una nova iniciativa?"
-msgstr "¿Cómo puedo proponer una nueva iniciativa?"
+msgstr ""
 
 #: templates/contact.html:194
 msgid ""
@@ -1093,13 +1029,10 @@ msgid ""
 "una iniciativa\" en l'assumpte. Explica'ns la teva idea i t'ajudarem a "
 "fer-la realitat."
 msgstr ""
-"Puedes contactarnos a través de este formulario seleccionando \"Proponer "
-"una iniciativa\" en el asunto. Cuéntanos tu idea y te ayudaremos a "
-"hacerla realidad."
 
 #: templates/contact.html:202
 msgid "Necessito registrar-me per participar?"
-msgstr "¿Necesito registrarme para participar?"
+msgstr ""
 
 #: templates/contact.html:207
 msgid ""
@@ -1107,25 +1040,20 @@ msgid ""
 "i contacte, però registrar-te et permet fer seguiment de les teves "
 "participacions i rebre actualitzacions."
 msgstr ""
-"No es obligatorio. Puedes participar como usuario anónimo dejando tu "
-"nombre y contacto, pero registrarte te permite hacer seguimiento de tus "
-"participaciones y recibir actualizaciones."
 
 #: templates/contact.html:215
 msgid "Com puc col·laborar com a associació o col·lectiu?"
-msgstr "¿Cómo puedo colaborar como asociación o colectivo?"
+msgstr ""
 
 #: templates/contact.html:220
 msgid ""
 "Estem oberts a col·laboracions amb associacions i col·lectius locals. "
 "Contacta amb nosaltres i explorarem com podem treballar junts."
 msgstr ""
-"Estamos abiertos a colaboraciones con asociaciones y colectivos locales. "
-"Contacta con nosotros y exploraremos cómo podemos trabajar juntos."
 
 #: templates/contact.html:228
 msgid "Les iniciatives tenen algun cost?"
-msgstr "¿Las iniciativas tienen algún coste?"
+msgstr ""
 
 #: templates/contact.html:233
 msgid ""
@@ -1133,9 +1061,6 @@ msgid ""
 "nostre objectiu és facilitar l'acció ciutadana sense barreres "
 "econòmiques."
 msgstr ""
-"La participación en todas las iniciativas es completamente gratuita. "
-"Nuestro objetivo es facilitar la acción ciudadana sin barreras "
-"económicas."
 
 #: templates/contact.html:268
 msgid "Enviant..."
@@ -1143,71 +1068,68 @@ msgstr ""
 
 #: templates/donate.html:29
 msgid "Quantitat de la donació"
-msgstr "Cantidad de la donación"
+msgstr ""
 
 #: templates/donate.html:60
 msgid "Altres quantitats"
-msgstr "Otras cantidades"
+msgstr ""
 
 #: templates/donate.html:64
 msgid "Quantitat mínima: 1€"
-msgstr "Cantidad mínima: 1€"
+msgstr ""
 
 #: templates/donate.html:74
 msgid "Per enviar-te el comprovant de donació"
-msgstr "Para enviarte el comprobante de donación"
+msgstr ""
 
 #: templates/donate.html:80
 msgid "Segur i segur"
-msgstr "Seguro y seguro"
+msgstr ""
 
 #: templates/donate.html:81
 msgid ""
 "Els pagaments es processen de forma segura a través de Stripe. No "
 "emmagatzemem les teves dades de targeta."
 msgstr ""
-"Los pagos se procesan de forma segura a través de Stripe. No almacenamos "
-"tus datos de tarjeta."
 
 #: templates/donate.html:87
 msgid "Continuar amb el pagament"
-msgstr "Continuar con el pago"
+msgstr ""
 
 #: templates/donate.html:97
 msgid "Pagament segur processat per"
-msgstr "Pago seguro procesado por"
+msgstr ""
 
 #: templates/donate_success.html:3
 msgid "Donació realitzada"
-msgstr "Donación realizada"
+msgstr ""
 
 #: templates/donate_success.html:18
 #: templates/emails/donation_confirmation.html:4
 msgid "Gràcies per la teva donació!"
-msgstr "¡Gracias por tu donación!"
+msgstr ""
 
 #: templates/donate_success.html:20
 msgid "La teva donació ens ajuda a mantenir Tarracograf gratuïta per a tothom."
-msgstr "Tu donación nos ayuda a mantener Tarracograf gratuita para todos."
+msgstr ""
 
 #: templates/donate_success.html:24
 msgid "Tornar a l'inici"
-msgstr "Volver al inicio"
+msgstr ""
 
 #: templates/donate_success.html:27
 #: templates/emails/initiative_rejected.html:20
 #: templates/emails/inventory_rejected.html:19
-#, fuzzy
 msgid "Contactar"
-msgstr "Contacto"
+msgstr ""
 
 #: templates/index.html:18 templates/index.html:57
 msgid "Reportar Problema"
-msgstr "Reportar Problema"
+msgstr ""
 
 #: templates/index.html:21
 msgid "Radiografia Ciutat"
-msgstr "Radiografía Ciudad"
+msgstr ""
 
 #: templates/index.html:33
 msgid ""
@@ -1217,129 +1139,125 @@ msgstr ""
 
 #: templates/index.html:39
 msgid "Reportatges Actius"
-msgstr "Reportajes Activos"
+msgstr ""
 
 #: templates/index.html:43
 msgid "Problemàtiques"
-msgstr "Problemáticas"
+msgstr ""
 
 #: templates/admin/analytics.html:51 templates/includes/footer.html:43
 #: templates/index.html:47
-#, fuzzy
 msgid "Iniciatives"
-msgstr "Ver Iniciativas"
+msgstr ""
 
 #: templates/index.html:53
 msgid "Veure Mapa del Inventari"
-msgstr "Ver Mapa del Inventario"
+msgstr ""
 
 #: templates/index.html:61
 msgid "Uneix-te per Reportar"
-msgstr "Únete para Reportar"
+msgstr ""
 
 #: templates/index.html:75
 msgid "Radiografia de la Ciutat"
-msgstr "Radiografía de la Ciudad"
+msgstr ""
 
 #: templates/index.html:76
 msgid ""
 "Visualitza i reporta problemes de neteja, palomes i altres incidències a "
 "Tarragona"
 msgstr ""
-"Visualiza y reporta problemas de limpieza, palomas y otras incidencias en"
-" Tarragona"
 
 #: templates/index.html:86
 msgid "Problemes de Brossa"
-msgstr "Problemas de Basura"
+msgstr ""
 
 #: templates/index.html:95
 msgid "Problemes de Coloms"
-msgstr "Problemas de Palomas"
+msgstr ""
 
 #: templates/index.html:104
 msgid "Total Reportatges"
-msgstr "Total Reportajes"
+msgstr ""
 
 #: templates/index.html:113
 msgid "Ciutadans Actius"
-msgstr "Ciudadanos Activos"
+msgstr ""
 
 #: templates/index.html:120
 msgid "Explorar Mapa"
-msgstr "Explorar Mapa"
+msgstr ""
 
 #: templates/index.html:124
 msgid "Reportar Nou Problema"
-msgstr "Reportar Nuevo Problema"
+msgstr ""
 
 #: templates/index.html:128
 msgid "Registra't per Reportar"
-msgstr "Regístrate para Reportar"
+msgstr ""
 
 #: templates/index.html:141
 msgid "Reportatges Recents"
-msgstr "Reportajes Recientes"
+msgstr ""
 
 #: templates/index.html:142
 msgid "Últims problemes reportats pels ciutadans"
-msgstr "Últimos problemas reportados por los ciudadanos"
+msgstr ""
 
 #: templates/index.html:145 templates/profile.html:189
 msgid "Veure Tots"
-msgstr "Ver Todos"
+msgstr ""
 
 #: templates/admin/dashboard.html:303
 #: templates/admin/pending_initiatives.html:118 templates/index.html:165
 msgid "Veure"
-msgstr "Ver"
+msgstr ""
 
 #: templates/index.html:181 templates/initiatives/list.html:3
 #: templates/initiatives/list.html:10
 msgid "Iniciatives Ciutadanes"
-msgstr "Iniciativas Ciudadanas"
+msgstr ""
 
 #: templates/index.html:182 templates/initiatives/list.html:11
 msgid "Descobreix com pots contribuir al canvi positiu a la nostra ciutat"
-msgstr "Descubre cómo puedes contribuir al cambio positivo en nuestra ciudad"
+msgstr ""
 
 #: templates/index.html:185 templates/profile.html:261
 #: templates/profile.html:299
-#, fuzzy
 msgid "Veure Totes"
-msgstr "Ver Todos"
+msgstr ""
 
 #: templates/index.html:195 templates/initiatives/list.html:44
 msgid "Totes les categories"
-msgstr "Todas las categorías"
+msgstr ""
 
 #: templates/index.html:196
 msgid "Neteja"
-msgstr "Limpieza"
+msgstr ""
 
 #: templates/index.html:197
 msgid "Reciclatge"
-msgstr "Reciclaje"
+msgstr ""
 
 #: templates/index.html:198
 msgid "Espais Verds"
-msgstr "Espacios Verdes"
+msgstr ""
 
 #: templates/index.html:199
 msgid "Mobilitat Sostenible"
-msgstr "Movilidad Sostenible"
+msgstr ""
 
 #: templates/index.html:200
 msgid "Educació Ambiental"
-msgstr "Educación Ambiental"
+msgstr ""
 
 #: templates/index.html:201
 msgid "Cultura i Civisme"
-msgstr "Cultura y Civismo"
+msgstr ""
 
 #: templates/index.html:202
 msgid "Acció Social"
-msgstr "Acción Social"
+msgstr ""
 
 #: templates/admin/analytics_purchases.html:159
 #: templates/admin/dashboard.html:158 templates/admin/dashboard.html:236
@@ -1348,153 +1266,149 @@ msgstr "Acción Social"
 #: templates/initiatives/list.html:53 templates/inventory/admin.html:165
 #: templates/profile.html:199
 msgid "Estat"
-msgstr "Estado"
+msgstr ""
 
 #: templates/admin/analytics_inventory_by_zone.html:45
 #: templates/admin/analytics_trends.html:34 templates/index.html:208
 #: templates/initiatives/list.html:55 templates/inventory/map.html:92
 msgid "Totes"
-msgstr "Todas"
+msgstr ""
 
 #: templates/index.html:210 templates/initiatives/list.html:57
 msgid "Passades"
-msgstr "Pasadas"
+msgstr ""
 
 #: templates/admin/analytics_inventory_by_zone.html:60
 #: templates/admin/analytics_top_categories.html:46
 #: templates/admin/analytics_trends.html:49 templates/index.html:215
 #: templates/initiatives/list.html:62
 msgid "Filtrar"
-msgstr "Filtrar"
+msgstr ""
 
 #: templates/index.html:253 templates/initiative_detail.html:308
 #: templates/initiatives/list.html:102
-#, fuzzy
 msgid "Veure detalls"
-msgstr "Ver Todos"
+msgstr ""
 
 #: templates/index.html:263 templates/initiatives/list.html:165
 msgid "No hi ha iniciatives que coincideixin amb la teva cerca"
-msgstr "No hay iniciativas que coincidan con tu búsqueda"
+msgstr ""
 
 #: templates/index.html:264 templates/initiatives/list.html:166
 msgid "Prova amb altres filtres o crea una nova iniciativa"
-msgstr "Prueba con otros filtros o crea una nueva iniciativa"
+msgstr ""
 
 #: templates/admin/new_initiative.html:15 templates/index.html:267
 #: templates/initiatives/create.html:3 templates/initiatives/create.html:13
 #: templates/initiatives/list.html:169
 msgid "Crear Nova Iniciativa"
-msgstr "Crear Nueva Iniciativa"
+msgstr ""
 
 #: templates/index.html:271 templates/initiatives/list.html:173
-#, fuzzy
 msgid "Inicia sessió per crear"
-msgstr "Inicia sesión"
+msgstr ""
 
 #: templates/index.html:286
 msgid "Tens una idea per millorar Tarragona?"
-msgstr "¿Tienes una idea para mejorar Tarragona?"
+msgstr ""
 
 #: templates/index.html:288
 msgid ""
 "Si ets una associació, col·lectiu o simplement un ciutadà compromès, "
 "contacta amb nosaltres per llançar la teva pròpia iniciativa."
 msgstr ""
-"Si eres una asociación, colectivo o simplemente un ciudadano "
-"comprometido, contacta con nosotros para lanzar tu propia iniciativa."
 
 #: templates/index.html:291
 msgid "Proposar Iniciativa"
-msgstr "Proponer Iniciativa"
+msgstr ""
 
 #: templates/admin/dashboard.html:234 templates/initiative_detail.html:64
 msgid "Participants"
-msgstr "Participantes"
+msgstr ""
 
 #: templates/initiative_detail.html:65
 msgid "persones"
-msgstr "personas"
+msgstr ""
 
 #: templates/initiative_detail.html:100
 msgid "Organitzat per"
-msgstr "Organizado por"
+msgstr ""
 
 #: templates/initiative_detail.html:120
 msgid "Persones compromeses"
-msgstr "Personas comprometidas"
+msgstr ""
 
 #: templates/initiative_detail.html:141
 msgid "Sigues el primer a unir-te a aquesta iniciativa"
-msgstr "Sé el primero en unirte a esta iniciativa"
+msgstr ""
 
 #: templates/initiative_detail.html:143
 msgid "més persones"
-msgstr "más personas"
+msgstr ""
 
 #: templates/initiative_detail.html:151
 msgid "Comentaris i preguntes"
-msgstr "Comentarios y preguntas"
+msgstr ""
 
 #: templates/initiative_detail.html:158
 msgid "Comparteix la teva opinió o fes una pregunta..."
-msgstr "Comparte tu opinión o haz una pregunta..."
+msgstr ""
 
 #: templates/initiative_detail.html:162
 msgid "Publicar comentari"
-msgstr "Publicar comentario"
+msgstr ""
 
 #: templates/initiative_detail.html:167 templates/initiative_detail.html:254
 msgid "Inicia sessió"
-msgstr "Inicia sesión"
+msgstr ""
 
 #: templates/initiative_detail.html:167
 msgid "per deixar un comentari"
-msgstr "para dejar un comentario"
+msgstr ""
 
 #: templates/initiative_detail.html:189
 msgid "No hi ha comentaris encara. Sigues el primer a comentar!"
-msgstr "No hay comentarios aún. ¡Sé el primero en comentar!"
+msgstr ""
 
 #: templates/initiative_detail.html:200
 msgid "Participa!"
-msgstr "¡Participa!"
+msgstr ""
 
 #: templates/initiative_detail.html:205
 msgid "Ja estàs participant"
-msgstr "Ya estás participando"
+msgstr ""
 
 #: templates/initiative_detail.html:210
 msgid "Cancel·lar participació"
-msgstr "Cancelar participación"
+msgstr ""
 
 #: templates/initiative_detail.html:214
 msgid "Uneix-te a aquesta iniciativa i ajuda'ns a millorar la nostra ciutat."
-msgstr "Únete a esta iniciativa y ayúdanos a mejorar nuestra ciudad."
+msgstr ""
 
 #: templates/initiative_detail.html:218 templates/initiative_detail.html:247
 msgid "Vull participar"
-msgstr "Quiero participar"
+msgstr ""
 
 #: templates/initiative_detail.html:223
 msgid "Registra el teu interès a participar. Et contactarem amb més detalls."
-msgstr "Registra tu interés en participar. Te contactaremos con más detalles."
+msgstr ""
 
 #: templates/initiative_detail.html:253
 msgid "Ja tens compte?"
-msgstr "¿Ya tienes cuenta?"
+msgstr ""
 
 #: templates/initiative_detail.html:260
 msgid "Aquesta iniciativa ja ha finalitzat"
-msgstr "Esta iniciativa ya ha finalizado"
+msgstr ""
 
 #: templates/initiative_detail.html:266
 msgid "Comparteix aquesta iniciativa:"
-msgstr "Comparte esta iniciativa:"
+msgstr ""
 
 #: templates/initiative_detail.html:290
 msgid "Iniciatives relacionades"
-msgstr "Iniciativas relacionadas"
+msgstr ""
 
 #: templates/profile.html:25
 msgid "Email verificat"
@@ -1513,24 +1427,20 @@ msgid "Membre des de"
 msgstr ""
 
 #: templates/profile.html:55
-#, fuzzy
 msgid "Items Reportats"
-msgstr "Total Reportajes"
+msgstr ""
 
 #: templates/profile.html:66 templates/profile.html:258
-#, fuzzy
 msgid "Iniciatives Creades"
-msgstr "Iniciativas relacionadas"
+msgstr ""
 
 #: templates/profile.html:77 templates/profile.html:296
-#, fuzzy
 msgid "Iniciatives Participades"
-msgstr "Iniciativas relacionadas"
+msgstr ""
 
 #: templates/profile.html:88
-#, fuzzy
 msgid "Contribucions Totals"
-msgstr "Participaciones Totales"
+msgstr ""
 
 #: templates/profile.html:101
 msgid "Estat dels Items"
@@ -1543,9 +1453,8 @@ msgstr ""
 
 #: templates/admin/users.html:58 templates/inventory/admin.html:60
 #: templates/inventory/admin.html:118 templates/profile.html:115
-#, fuzzy
 msgid "Actius"
-msgstr "Actúa"
+msgstr ""
 
 #: templates/admin/donations.html:43
 #: templates/admin/pending_initiatives.html:27
@@ -1555,19 +1464,16 @@ msgid "Pendents"
 msgstr ""
 
 #: templates/profile.html:142
-#, fuzzy
 msgid "Activitat Recent"
-msgstr "Participaciones Recientes"
+msgstr ""
 
 #: templates/profile.html:153
-#, fuzzy
 msgid "Item reportat"
-msgstr "Total Reportajes"
+msgstr ""
 
 #: templates/profile.html:166
-#, fuzzy
 msgid "Iniciativa creada"
-msgstr "Iniciativas Ciudadanas"
+msgstr ""
 
 #: templates/profile.html:174
 msgid "Encara no hi ha activitat recent"
@@ -1583,22 +1489,20 @@ msgstr ""
 
 #: templates/admin/users.html:132 templates/inventory/admin.html:210
 #: templates/profile.html:223
-#, fuzzy
 msgid "Actiu"
-msgstr "Actúa"
+msgstr ""
 
 #: templates/inventory/admin.html:212 templates/profile.html:225
 msgid "Resolt"
 msgstr ""
 
 #: templates/emails/inventory_approved.html:23 templates/profile.html:237
-#, fuzzy
 msgid "Veure al mapa"
-msgstr "Ver Más"
+msgstr ""
 
 #: templates/profile.html:315
 msgid "participants"
-msgstr "participantes"
+msgstr ""
 
 #: templates/profile.html:332
 msgid "Reports Descarregats"
@@ -1625,23 +1529,20 @@ msgid "Genera i descarrega reports detallats per a l'ajuntament"
 msgstr ""
 
 #: templates/admin/analytics.html:19
-#, fuzzy
 msgid "Veure Compres"
-msgstr "Ver Más"
+msgstr ""
 
 #: templates/admin/analytics.html:22
 #: templates/admin/analytics_inventory_by_zone.html:19
 #: templates/admin/analytics_purchases.html:18
 #: templates/admin/analytics_top_categories.html:19
 #: templates/admin/analytics_trends.html:19 templates/admin/users.html:41
-#, fuzzy
 msgid "Tornar"
-msgstr "Donar"
+msgstr ""
 
 #: templates/admin/analytics.html:34
-#, fuzzy
 msgid "Items d'Inventari"
-msgstr "Ver Mapa del Inventario"
+msgstr ""
 
 #: templates/admin/analytics.html:75
 #: templates/admin/analytics_inventory_by_zone.html:3
@@ -1651,15 +1552,13 @@ msgstr "Ver Mapa del Inventario"
 #: templates/admin/analytics_purchases.html:175
 #: templates/reports/public.html:50
 msgid "Inventari per Zona"
-msgstr "Inventario por Zona"
+msgstr ""
 
 #: templates/admin/analytics.html:77 templates/reports/public.html:52
 msgid ""
 "Report detallat dels items d'inventari agrupats per districte i secció. "
 "Inclou categories, ubicacions i estadístiques."
 msgstr ""
-"Reporte detallado de los items de inventario agrupados por distrito y "
-"sección. Incluye categorías, ubicaciones y estadísticas."
 
 #: templates/admin/analytics.html:79 templates/admin/analytics.html:98
 #: templates/admin/analytics.html:117
@@ -1673,15 +1572,13 @@ msgstr ""
 #: templates/admin/analytics_trends.html:3
 #: templates/admin/analytics_trends.html:13 templates/reports/public.html:85
 msgid "Tendències Temporals"
-msgstr "Tendencias Temporales"
+msgstr ""
 
 #: templates/admin/analytics.html:96 templates/reports/public.html:87
 msgid ""
 "Evolució dels reports al llarg del temps. Analitza patrons i tendències "
 "per categoria i zona."
 msgstr ""
-"Evolución de los reportes a lo largo del tiempo. Analiza patrones y "
-"tendencias por categoría y zona."
 
 #: templates/admin/analytics.html:113
 #: templates/admin/analytics_purchase_success.html:31
@@ -1691,15 +1588,13 @@ msgstr ""
 #: templates/admin/analytics_top_categories.html:13
 #: templates/reports/public.html:120
 msgid "Categories Més Reportades"
-msgstr "Categorías Más Reportadas"
+msgstr ""
 
 #: templates/admin/analytics.html:115 templates/reports/public.html:122
 msgid ""
 "Ranking de les categories i subcategories amb més reports, agrupades per "
 "zona."
 msgstr ""
-"Ranking de las categorías y subcategorías con más reportes, agrupadas por"
-" zona."
 
 #: templates/admin/analytics_inventory_by_zone.html:15
 msgid "Report detallat dels items d'inventari agrupats per districte i secció"
@@ -1714,9 +1609,8 @@ msgstr ""
 #: templates/admin/analytics_inventory_by_zone.html:34
 #: templates/admin/analytics_top_categories.html:34
 #: templates/inventory/admin.html:92
-#, fuzzy
 msgid "Tots"
-msgstr "Todas"
+msgstr ""
 
 #: templates/admin/analytics_inventory_by_zone.html:51
 #: templates/admin/analytics_trends.html:40
@@ -1725,9 +1619,8 @@ msgstr ""
 
 #: templates/admin/analytics_inventory_by_zone.html:55
 #: templates/admin/analytics_trends.html:44
-#, fuzzy
 msgid "Data fins"
-msgstr "Fecha"
+msgstr ""
 
 #: templates/admin/analytics_inventory_by_zone.html:70
 msgid "Total items:"
@@ -1739,14 +1632,12 @@ msgstr ""
 
 #: templates/admin/analytics_inventory_by_zone.html:92
 #: templates/inventory/admin.html:297
-#, fuzzy
 msgid "items"
-msgstr "Vistas"
+msgstr ""
 
 #: templates/admin/analytics_inventory_by_zone.html:98
-#, fuzzy
 msgid "Per categoria:"
-msgstr "Categoría"
+msgstr ""
 
 #: templates/admin/analytics_inventory_by_zone.html:144
 #: templates/admin/analytics_top_categories.html:99
@@ -1755,14 +1646,12 @@ msgid "No hi ha dades per mostrar amb els filtres seleccionats"
 msgstr ""
 
 #: templates/admin/analytics_purchase_success.html:3
-#, fuzzy
 msgid "Compra Completada"
-msgstr "Nombre completo"
+msgstr ""
 
 #: templates/admin/analytics_purchase_success.html:15
-#, fuzzy
 msgid "Compra Completada!"
-msgstr "Nombre completo"
+msgstr ""
 
 #: templates/admin/analytics_purchase_success.html:17
 msgid "Gràcies per la teva compra. El teu report està llest per descarregar."
@@ -1781,9 +1670,8 @@ msgid "Import:"
 msgstr ""
 
 #: templates/admin/analytics_purchase_success.html:40
-#, fuzzy
 msgid "Data:"
-msgstr "Fecha"
+msgstr ""
 
 #: templates/admin/analytics_purchase_success.html:50
 msgid "Descarregar Report"
@@ -1802,9 +1690,8 @@ msgid ""
 msgstr ""
 
 #: templates/admin/analytics_purchase_success.html:65
-#, fuzzy
 msgid "Tornar a Reports"
-msgstr "Total Reportajes"
+msgstr ""
 
 #: templates/admin/analytics_purchases.html:3
 #: templates/admin/analytics_purchases.html:13
@@ -1817,14 +1704,12 @@ msgstr ""
 
 #: templates/admin/analytics_purchases.html:29
 #: templates/admin/donations.html:35
-#, fuzzy
 msgid "Total Recaudat"
-msgstr "Total Reportajes"
+msgstr ""
 
 #: templates/admin/analytics_purchases.html:46
-#, fuzzy
 msgid "Total Compres"
-msgstr "Total Reportajes"
+msgstr ""
 
 #: templates/admin/analytics_purchases.html:63
 msgid "Mitjana per Compra"
@@ -1839,28 +1724,24 @@ msgid "Ingressos per Tipus de Report"
 msgstr ""
 
 #: templates/admin/analytics_purchases.html:127
-#, fuzzy
 msgid "compres"
-msgstr "Compromiso"
+msgstr ""
 
 #: templates/admin/analytics_purchases.html:147
-#, fuzzy
 msgid "Totes les Compres"
-msgstr "Todas las categorías"
+msgstr ""
 
 #: templates/admin/analytics_purchases.html:156
 msgid "Tipus de Report"
 msgstr ""
 
 #: templates/admin/analytics_purchases.html:157
-#, fuzzy
 msgid "Comprador"
-msgstr "Compromiso"
+msgstr ""
 
 #: templates/admin/analytics_purchases.html:158
-#, fuzzy
 msgid "Import"
-msgstr "Impacta"
+msgstr ""
 
 #: templates/admin/analytics_purchases.html:160
 msgid "Descarregat"
@@ -1874,9 +1755,8 @@ msgstr ""
 #: templates/admin/analytics_purchases.html:199
 #: templates/admin/dashboard.html:168 templates/admin/donations.html:106
 #: templates/emails/donation_confirmation.html:19
-#, fuzzy
 msgid "Completada"
-msgstr "Nombre completo"
+msgstr ""
 
 #: templates/admin/analytics_purchases.html:207
 #: templates/admin/donations.html:112
@@ -1884,18 +1764,16 @@ msgid "Fallida"
 msgstr ""
 
 #: templates/admin/analytics_purchases.html:229
-#, fuzzy
 msgid "No hi ha compres encara"
-msgstr "No hay iniciativas aún"
+msgstr ""
 
 #: templates/admin/analytics_top_categories.html:15
 msgid "Ranking de les categories i subcategories amb més reports"
 msgstr ""
 
 #: templates/admin/analytics_top_categories.html:64
-#, fuzzy
 msgid "Total Reports"
-msgstr "Total Reportajes"
+msgstr ""
 
 #: templates/admin/analytics_trends.html:15
 msgid "Evolució dels reports al llarg del temps"
@@ -1903,33 +1781,32 @@ msgstr ""
 
 #: templates/admin/dashboard.html:13
 msgid "Panel d'Administració"
-msgstr "Panel de Administración"
+msgstr ""
 
 #: templates/admin/dashboard.html:15
 msgid "Gestiona les iniciatives i supervisa la plataforma"
-msgstr "Gestiona las iniciativas y supervisa la plataforma"
+msgstr ""
 
 #: templates/admin/dashboard.html:18 templates/admin/dashboard.html:119
 #: templates/admin/new_initiative.html:4
 msgid "Nova Iniciativa"
-msgstr "Nueva Iniciativa"
+msgstr ""
 
 #: templates/admin/dashboard.html:29
 msgid "Iniciatives Totals"
-msgstr "Iniciativas Totales"
+msgstr ""
 
 #: templates/admin/dashboard.html:46
 msgid "Usuaris Registrats"
-msgstr "Usuarios Registrados"
+msgstr ""
 
 #: templates/admin/dashboard.html:63
 msgid "Participacions Totals"
-msgstr "Participaciones Totales"
+msgstr ""
 
 #: templates/admin/dashboard.html:80 templates/admin/donations.html:3
-#, fuzzy
 msgid "Donacions"
-msgstr "Acciones"
+msgstr ""
 
 #: templates/admin/dashboard.html:82
 msgid "Total:"
@@ -1937,55 +1814,49 @@ msgstr ""
 
 #: templates/admin/dashboard.html:100 templates/admin/dashboard.html:122
 #: templates/admin/pending_initiatives.html:3
-#, fuzzy
 msgid "Iniciatives Pendents"
-msgstr "Iniciativas relacionadas"
+msgstr ""
 
 #: templates/admin/dashboard.html:101
 msgid "Hi ha"
 msgstr ""
 
 #: templates/admin/dashboard.html:101
-#, fuzzy
 msgid "iniciatives esperant aprovació"
-msgstr "Iniciativas Totales"
+msgstr ""
 
 #: templates/admin/dashboard.html:104
-#, fuzzy
 msgid "Revisar"
-msgstr "Registrarse"
+msgstr ""
 
 #: templates/admin/dashboard.html:115
 msgid "Accions Ràpides"
-msgstr "Acciones Rápidas"
+msgstr ""
 
 #: templates/admin/dashboard.html:128
 msgid "Gestionar Usuaris"
-msgstr "Gestionar Usuarios"
+msgstr ""
 
 #: templates/admin/dashboard.html:131
 msgid "Veure Participacions"
-msgstr "Ver Participaciones"
+msgstr ""
 
 #: templates/admin/dashboard.html:134
-#, fuzzy
 msgid "Veure Donacions"
-msgstr "Ver Participaciones"
+msgstr ""
 
 #: templates/admin/dashboard.html:149
-#, fuzzy
 msgid "Donacions Recents"
-msgstr "Participaciones Recientes"
+msgstr ""
 
 #: templates/admin/dashboard.html:155 templates/admin/donations.html:66
 #: templates/emails/donation_confirmation.html:13
-#, fuzzy
 msgid "Quantitat"
-msgstr "Otras cantidades"
+msgstr ""
 
 #: templates/admin/dashboard.html:185
 msgid "Participacions Recents"
-msgstr "Participaciones Recientes"
+msgstr ""
 
 #: templates/admin/dashboard.html:191
 #: templates/emails/admin_notification.html:15
@@ -1993,49 +1864,47 @@ msgid "Nom"
 msgstr ""
 
 #: templates/admin/dashboard.html:193
-#, fuzzy
 msgid "Iniciativa"
-msgstr "Nueva Iniciativa"
+msgstr ""
 
 #: templates/admin/dashboard.html:223
 msgid "Totes les Iniciatives"
-msgstr "Todas las Iniciativas"
+msgstr ""
 
 #: templates/admin/dashboard.html:231
 #: templates/admin/pending_initiatives.html:58
 msgid "Títol"
-msgstr "Título"
+msgstr ""
 
 #: templates/admin/dashboard.html:235
 msgid "Vistes"
-msgstr "Vistas"
+msgstr ""
 
 #: templates/admin/dashboard.html:237
 #: templates/admin/pending_initiatives.html:63 templates/admin/users.html:93
 #: templates/inventory/admin.html:168
 msgid "Accions"
-msgstr "Acciones"
+msgstr ""
 
 #: templates/admin/dashboard.html:309
 msgid "Editar"
-msgstr "Editar"
+msgstr ""
 
 #: templates/admin/dashboard.html:315
 msgid "Estàs segur d'eliminar aquesta iniciativa?"
-msgstr "¿Estás seguro de eliminar esta iniciativa?"
+msgstr ""
 
 #: templates/admin/dashboard.html:319 templates/inventory/admin.html:269
 msgid "Eliminar"
-msgstr "Eliminar"
+msgstr ""
 
 #: templates/admin/dashboard.html:331
 msgid "No hi ha iniciatives encara"
-msgstr "No hay iniciativas aún"
+msgstr ""
 
 #: templates/admin/donations.html:13
-#, fuzzy
 msgid "Donacions Rebudes"
-msgstr "Acciones Rápidas"
+msgstr ""
 
 #: templates/admin/donations.html:15
 msgid "Historial de donacions rebudes a través de Stripe"
@@ -2055,27 +1924,24 @@ msgid "Reemborsades"
 msgstr ""
 
 #: templates/admin/donations.html:67
-#, fuzzy
 msgid "Donant"
-msgstr "Donar"
+msgstr ""
 
 #: templates/admin/donations.html:71
 msgid "Stripe ID"
 msgstr ""
 
 #: templates/admin/donations.html:89
-#, fuzzy
 msgid "Usuari registrat"
-msgstr "Usuarios Registrados"
+msgstr ""
 
 #: templates/admin/donations.html:110
 msgid "Reemborsada"
 msgstr ""
 
 #: templates/admin/donations.html:182
-#, fuzzy
 msgid "No hi ha donacions encara"
-msgstr "No hay iniciativas aún"
+msgstr ""
 
 #: templates/admin/donations.html:183
 msgid "Les donacions rebudes apareixeran aquí"
@@ -2083,46 +1949,42 @@ msgstr ""
 
 #: templates/admin/new_initiative.html:4 templates/admin/new_initiative.html:15
 msgid "Editar Iniciativa"
-msgstr "Editar Iniciativa"
+msgstr ""
 
 #: templates/admin/new_initiative.html:19
 msgid "Modifica els detalls de la iniciativa ciutadana"
-msgstr "Modifica los detalles de la iniciativa ciudadana"
+msgstr ""
 
 #: templates/admin/new_initiative.html:21
 msgid "Crea una nova iniciativa per a la comunitat de Tarragona"
-msgstr "Crea una nueva iniciativa para la comunidad de Tarragona"
+msgstr ""
 
 #: templates/admin/new_initiative.html:38 templates/initiatives/create.html:32
 msgid "Ex: Gran Neteja de la Platja del Miracle"
-msgstr "Ej: Gran Limpieza de la Playa del Miracle"
+msgstr ""
 
 #: templates/admin/new_initiative.html:47 templates/initiatives/create.html:41
 msgid "Un títol clar i atractiu que motivi a participar"
-msgstr "Un título claro y atractivo que motive a participar"
+msgstr ""
 
 #: templates/admin/new_initiative.html:59 templates/initiatives/create.html:53
 msgid ""
 "Descriu detalladament la iniciativa: objectius, què es necessita, impacte"
 " esperat..."
 msgstr ""
-"Describe detalladamente la iniciativa: objetivos, qué se necesita, "
-"impacto esperado..."
 
 #: templates/admin/new_initiative.html:68 templates/initiatives/create.html:62
 msgid "Sigues específic sobre el que es farà i com els participants poden ajudar"
 msgstr ""
-"Sé específico sobre lo que se va a hacer y cómo los participantes pueden "
-"ayudar"
 
 #: templates/admin/new_initiative.html:94 templates/initiatives/create.html:88
 msgid "Ex: Platja del Miracle, Tarragona"
-msgstr "Ej: Playa del Miracle, Tarragona"
+msgstr ""
 
 #: templates/admin/new_initiative.html:136
 #: templates/initiatives/create.html:130
 msgid "Format HH:MM"
-msgstr "Formato HH:MM"
+msgstr ""
 
 #: templates/admin/new_initiative.html:155
 msgid ""
@@ -2133,7 +1995,7 @@ msgstr ""
 #: templates/admin/new_initiative.html:170
 #: templates/admin/new_initiative.html:173
 msgid "Imatge actual"
-msgstr "Imagen actual"
+msgstr ""
 
 #: templates/admin/new_initiative.html:188
 #: templates/initiatives/create.html:151
@@ -2141,27 +2003,24 @@ msgid ""
 "Formats acceptats: JPG, PNG, GIF, WEBP (Màx. 16MB). La imatge serà "
 "optimitzada automàticament."
 msgstr ""
-"Formatos aceptados: JPG, PNG, GIF, WEBP (Máx. 16MB). La imagen será "
-"optimizada automáticamente."
 
 #: templates/admin/new_initiative.html:195
 #: templates/initiatives/create.html:166 templates/inventory/report.html:116
 #: templates/inventory/report.html:359
 msgid "Cancel·lar"
-msgstr "Cancelar"
+msgstr ""
 
 #: templates/admin/new_initiative.html:199
 msgid "Actualitzar Iniciativa"
-msgstr "Actualizar Iniciativa"
+msgstr ""
 
 #: templates/admin/new_initiative.html:199
 msgid "Crear Iniciativa"
-msgstr "Crear Iniciativa"
+msgstr ""
 
 #: templates/admin/pending_initiatives.html:13
-#, fuzzy
 msgid "Iniciatives Pendents d'Aprovació"
-msgstr "Iniciativas Totales"
+msgstr ""
 
 #: templates/admin/pending_initiatives.html:15
 msgid "Revisa i aprueba les iniciatives creades pels usuaris"
@@ -2184,9 +2043,8 @@ msgstr ""
 #: templates/inventory/admin_pending_map.html:216
 #: templates/inventory/admin_pending_map.html:326
 #: templates/inventory/admin_pending_map.html:333
-#, fuzzy
 msgid "Aprovar"
-msgstr "Próximo"
+msgstr ""
 
 #: templates/admin/pending_initiatives.html:130
 #: templates/inventory/admin.html:246
@@ -2197,43 +2055,36 @@ msgid "Rebutjar"
 msgstr ""
 
 #: templates/admin/pending_initiatives.html:196
-#, fuzzy
 msgid "No hi ha iniciatives pendents"
-msgstr "No hay iniciativas aún"
+msgstr ""
 
 #: templates/admin/pending_initiatives.html:197
-#, fuzzy
 msgid "Totes les iniciatives han estat processades"
-msgstr "Todas las Iniciativas"
+msgstr ""
 
 #: templates/admin/users.html:3 templates/admin/users.html:36
-#, fuzzy
 msgid "Gestió d'Usuaris"
-msgstr "Gestionar Usuarios"
+msgstr ""
 
 #: templates/admin/users.html:38
-#, fuzzy
 msgid "Gestiona els usuaris de la plataforma"
-msgstr "Gestiona las iniciativas y supervisa la plataforma"
+msgstr ""
 
 #: templates/admin/users.html:50
-#, fuzzy
 msgid "Total Usuaris"
-msgstr "Gestionar Usuarios"
+msgstr ""
 
 #: templates/admin/users.html:66
-#, fuzzy
 msgid "Inactius"
-msgstr "Ciudadanos Activos"
+msgstr ""
 
 #: templates/admin/users.html:74
 msgid "No Confirmats"
 msgstr ""
 
 #: templates/admin/users.html:88
-#, fuzzy
 msgid "Usuari"
-msgstr "Buscar"
+msgstr ""
 
 #: templates/admin/users.html:90
 msgid "Rol"
@@ -2248,37 +2099,32 @@ msgid "Sense rol"
 msgstr ""
 
 #: templates/admin/users.html:136
-#, fuzzy
 msgid "Inactiu"
-msgstr "Actúa"
+msgstr ""
 
 #: templates/admin/users.html:141
-#, fuzzy
 msgid "No confirmat"
-msgstr "Nombre completo"
+msgstr ""
 
 #: templates/admin/users.html:158
 msgid "Desactivar"
 msgstr ""
 
 #: templates/admin/users.html:158
-#, fuzzy
 msgid "Activar"
-msgstr "Actúa"
+msgstr ""
 
 #: templates/admin/users.html:168
-#, fuzzy
 msgid "Confirmar"
-msgstr "Filtrar"
+msgstr ""
 
 #: templates/admin/users.html:177
 msgid "Canviar Rol"
 msgstr ""
 
 #: templates/admin/users.html:211 templates/admin/users.html:243
-#, fuzzy
 msgid "No s'han trobat usuaris"
-msgstr "Gestionar Usuarios"
+msgstr ""
 
 #: templates/admin/users.html:232
 msgid "Cercar"
@@ -2290,15 +2136,13 @@ msgstr ""
 
 #: templates/admin/users.html:233 templates/admin/users.html:234
 #: templates/admin/users.html:235
-#, fuzzy
 msgid "registres"
-msgstr "Registrarse"
+msgstr ""
 
 #: templates/admin/users.html:234 templates/admin/users.html:235
 #: templates/inventory/admin.html:295
-#, fuzzy
 msgid "Mostrant"
-msgstr "Estado"
+msgstr ""
 
 #: templates/admin/users.html:234 templates/admin/users.html:235
 msgid "a"
@@ -2306,47 +2150,40 @@ msgstr ""
 
 #: templates/admin/users.html:234 templates/admin/users.html:235
 #: templates/inventory/admin.html:297
-#, fuzzy
 msgid "de"
-msgstr "Fecha"
+msgstr ""
 
 #: templates/admin/users.html:236
-#, fuzzy
 msgid "filtrat de"
-msgstr "Filtrar"
+msgstr ""
 
 #: templates/admin/users.html:236
-#, fuzzy
 msgid "registres totals"
-msgstr "Iniciativas Totales"
+msgstr ""
 
 #: templates/admin/users.html:238
-#, fuzzy
 msgid "Primer"
-msgstr "Próximas"
+msgstr ""
 
 #: templates/admin/users.html:239
-#, fuzzy
 msgid "Últim"
-msgstr "Hora"
+msgstr ""
 
 #: templates/admin/users.html:240
 msgid "Següent"
 msgstr ""
 
 #: templates/admin/users.html:241
-#, fuzzy
 msgid "Anterior"
-msgstr "Categoría"
+msgstr ""
 
 #: templates/admin/users.html:244
 msgid "No s'han trobat resultats"
 msgstr ""
 
 #: templates/emails/admin_notification.html:4
-#, fuzzy
 msgid "Notificació de Tarracograf"
-msgstr "Donación a Tarracograf"
+msgstr ""
 
 #: templates/emails/admin_notification.html:6
 msgid "Hola administrador/a,"
@@ -2361,24 +2198,21 @@ msgid "Tipus"
 msgstr ""
 
 #: templates/emails/admin_notification.html:40
-#, fuzzy
 msgid "Veure panell d'administració"
-msgstr "Panel de Administración"
+msgstr ""
 
 #: templates/emails/admin_notification.html:43
 msgid "Gràcies!"
 msgstr ""
 
 #: templates/emails/base.html:150
-#, fuzzy
 msgid "Reporta l'estat de la ciutat"
-msgstr "Radiografía de la Ciudad"
+msgstr ""
 
 #: templates/emails/base.html:150
 #: templates/emails/participant_confirmation.html:22
-#, fuzzy
 msgid "coloms"
-msgstr "Compromiso"
+msgstr ""
 
 #: templates/emails/base.html:150
 #: templates/emails/participant_confirmation.html:22
@@ -2430,9 +2264,8 @@ msgid "Visitar la plataforma"
 msgstr ""
 
 #: templates/emails/contact_response.html:22
-#, fuzzy
 msgid "Gràcies per contactar-nos!"
-msgstr "¡Gracias por tu donación!"
+msgstr ""
 
 #: templates/emails/donation_confirmation.html:8
 msgid ""
@@ -2441,9 +2274,8 @@ msgid ""
 msgstr ""
 
 #: templates/emails/donation_confirmation.html:11
-#, fuzzy
 msgid "Detalls de la donació"
-msgstr "Cantidad de la donación"
+msgstr ""
 
 #: templates/emails/donation_confirmation.html:16
 msgid "Ara mateix"
@@ -2462,9 +2294,8 @@ msgid "Organitzar més iniciatives cíviques"
 msgstr ""
 
 #: templates/emails/donation_confirmation.html:27
-#, fuzzy
 msgid "Millorar les funcionalitats de la plataforma"
-msgstr "Gestiona las iniciativas y supervisa la plataforma"
+msgstr ""
 
 #: templates/emails/donation_confirmation.html:28
 msgid "Fomentar la participació ciutadana"
@@ -2512,9 +2343,8 @@ msgstr ""
 #: templates/emails/initiative_approved.html:19
 #: templates/emails/initiative_reminder.html:22
 #: templates/emails/participant_confirmation.html:26
-#, fuzzy
 msgid "Veure la iniciativa"
-msgstr "Ver Iniciativas"
+msgstr ""
 
 #: templates/emails/initiative_approved.html:22
 msgid ""
@@ -2524,9 +2354,8 @@ msgid ""
 msgstr ""
 
 #: templates/emails/initiative_approved.html:24
-#, fuzzy
 msgid "Gràcies per contribuir a millorar Tarragona!"
-msgstr "¿Tienes una idea para mejorar Tarragona?"
+msgstr ""
 
 #: templates/emails/initiative_rejected.html:8
 msgid ""
@@ -2547,9 +2376,8 @@ msgstr ""
 
 #: templates/emails/initiative_rejected.html:23
 #: templates/emails/inventory_rejected.html:22
-#, fuzzy
 msgid "Gràcies per la teva comprensió."
-msgstr "¡Gracias por tu donación!"
+msgstr ""
 
 #: templates/emails/initiative_reminder.html:4
 msgid "Recordatori: La teva iniciativa és demà!"
@@ -2571,9 +2399,8 @@ msgid ""
 msgstr ""
 
 #: templates/emails/initiative_reminder.html:25
-#, fuzzy
 msgid "Molts ànims amb la iniciativa!"
-msgstr "Proponer una iniciativa"
+msgstr ""
 
 #: templates/emails/inventory_approved.html:4
 msgid "El teu reportatge ha estat aprovat!"
@@ -2592,9 +2419,8 @@ msgid ""
 msgstr ""
 
 #: templates/emails/inventory_approved.html:26
-#, fuzzy
 msgid "Gràcies per la teva contribució!"
-msgstr "¡Gracias por tu donación!"
+msgstr ""
 
 #: templates/emails/inventory_rejected.html:8
 msgid ""
@@ -2607,14 +2433,12 @@ msgid "Si tens preguntes o vols més informació, no dubtis a contactar-nos."
 msgstr ""
 
 #: templates/emails/participant_confirmation.html:4
-#, fuzzy
 msgid "Confirmació de participació"
-msgstr "Cancelar participación"
+msgstr ""
 
 #: templates/emails/participant_confirmation.html:8
-#, fuzzy
 msgid "Gràcies per unir-te a la iniciativa!"
-msgstr "Sé el primero en unirte a esta iniciativa"
+msgstr ""
 
 #: templates/emails/participant_confirmation.html:19
 msgid "Ens veiem allà! Si tens alguna pregunta, no dubtis a contactar-nos."
@@ -2633,14 +2457,12 @@ msgid "i més coses en el futur"
 msgstr ""
 
 #: templates/emails/participant_confirmation.html:29
-#, fuzzy
 msgid "Gràcies per participar!"
-msgstr "¡Gracias por tu donación!"
+msgstr ""
 
 #: templates/emails/welcome.html:4
-#, fuzzy
 msgid "Benvingut/da a Tarracograf!"
-msgstr "Donación a Tarracograf"
+msgstr ""
 
 #: templates/emails/welcome.html:8
 msgid ""
@@ -2649,9 +2471,8 @@ msgid ""
 msgstr ""
 
 #: templates/emails/welcome.html:12
-#, fuzzy
 msgid "Confirma el teu correu electrònic"
-msgstr "Tu email"
+msgstr ""
 
 #: templates/emails/welcome.html:13
 msgid ""
@@ -2660,18 +2481,16 @@ msgid ""
 msgstr ""
 
 #: templates/emails/welcome.html:15
-#, fuzzy
 msgid "Confirmar correu electrònic"
-msgstr "Tu email"
+msgstr ""
 
 #: templates/emails/welcome.html:18
 msgid "O copia i enganxa aquest enllaç al teu navegador:"
 msgstr ""
 
 #: templates/emails/welcome.html:24
-#, fuzzy
 msgid "El teu compte està actiu"
-msgstr "Tu email"
+msgstr ""
 
 #: templates/emails/welcome.html:25
 msgid ""
@@ -2684,14 +2503,12 @@ msgid "Què pots fer ara?"
 msgstr ""
 
 #: templates/emails/welcome.html:31
-#, fuzzy
 msgid "Explorar les iniciatives actives"
-msgstr "Explora las iniciativas activas en tu ciudad"
+msgstr ""
 
 #: templates/emails/welcome.html:32
-#, fuzzy
 msgid "Crear la teva pròpia iniciativa"
-msgstr "Crear Nueva Iniciativa"
+msgstr ""
 
 #: templates/emails/welcome.html:33
 msgid "Participar en activitats comunitàries"
@@ -2714,9 +2531,8 @@ msgid "I més coses en el futur"
 msgstr ""
 
 #: templates/emails/welcome.html:44
-#, fuzzy
 msgid "Iniciar sessió"
-msgstr "Inicia sesión"
+msgstr ""
 
 #: templates/emails/welcome.html:47
 msgid "Si tens alguna pregunta, no dubtis a contactar-nos."
@@ -2734,33 +2550,29 @@ msgstr ""
 
 #: templates/includes/footer.html:34
 msgid "Enllaços Ràpids"
-msgstr "Enlaces Rápidos"
+msgstr ""
 
 #: templates/includes/footer.html:66
-#, fuzzy
 msgid "Recursos"
-msgstr "personas"
+msgstr ""
 
 #: templates/includes/footer.html:123
 msgid "Tots els drets reservats."
 msgstr ""
 
 #: templates/includes/footer.html:129
-#, fuzzy
 msgid "Política de Privacitat"
-msgstr "Privacidad"
+msgstr ""
 
 #: templates/includes/footer.html:135
-#, fuzzy
 msgid "Termes d'Ús"
-msgstr "Términos"
+msgstr ""
 
 #: templates/initiatives/create.html:16
-#, fuzzy
 msgid ""
 "Crea una nova iniciativa per a la comunitat de Tarragona. Després de "
 "crear-la, un moderador la revisarà abans de publicar-la."
-msgstr "Crea una nueva iniciativa para la comunidad de Tarragona"
+msgstr ""
 
 #: templates/initiatives/create.html:159
 msgid "Recorda:"
@@ -2778,15 +2590,15 @@ msgstr ""
 
 #: templates/initiatives/list.html:20
 msgid "Iniciatives Actives"
-msgstr "Iniciativas Activas"
+msgstr ""
 
 #: templates/initiatives/list.html:26
 msgid "Ciutadans Compromesos"
-msgstr "Ciudadanos Comprometidos"
+msgstr ""
 
 #: templates/initiatives/list.html:32
 msgid "Àrees d'Acció"
-msgstr "Áreas de Acción"
+msgstr ""
 
 #: templates/inventory/admin.html:3 templates/inventory/admin.html:26
 msgid "Administrar Inventari"
@@ -2797,9 +2609,8 @@ msgid "Rebutjats"
 msgstr ""
 
 #: templates/inventory/admin.html:143 templates/inventory/admin.html:382
-#, fuzzy
 msgid "Veure Mapa de Pendents"
-msgstr "Ver Mapa del Inventario"
+msgstr ""
 
 #: templates/inventory/admin.html:163 templates/inventory/report.html:80
 msgid "Foto"
@@ -2810,24 +2621,21 @@ msgid "Reporter"
 msgstr ""
 
 #: templates/inventory/admin.html:214
-#, fuzzy
 msgid "Rebutjat"
-msgstr "Estado"
+msgstr ""
 
 #: templates/inventory/admin.html:247
 #: templates/inventory/admin_pending_map.html:345
-#, fuzzy
 msgid "Estàs segur de rebutjar aquest item?"
-msgstr "¿Estás seguro de eliminar esta iniciativa?"
+msgstr ""
 
 #: templates/inventory/admin.html:257
 msgid "Marcar com resolt"
 msgstr ""
 
 #: templates/inventory/admin.html:264
-#, fuzzy
 msgid "Estàs segur d'eliminar aquest item?"
-msgstr "¿Estás seguro de eliminar esta iniciativa?"
+msgstr ""
 
 #: templates/inventory/admin.html:282
 msgid "No hi ha items amb aquest estat"
@@ -2842,9 +2650,8 @@ msgid "Per pàgina"
 msgstr ""
 
 #: templates/inventory/admin.html:386
-#, fuzzy
 msgid "Tornar al mapa"
-msgstr "Explorar Mapa"
+msgstr ""
 
 #: templates/inventory/admin.html:400
 msgid "Foto de l'Item"
@@ -2864,9 +2671,8 @@ msgid "Aprova o rebutja items des del mapa"
 msgstr ""
 
 #: templates/inventory/admin_pending_map.html:36
-#, fuzzy
 msgid "Veure llista"
-msgstr "Ver Más"
+msgstr ""
 
 #: templates/inventory/admin_pending_map.html:47
 #: templates/inventory/admin_pending_map.html:174
@@ -2875,9 +2681,8 @@ msgstr ""
 
 #: templates/inventory/admin_pending_map.html:57
 #: templates/inventory/report.html:31
-#, fuzzy
 msgid "Instruccions"
-msgstr "Acciones"
+msgstr ""
 
 #: templates/inventory/admin_pending_map.html:57
 msgid "Fes clic en un marcador per veure els detalls i aprovar o rebutjar l'item."
@@ -2897,9 +2702,8 @@ msgstr ""
 #: templates/inventory/admin_pending_map.html:331
 #: templates/inventory/admin_pending_map.html:382
 #: templates/inventory/admin_pending_map.html:389
-#, fuzzy
 msgid "Error al processar la sol·licitud"
-msgstr "Error al procesar el pago: {error}"
+msgstr ""
 
 #: templates/inventory/admin_pending_map.html:377
 msgid "Item rebutjat"
@@ -2912,52 +2716,44 @@ msgid ""
 msgstr ""
 
 #: templates/inventory/map.html:62 templates/reports/public.html:23
-#, fuzzy
 msgid "Items reportats"
-msgstr "Total Reportajes"
+msgstr ""
 
 #: templates/inventory/map.html:67
-#, fuzzy
 msgid "Per categoria"
-msgstr "Categoría"
+msgstr ""
 
 #: templates/inventory/map.html:86
-#, fuzzy
 msgid "Filtrar per categoria"
-msgstr "Categoría"
+msgstr ""
 
 #: templates/inventory/map.html:115
-#, fuzzy
 msgid "Subcategorías de Coloms"
-msgstr "Subcategorías de Palomas"
+msgstr ""
 
 #: templates/inventory/map.html:118 templates/inventory/map.html:150
 msgid "Totes les subcategorías"
-msgstr "Todas las subcategorías"
+msgstr ""
 
 #: templates/inventory/map.html:147
-#, fuzzy
 msgid "Subcategorías de Brossa"
-msgstr "Subcategorías de Basura"
+msgstr ""
 
 #: templates/inventory/map.html:183
-#, fuzzy
 msgid "Reportar nou item"
-msgstr "Reportar Nuevo Problema"
+msgstr ""
 
 #: templates/inventory/map.html:188
 msgid "Has de"
 msgstr ""
 
 #: templates/inventory/map.html:188
-#, fuzzy
 msgid "iniciar sessió"
-msgstr "Inicia sesión"
+msgstr ""
 
 #: templates/inventory/map.html:188
-#, fuzzy
 msgid "per reportar items"
-msgstr "Total Reportajes"
+msgstr ""
 
 #: templates/inventory/map.html:526 templates/inventory/map.html:533
 #: templates/inventory/map.html:539 templates/inventory/map.html:815
@@ -2966,9 +2762,8 @@ msgid "Ja no hi és"
 msgstr ""
 
 #: templates/inventory/map.html:555
-#, fuzzy
 msgid "confirmacions"
-msgstr "Confirma tu contraseña"
+msgstr ""
 
 #: templates/inventory/map.html:563 templates/inventory/map.html:689
 #: templates/inventory/map.html:786
@@ -2980,9 +2775,8 @@ msgid "Error al votar"
 msgstr ""
 
 #: templates/inventory/map.html:711
-#, fuzzy
 msgid "Error al votar. Intenta-ho de nou."
-msgstr "Error inesperado. Por favor, inténtalo de nuevo."
+msgstr ""
 
 #: templates/inventory/map.html:713
 msgid "Confirmar importància"
@@ -2995,19 +2789,16 @@ msgid ""
 msgstr ""
 
 #: templates/inventory/map.html:809
-#, fuzzy
 msgid "Error al reportar"
-msgstr "Total Reportajes"
+msgstr ""
 
 #: templates/inventory/map.html:820
-#, fuzzy
 msgid "Error al reportar. Intenta-ho de nou."
-msgstr "Error inesperado. Por favor, inténtalo de nuevo."
+msgstr ""
 
 #: templates/inventory/report.html:25
-#, fuzzy
 msgid "Reportar nou item al inventari"
-msgstr "Reportar Nuevo Problema"
+msgstr ""
 
 #: templates/inventory/report.html:32
 msgid "Fes clic al mapa o usa la teva ubicació actual"
@@ -3018,9 +2809,8 @@ msgid "Usar ubicació actual"
 msgstr ""
 
 #: templates/inventory/report.html:66
-#, fuzzy
 msgid "Selecciona primero una categoría"
-msgstr "Selecciona una subcategoría"
+msgstr ""
 
 #: templates/inventory/report.html:72
 msgid "Descripció opcional del problema..."
@@ -3035,18 +2825,14 @@ msgid "Pujar foto"
 msgstr ""
 
 #: templates/inventory/report.html:93
-#, fuzzy
 msgid "Eliminar foto"
-msgstr "Eliminar"
+msgstr ""
 
 #: templates/inventory/report.html:96
-#, fuzzy
 msgid ""
 "Formatos aceptados: JPG, PNG, GIF. La imagen será optimizada "
 "automáticamente."
 msgstr ""
-"Formatos aceptados: JPG, PNG, GIF, WEBP (Máx. 16MB). La imagen será "
-"optimizada automáticamente."
 
 #: templates/inventory/report.html:106 templates/inventory/report.html:154
 msgid "Ubicació seleccionada"
@@ -3057,9 +2843,8 @@ msgid "Fes clic al mapa per seleccionar la ubicació"
 msgstr ""
 
 #: templates/inventory/report.html:113
-#, fuzzy
 msgid "Reportar"
-msgstr "Reportar Problema"
+msgstr ""
 
 #: templates/inventory/report.html:190
 msgid "La geolocalización no está disponible en tu navegador"
@@ -3093,23 +2878,23 @@ msgstr ""
 
 #: templates/inventory/report.html:245
 msgid "Nido"
-msgstr "Nido"
+msgstr ""
 
 #: templates/inventory/report.html:246
 msgid "Excremento"
-msgstr "Excremento"
+msgstr ""
 
 #: templates/inventory/report.html:247
 msgid "Plumas"
-msgstr "Plumas"
+msgstr ""
 
 #: templates/inventory/report.html:251
 msgid "Vertidos"
-msgstr "Vertidos"
+msgstr ""
 
 #: templates/inventory/report.html:257
 msgid "Selecciona una subcategoría"
-msgstr "Selecciona una subcategoría"
+msgstr ""
 
 #: templates/inventory/report.html:351
 msgid "Fer foto"
@@ -3124,9 +2909,8 @@ msgid "La imagen es demasiado grande. Máximo 10MB"
 msgstr ""
 
 #: templates/inventory/report.html:466
-#, fuzzy
 msgid "Por favor, selecciona una categoría y subcategoría"
-msgstr "Selecciona una subcategoría"
+msgstr ""
 
 #: templates/inventory/report.html:473
 msgid "Por favor, selecciona una ubicación en el mapa"
@@ -3137,217 +2921,108 @@ msgid "Por favor, sube una foto del item. La foto es obligatoria."
 msgstr ""
 
 #: templates/reports/public.html:12
-#, fuzzy
 msgid "Reports i Analytics"
-msgstr "Reportes y Analytics"
+msgstr ""
 
 #: templates/reports/public.html:15
 msgid "Descarrega reports detallats sobre l'estat de la ciutat de Tarragona"
-msgstr "Descarga reportes detallados sobre el estado de la ciudad de Tarragona"
+msgstr ""
 
 #: templates/reports/public.html:32
-#, fuzzy
 msgid "Iniciatives actives"
-msgstr "Iniciativas Activas"
+msgstr ""
 
 #: templates/reports/public.html:55 templates/reports/public.html:90
 #: templates/reports/public.html:125
-#, fuzzy
 msgid "Veure Detalls"
-msgstr "Ver Todos"
+msgstr ""
 
 #: templates/reports/public.html:63 templates/reports/public.html:98
 #: templates/reports/public.html:133
 msgid "Comprar i Descarregar"
-msgstr "Comprar y Descargar"
+msgstr ""
 
 #: templates/reports/public.html:68 templates/reports/public.html:103
 #: templates/reports/public.html:138
-#, fuzzy
 msgid "Inicia sessió per comprar"
-msgstr "Inicia sesión"
+msgstr ""
 
 #: templates/reports/public.html:154
-#, fuzzy
 msgid "Sobre els Reports"
-msgstr "Sobre los Reportes"
+msgstr ""
 
 #: templates/reports/public.html:155
 msgid ""
 "Els reports es generen amb les dades més actualitzades de la plataforma i"
 " inclouen informació detallada sobre l'estat de la ciutat."
 msgstr ""
-"Los reportes se generan con los datos más actualizados de la plataforma y"
-" incluyen información detallada sobre el estado de la ciudad."
 
 #: templates/reports/public.html:156
-#, fuzzy
 msgid "Format:"
-msgstr "Formato:"
+msgstr ""
 
 #: templates/reports/public.html:156
 msgid "CSV (compatible amb Excel i altres eines d'anàlisi)"
-msgstr "CSV (compatible con Excel y otras herramientas de análisis)"
+msgstr ""
 
 #: templates/security/login.html:3 templates/security/login.html:14
 #: templates/security/login.html:55
 msgid "Iniciar Sesión"
-msgstr "Iniciar Sesión"
+msgstr ""
 
 #: templates/security/login.html:16
 msgid "Accede a tu cuenta para participar en iniciativas y gestionar tu perfil"
-msgstr "Accede a tu cuenta para participar en iniciativas y gestionar tu perfil"
+msgstr ""
 
 #: templates/security/login.html:25 templates/security/register.html:25
 msgid "tu@email.com"
-msgstr "tu@email.com"
+msgstr ""
 
 #: templates/security/login.html:37
 msgid "Tu contraseña"
-msgstr "Tu contraseña"
+msgstr ""
 
 #: templates/security/login.html:61
 msgid "¿No tienes cuenta?"
-msgstr "¿No tienes cuenta?"
+msgstr ""
 
 #: templates/security/login.html:63
 msgid "Regístrate aquí"
-msgstr "Regístrate aquí"
+msgstr ""
 
 #: templates/security/register.html:3
-#, fuzzy
 msgid "Registrarse"
-msgstr "Registrarse"
+msgstr ""
 
 #: templates/security/register.html:14 templates/security/register.html:75
 msgid "Crear Cuenta"
-msgstr "Crear Cuenta"
+msgstr ""
 
 #: templates/security/register.html:16
 msgid "Únete a la comunidad de Tarracograf y participa en iniciativas ciudadanas"
-msgstr "Únete a la comunidad de Tarracograf y participa en iniciativas ciudadanas"
+msgstr ""
 
 #: templates/security/register.html:37
 msgid "Tu nombre de usuario"
-msgstr "Tu nombre de usuario"
+msgstr ""
 
 #: templates/security/register.html:49
 msgid "Mínimo 8 caracteres"
-msgstr "Mínimo 8 caracteres"
+msgstr ""
 
 #: templates/security/register.html:57
 msgid "La contraseña debe tener al menos 8 caracteres"
-msgstr "La contraseña debe tener al menos 8 caracteres"
+msgstr ""
 
 #: templates/security/register.html:63
 msgid "Confirma tu contraseña"
-msgstr "Confirma tu contraseña"
+msgstr ""
 
 #: templates/security/register.html:81
 msgid "¿Ya tienes cuenta?"
-msgstr "¿Ya tienes cuenta?"
+msgstr ""
 
 #: templates/security/register.html:83
 msgid "Inicia sesión aquí"
-msgstr "Inicia sesión aquí"
-
-#~ msgid "Junts construïm la Tarragona que volem"
-#~ msgstr "Juntos construimos la Tarragona que queremos"
-
-#~ msgid ""
-#~ "Uneix-te a les iniciatives ciutadanes"
-#~ " que estan transformant la nostra "
-#~ "ciutat. Cada acció compta, cada persona"
-#~ " suma. Sigues part del canvi!"
-#~ msgstr ""
-#~ "La radiografía de la ciudad. Visualiza"
-#~ " iniciativas ciudadanas, reporta problemas "
-#~ "de limpieza y participa en la "
-#~ "mejora de Tarragona."
-
-#~ msgid "Uneix-te al Moviment"
-#~ msgstr "Únete al Movimiento"
-
-#~ msgid ""
-#~ "Iniciatives que cuiden el nostre medi"
-#~ " ambient i promouen pràctiques ecològiques."
-#~ msgstr ""
-#~ "Iniciativas que cuidan nuestro medio "
-#~ "ambiente y promueven prácticas ecológicas."
-
-#~ msgid "Comunitat"
-#~ msgstr "Comunidad"
-
-#~ msgid "Connecta amb veïns compromesos i construeix una xarxa ciutadana forta."
-#~ msgstr "Conecta con vecinos comprometidos y construye una red ciudadana fuerte."
-
-#~ msgid "Troba la teva causa"
-#~ msgstr "Encuentra tu causa"
-
-#~ msgid "Iniciatives Ciutadanes Actives"
-#~ msgstr "Iniciativas Ciudadanas Activas"
-
-#~ msgid "Veure detalls i participar"
-#~ msgstr "Ver detalles y participar"
-
-#~ msgid "vistes"
-#~ msgstr "vistas"
-
-#~ msgid ""
-#~ "Plataforma ciutadana per construir junts "
-#~ "una Tarragona més neta, sostenible i "
-#~ "cívica."
-#~ msgstr ""
-#~ "Plataforma ciudadana para construir juntos "
-#~ "una Tarragona más limpia, sostenible y"
-#~ " cívica."
-
-#~ msgid "Esdeveniments Propers"
-#~ msgstr "Próximos Eventos"
-
-#~ msgid "Categories"
-#~ msgstr "Categorías"
-
-#~ msgid "Uneix-te al Canvi"
-#~ msgstr "Únete al Cambio"
-
-#~ msgid "Rep notificacions sobre noves iniciatives:"
-#~ msgstr "Recibe notificaciones sobre nuevas iniciativas:"
-
-#~ msgid "Subscriure's"
-#~ msgstr "Suscribirse"
-
-#~ msgid "Fet amb 💚 per Tarragona"
-#~ msgstr "Hecho con 💚 para Tarragona"
-
-#~ msgid "Passat"
-#~ msgstr "Pasado"
-
-#~ msgid "Les donacions voluntàries ens ajuden a cobrir els costos del servidor."
-#~ msgstr "Las donaciones voluntarias nos ayudan a cubrir los costos del servidor."
-
-#~ msgid "Fem la"
-#~ msgstr "Hacemos la"
-
-#~ msgid ""
-#~ "Tarracograf - Plataforma ciutadana per a"
-#~ " iniciatives cíviques a Tarragona"
-#~ msgstr "Tarracograf - Radiografía de la ciudad de Tarragona"
-
-#~ msgid "Tarracograf - Junts per una ciutat millor"
-#~ msgstr "Tarracograf - Radiografía de la ciudad"
-
-#~ msgid "Overflowing Trash"
-#~ msgstr "Basura Desbordada"
-
-#~ msgid "Basura Desbordada"
-#~ msgstr "Basura Desbordada"
-
-#~ msgid "Palomas"
-#~ msgstr "Palomas"
-
-#~ msgid "Basura"
-#~ msgstr "Basura"
-
-#~ msgstr ""
+msgstr ""
 

@@ -118,11 +118,12 @@ def contact():
             except Exception as e:
                 current_app.logger.error(f'Error sending contact confirmation email: {str(e)}', exc_info=True)
         
-        # Send notification to admin (optional - you can configure admin email)
+        # Send notification to admin
         if admin_email:
             try:
                 from app.services.email_service import EmailService
-                EmailService.send_admin_notification(
+                current_app.logger.info(f'Sending admin notification to {admin_email} for contact form from {email}')
+                result = EmailService.send_admin_notification(
                     admin_email,
                     'Nou missatge de contacte',
                     {
@@ -133,6 +134,10 @@ def contact():
                         'phone': phone if phone else 'No proporcionat'
                     }
                 )
+                if result:
+                    current_app.logger.info(f'Admin notification email sent successfully to {admin_email}')
+                else:
+                    current_app.logger.warning(f'Admin notification email failed to send to {admin_email}')
             except Exception as e:
                 current_app.logger.error(f'Error sending admin notification: {str(e)}', exc_info=True)
         

@@ -112,7 +112,7 @@ DESCRIPTIONS = {
         'Plumas en la zona',
         'Restos de plumas',
     ],
-    'basura_desbordada': [
+    'escombreries_desbordades': [
         'Contenedor de basura desbordado',
         'Basura acumulada fuera del contenedor',
         'Contenedor lleno con basura alrededor',
@@ -154,12 +154,12 @@ def generate_seed_data(num_items=50):
         # Categories and subcategories with weights
         # Distribution: 
         #   palomas: 40% excremento, 35% nido, 25% plumas (100% total)
-        #   basura: 65% basura_desbordada, 35% vertidos (100% total)
+        #   basura: 65% escombreries_desbordades, 35% vertidos (100% total)
         category_subcategory_map = [
             ('palomas', 'excremento')] * 20 + [
             ('palomas', 'nido')] * 17 + [
             ('palomas', 'plumas')] * 13 + [
-            ('basura', 'basura_desbordada')] * 13 + [
+            ('basura', 'escombreries_desbordades')] * 13 + [
             ('basura', 'vertidos')] * 7
         
         # Status distribution for realism:
@@ -227,7 +227,7 @@ def generate_seed_data(num_items=50):
                         'excremento': (400, 300),
                         'nido': (300, 300),
                         'plumas': (300, 200),
-                        'basura_desbordada': (400, 300),
+                        'escombreries_desbordades': (400, 300),
                         'vertidos': (400, 300),
                         'otro': (400, 300)
                     }
@@ -303,7 +303,7 @@ def generate_seed_data(num_items=50):
                 'excremento': '💩', 
                 'nido': '🪺', 
                 'plumas': '🪶',
-                'basura_desbordada': '🗑️',
+                'escombreries_desbordades': '🗑️',
                 'vertidos': '💧',
                 'otro': '📌'
             }.get(subcat, '📌')

@@ -5,10 +5,10 @@ from flask_babel import gettext as _
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import os
-from app.models import InventoryItem, InventoryVote, District, Section
+from app.models import InventoryItem, InventoryVote, District, Section, CityBoundary
 from app.extensions import db
 from app.forms import InventoryForm
-from app.utils import sanitize_html, allowed_file, optimize_image, get_inventory_category_name, normalize_category_from_url, normalize_subcategory_from_url, category_to_url, subcategory_to_url
+from app.utils import sanitize_html, allowed_file, optimize_image, extract_gps_from_image, get_inventory_category_name, normalize_category_from_url, normalize_subcategory_from_url, category_to_url, subcategory_to_url
 # Config.UPLOAD_FOLDER removed - using current_app.config['UPLOAD_FOLDER'] instead
 
 bp = Blueprint('inventory', __name__, url_prefix='/inventory')
@@ -92,13 +92,84 @@ def report_item():
     
     if form.validate_on_submit():
         try:
-            latitude = float(form.latitude.data)
-            longitude = float(form.longitude.data)
-            
-            # Validate coordinates (Tarragona area approximately)
-            if not (40.5 <= latitude <= 41.5 and 0.5 <= longitude <= 2.0):
-                flash(_('Las coordenadas están fuera del área de Tarragona'), 'error')
+            # Handle image upload first (required)
+            if not form.image.data:
+                flash(_('La foto es obligatoria para reportar un item'), 'error')
                 return render_template('inventory/report.html', form=form)
+            
+            file = form.image.data
+            if not file or not allowed_file(file.filename):
+                flash(_('Por favor, sube una imagen válida (JPG, PNG, GIF)'), 'error')
+                return render_template('inventory/report.html', form=form)
+            
+            # Save image temporarily to extract GPS
+            filename = secure_filename(f"{datetime.now().timestamp()}_{file.filename}")
+            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            
+            # Try to extract GPS coordinates from image (PRIORITY 1)
+            image_gps_lat, image_gps_lng = extract_gps_from_image(file_path)
+            current_app.logger.info(f"📍 GPS extraído de imagen: lat={image_gps_lat}, lng={image_gps_lng}")
+            
+            latitude = image_gps_lat
+            longitude = image_gps_lng
+            location_source = 'image_gps'
+            
+            # If no GPS in image, use coordinates from form (from browser geolocation or manual) (PRIORITY 2)
+            if latitude is None or longitude is None:
+                current_app.logger.info("⚠️ No GPS en imagen, usando coordenadas del formulario")
+                if form.latitude.data and form.longitude.data:
+                    try:
+                        latitude = float(form.latitude.data)
+                        longitude = float(form.longitude.data)
+                        current_app.logger.info(f"📍 Coordenadas del formulario: lat={latitude}, lng={longitude}")
+                        # We can't distinguish between browser geolocation and manual selection from form data
+                        # Both come through the same hidden fields. The frontend shows the source to the user.
+                        location_source = 'form_coordinates'  # Could be browser geolocation or manual
+                    except (ValueError, TypeError) as e:
+                        current_app.logger.warning(f"❌ Error parseando coordenadas del formulario: {e}")
+                        latitude = None
+                        longitude = None
+                else:
+                    current_app.logger.warning("❌ No hay coordenadas en formulario ni GPS en imagen")
+            
+            # If still no coordinates, show error with helpful message
+            if latitude is None or longitude is None:
+                flash(_('No se pudo obtener la ubicación de la foto (no tiene coordenadas GPS). Por favor, selecciona la ubicación en el mapa o usa el botón "Usar la meva ubicació actual".'), 'error')
+                # Clean up uploaded file
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                # Pre-fill form with uploaded image info for retry
+                form.category.data = form.category.data
+                form.subcategory.data = form.subcategory.data
+                form.description.data = form.description.data
+                return render_template('inventory/report.html', form=form)
+            
+            # Validate coordinates using CityBoundary (precise validation)
+            if not CityBoundary.point_is_inside(latitude, longitude):
+                current_app.logger.warning(
+                    f'User {current_user.id} attempted to report item outside city boundary: '
+                    f'lat={latitude}, lng={longitude}, source={location_source}'
+                )
+                flash(_('Les coordenades estan fora del límit de Tarragona. Si us plau, assegura\'t que la foto sigui dins de la ciutat o selecciona una ubicació dins del límit.'), 'error')
+                # Clean up uploaded file
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                return render_template('inventory/report.html', form=form)
+            
+            # Optimize image (this may remove EXIF, but we already extracted GPS)
+            optimize_image(file_path)  # Optimize in place
+            
+            # Get address from form or geocode (optional)
+            address = form.address.data if form.address.data else None
+            
+            # Create item with all data including GPS from image
+            current_app.logger.info(
+                f"💾 Guardando item con:\n"
+                f"   - Ubicación final: lat={latitude}, lng={longitude}\n"
+                f"   - GPS de imagen: lat={image_gps_lat}, lng={image_gps_lng}\n"
+                f"   - Fuente: {location_source}"
+            )
             
             item = InventoryItem(
                 category=form.category.data,
@@ -106,27 +177,31 @@ def report_item():
                 description=sanitize_html(form.description.data) if form.description.data else None,
                 latitude=latitude,
                 longitude=longitude,
-                address=sanitize_html(form.address.data) if form.address.data else None,
-                reporter_id=current_user.id,  # Always authenticated due to @login_required
-                status='pending'  # New items require admin approval
+                address=sanitize_html(address) if address else None,
+                image_path=filename,  # Set image path directly
+                reporter_id=current_user.id,
+                status='pending',
+                # Store GPS from image for comparison (even if not used as final location)
+                image_gps_latitude=image_gps_lat,
+                image_gps_longitude=image_gps_lng,
+                location_source=location_source
             )
-            
-            # Handle image upload
-            if form.image.data:
-                file = form.image.data
-                if file and allowed_file(file.filename):
-                    filename = secure_filename(f"{datetime.now().timestamp()}_{file.filename}")
-                    file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-                    file.save(file_path)
-                    
-                    # Optimize image
-                    if optimize_image(file_path):
-                        item.image_path = filename
             
             db.session.add(item)
             db.session.commit()
             
-            current_app.logger.info(f'Inventory item reported: {item.category} at ({latitude}, {longitude}) - Status: pending')
+            # Verify what was actually saved
+            current_app.logger.info(
+                f"✅ Item guardado (ID: {item.id}):\n"
+                f"   - Ubicación final: lat={item.latitude}, lng={item.longitude}\n"
+                f"   - GPS de imagen guardado: lat={item.image_gps_latitude}, lng={item.image_gps_longitude}\n"
+                f"   - Fuente guardada: {item.location_source}"
+            )
+            
+            current_app.logger.info(
+                f'Inventory item reported: {item.category} at ({latitude}, {longitude}) '
+                f'from {location_source} - Status: pending'
+            )
             flash(_('¡Item reportado con éxito! Está pendiente de aprobación por un administrador.'), 'info')
             return redirect(url_for('inventory.inventory_map'))
         
@@ -228,6 +303,87 @@ def api_sections():
         return jsonify({'error': 'WKT parsing not available'}), 500
     except Exception as e:
         current_app.logger.error(f"Error in api_sections: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/api/boundary')
+def api_boundary():
+    """API endpoint para obtener el boundary de la ciudad"""
+    try:
+        from shapely import wkt
+        import json
+        
+        boundary = CityBoundary.query.first()
+        
+        if not boundary or not boundary.polygon:
+            return jsonify({'error': 'City boundary not found'}), 404
+        
+        try:
+            from sqlalchemy import func
+            from app.extensions import db
+            
+            # Parsear WKT a geometría Shapely
+            geom = wkt.loads(boundary.polygon)
+            
+            # Convertir a GeoJSON
+            geojson = json.loads(json.dumps(geom.__geo_interface__))
+            
+            # Calcular bounding box usando PostGIS
+            try:
+                boundary_geom = func.ST_GeomFromText(boundary.polygon, 4326)
+                bbox_result = db.session.query(
+                    func.ST_XMin(func.ST_Envelope(boundary_geom)).label('min_lng'),
+                    func.ST_YMin(func.ST_Envelope(boundary_geom)).label('min_lat'),
+                    func.ST_XMax(func.ST_Envelope(boundary_geom)).label('max_lng'),
+                    func.ST_YMax(func.ST_Envelope(boundary_geom)).label('max_lat')
+                ).first()
+                
+                if bbox_result:
+                    # Añadir un margen del 20% al bounding box para permitir algo de movimiento
+                    lng_range = bbox_result.max_lng - bbox_result.min_lng
+                    lat_range = bbox_result.max_lat - bbox_result.min_lat
+                    margin_lng = lng_range * 0.2
+                    margin_lat = lat_range * 0.2
+                    
+                    bounds = {
+                        'southwest': [bbox_result.min_lat - margin_lat, bbox_result.min_lng - margin_lng],
+                        'northeast': [bbox_result.max_lat + margin_lat, bbox_result.max_lng + margin_lng]
+                    }
+                else:
+                    bounds = None
+            except Exception as e:
+                current_app.logger.warning(f"Error calculating bounds with PostGIS: {e}")
+                # Fallback: usar Shapely para calcular bounds
+                try:
+                    bounds_obj = geom.bounds  # (minx, miny, maxx, maxy)
+                    lng_range = bounds_obj[2] - bounds_obj[0]
+                    lat_range = bounds_obj[3] - bounds_obj[1]
+                    margin_lng = lng_range * 0.2
+                    margin_lat = lat_range * 0.2
+                    
+                    bounds = {
+                        'southwest': [bounds_obj[1] - margin_lat, bounds_obj[0] - margin_lng],
+                        'northeast': [bounds_obj[3] + margin_lat, bounds_obj[2] + margin_lng]
+                    }
+                except Exception as e2:
+                    current_app.logger.warning(f"Error calculating bounds with Shapely: {e2}")
+                    bounds = None
+            
+            return jsonify({
+                'id': boundary.id,
+                'name': boundary.name,
+                'calculated_at': boundary.calculated_at.isoformat() if boundary.calculated_at else None,
+                'geometry': geojson,
+                'bounds': bounds
+            })
+        except Exception as e:
+            current_app.logger.error(f"Error parsing boundary polygon: {e}")
+            return jsonify({'error': 'Error parsing boundary geometry'}), 500
+        
+    except ImportError:
+        current_app.logger.error("Shapely not available for WKT parsing")
+        return jsonify({'error': 'WKT parsing not available'}), 500
+    except Exception as e:
+        current_app.logger.error(f"Error in api_boundary: {e}")
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/<int:item_id>/vote', methods=['POST'])

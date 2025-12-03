@@ -1,0 +1,155 @@
+<footer class="mt-auto">
+    <div class="container py-5">
+        <div class="row g-4">
+            <!-- About Section -->
+            <div class="col-lg-4 col-md-6">
+                <h5 class="fw-bold mb-3">{{ _('Sobre Tarracograf') }}</h5>
+                <p class="text-muted small mb-3">
+                    {{ _('Radiografia ciutadana de Tarragona. Uneix-te a les iniciatives que estan transformant la nostra ciutat.') }}
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="https://twitter.com/tarracograf" target="_blank" rel="noopener noreferrer" 
+                       class="text-muted text-decoration-none" 
+                       title="Twitter"
+                       style="transition: color 0.2s;">
+                        <i class="fab fa-twitter fa-lg"></i>
+                    </a>
+                    <a href="https://facebook.com/tarracograf" target="_blank" rel="noopener noreferrer" 
+                       class="text-muted text-decoration-none" 
+                       title="Facebook"
+                       style="transition: color 0.2s;">
+                        <i class="fab fa-facebook fa-lg"></i>
+                    </a>
+                    <a href="https://instagram.com/tarracograf" target="_blank" rel="noopener noreferrer" 
+                       class="text-muted text-decoration-none" 
+                       title="Instagram"
+                       style="transition: color 0.2s;">
+                        <i class="fab fa-instagram fa-lg"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="col-lg-2 col-md-6">
+                <h5 class="fw-bold mb-3">{{ _('Enllaços Ràpids') }}</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <a href="{{ url_for('main.index') }}" class="text-muted text-decoration-none small">
+                            {{ _('Inici') }}
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="{{ url_for('initiatives.list_initiatives') }}" class="text-muted text-decoration-none small">
+                            {{ _('Iniciatives') }}
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="{{ url_for('inventory.inventory_map') }}" class="text-muted text-decoration-none small">
+                            {{ _('Inventari') }}
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="{{ url_for('reports.public_reports') }}" class="text-muted text-decoration-none small">
+                            {{ _('Reports') }}
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="{{ url_for('main.about') }}" class="text-muted text-decoration-none small">
+                            {{ _('Sobre Nosaltres') }}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Resources -->
+            <div class="col-lg-3 col-md-6">
+                <h5 class="fw-bold mb-3">{{ _('Recursos') }}</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <a href="{{ url_for('main.contact') }}" class="text-muted text-decoration-none small">
+                            {{ _('Contacte') }}
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="{{ url_for('donations.donate') }}" class="text-muted text-decoration-none small">
+                            {{ _('Donar') }}
+                        </a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                    <li class="mb-2">
+                        <a href="{{ url_for('profile') }}" class="text-muted text-decoration-none small">
+                            {{ _('El Meu Perfil') }}
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="mb-2">
+                        <a href="{{ url_for('security.login') }}" class="text-muted text-decoration-none small">
+                            {{ _('Accedir') }}
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="{{ url_for('security.register') }}" class="text-muted text-decoration-none small">
+                            {{ _('Registrar-se') }}
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="col-lg-3 col-md-6">
+                <h5 class="fw-bold mb-3">{{ _('Contacte') }}</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <a href="mailto:hola@tarracograf.cat" class="text-muted text-decoration-none small d-flex align-items-center">
+                            <i class="fas fa-envelope me-2" style="width: 20px;"></i>
+                            hola@tarracograf.cat
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <span class="text-muted small d-flex align-items-center">
+                            <i class="fas fa-map-marker-alt me-2" style="width: 20px;"></i>
+                            Tarragona, Catalunya
+                        </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Bottom Bar -->
+        <div class="row mt-4 pt-4 border-top">
+            <div class="col-md-6">
+                <p class="text-muted small mb-0">
+                    &copy; 2024 Tarracograf. {{ _('Tots els drets reservats.') }}
+                </p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <ul class="list-inline mb-0">
+                    <li class="list-inline-item">
+                        <a href="#" class="text-muted text-decoration-none small">{{ _('Política de Privacitat') }}</a>
+                    </li>
+                    <li class="list-inline-item">
+                        <span class="text-muted">|</span>
+                    </li>
+                    <li class="list-inline-item">
+                        <a href="#" class="text-muted text-decoration-none small">{{ _('Termes d\'Ús') }}</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<style>
+footer a:hover {
+    color: var(--primary-green) !important;
+}
+
+footer .fab:hover,
+footer .fas:hover {
+    color: var(--primary-green) !important;
+    transform: translateY(-2px);
+    transition: all 0.2s ease;
+}
+</style>
+

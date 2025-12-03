@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Vista Previa: Tendències Temporals') }} - Tarracograf{% endblock %}
+
+{% block content %}
+<section class="py-5" style="padding-top: 8rem !important;">
+    <div class="container-fluid px-4">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="display-5 fw-bold mb-2">
+                    <i class="fas fa-chart-line text-success me-2"></i>
+                    {{ _('Vista Previa: Tendències Temporals') }}
+                </h1>
+                <p class="text-muted mb-0">{{ _('Evolució dels reports als últims 6 mesos') }}</p>
+            </div>
+            <div>
+                <a href="{{ url_for('reports.public_reports') }}" class="btn btn-outline-secondary" style="border-radius: 50px;">
+                    <i class="fas fa-arrow-left me-2"></i>{{ _('Tornar') }}
+                </a>
+            </div>
+        </div>
+
+        <!-- Summary Card -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-12">
+                <div class="card border-0 shadow-sm" style="border-radius: 20px;">
+                    <div class="card-body text-center p-4">
+                        <i class="fas fa-chart-line fa-2x text-success mb-3"></i>
+                        <h2 class="fw-bold mb-0">{{ total_items }}</h2>
+                        <p class="text-muted mb-0">{{ _('Items reportats als últims 6 mesos') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Trends -->
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px;">
+            <div class="card-header bg-transparent border-0 p-4">
+                <h3 class="fw-bold mb-0">
+                    <i class="fas fa-calendar-alt text-success me-2"></i>
+                    {{ _('Evolució Mensual') }}
+                </h3>
+            </div>
+            <div class="card-body p-4">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>{{ _('Mes') }}</th>
+                                <th class="text-end">{{ _('Items Reportats') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for month, count in monthly_data %}
+                            <tr>
+                                <td>
+                                    {% set month_parts = month.split('-') %}
+                                    {% if month_parts|length == 2 %}
+                                        {{ month_parts[1] }}/{{ month_parts[0] }}
+                                    {% else %}
+                                        {{ month }}
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <span class="badge bg-success rounded-pill">{{ count }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trends by Category -->
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px;">
+            <div class="card-header bg-transparent border-0 p-4">
+                <h3 class="fw-bold mb-0">
+                    <i class="fas fa-tags text-warning me-2"></i>
+                    {{ _('Tendències per Categoria') }}
+                </h3>
+            </div>
+            <div class="card-body p-4">
+                {% for month, categories in category_monthly.items() %}
+                <div class="mb-4">
+                    <h5 class="fw-bold mb-3">
+                        {% set month_parts = month.split('-') %}
+                        {% if month_parts|length == 2 %}
+                            {{ month_parts[1] }}/{{ month_parts[0] }}
+                        {% else %}
+                            {{ month }}
+                        {% endif %}
+                    </h5>
+                    <div class="row g-2">
+                        {% for category, count in categories.items() %}
+                        <div class="col-md-3">
+                            <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                                <span class="small">{{ category }}</span>
+                                <span class="badge bg-warning rounded-pill">{{ count }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Download CTA -->
+        <div class="card border-0 shadow-lg mb-4" style="border-radius: 20px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+            <div class="card-body text-center p-5 text-white">
+                <h3 class="fw-bold mb-3">
+                    <i class="fas fa-download fa-2x mb-3"></i><br>
+                    {{ _('Vols el report complet?') }}
+                </h3>
+                <p class="lead mb-4">{{ _('Descarrega el CSV complet amb tots els detalls temporals i dades per a anàlisi avançada.') }}</p>
+                {% if current_user.is_authenticated %}
+                <form method="POST" action="{{ url_for('reports.purchase_report') }}" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="report_type" value="trends">
+                    <input type="hidden" name="report_params" value="{}">
+                    {% if payment_enabled %}
+                    <button type="submit" class="btn btn-light btn-lg" style="border-radius: 50px;">
+                        <i class="fas fa-shopping-cart me-2"></i>{{ _('Comprar i Descarregar') }}
+                    </button>
+                    {% else %}
+                    <button type="submit" class="btn btn-light btn-lg" style="border-radius: 50px;">
+                        <i class="fas fa-download me-2"></i>{{ _('Descarregar') }}
+                    </button>
+                    {% endif %}
+                </form>
+                {% else %}
+                <a href="{{ url_for('security.login') }}" class="btn btn-light btn-lg" style="border-radius: 50px;">
+                    <i class="fas fa-sign-in-alt me-2"></i>{{ _('Inicia sessió per descarregar') }}
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+

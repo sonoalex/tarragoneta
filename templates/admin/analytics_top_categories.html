@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Categories Més Reportades') }} - Tarracograf{% endblock %}
+
+{% block content %}
+<section class="py-5" style="padding-top: 8rem !important;">
+    <div class="container-fluid px-4">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="display-5 fw-bold mb-2">
+                    <i class="fas fa-trophy text-warning me-2"></i>
+                    {{ _('Categories Més Reportades') }}
+                </h1>
+                <p class="text-muted mb-0">{{ _('Ranking de les categories i subcategories amb més reports') }}</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('analytics.analytics_dashboard') }}" class="btn btn-outline-secondary" style="border-radius: 50px;">
+                    <i class="fas fa-arrow-left me-2"></i>{{ _('Tornar') }}
+                </a>
+                <a href="{{ url_for('analytics.top_categories', format='csv', **filters) }}" class="btn btn-warning" style="border-radius: 50px;">
+                    <i class="fas fa-download me-2"></i>{{ _('Descarregar CSV') }}
+                </a>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px;">
+            <div class="card-body p-4">
+                <form method="GET" action="{{ url_for('analytics.top_categories') }}" class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">{{ _('Districte') }}</label>
+                        <select name="district_id" class="form-select">
+                            <option value="">{{ _('Tots') }}</option>
+                            {% if districts %}
+                            {% for district in districts %}
+                            <option value="{{ district.id }}" {% if filters.district_id == district.id %}selected{% endif %}>
+                                {{ district.name }}
+                            </option>
+                            {% endfor %}
+                            {% endif %}
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-warning w-100" style="border-radius: 50px;">
+                            <i class="fas fa-filter me-2"></i>{{ _('Filtrar') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Top Categories -->
+        <div class="card border-0 shadow-sm" style="border-radius: 20px;">
+            <div class="card-body p-4">
+                {% if report_data and report_data|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 50px;">#</th>
+                                <th>{{ _('Categoria') }}</th>
+                                <th>{{ _('Subcategoria') }}</th>
+                                <th class="text-center">{{ _('Total Reports') }}</th>
+                                <th class="text-center">{{ _('Zones Afectades') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cat_key, data in report_data %}
+                            {% set rank = loop.index %}
+                            <tr>
+                                <td>
+                                    {% if rank == 1 %}
+                                    <span class="badge bg-warning fs-6">🥇</span>
+                                    {% elif rank == 2 %}
+                                    <span class="badge bg-secondary fs-6">🥈</span>
+                                    {% elif rank == 3 %}
+                                    <span class="badge bg-warning bg-opacity-50 fs-6">🥉</span>
+                                    {% else %}
+                                    <span class="text-muted">#{{ rank }}</span>
+                                    {% endif %}
+                                </td>
+                                <td><strong>{{ get_inventory_category_name(data.category) }}</strong></td>
+                                <td>{{ get_inventory_subcategory_name(data.subcategory) }}</td>
+                                <td class="text-center">
+                                    <span class="badge bg-primary fs-6">{{ data.total }}</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-info">{{ data.by_zone|length }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">{{ _('No hi ha dades per mostrar amb els filtres seleccionats') }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+

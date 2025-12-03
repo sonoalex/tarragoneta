@@ -63,7 +63,7 @@ class InitiativeForm(FlaskForm):
                 ('educacion', '📚 ' + str(_('Environmental Education'))),
                 ('cultura', '🎭 ' + str(_('Culture and Civics'))),
                 ('social', '🤝 ' + str(_('Social Action'))),
-                ('basura_desbordada', '🗑️ ' + str(_('Brossa Desbordada'))),
+                ('escombreries_desbordades', '🗑️ ' + str(_('Escombreries Desbordades'))),
                 ('vertidos', '💧 ' + str(_('Dumping')))
             ]
         else:
@@ -76,7 +76,7 @@ class InitiativeForm(FlaskForm):
                 ('educacion', '📚 Environmental Education'),
                 ('cultura', '🎭 Culture and Civics'),
                 ('social', '🤝 Social Action'),
-                ('basura_desbordada', '🗑️ Brossa Desbordada'),
+                ('escombreries_desbordades', '🗑️ Escombreries Desbordades'),
                 ('vertidos', '💧 Dumping')
             ]
 
@@ -84,41 +84,101 @@ class InventoryForm(FlaskForm):
     category = SelectField(_l('Category'), validators=[DataRequired()])
     subcategory = SelectField(_l('Subcategory'), validators=[DataRequired()])
     description = TextAreaField(_l('Description'), validators=[Optional(), Length(max=500)])
-    latitude = StringField(_l('Latitude'), validators=[DataRequired()])
-    longitude = StringField(_l('Longitude'), validators=[DataRequired()])
+    latitude = StringField(_l('Latitude'), validators=[Optional()])  # Opcional: se obtiene de imagen GPS o navegador
+    longitude = StringField(_l('Longitude'), validators=[Optional()])  # Opcional: se obtiene de imagen GPS o navegador
     address = StringField(_l('Address'), validators=[Optional()])
-    image = FileField(_l('Photo'), validators=[Optional()])
+    image = FileField(_l('Photo'), validators=[DataRequired()])
     
     def __init__(self, *args, **kwargs):
         super(InventoryForm, self).__init__(*args, **kwargs)
         # Set main category choices
         if has_request_context():
             self.category.choices = [
-                ('palomas', '🕊️ ' + str(_('Palomas'))),
-                ('basura', '🗑️ ' + str(_('Basura')))
+                ('palomas', '🕊️ ' + str(_('Coloms'))),
+                ('basura', '🗑️ ' + str(_('Brossa'))),
+                ('perros', '🐕 ' + str(_('Gossos'))),
+                ('material_deteriorat', '🔧 ' + str(_('Material Deteriorat'))),
+                ('bruticia', '🧹 ' + str(_('Brutícia'))),
+                ('mobiliari_urba', '🏙️ ' + str(_('Mobiliari Urbà'))),
+                ('vegetacio', '🌳 ' + str(_('Vegetació'))),
+                ('infraestructura', '🏗️ ' + str(_('Infraestructura')))
             ]
             # Set all possible subcategories (for validation)
             # These will be filtered by JavaScript on the client side
             self.subcategory.choices = [
                 # Palomas subcategories
-                ('nido', '🪺 ' + str(_('Niul'))),
+                ('nido', '🪺 ' + str(_('Niu'))),
                 ('excremento', '💩 ' + str(_('Excrement'))),
                 ('plumas', '🪶 ' + str(_('Plomes'))),
                 # Basura subcategories
-                ('basura_desbordada', '🗑️ ' + str(_('Brossa Desbordada'))),
-                ('vertidos', '💧 ' + str(_('Abocaments')))
+                ('escombreries_desbordades', '🗑️ ' + str(_('Escombreries Desbordades'))),
+                ('vertidos', '💧 ' + str(_('Abocaments'))),
+                # Perros subcategories
+                ('excrements', '💩 ' + str(_('Excrements'))),
+                ('pixades', '💧 ' + str(_('Pixades'))),
+                # Material Deteriorat subcategories
+                ('faroles', '💡 ' + str(_('Faroles'))),
+                ('bancs', '🪑 ' + str(_('Bancs'))),
+                ('senyals', '🚦 ' + str(_('Senyals'))),
+                ('paviment', '🛣️ ' + str(_('Paviment'))),
+                # Brutícia subcategories
+                ('terra', '🌍 ' + str(_('Terra'))),
+                ('fulles', '🍂 ' + str(_('Fulles'))),
+                ('grafit', '🎨 ' + str(_('Grafit'))),
+                # Mobiliari Urbà subcategories
+                ('papereres', '🗑️ ' + str(_('Papereres'))),
+                ('parades', '🚏 ' + str(_('Parades'))),
+                # Vegetació subcategories
+                ('arbres', '🌳 ' + str(_('Arbres'))),
+                ('arbustos', '🌿 ' + str(_('Arbustos'))),
+                ('gespa', '🌱 ' + str(_('Gespa'))),
+                # Infraestructura subcategories
+                ('carreteres', '🛣️ ' + str(_('Carreteres'))),
+                ('voreres', '🚶 ' + str(_('Voreres'))),
+                ('enllumenat', '💡 ' + str(_('Enllumenat')))
             ]
         else:
             self.category.choices = [
-                ('palomas', '🕊️ Palomas'),
-                ('basura', '🗑️ Basura')
+                ('palomas', '🕊️ Coloms'),
+                ('basura', '🗑️ Brossa'),
+                ('perros', '🐕 Gossos'),
+                ('material_deteriorat', '🔧 Material Deteriorat'),
+                ('bruticia', '🧹 Brutícia'),
+                ('mobiliari_urba', '🏙️ Mobiliari Urbà'),
+                ('vegetacio', '🌳 Vegetació'),
+                ('infraestructura', '🏗️ Infraestructura')
             ]
             self.subcategory.choices = [
-                ('nido', '🪺 Niul'),
+                # Palomas
+                ('nido', '🪺 Niu'),
                 ('excremento', '💩 Excrement'),
                 ('plumas', '🪶 Plomes'),
-                ('basura_desbordada', '🗑️ Brossa Desbordada'),
-                ('vertidos', '💧 Abocaments')
+                # Basura
+                ('escombreries_desbordades', '🗑️ Escombreries Desbordades'),
+                ('vertidos', '💧 Abocaments'),
+                # Perros
+                ('excrements', '💩 Excrements'),
+                ('pixades', '💧 Pixades'),
+                # Material Deteriorat
+                ('faroles', '💡 Faroles'),
+                ('bancs', '🪑 Bancs'),
+                ('senyals', '🚦 Senyals'),
+                ('paviment', '🛣️ Paviment'),
+                # Brutícia
+                ('terra', '🌍 Terra'),
+                ('fulles', '🍂 Fulles'),
+                ('grafit', '🎨 Grafit'),
+                # Mobiliari Urbà
+                ('papereres', '🗑️ Papereres'),
+                ('parades', '🚏 Parades'),
+                # Vegetació
+                ('arbres', '🌳 Arbres'),
+                ('arbustos', '🌿 Arbustos'),
+                ('gespa', '🌱 Gespa'),
+                # Infraestructura
+                ('carreteres', '🛣️ Carreteres'),
+                ('voreres', '🚶 Voreres'),
+                ('enllumenat', '💡 Enllumenat')
             ]
     
     def validate_subcategory(self, field):
@@ -129,7 +189,13 @@ class InventoryForm(FlaskForm):
         # Define valid subcategories for each category
         valid_subcategories = {
             'palomas': ['nido', 'excremento', 'plumas'],
-            'basura': ['basura_desbordada', 'vertidos']
+            'basura': ['escombreries_desbordades', 'vertidos'],
+            'perros': ['excrements', 'pixades'],
+            'material_deteriorat': ['faroles', 'bancs', 'senyals', 'paviment'],
+            'bruticia': ['terra', 'fulles', 'grafit'],
+            'mobiliari_urba': ['papereres', 'parades', 'bancs'],
+            'vegetacio': ['arbres', 'arbustos', 'gespa'],
+            'infraestructura': ['carreteres', 'voreres', 'enllumenat']
         }
         
         if category and subcategory:

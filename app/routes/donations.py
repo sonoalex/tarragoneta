@@ -117,62 +117,94 @@ def stripe_webhook():
             session = event['data']['object']
             session_id = session.get('id', 'unknown')
             amount_total = session.get('amount_total', 0)
+            metadata = session.get('metadata') or {}
+            purchase_type = metadata.get('purchase_type')
+            
             current_app.logger.info(f'Payment successful for session: {session_id}, amount: {amount_total/100}€')
             
-            # Save donation to database
-            from app.models import Donation
-            from datetime import datetime
-            
-            try:
-                # Check if donation already exists
-                existing_donation = Donation.query.filter_by(stripe_session_id=session_id).first()
-                if not existing_donation:
-                    # Get email safely
+            # Handle report purchases
+            if purchase_type == 'report_download':
+                from app.models import ReportPurchase
+                from datetime import datetime
+                import secrets
+                
+                purchase = ReportPurchase.query.filter_by(stripe_session_id=session_id).first()
+                
+                if purchase:
+                    purchase.status = 'completed'
+                    purchase.completed_at = datetime.utcnow()
+                    purchase.stripe_payment_intent_id = session.get('payment_intent')
+                    
+                    # Generate download token
+                    if not purchase.download_token:
+                        purchase.download_token = secrets.token_urlsafe(32)
+                    
+                    # Update email if available
                     customer_details = session.get('customer_details') or {}
-                    metadata = session.get('metadata') or {}
-                    email = customer_details.get('email') or metadata.get('user_email') or None
+                    if customer_details.get('email'):
+                        purchase.email = customer_details.get('email')
                     
-                    donation = Donation(
-                        amount=amount_total,
-                        currency=session.get('currency', 'eur'),
-                        email=email,
-                        stripe_session_id=session_id,
-                        stripe_payment_intent_id=session.get('payment_intent'),
-                        status='completed',
-                        donation_type=metadata.get('donation_type', 'voluntary'),
-                        completed_at=datetime.utcnow()
-                    )
-                    
-                    # Try to link to user if email matches
-                    user = None
-                    if donation.email:
-                        from app.models import User
-                        user = User.query.filter_by(email=donation.email).first()
-                        if user:
-                            donation.user_id = user.id
-                    
-                    db.session.add(donation)
                     db.session.commit()
-                    current_app.logger.info(f'Donation saved: {donation.id} - {donation.amount_euros}€')
-                    
-                    # Send donation confirmation email
-                    try:
-                        from app.services.email_service import EmailService
-                        EmailService.send_donation_confirmation(donation, user)
-                    except Exception as e:
-                        current_app.logger.error(f'Error sending donation confirmation email: {str(e)}', exc_info=True)
+                    current_app.logger.info(f'Report purchase completed: {purchase.id} - {purchase.report_type}')
                 else:
-                    # Update existing donation
-                    existing_donation.status = 'completed'
-                    existing_donation.completed_at = datetime.now(timezone.utc)
-                    if session.get('payment_intent'):
-                        existing_donation.stripe_payment_intent_id = session.get('payment_intent')
-                    db.session.commit()
-                    current_app.logger.info(f'Donation updated: {existing_donation.id}')
-            except Exception as e:
-                current_app.logger.error(f'Error saving donation for session {session_id}: {str(e)}', exc_info=True)
-                db.session.rollback()
-                raise  # Re-raise to be caught by outer try/except
+                    current_app.logger.warning(f'Report purchase not found for session: {session_id}')
+            
+            # Handle donations (default behavior)
+            else:
+                # Save donation to database
+                from app.models import Donation
+                from datetime import datetime
+                
+                try:
+                    # Check if donation already exists
+                    existing_donation = Donation.query.filter_by(stripe_session_id=session_id).first()
+                    if not existing_donation:
+                        # Get email safely
+                        customer_details = session.get('customer_details') or {}
+                        metadata = session.get('metadata') or {}
+                        email = customer_details.get('email') or metadata.get('user_email') or None
+                        
+                        donation = Donation(
+                            amount=amount_total,
+                            currency=session.get('currency', 'eur'),
+                            email=email,
+                            stripe_session_id=session_id,
+                            stripe_payment_intent_id=session.get('payment_intent'),
+                            status='completed',
+                            donation_type=metadata.get('donation_type', 'voluntary'),
+                            completed_at=datetime.utcnow()
+                        )
+                        
+                        # Try to link to user if email matches
+                        user = None
+                        if donation.email:
+                            from app.models import User
+                            user = User.query.filter_by(email=donation.email).first()
+                            if user:
+                                donation.user_id = user.id
+                        
+                        db.session.add(donation)
+                        db.session.commit()
+                        current_app.logger.info(f'Donation saved: {donation.id} - {donation.amount_euros}€')
+                        
+                        # Send donation confirmation email
+                        try:
+                            from app.services.email_service import EmailService
+                            EmailService.send_donation_confirmation(donation, user)
+                        except Exception as e:
+                            current_app.logger.error(f'Error sending donation confirmation email: {str(e)}', exc_info=True)
+                    else:
+                        # Update existing donation
+                        existing_donation.status = 'completed'
+                        existing_donation.completed_at = datetime.now(timezone.utc)
+                        if session.get('payment_intent'):
+                            existing_donation.stripe_payment_intent_id = session.get('payment_intent')
+                        db.session.commit()
+                        current_app.logger.info(f'Donation updated: {existing_donation.id}')
+                except Exception as e:
+                    current_app.logger.error(f'Error saving donation for session {session_id}: {str(e)}', exc_info=True)
+                    db.session.rollback()
+                    raise  # Re-raise to be caught by outer try/except
         
         elif event['type'] == 'payment_intent.succeeded':
             # Additional confirmation when payment intent succeeds

@@ -3,7 +3,7 @@ Context processors for templates
 """
 from flask import session
 from flask_babel import gettext as _
-from app.utils import get_category_name, get_inventory_category_name, get_inventory_icon, category_to_url, subcategory_to_url
+from app.utils import get_category_name, get_inventory_category_name, get_inventory_subcategory_name, get_inventory_icon, category_to_url, subcategory_to_url, calculate_distance_km
 
 
 def register_context_processors(app):
@@ -31,14 +31,19 @@ def register_context_processors(app):
         except Exception:
             pass  # Ignore errors in context processor
         
+        from flask import current_app
+        
         return dict(
             _=_,
             get_locale=current_locale,
             get_category_name=get_category_name,
             get_inventory_category_name=get_inventory_category_name,
+            get_inventory_subcategory_name=get_inventory_subcategory_name,
             get_inventory_icon=get_inventory_icon,
             category_to_url=category_to_url,
             subcategory_to_url=subcategory_to_url,
-            pending_initiatives_count=pending_count
+            calculate_distance_km=calculate_distance_km,
+            pending_initiatives_count=pending_count,
+            config=current_app.config
         )
 

@@ -165,54 +165,41 @@ class Section(db.Model):
     
     @staticmethod
     def find_section_for_point(lat, lng):
-        """Encontrar sección que contiene un punto usando PostGIS o Shapely (WKT)"""
+        """Encontrar sección que contiene un punto usando PostGIS"""
         try:
             from sqlalchemy import func
             from app.extensions import db
             
-            # Verificar si estamos usando PostgreSQL
-            db_url = str(db.engine.url)
-            is_postgresql = 'postgresql' in db_url
+            # Usar PostGIS para buscar sección que contiene el punto
+            point = func.ST_SetSRID(func.ST_MakePoint(lng, lat), 4326)
+            section = Section.query.filter(
+                func.ST_Contains(
+                    func.ST_GeomFromText(Section.polygon, 4326),
+                    point
+                )
+            ).first()
             
-            # Intentar usar PostGIS si está disponible y es PostgreSQL
-            if is_postgresql and POSTGIS_AVAILABLE and Geometry:
-                try:
-                    # Convertir WKT a PostGIS Geometry en la consulta
-                    point = func.ST_SetSRID(func.ST_MakePoint(lng, lat), 4326)
-                    # Buscar sección que contiene el punto usando ST_GeomFromText para convertir WKT
-                    section = Section.query.filter(
-                        func.ST_Contains(
-                            func.ST_GeomFromText(Section.polygon, 4326),
-                            point
-                        )
-                    ).first()
-                    if section:
-                        return section
-                except Exception as e:
-                    # Si PostGIS falla, continuar con Shapely
-                    import logging
-                    logging.getLogger(__name__).debug(f"PostGIS query failed, trying Shapely: {e}")
+            if section:
+                return section
             
-            # Fallback: usar Shapely para verificar polígonos WKT
-            if POSTGIS_AVAILABLE:
-                try:
-                    from shapely import wkt
-                    from shapely.geometry import Point
-                    
-                    point = Point(lng, lat)
-                    
-                    # Buscar todas las secciones y verificar manualmente
-                    sections = Section.query.all()
-                    for section in sections:
-                        if section.polygon:
-                            try:
-                                geom = wkt.loads(section.polygon)
-                                if geom.contains(point):
-                                    return section
-                            except Exception:
-                                continue
-                except ImportError:
-                    pass
+            # Fallback: usar Shapely si PostGIS falla
+            try:
+                from shapely import wkt
+                from shapely.geometry import Point
+                
+                point = Point(lng, lat)
+                sections = Section.query.all()
+                for section in sections:
+                    if section.polygon:
+                        try:
+                            geom = wkt.loads(section.polygon)
+                            if geom.contains(point):
+                                return section
+                        except Exception:
+                            continue
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).debug(f"Shapely fallback failed: {e}")
             
             return None
         except Exception as e:
@@ -223,16 +210,174 @@ class Section(db.Model):
     def __repr__(self):
         return f'<Section {self.full_code}: {self.name or "Sin nombre"}>'
 
+class CityBoundary(db.Model):
+    """Boundary externo de Tarragona (unión de todas las secciones)"""
+    __tablename__ = 'city_boundary'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), default='Tarragona', nullable=False)
+    polygon = db.Column(db.Text, nullable=False)  # WKT format
+    calculated_at = db.Column(db.DateTime(), default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    @staticmethod
+    def calculate_boundary():
+        """Calcular el boundary externo de Tarragona usando todos los polígonos de secciones"""
+        try:
+            from sqlalchemy import func, select
+            from app.extensions import db
+            
+            # Usar PostGIS: ST_Union de todos los polígonos (une todos sin dejar áreas vacías)
+            # Esto crea un boundary que sigue los contornos reales de las secciones
+            # Primero corregimos la topología con ST_MakeValid, luego unimos
+            valid_geoms = select(
+                func.ST_MakeValid(
+                    func.ST_GeomFromText(Section.polygon, 4326)
+                ).label('geom')
+            ).where(Section.polygon.isnot(None)).subquery()
+            
+            # Unir todas las geometrías válidas
+            result = db.session.query(
+                func.ST_AsText(
+                    func.ST_Union(valid_geoms.c.geom)
+                ).label('boundary')
+            ).first()
+            
+            if result and result.boundary:
+                return result.boundary
+            
+            # Fallback: usar Shapely si PostGIS falla
+            try:
+                from shapely import wkt
+                from shapely.ops import unary_union
+                
+                sections = Section.query.all()
+                polygons = []
+                for section in sections:
+                    if section.polygon:
+                        try:
+                            geom = wkt.loads(section.polygon)
+                            polygons.append(geom)
+                        except Exception:
+                            continue
+                
+                if polygons:
+                    union = unary_union(polygons)
+                    return union.wkt
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning(f"Shapely boundary calculation failed: {e}")
+            
+            return None
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"Error calculating city boundary: {e}", exc_info=True)
+            return None
+    
+    @staticmethod
+    def get_or_create_boundary():
+        """Obtener el boundary existente o calcularlo y guardarlo"""
+        boundary = CityBoundary.query.first()
+        
+        if not boundary:
+            # Calcular y guardar
+            polygon_wkt = CityBoundary.calculate_boundary()
+            if polygon_wkt:
+                boundary = CityBoundary(
+                    name='Tarragona',
+                    polygon=polygon_wkt
+                )
+                db.session.add(boundary)
+                db.session.commit()
+                return boundary
+        
+        return boundary
+    
+    @staticmethod
+    def point_is_inside(lat, lng):
+        """Verificar si un punto está dentro del boundary de Tarragona"""
+        boundary = CityBoundary.get_or_create_boundary()
+        
+        if not boundary or not boundary.polygon:
+            # Si no hay boundary, usar validación básica por bounding box
+            import logging
+            logging.getLogger(__name__).warning(f"City boundary not found, using bounding box validation for point ({lat}, {lng})")
+            return 40.5 <= lat <= 41.5 and 0.5 <= lng <= 2.0
+        
+        try:
+            from sqlalchemy import func
+            from app.extensions import db
+            
+            # Usar PostGIS ST_Contains (funciona con Polygon y MultiPolygon)
+            # Primero validar el boundary con ST_MakeValid por si acaso
+            point = func.ST_SetSRID(func.ST_MakePoint(lng, lat), 4326)
+            boundary_geom = func.ST_MakeValid(
+                func.ST_GeomFromText(boundary.polygon, 4326)
+            )
+            
+            result = db.session.query(
+                func.ST_Contains(
+                    boundary_geom,
+                    point
+                ).label('inside')
+            ).first()
+            
+            if result is not None:
+                is_inside = bool(result.inside)
+                import logging
+                logging.getLogger(__name__).debug(
+                    f"PostGIS validation: point ({lat}, {lng}) is {'INSIDE' if is_inside else 'OUTSIDE'} boundary"
+                )
+                return is_inside
+            
+            # Fallback: usar Shapely si PostGIS falla
+            try:
+                from shapely import wkt
+                from shapely.geometry import Point
+                
+                geom = wkt.loads(boundary.polygon)
+                point = Point(lng, lat)
+                is_inside = geom.contains(point)
+                import logging
+                logging.getLogger(__name__).debug(
+                    f"Shapely validation: point ({lat}, {lng}) is {'INSIDE' if is_inside else 'OUTSIDE'} boundary"
+                )
+                return is_inside
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning(f"Shapely point check failed: {e}")
+            
+            # Último fallback: bounding box básico
+            import logging
+            logging.getLogger(__name__).warning(
+                f"Using bounding box fallback validation for point ({lat}, {lng})"
+            )
+            return 40.5 <= lat <= 41.5 and 0.5 <= lng <= 2.0
+            
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"Error checking point inside boundary: {e}", exc_info=True)
+            # Fallback a validación básica
+            return 40.5 <= lat <= 41.5 and 0.5 <= lng <= 2.0
+    
+    def __repr__(self):
+        return f'<CityBoundary {self.name} - calculated: {self.calculated_at}>'
+
 class InventoryItem(db.Model):
     """Items del inventario (palomas, basura, etc.)"""
     id = db.Column(db.Integer, primary_key=True)
     category = db.Column(db.String(50), nullable=False)  # 'palomas', 'basura', etc.
-    subcategory = db.Column(db.String(50), nullable=False)  # 'nido', 'excremento', 'basura_desbordada', 'vertidos', etc.
+    subcategory = db.Column(db.String(50), nullable=False)  # 'nido', 'excremento', 'escombreries_desbordades', 'vertidos', etc.
     description = db.Column(db.Text)
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
     address = db.Column(db.String(200))  # Dirección legible
     image_path = db.Column(db.String(300))
+    
+    # GPS from image EXIF (for comparison with final location)
+    image_gps_latitude = db.Column(db.Float, nullable=True)  # GPS lat from image EXIF
+    image_gps_longitude = db.Column(db.Float, nullable=True)  # GPS lng from image EXIF
+    location_source = db.Column(db.String(50), nullable=True)  # 'image_gps', 'browser_geolocation', 'manual', 'form_coordinates'
     status = db.Column(db.String(20), default='pending')  # 'pending', 'approved', 'rejected', 'active', 'resolved', 'removed'
     importance_count = db.Column(db.Integer, default=0)  # Contador de importancia/votos
     resolved_count = db.Column(db.Integer, default=0)  # Contador de "ya no está"
@@ -343,4 +488,30 @@ class Donation(db.Model):
     
     def __repr__(self):
         return f'<Donation {self.amount_euros}€ from {self.email or "anonymous"} - {self.status}>'
+
+class ReportPurchase(db.Model):
+    """Track purchases of reports"""
+    id = db.Column(db.Integer, primary_key=True)
+    report_type = db.Column(db.String(50), nullable=False)  # e.g., 'inventory_by_zone', 'trends'
+    report_params = db.Column(db.Text, nullable=True)  # JSON string of filters used for the report
+    amount = db.Column(db.Integer, nullable=False)  # Amount in cents
+    currency = db.Column(db.String(3), default='eur')
+    email = db.Column(db.String(255), nullable=True)  # Purchaser email
+    stripe_session_id = db.Column(db.String(255), unique=True, nullable=False)
+    stripe_payment_intent_id = db.Column(db.String(255), nullable=True)
+    status = db.Column(db.String(20), default='pending')  # 'pending', 'completed', 'failed', 'refunded'
+    download_token = db.Column(db.String(255), unique=True, nullable=True)
+    created_at = db.Column(db.DateTime(), default=datetime.utcnow)
+    completed_at = db.Column(db.DateTime())
+    downloaded_at = db.Column(db.DateTime())
+    
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    user = db.relationship('User', backref='report_purchases')
+    
+    @property
+    def amount_euros(self):
+        return self.amount / 100
+    
+    def __repr__(self):
+        return f'<ReportPurchase {self.report_type} - {self.amount_euros}€ - {self.status}>'
 

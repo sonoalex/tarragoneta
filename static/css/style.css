@@ -1,25 +1,33 @@
 /* Tarracograf - Custom Styles with Bootstrap 5 + Environmental Color Palette */
 
-/* Modern Plant-Inspired Color Palette */
+/* Tarracograf Color Palette - Adapted to Logo */
 :root {
-    /* Primary Greens - Vibrant & Fresh */
+    /* Primary Greens - Vibrant & Fresh (matching logo) */
     --primary-green: #4A9B5C;       /* Vibrant medium green */
     --primary-green-light: #6BC47A; /* Light green */
     --primary-green-pale: #C8E6D0;  /* Pastel green for backgrounds */
+    --primary-green-dark: #3A7A4A;  /* Darker green for contrast */
     
     /* Background Colors */
     --bg-cream: #F5F5F0;            /* Soft creamy off-white */
     --bg-white: #FFFFFF;
     --bg-light: #FAFAF8;
     
-    /* Accent Colors */
-    --accent-yellow: #FFD700;       /* Bright yellow for highlights */
+    /* Accent Colors - Harmonious with green */
+    --accent-yellow: #FFC107;       /* Warm yellow (softer than before) */
     --accent-yellow-light: #FFF9C4; /* Light yellow */
+    --accent-orange: #FF9800;       /* Warm orange accent */
     
     /* Text Colors */
     --text-dark: #2C2C2C;           /* Dark grey */
     --text-medium: #5A5A5A;         /* Medium grey */
     --text-light: #8A8A8A;          /* Light grey */
+    
+    /* Status Colors - Coherent with green palette */
+    --color-success: var(--primary-green);
+    --color-warning: #FF9800;        /* Orange instead of yellow */
+    --color-danger: #E53935;         /* Red (kept for errors) */
+    --color-info: #2196F3;          /* Blue (kept for info) */
     
     /* Borders & Shadows */
     --border-color: #E5E5E0;
@@ -68,24 +76,24 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 {
-    font-size: 3rem;
+    font-size: 2.25rem;
     font-weight: 800;
 }
 
 h2 {
-    font-size: 2.25rem;
+    font-size: 1.75rem;
 }
 
 h3 {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
 }
 
 /* Custom Navbar - Shrinks on Scroll */
 .navbar {
-    background: #FFFFFF !important;
+    background: linear-gradient(180deg, #FFFFFF 0%, #FAFAFA 100%) !important;
     background-color: #FFFFFF !important; /* Ensure solid white background */
-    box-shadow: 0 1px 3px var(--shadow-soft);
-    padding: 2rem 0;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    padding: 1.5rem 0;
     border-bottom: 1px solid var(--border-color);
     transition: all 0.3s ease;
     position: fixed;
@@ -96,13 +104,14 @@ h3 {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     /* Increased min-height to accommodate larger logo */
-    min-height: 100px;
+    min-height: 90px;
 }
 
 .navbar.scrolled {
     padding: 0.75rem 0;
-    box-shadow: 0 2px 8px var(--shadow-medium);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
     min-height: 70px;
+    background: #FFFFFF !important;
 }
 
 .navbar-brand {
@@ -158,25 +167,47 @@ h3 {
     color: var(--text-medium) !important;
     font-weight: 500;
     padding: 0.75rem 1.25rem !important;
-    border-radius: 8px;
+    border-radius: 12px;
     transition: all 0.3s ease;
-    margin: 0 0.25rem;
-    font-size: 1rem;
+    margin: 0 0.15rem;
+    font-size: 0.95rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
 }
 
 .navbar.scrolled .navbar-nav .nav-link {
     padding: 0.5rem 1rem !important;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
 }
 
 .navbar-nav .nav-link:hover {
-    background-color: var(--bg-light);
     color: var(--primary-green) !important;
 }
 
 .navbar-nav .nav-link.active {
     color: var(--primary-green) !important;
-    background-color: transparent;
+    font-weight: 600;
+}
+
+.navbar-nav .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 100%;
+    height: 3px;
+    background-color: var(--primary-green);
+    border-radius: 2px;
+    transition: transform 0.3s ease;
+    transform-origin: center;
+}
+
+.navbar-nav .nav-link:hover::after,
+.navbar-nav .nav-link.active::after {
+    transform: translateX(-50%) scaleX(1);
 }
 
 .navbar-toggler {
@@ -345,8 +376,10 @@ h3 {
 }
 
 .btn-success:hover {
-    background-color: var(--primary-green-lighter);
-    border-color: var(--primary-green-lighter);
+    background-color: var(--primary-green-light);
+    border-color: var(--primary-green-light);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(74, 155, 92, 0.25);
 }
 
 .btn-outline-primary {
@@ -545,12 +578,12 @@ h3 {
 }
 
 .badge-warning {
-    background-color: var(--accent-sun);
+    background-color: var(--color-warning);
     color: white;
 }
 
 .badge-danger {
-    background-color: var(--accent-flower);
+    background-color: var(--color-danger);
     color: white;
 }
 
@@ -592,19 +625,19 @@ h3 {
 
 .alert-danger {
     background-color: #FFEBEE;
-    border-left-color: var(--accent-flower);
+    border-left-color: var(--color-danger);
     color: #C62828;
 }
 
 .alert-warning {
     background-color: #FFF3E0;
-    border-left-color: var(--accent-sun);
+    border-left-color: var(--color-warning);
     color: #E65100;
 }
 
 .alert-info {
     background-color: #E3F2FD;
-    border-left-color: var(--sky-blue);
+    border-left-color: var(--color-info);
     color: #1565C0;
 }
 

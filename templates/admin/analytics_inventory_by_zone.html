@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Inventari per Zona') }} - Tarracograf{% endblock %}
+
+{% block content %}
+<section class="py-5" style="padding-top: 8rem !important;">
+    <div class="container-fluid px-4">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="display-5 fw-bold mb-2">
+                    <i class="fas fa-map-marked-alt text-primary me-2"></i>
+                    {{ _('Inventari per Zona') }}
+                </h1>
+                <p class="text-muted mb-0">{{ _('Report detallat dels items d\'inventari agrupats per districte i secció') }}</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('analytics.analytics_dashboard') }}" class="btn btn-outline-secondary" style="border-radius: 50px;">
+                    <i class="fas fa-arrow-left me-2"></i>{{ _('Tornar') }}
+                </a>
+                <a href="{{ url_for('analytics.inventory_by_zone', format='csv', **filters) }}" class="btn btn-primary" style="border-radius: 50px;">
+                    <i class="fas fa-download me-2"></i>{{ _('Descarregar CSV') }}
+                </a>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px;">
+            <div class="card-body p-4">
+                <form method="GET" action="{{ url_for('analytics.inventory_by_zone') }}" class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">{{ _('Districte') }}</label>
+                        <select name="district_id" class="form-select">
+                            <option value="">{{ _('Tots') }}</option>
+                            {% for district in districts %}
+                            <option value="{{ district.id }}" {% if filters.district_id == district.id %}selected{% endif %}>
+                                {{ district.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">{{ _('Categoria') }}</label>
+                        <select name="category" class="form-select">
+                            <option value="">{{ _('Totes') }}</option>
+                            <option value="coloms" {% if filters.category == 'coloms' %}selected{% endif %}>{{ _('Coloms') }}</option>
+                            <option value="brossa" {% if filters.category == 'brossa' %}selected{% endif %}>{{ _('Brossa') }}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">{{ _('Data des de') }}</label>
+                        <input type="date" name="date_from" class="form-control" value="{{ filters.date_from or '' }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">{{ _('Data fins') }}</label>
+                        <input type="date" name="date_to" class="form-control" value="{{ filters.date_to or '' }}">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100" style="border-radius: 50px;">
+                            <i class="fas fa-filter me-2"></i>{{ _('Filtrar') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="alert alert-info mb-4" style="border-radius: 15px;">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>{{ _('Total items:') }}</strong> {{ total_items }}
+        </div>
+
+        <!-- Report Data -->
+        <div class="card border-0 shadow-sm" style="border-radius: 20px;">
+            <div class="card-body p-4">
+                {% if report_data %}
+                {% for district_name, sections in report_data %}
+                <div class="mb-5">
+                    <h3 class="fw-bold mb-3">
+                        <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                        {{ district_name }}
+                    </h3>
+                    {% for section_code, section_data in sections %}
+                    <div class="card border mb-3" style="border-radius: 15px;">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h5 class="fw-bold mb-1">{{ section_data.section_name }}</h5>
+                                    <small class="text-muted">{{ _('Codi:') }} {{ section_code }}</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-primary fs-6">{{ section_data.total }} {{ _('items') }}</span>
+                                </div>
+                            </div>
+                            
+                            <!-- By Category -->
+                            <div class="mb-3">
+                                <strong>{{ _('Per categoria:') }}</strong>
+                                <div class="d-flex gap-2 flex-wrap mt-2">
+                                    {% for cat_key, count in section_data.by_category %}
+                                    {% set parts = cat_key.split('->') %}
+                                    {% set cat = parts[0] if parts|length > 0 else cat_key %}
+                                    {% set subcat = parts[1] if parts|length > 1 else None %}
+                                    <span class="badge bg-secondary">{{ get_inventory_category_name(cat, subcat) }}: {{ count }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Items List -->
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>{{ _('Categoria') }}</th>
+                                            <th>{{ _('Subcategoria') }}</th>
+                                            <th>{{ _('Adreça') }}</th>
+                                            <th>{{ _('Importància') }}</th>
+                                            <th>{{ _('Resolts') }}</th>
+                                            <th>{{ _('Data') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in section_data['items'] %}
+                                        <tr>
+                                            <td>{{ get_inventory_category_name(item.category) }}</td>
+                                            <td>{{ get_inventory_subcategory_name(item.subcategory) }}</td>
+                                            <td>{{ item.address or '-' }}</td>
+                                            <td><span class="badge bg-info">{{ item.importance_count }}</span></td>
+                                            <td><span class="badge bg-warning">{{ item.resolved_count }}</span></td>
+                                            <td>{{ item.created_at.strftime('%d/%m/%Y') if item.created_at else '-' }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">{{ _('No hi ha dades per mostrar amb els filtres seleccionats') }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+

@@ -2,6 +2,22 @@
 
 {% block title %}{{ _('Administrar Inventari') }} - Tarracograf{% endblock %}
 
+{% block extra_css %}
+<style>
+    .nav-pills .nav-link {
+        font-weight: 500;
+    }
+    .nav-pills .nav-link:hover:not(.active) {
+        background-color: rgba(0,0,0,0.05);
+        transform: translateY(-1px);
+    }
+    .nav-pills .nav-link.active {
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <section class="py-5" style="background: var(--bg-cream); padding-top: 120px;">
     <div class="container">
@@ -65,56 +81,71 @@
 
         <!-- Filter Tabs -->
         <div class="mb-4">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <ul class="nav nav-pills" role="tablist">
-                    <li class="nav-item">
-                        <a class="nav-link {% if status_filter == 'all' %}active{% endif %}" 
-                           href="{{ url_for('inventory.admin_inventory', status='all', page=1, per_page=per_page|default(20)) }}">
-                            {{ _('Tots') }}
+            <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <ul class="nav nav-pills mb-0" role="tablist" style="gap: 0.5rem;">
+                            <li class="nav-item">
+                                <a class="nav-link {% if status_filter == 'all' %}active bg-primary{% else %}text-dark{% endif %}" 
+                                   href="{{ url_for('inventory.admin_inventory', status='all', page=1, per_page=per_page|default(20)) }}"
+                                   style="border-radius: 50px; padding: 0.5rem 1.25rem; transition: all 0.3s;">
+                                    <i class="fas fa-list me-1"></i>{{ _('Tots') }}
+                                    <span class="badge {% if status_filter == 'all' %}bg-light text-primary{% else %}bg-secondary{% endif %} ms-1">{{ total_items }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if status_filter == 'pending' %}active bg-warning text-dark{% else %}text-dark{% endif %}" 
+                                   href="{{ url_for('inventory.admin_inventory', status='pending', page=1, per_page=per_page|default(20)) }}"
+                                   style="border-radius: 50px; padding: 0.5rem 1.25rem; transition: all 0.3s;">
+                                    <i class="fas fa-clock me-1"></i>{{ _('Pendents') }}
+                                    {% if pending_items > 0 %}
+                                    <span class="badge {% if status_filter == 'pending' %}bg-dark{% else %}bg-warning text-dark{% endif %} ms-1">{{ pending_items }}</span>
+                                    {% endif %}
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if status_filter == 'approved' %}active bg-success{% else %}text-dark{% endif %}" 
+                                   href="{{ url_for('inventory.admin_inventory', status='approved', page=1, per_page=per_page|default(20)) }}"
+                                   style="border-radius: 50px; padding: 0.5rem 1.25rem; transition: all 0.3s;">
+                                    <i class="fas fa-check-circle me-1"></i>{{ _('Aprovats') }}
+                                    <span class="badge {% if status_filter == 'approved' %}bg-light text-success{% else %}bg-success{% endif %} ms-1">{{ approved_items }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if status_filter == 'active' %}active bg-info{% else %}text-dark{% endif %}" 
+                                   href="{{ url_for('inventory.admin_inventory', status='active', page=1, per_page=per_page|default(20)) }}"
+                                   style="border-radius: 50px; padding: 0.5rem 1.25rem; transition: all 0.3s;">
+                                    <i class="fas fa-check-double me-1"></i>{{ _('Actius') }}
+                                    <span class="badge {% if status_filter == 'active' %}bg-light text-info{% else %}bg-info{% endif %} ms-1">{{ active_items }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if status_filter == 'resolved' %}active bg-secondary{% else %}text-dark{% endif %}" 
+                                   href="{{ url_for('inventory.admin_inventory', status='resolved', page=1, per_page=per_page|default(20)) }}"
+                                   style="border-radius: 50px; padding: 0.5rem 1.25rem; transition: all 0.3s;">
+                                    <i class="fas fa-check-square me-1"></i>{{ _('Resolts') }}
+                                    <span class="badge {% if status_filter == 'resolved' %}bg-light text-secondary{% else %}bg-secondary{% endif %} ms-1">{{ resolved_items }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if status_filter == 'rejected' %}active bg-danger{% else %}text-dark{% endif %}" 
+                                   href="{{ url_for('inventory.admin_inventory', status='rejected', page=1, per_page=per_page|default(20)) }}"
+                                   style="border-radius: 50px; padding: 0.5rem 1.25rem; transition: all 0.3s;">
+                                    <i class="fas fa-times-circle me-1"></i>{{ _('Rebutjats') }}
+                                    <span class="badge {% if status_filter == 'rejected' %}bg-light text-danger{% else %}bg-danger{% endif %} ms-1">{{ rejected_items }}</span>
+                                </a>
+                            </li>
+                        </ul>
+                        {% if pending_items > 0 %}
+                        <a class="btn btn-warning text-dark" 
+                           href="{{ url_for('inventory.admin_pending_map') }}"
+                           style="border-radius: 50px; white-space: nowrap;">
+                            <i class="fas fa-map me-2"></i>{{ _('Veure Mapa de Pendents') }}
+                            <span class="badge bg-dark ms-2">{{ pending_items }}</span>
                         </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if status_filter == 'pending' %}active{% endif %}" 
-                           href="{{ url_for('inventory.admin_inventory', status='pending', page=1, per_page=per_page|default(20)) }}">
-                            {{ _('Pendents') }} 
-                            {% if pending_items > 0 %}
-                            <span class="badge bg-warning text-dark">{{ pending_items }}</span>
-                            {% endif %}
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if status_filter == 'approved' %}active{% endif %}" 
-                           href="{{ url_for('inventory.admin_inventory', status='approved', page=1, per_page=per_page|default(20)) }}">
-                            {{ _('Aprovats') }}
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if status_filter == 'active' %}active{% endif %}" 
-                           href="{{ url_for('inventory.admin_inventory', status='active', page=1, per_page=per_page|default(20)) }}">
-                            {{ _('Actius') }}
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if status_filter == 'resolved' %}active{% endif %}" 
-                           href="{{ url_for('inventory.admin_inventory', status='resolved', page=1, per_page=per_page|default(20)) }}">
-                            {{ _('Resolts') }}
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if status_filter == 'rejected' %}active{% endif %}" 
-                           href="{{ url_for('inventory.admin_inventory', status='rejected', page=1, per_page=per_page|default(20)) }}">
-                            {{ _('Rebutjats') }}
-                        </a>
-                    </li>
-                </ul>
-                {% if pending_items > 0 %}
-                <a class="btn btn-warning text-dark" 
-                   href="{{ url_for('inventory.admin_pending_map') }}"
-                   style="border-radius: 50px;">
-                    <i class="fas fa-map me-2"></i>{{ _('Veure Mapa de Pendents') }}
-                    <span class="badge bg-dark ms-2">{{ pending_items }}</span>
-                </a>
-                {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -147,7 +178,36 @@
                                 </td>
                                 <td>
                                     <small>
-                                        {{ item.address or (item.latitude|string + ', ' + item.longitude|string) }}
+                                        <div>{{ item.address or (item.latitude|string + ', ' + item.longitude|string) }}</div>
+                                        {% if item.image_gps_latitude and item.image_gps_longitude %}
+                                            {% set distance_km = calculate_distance_km(item.latitude, item.longitude, item.image_gps_latitude, item.image_gps_longitude) %}
+                                            {% if distance_km > 0.01 %}
+                                                <div class="text-warning mt-1" title="{{ _('La ubicació final difereix de la GPS de la imatge') }}">
+                                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                                    <small>{{ _('GPS imatge') }}: {{ "%.6f"|format(item.image_gps_latitude) }}, {{ "%.6f"|format(item.image_gps_longitude) }}</small>
+                                                    <br>
+                                                    <small>{{ _('Diferència') }}: ~{{ "%.2f"|format(distance_km * 1000) }}m</small>
+                                                </div>
+                                            {% else %}
+                                                <div class="text-success mt-1" title="{{ _('La ubicació final coincideix amb la GPS de la imatge') }}">
+                                                    <i class="fas fa-check-circle me-1"></i>
+                                                    <small>{{ _('Coincideix amb GPS imatge') }}</small>
+                                                </div>
+                                            {% endif %}
+                                        {% endif %}
+                                        {% if item.location_source %}
+                                            <div class="text-muted mt-1">
+                                                <small><i class="fas fa-info-circle me-1"></i>
+                                                {% if item.location_source == 'image_gps' %}
+                                                    {{ _('Font: GPS de la imatge') }}
+                                                {% elif item.location_source == 'form_coordinates' %}
+                                                    {{ _('Font: Coordenades del formulari') }}
+                                                {% else %}
+                                                    {{ _('Font') }}: {{ item.location_source }}
+                                                {% endif %}
+                                                </small>
+                                            </div>
+                                        {% endif %}
                                     </small>
                                 </td>
                                 <td>
@@ -156,8 +216,11 @@
                                 <td>
                                     {% if item.image_path %}
                                         <img src="{{ url_for('static', filename='uploads/' + item.image_path) }}" 
-                                             style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;" 
-                                             alt="Foto">
+                                             style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; cursor: pointer;" 
+                                             alt="Foto"
+                                             data-bs-toggle="modal" 
+                                             data-bs-target="#imageModal{{ item.id }}"
+                                             onclick="document.getElementById('modalImage{{ item.id }}').src = this.src">
                                     {% else %}
                                         <span class="text-muted">-</span>
                                     {% endif %}
@@ -249,74 +312,93 @@
                 </div>
                 {% endif %}
                 
-                <!-- Pagination - Always show if pagination exists -->
+                <!-- Pagination -->
                 {% if pagination %}
-                <!-- Navigation buttons (only if more than 1 page) -->
-                {% if pagination.pages > 1 %}
-                <nav aria-label="Page navigation" class="mt-4">
-                    <ul class="pagination justify-content-center">
-                        {% if pagination.has_prev %}
-                        <li class="page-item">
-                            <a class="page-link" href="{{ url_for('inventory.admin_inventory', status=status_filter, page=pagination.prev_num, per_page=per_page) }}">
-                                <i class="fas fa-chevron-left"></i> {{ _('Anterior') }}
-                            </a>
-                        </li>
-                        {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link"><i class="fas fa-chevron-left"></i> {{ _('Anterior') }}</span>
-                        </li>
-                        {% endif %}
+                <div class="mt-4 pt-3 border-top">
+                    <div class="row align-items-center">
+                        <!-- Pagination Info -->
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-info-circle text-muted me-2"></i>
+                                <small class="text-muted">
+                                    {{ _('Mostrant') }} <strong>{{ (pagination.page - 1) * pagination.per_page + 1 }}</strong> - 
+                                    <strong>{{ (pagination.page - 1) * pagination.per_page + pagination.items|length }}</strong> 
+                                    {{ _('de') }} <strong>{{ pagination.total }}</strong> {{ _('items') }}
+                                </small>
+                            </div>
+                        </div>
                         
-                        {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
-                            {% if page_num %}
-                                {% if page_num == pagination.page %}
-                                <li class="page-item active">
-                                    <span class="page-link">{{ page_num }}</span>
-                                </li>
-                                {% else %}
-                                <li class="page-item">
-                                    <a class="page-link" href="{{ url_for('inventory.admin_inventory', status=status_filter, page=page_num, per_page=per_page) }}">{{ page_num }}</a>
-                                </li>
-                                {% endif %}
+                        <!-- Page Navigation -->
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            {% if pagination.pages > 1 %}
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination pagination-sm justify-content-center mb-0">
+                                    {% if pagination.has_prev %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('inventory.admin_inventory', status=status_filter, page=pagination.prev_num, per_page=per_page) }}" aria-label="Previous">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link" aria-label="Previous">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </span>
+                                    </li>
+                                    {% endif %}
+                                    
+                                    {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                                        {% if page_num %}
+                                            {% if page_num == pagination.page %}
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ page_num }}</span>
+                                            </li>
+                                            {% else %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="{{ url_for('inventory.admin_inventory', status=status_filter, page=page_num, per_page=per_page) }}">{{ page_num }}</a>
+                                            </li>
+                                            {% endif %}
+                                        {% else %}
+                                            <li class="page-item disabled">
+                                                <span class="page-link">…</span>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if pagination.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('inventory.admin_inventory', status=status_filter, page=pagination.next_num, per_page=per_page) }}" aria-label="Next">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link" aria-label="Next">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </span>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
                             {% else %}
-                                <li class="page-item disabled">
-                                    <span class="page-link">...</span>
-                                </li>
+                            <div class="text-center">
+                                <small class="text-muted">{{ _('Pàgina 1 de 1') }}</small>
+                            </div>
                             {% endif %}
-                        {% endfor %}
+                        </div>
                         
-                        {% if pagination.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="{{ url_for('inventory.admin_inventory', status=status_filter, page=pagination.next_num, per_page=per_page) }}">
-                                {{ _('Següent') }} <i class="fas fa-chevron-right"></i>
-                            </a>
-                        </li>
-                        {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link">{{ _('Següent') }} <i class="fas fa-chevron-right"></i></span>
-                        </li>
-                        {% endif %}
-                    </ul>
-                </nav>
-                {% endif %}
-                
-                <!-- Pagination info (always show) -->
-                <div class="text-center mt-3">
-                    <small class="text-muted">
-                        {{ _('Mostrant') }} {{ (pagination.page - 1) * pagination.per_page + 1 }} - 
-                        {{ (pagination.page - 1) * pagination.per_page + pagination.items|length }} 
-                        {{ _('de') }} {{ pagination.total }} {{ _('items') }}
-                    </small>
-                    <div class="mt-2">
-                        <small class="text-muted">{{ _('Items per pàgina') }}:</small>
-                        <a href="{{ url_for('inventory.admin_inventory', status=status_filter, page=1, per_page=10) }}" 
-                           class="btn btn-sm btn-outline-secondary {% if per_page == 10 %}active{% endif %}">10</a>
-                        <a href="{{ url_for('inventory.admin_inventory', status=status_filter, page=1, per_page=20) }}" 
-                           class="btn btn-sm btn-outline-secondary {% if per_page == 20 %}active{% endif %}">20</a>
-                        <a href="{{ url_for('inventory.admin_inventory', status=status_filter, page=1, per_page=50) }}" 
-                           class="btn btn-sm btn-outline-secondary {% if per_page == 50 %}active{% endif %}">50</a>
-                        <a href="{{ url_for('inventory.admin_inventory', status=status_filter, page=1, per_page=100) }}" 
-                           class="btn btn-sm btn-outline-secondary {% if per_page == 100 %}active{% endif %}">100</a>
+                        <!-- Items per page -->
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center justify-content-md-end">
+                                <label class="form-label mb-0 me-2 text-muted small">{{ _('Per pàgina') }}:</label>
+                                <select class="form-select form-select-sm" style="width: auto;" onchange="window.location.href='{{ url_for('inventory.admin_inventory', status=status_filter, page=1, per_page='__PER_PAGE__') }}'.replace('__PER_PAGE__', this.value)">
+                                    <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+                                    <option value="20" {% if per_page == 20 %}selected{% endif %}>20</option>
+                                    <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+                                    <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 {% endif %}
@@ -335,4 +417,40 @@
         </div>
     </div>
 </section>
+
+<!-- Image Modal -->
+{% for item in items %}
+{% if item.image_path %}
+<div class="modal fade" id="imageModal{{ item.id }}" tabindex="-1" aria-labelledby="imageModalLabel{{ item.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel{{ item.id }}">
+                    <i class="fas fa-image me-2"></i>{{ _('Foto de l\'Item') }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-0">
+                <img id="modalImage{{ item.id }}" 
+                     src="{{ url_for('static', filename='uploads/' + item.image_path) }}" 
+                     class="img-fluid" 
+                     alt="{{ _('Foto de l\'item') }}"
+                     style="max-height: 70vh; width: auto;">
+            </div>
+            <div class="modal-footer">
+                <div class="w-100">
+                    <p class="mb-2"><strong>{{ _('Categoria') }}:</strong> {{ get_inventory_category_name(item.category, item.subcategory) }}</p>
+                    {% if item.description %}
+                    <p class="mb-2"><strong>{{ _('Descripció') }}:</strong> {{ item.description }}</p>
+                    {% endif %}
+                    {% if item.address %}
+                    <p class="mb-0"><strong>{{ _('Ubicació') }}:</strong> {{ item.address }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
 {% endblock %}

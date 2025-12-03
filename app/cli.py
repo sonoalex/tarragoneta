@@ -130,7 +130,7 @@ def create_sample_data():
             'title': 'Acció contra la Brossa Desbordada',
             'description': 'Identifiquem i reportem contenedors de brossa desbordats per millorar la gestió de residus a la ciutat.',
             'location': 'Diverses ubicacions, Tarragona',
-            'category': 'basura_desbordada',
+            'category': 'escombreries_desbordades',
             'date': datetime.now().date() + timedelta(days=5),
             'time': '18:00'
         },
@@ -259,7 +259,7 @@ def import_zones_from_geojson(geojson_dir='geojson_tarragona'):
     print("=" * 70)
     print()
     
-    from app.models import District, Section
+    from app.models import District, Section, CityBoundary
     
     # Verificar tipo de base de datos
     db_url = str(db.engine.url)
@@ -437,6 +437,23 @@ def import_zones_from_geojson(geojson_dir='geojson_tarragona'):
         print(f"   Distritos en BD: {total_districts}")
         print(f"   Secciones en BD: {total_sections}")
         print()
+        
+        # Calcular y guardar city boundary después de importar secciones
+        print("🗺️  Calculando boundary de Tarragona...")
+        boundary_wkt = CityBoundary.calculate_boundary()
+        if boundary_wkt:
+            existing = CityBoundary.query.first()
+            if existing:
+                existing.polygon = boundary_wkt
+                existing.updated_at = datetime.utcnow()
+                print("✅ Boundary actualizado")
+            else:
+                existing = CityBoundary(name='Tarragona', polygon=boundary_wkt)
+                db.session.add(existing)
+                print("✅ Boundary creado")
+            db.session.commit()
+        else:
+            print("⚠️  No se pudo calcular el boundary")
         
         return True
         

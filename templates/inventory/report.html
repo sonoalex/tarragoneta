@@ -24,20 +24,42 @@
                     <div class="card-body p-5">
                         <h1 class="h3 fw-bold mb-4">{{ _('Reportar nou item al inventari') }}</h1>
                         
-                        <div class="map-instructions">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <p class="mb-0">
-                                    <i class="fas fa-info-circle me-2"></i>
-                                    <strong>{{ _('Instruccions') }}:</strong> 
-                                    {{ _('Fes clic al mapa o usa la teva ubicació actual') }}
-                                </p>
-                                <button type="button" class="btn btn-sm btn-primary" id="use-current-location-btn">
-                                    <i class="fas fa-crosshairs me-1"></i>{{ _('Usar ubicació actual') }}
-                                </button>
+                        <!-- Location display (auto-detected) -->
+                        <div class="mb-4">
+                            <div class="alert alert-success" id="location-auto-display" style="display: none;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="fas fa-map-marker-alt me-2"></i>
+                                        <strong>{{ _('Ubicació detectada') }}:</strong>
+                                        <span id="location-text"></span>
+                                        <small class="d-block text-muted mt-1" id="location-source"></small>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="correct-location-btn">
+                                        <i class="fas fa-edit me-1"></i>{{ _('Corregir') }}
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Manual location selection (shown by default) -->
+                            <div id="location-manual-section">
+                                <div class="map-instructions mb-2">
+                                    <p class="mb-0">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <strong>{{ _('Selecciona la ubicació al mapa') }}</strong>
+                                    </p>
+                                    <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="use-location-btn">
+                                        <i class="fas fa-crosshairs me-1"></i>{{ _('Usar la meva ubicació actual') }}
+                                    </button>
+                                </div>
+                                <div id="map"></div>
+                            </div>
+                            
+                            <!-- Loading state -->
+                            <div class="alert alert-info" id="location-loading" style="display: none;">
+                                <i class="fas fa-spinner fa-spin me-2"></i>
+                                {{ _('Obtenint ubicació...') }}
                             </div>
                         </div>
-                        
-                        <div id="map"></div>
                         
                         <form method="POST" action="{{ url_for('inventory.report_item') }}" enctype="multipart/form-data" class="needs-validation" novalidate>
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -77,7 +99,7 @@
                             
                             <!-- Image -->
                             <div class="mb-4">
-                                <label class="form-label fw-bold">{{ _('Foto') }}</label>
+                                <label class="form-label fw-bold">{{ _('Foto') }} *</label>
                                 <div class="d-flex gap-2 mb-2">
                                     <button type="button" class="btn btn-outline-primary flex-fill" id="camera-btn">
                                         <i class="fas fa-camera me-2"></i>{{ _('Fer foto ara') }}
@@ -86,7 +108,7 @@
                                         <i class="fas fa-upload me-2"></i>{{ _('Pujar foto') }}
                                     </button>
                                 </div>
-                                {{ form.image(class="form-control d-none", id="image", accept="image/*") }}
+                                {{ form.image(class="form-control d-none", id="image", accept="image/*", required=True) }}
                                 <div id="image-preview" class="mt-3" style="display: none;">
                                     <img id="preview-img" src="" alt="Preview" style="max-width: 100%; max-height: 300px; border-radius: 8px; border: 2px solid var(--border-color);">
                                     <button type="button" class="btn btn-sm btn-outline-danger mt-2" id="remove-image-btn">
@@ -99,17 +121,9 @@
                                 {% endif %}
                             </div>
                             
-                            <!-- Location display -->
-                            <div class="mb-4">
-                                <div class="alert alert-info" id="location-display" style="display: none;">
-                                    <i class="fas fa-map-marker-alt me-2"></i>
-                                    <strong>{{ _('Ubicació seleccionada') }}:</strong>
-                                    <span id="location-text">{{ _('Fes clic al mapa per seleccionar la ubicació') }}</span>
-                                </div>
-                            </div>
                             
                             <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-primary btn-lg px-5" style="border-radius: 50px;" id="submit-btn" disabled>
+                                <button type="submit" class="btn btn-primary btn-lg px-5" style="border-radius: 50px;" id="submit-btn">
                                     <i class="fas fa-paper-plane me-2"></i>{{ _('Reportar') }}
                                 </button>
                                 <a href="{{ url_for('inventory.inventory_map') }}" class="btn btn-outline-secondary btn-lg px-5" style="border-radius: 50px;">
@@ -129,17 +143,113 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        var map = L.map('map').setView([41.1189, 1.2445], 14);
+        var map = null;
         var marker = null;
-        var selectedLocation = null;
+        var locationMode = 'auto'; // 'auto' or 'manual'
+        var currentLocation = null;
         
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors',
-            maxZoom: 19
-        }).addTo(map);
+        // Initialize map (but don't show it yet - only when manual mode is activated)
+        function initializeMap() {
+            if (map) return; // Already initialized
+            
+            var mapContainer = document.getElementById('map');
+            if (!mapContainer) return;
+            
+            map = L.map('map').setView([41.1189, 1.2445], 14);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(map);
+            
+            // Click handler for manual location selection
+            map.on('click', function(e) {
+                setLocationFromManual(e.latlng.lat, e.latlng.lng);
+            });
+        }
         
-        // Function to set location and update UI
-        function setLocation(lat, lng) {
+        // Function to set location and update UI (for auto-detected locations)
+        function setLocationFromAuto(lat, lng, source) {
+            // Update hidden inputs
+            document.getElementById('latitude').value = lat;
+            document.getElementById('longitude').value = lng;
+            
+            // Geocode to get address
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`, {
+                headers: {
+                    'User-Agent': 'Tarracograf/1.0'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                var address = data.display_name || '';
+                document.getElementById('address').value = address;
+                
+                // Update UI
+                var locationText = address || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                document.getElementById('location-text').textContent = locationText;
+                
+                // Set source text
+                var sourceText = '';
+                if (source === 'image_gps') {
+                    sourceText = '{{ _("Obtinguda de la foto (GPS)") }}';
+                } else if (source === 'browser_geolocation') {
+                    sourceText = '{{ _("Obtinguda de la teva ubicació actual") }}';
+                } else {
+                    sourceText = '{{ _("Seleccionada manualment") }}';
+                }
+                document.getElementById('location-source').textContent = sourceText;
+                
+                // Show auto-display, hide loading
+                document.getElementById('location-auto-display').style.display = 'block';
+                document.getElementById('location-loading').style.display = 'none';
+                document.getElementById('location-manual-section').style.display = 'none';
+                
+                // Enable submit button
+                document.getElementById('submit-btn').disabled = false;
+                
+                // Update map if it exists (show pin for auto-detected locations too)
+                if (map) {
+                    if (marker) {
+                        map.removeLayer(marker);
+                    }
+                    marker = L.marker([lat, lng]).addTo(map);
+                    marker.bindPopup(locationText).openPopup();
+                    map.setView([lat, lng], 16);
+                } else {
+                    // If map doesn't exist yet, initialize it and show the location
+                    initializeMap();
+                    if (marker) {
+                        map.removeLayer(marker);
+                    }
+                    marker = L.marker([lat, lng]).addTo(map);
+                    marker.bindPopup(locationText).openPopup();
+                    map.setView([lat, lng], 16);
+                    // Show manual section to display the map
+                    document.getElementById('location-manual-section').style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error geocoding:', error);
+                var locationText = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                document.getElementById('location-text').textContent = locationText;
+                
+                var sourceText = '';
+                if (source === 'image_gps') {
+                    sourceText = '{{ _("Obtinguda de la foto (GPS)") }}';
+                } else if (source === 'browser_geolocation') {
+                    sourceText = '{{ _("Obtinguda de la teva ubicació actual") }}';
+                }
+                document.getElementById('location-source').textContent = sourceText;
+                
+                document.getElementById('location-auto-display').style.display = 'block';
+                document.getElementById('location-loading').style.display = 'none';
+                document.getElementById('location-manual-section').style.display = 'none';
+                document.getElementById('submit-btn').disabled = false;
+            });
+        }
+        
+        // Function to set location from manual selection
+        function setLocationFromManual(lat, lng) {
             // Update hidden inputs
             document.getElementById('latitude').value = lat;
             document.getElementById('longitude').value = lng;
@@ -149,9 +259,28 @@
                 map.removeLayer(marker);
             }
             
-            // Add new marker
-            marker = L.marker([lat, lng]).addTo(map);
-            marker.bindPopup('{{ _("Ubicació seleccionada") }}').openPopup();
+            // Add new marker (PIN) on map
+            marker = L.marker([lat, lng], {
+                draggable: true  // Allow dragging to adjust position
+            }).addTo(map);
+            
+            // Update marker position if dragged
+            marker.on('dragend', function(e) {
+                var newLat = e.target.getLatLng().lat;
+                var newLng = e.target.getLatLng().lng;
+                document.getElementById('latitude').value = newLat;
+                document.getElementById('longitude').value = newLng;
+                // Geocode new position
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${newLat}&lon=${newLng}`, {
+                    headers: { 'User-Agent': 'Tarracograf/1.0' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    var address = data.display_name || '';
+                    document.getElementById('address').value = address;
+                    marker.bindPopup(address || `${newLat.toFixed(6)}, ${newLng.toFixed(6)}`).openPopup();
+                });
+            });
             
             // Center map on location
             map.setView([lat, lng], 16);
@@ -166,67 +295,101 @@
             .then(data => {
                 var address = data.display_name || '';
                 document.getElementById('address').value = address;
-                document.getElementById('location-text').textContent = address;
-                document.getElementById('location-display').style.display = 'block';
+                var locationText = address || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                marker.bindPopup(locationText).openPopup();
+                
+                // Update UI
+                document.getElementById('location-text').textContent = locationText;
+                document.getElementById('location-source').textContent = '{{ _("Seleccionada manualment") }}';
+                
+                // Show auto-display (even though it's manual, we show it in the same format)
+                document.getElementById('location-auto-display').style.display = 'block';
+                document.getElementById('location-loading').style.display = 'none';
+                document.getElementById('location-manual-section').style.display = 'block';
+                
+                // Enable submit button
                 document.getElementById('submit-btn').disabled = false;
             })
             .catch(error => {
                 console.error('Error geocoding:', error);
-                document.getElementById('location-text').textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-                document.getElementById('location-display').style.display = 'block';
+                var locationText = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                marker.bindPopup(locationText).openPopup();
+                
+                document.getElementById('location-text').textContent = locationText;
+                document.getElementById('location-source').textContent = '{{ _("Seleccionada manualment") }}';
+                document.getElementById('location-auto-display').style.display = 'block';
+                document.getElementById('location-loading').style.display = 'none';
+                document.getElementById('location-manual-section').style.display = 'block';
                 document.getElementById('submit-btn').disabled = false;
             });
+            
+            locationMode = 'manual';
         }
         
-        // Click handler - mark location on map
-        map.on('click', function(e) {
-            setLocation(e.latlng.lat, e.latlng.lng);
-        });
+        // Show manual location option (default - no automatic geolocation request)
+        function showManualLocationOption() {
+            locationMode = 'manual';
+            document.getElementById('location-auto-display').style.display = 'none';
+            document.getElementById('location-loading').style.display = 'none';
+            document.getElementById('location-manual-section').style.display = 'block';
+            initializeMap();
+        }
         
-        // Use current location button
-        var useCurrentLocationBtn = document.getElementById('use-current-location-btn');
-        useCurrentLocationBtn.addEventListener('click', function() {
+        // Get current location (only when user explicitly requests it)
+        function getCurrentLocation() {
             if (!navigator.geolocation) {
-                alert('{{ _("La geolocalización no está disponible en tu navegador") }}');
+                alert('{{ _("La geolocalización no está disponible en tu navegador. Por favor, selecciona la ubicación en el mapa.") }}');
                 return;
             }
             
-            // Show loading state
-            var originalText = useCurrentLocationBtn.innerHTML;
-            useCurrentLocationBtn.disabled = true;
-            useCurrentLocationBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ _("Obtenint ubicació...") }}';
+            document.getElementById('location-loading').style.display = 'block';
+            document.getElementById('location-auto-display').style.display = 'none';
+            document.getElementById('location-manual-section').style.display = 'none';
             
             navigator.geolocation.getCurrentPosition(
                 function(position) {
                     var lat = position.coords.latitude;
                     var lng = position.coords.longitude;
                     
-                    // Validate coordinates (Tarragona area approximately)
+                    // Validate coordinates (Tarragona area)
                     if (40.5 <= lat && lat <= 41.5 && 0.5 <= lng && lng <= 2.0) {
-                        setLocation(lat, lng);
+                        currentLocation = { lat: lat, lng: lng };
+                        // Pre-fill with current location (will be used if image has no GPS)
+                        document.getElementById('latitude').value = lat;
+                        document.getElementById('longitude').value = lng;
+                        // Show that location is ready (will be used as fallback if image has no GPS)
+                        // The server will try GPS from image first, then use these coordinates
+                        document.getElementById('location-loading').style.display = 'none';
+                        setLocationFromAuto(lat, lng, 'browser_geolocation');
                     } else {
-                        alert('{{ _("Tu ubicación está fuera del área de Tarragona. Por favor, marca la ubicación en el mapa.") }}');
+                        // Outside Tarragona - show manual option
+                        document.getElementById('location-loading').style.display = 'none';
+                        alert('{{ _("Tu ubicación está fuera del área de Tarragona. Por favor, selecciona la ubicación en el mapa.") }}');
+                        showManualLocationOption();
                     }
-                    
-                    // Restore button
-                    useCurrentLocationBtn.disabled = false;
-                    useCurrentLocationBtn.innerHTML = originalText;
                 },
                 function(error) {
-                    console.error('Error getting location:', error);
-                    var errorMsg = '{{ _("Error al obtener la ubicación") }}';
-                    if (error.code === error.PERMISSION_DENIED) {
-                        errorMsg = '{{ _("Permiso de ubicación denegado. Por favor, marca la ubicación en el mapa.") }}';
-                    } else if (error.code === error.POSITION_UNAVAILABLE) {
-                        errorMsg = '{{ _("Ubicación no disponible. Por favor, marca la ubicación en el mapa.") }}';
-                    } else if (error.code === error.TIMEOUT) {
-                        errorMsg = '{{ _("Tiempo de espera agotado. Por favor, marca la ubicación en el mapa.") }}';
-                    }
-                    alert(errorMsg);
+                    // Log error for debugging (but don't show to user if it's just unavailable)
+                    console.log('Geolocation error:', error.code, error.message);
+                    document.getElementById('location-loading').style.display = 'none';
                     
-                    // Restore button
-                    useCurrentLocationBtn.disabled = false;
-                    useCurrentLocationBtn.innerHTML = originalText;
+                    var errorMsg = '{{ _("No se pudo obtener tu ubicación") }}';
+                    if (error.code === error.PERMISSION_DENIED) {
+                        errorMsg = '{{ _("Permiso de ubicación denegado. Por favor, selecciona la ubicación en el mapa.") }}';
+                    } else if (error.code === error.POSITION_UNAVAILABLE) {
+                        // POSITION_UNAVAILABLE (code 2) - location unavailable, show map silently
+                        errorMsg = '{{ _("Ubicación no disponible. Por favor, selecciona la ubicación en el mapa.") }}';
+                    } else if (error.code === error.TIMEOUT) {
+                        errorMsg = '{{ _("Tiempo de espera agotado. Por favor, selecciona la ubicación en el mapa.") }}';
+                    }
+                    
+                    // Only show alert for permission denied or timeout, not for unavailable (which is common)
+                    if (error.code === error.PERMISSION_DENIED || error.code === error.TIMEOUT) {
+                        alert(errorMsg);
+                    }
+                    
+                    // Always show manual option as fallback
+                    showManualLocationOption();
                 },
                 {
                     enableHighAccuracy: true,
@@ -234,7 +397,26 @@
                     maximumAge: 0
                 }
             );
-        });
+        }
+        
+        // Show manual location option by default (no automatic geolocation request)
+        showManualLocationOption();
+        
+        // Button to request geolocation (optional - user must click)
+        var useLocationBtn = document.getElementById('use-location-btn');
+        if (useLocationBtn) {
+            useLocationBtn.addEventListener('click', function() {
+                getCurrentLocation();
+            });
+        }
+        
+        // Correct location button - switch to manual mode
+        var correctLocationBtn = document.getElementById('correct-location-btn');
+        if (correctLocationBtn) {
+            correctLocationBtn.addEventListener('click', function() {
+                showManualLocationOption();
+            });
+        }
         
         // Category and subcategory handling
         var categorySelect = document.getElementById('category');
@@ -242,13 +424,43 @@
         
         var subcategories = {
             'palomas': [
-                {value: 'nido', label: '🪺 {{ _("Nido") }}'},
-                {value: 'excremento', label: '💩 {{ _("Excremento") }}'},
-                {value: 'plumas', label: '🪶 {{ _("Plumas") }}'}
+                {value: 'nido', label: '🪺 {{ _("Niu") }}'},
+                {value: 'excremento', label: '💩 {{ _("Excrement") }}'},
+                {value: 'plumas', label: '🪶 {{ _("Plomes") }}'}
             ],
             'basura': [
-                {value: 'basura_desbordada', label: '🗑️ {{ _("Brossa Desbordada") }}'},
-                {value: 'vertidos', label: '💧 {{ _("Vertidos") }}'}
+                {value: 'escombreries_desbordades', label: '🗑️ {{ _("Escombreries Desbordades") }}'},
+                {value: 'vertidos', label: '💧 {{ _("Abocaments") }}'}
+            ],
+            'perros': [
+                {value: 'excrements', label: '💩 {{ _("Excrements") }}'},
+                {value: 'pixades', label: '💧 {{ _("Pixades") }}'}
+            ],
+            'material_deteriorat': [
+                {value: 'faroles', label: '💡 {{ _("Faroles") }}'},
+                {value: 'bancs', label: '🪑 {{ _("Bancs") }}'},
+                {value: 'senyals', label: '🚦 {{ _("Senyals") }}'},
+                {value: 'paviment', label: '🛣️ {{ _("Paviment") }}'}
+            ],
+            'bruticia': [
+                {value: 'terra', label: '🌍 {{ _("Terra") }}'},
+                {value: 'fulles', label: '🍂 {{ _("Fulles") }}'},
+                {value: 'grafit', label: '🎨 {{ _("Grafit") }}'}
+            ],
+            'mobiliari_urba': [
+                {value: 'papereres', label: '🗑️ {{ _("Papereres") }}'},
+                {value: 'parades', label: '🚏 {{ _("Parades") }}'},
+                {value: 'bancs', label: '🪑 {{ _("Bancs") }}'}
+            ],
+            'vegetacio': [
+                {value: 'arbres', label: '🌳 {{ _("Arbres") }}'},
+                {value: 'arbustos', label: '🌿 {{ _("Arbustos") }}'},
+                {value: 'gespa', label: '🌱 {{ _("Gespa") }}'}
+            ],
+            'infraestructura': [
+                {value: 'carreteres', label: '🛣️ {{ _("Carreteres") }}'},
+                {value: 'voreres', label: '🚶 {{ _("Voreres") }}'},
+                {value: 'enllumenat', label: '💡 {{ _("Enllumenat") }}'}
             ]
         };
         
@@ -447,6 +659,18 @@
                 imagePreview.style.display = 'block';
             };
             reader.readAsDataURL(file);
+            
+            // Note: GPS extraction will be done on the server side (Python)
+            // The server will try GPS from image first, then use form coordinates (browser geolocation or manual)
+            // We don't require location selection before uploading image - server will handle it
+            // If we have current location, show it as fallback (but server will prioritize GPS from image)
+            if (currentLocation) {
+                // Show that we have a fallback location ready
+                // The server will prioritize GPS from image
+                setLocationFromAuto(currentLocation.lat, currentLocation.lng, 'browser_geolocation');
+            }
+            // If no current location, user can still submit - server will extract GPS from image
+            // If image has no GPS, server will return error asking for location
         }
         
         // Remove image button
@@ -456,7 +680,7 @@
             previewImg.src = '';
         });
         
-        // Form validation and enable subcategory before submit
+        // Form validation
         var form = document.querySelector('form');
         form.addEventListener('submit', function(e) {
             // Enable subcategory field before submit (disabled fields are not submitted)
@@ -468,9 +692,14 @@
             }
             subcategoryField.disabled = false; // Enable before submit
             
-            if (!document.getElementById('latitude').value || !document.getElementById('longitude').value) {
+            // Don't validate coordinates here - server will try GPS from image first
+            // If image has no GPS and no coordinates are provided, server will return error
+            // This allows testing GPS extraction from images without requiring location selection
+            
+            // Validate image is required
+            if (!imageInput.files || imageInput.files.length === 0) {
                 e.preventDefault();
-                alert('{{ _("Por favor, selecciona una ubicación en el mapa") }}');
+                alert('{{ _("Por favor, sube una foto del item. La foto es obligatoria.") }}');
                 return false;
             }
         });

@@ -90,6 +90,9 @@ def create_app(config_name=None):
     app.register_blueprint(admin.bp)
     app.register_blueprint(donations.bp)
     app.register_blueprint(inventory.bp)
+    from app.routes import analytics
+    app.register_blueprint(analytics.bp)
+    app.register_blueprint(analytics.bp_public)
     
     # Register CLI commands
     register_cli_commands(app)
@@ -102,13 +105,54 @@ def create_app(config_name=None):
     
     # Profile route (simple, can be moved to auth blueprint later)
     from flask_security import login_required, current_user
+    from app.models import InventoryItem, Initiative, Comment, ReportPurchase
     @app.route('/profile')
     @login_required
     def profile():
         from flask import render_template
+        from datetime import datetime, timedelta
+        
+        # Get user statistics
+        reported_items = InventoryItem.query.filter_by(reporter_id=current_user.id).all()
         participated = current_user.participated_initiatives.all()
         created = current_user.created_initiatives.all()
-        return render_template('profile.html', participated=participated, created=created)
+        comments = Comment.query.filter_by(user_id=current_user.id).order_by(Comment.created_at.desc()).limit(10).all()
+        report_purchases = ReportPurchase.query.filter_by(user_id=current_user.id, status='completed').order_by(ReportPurchase.completed_at.desc()).limit(5).all()
+        
+        # Calculate statistics
+        stats = {
+            'reported_items': len(reported_items),
+            'approved_items': len([item for item in reported_items if item.status == 'approved']),
+            'active_items': len([item for item in reported_items if item.status == 'active']),
+            'resolved_items': len([item for item in reported_items if item.status == 'resolved']),
+            'created_initiatives': len(created),
+            'participated_initiatives': len(participated),
+            'comments': len(comments),
+            'report_purchases': len(report_purchases),
+            'total_contributions': len(reported_items) + len(created) + len(participated) + len(comments)
+        }
+        
+        # Recent activity (last 30 days)
+        thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+        recent_items = InventoryItem.query.filter(
+            InventoryItem.reporter_id == current_user.id,
+            InventoryItem.created_at >= thirty_days_ago
+        ).order_by(InventoryItem.created_at.desc()).limit(5).all()
+        
+        recent_initiatives = Initiative.query.filter(
+            Initiative.creator_id == current_user.id,
+            Initiative.created_at >= thirty_days_ago
+        ).order_by(Initiative.created_at.desc()).limit(5).all()
+        
+        return render_template('profile.html', 
+                             participated=participated, 
+                             created=created,
+                             reported_items=reported_items[:10],  # Last 10 reported items
+                             recent_items=recent_items,
+                             recent_initiatives=recent_initiatives,
+                             comments=comments,
+                             report_purchases=report_purchases,
+                             stats=stats)
     
     # Configure logging
     setup_logging(app)

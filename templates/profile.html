@@ -1,0 +1,364 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('El Meu Perfil') }} - Tarracograf{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Profile Header -->
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px; overflow: hidden;">
+        <div class="card-body p-4" style="background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-light) 100%);">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-white text-primary" 
+                         style="width: 100px; height: 100px; font-size: 2.5rem; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                        {{ current_user.username[0].upper() if current_user.username else 'U' }}
+                    </div>
+                </div>
+                <div class="col">
+                    <h1 class="text-white mb-1" style="font-weight: 700; font-size: 1.75rem;">{{ current_user.username }}</h1>
+                    <p class="text-white mb-2" style="opacity: 0.9;">
+                        <i class="fas fa-envelope me-2"></i>{{ current_user.email }}
+                    </p>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% if current_user.confirmed_at %}
+                        <span class="badge bg-white text-primary" style="border-radius: 50px; padding: 0.4rem 1rem;">
+                            <i class="fas fa-check-circle me-1"></i>{{ _('Email verificat') }}
+                        </span>
+                        {% else %}
+                        <span class="badge bg-warning text-dark" style="border-radius: 50px; padding: 0.4rem 1rem;">
+                            <i class="fas fa-exclamation-circle me-1"></i>{{ _('Email no verificat') }}
+                        </span>
+                        {% endif %}
+                        {% if current_user.has_role('admin') %}
+                        <span class="badge bg-white text-danger" style="border-radius: 50px; padding: 0.4rem 1rem;">
+                            <i class="fas fa-shield-alt me-1"></i>{{ _('Administrador') }}
+                        </span>
+                        {% endif %}
+                        <span class="badge bg-white text-primary" style="border-radius: 50px; padding: 0.4rem 1rem;">
+                            <i class="fas fa-calendar me-1"></i>{{ _('Membre des de') }} {{ current_user.created_at.strftime('%B %Y') if current_user.created_at else '' }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 16px;">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="fas fa-map-marker-alt fa-2x text-primary"></i>
+                    </div>
+                    <h3 class="mb-1" style="font-weight: 700; color: var(--text-dark);">{{ stats.reported_items }}</h3>
+                    <p class="text-muted mb-0 small">{{ _('Items Reportats') }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 16px;">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="fas fa-calendar-check fa-2x text-success"></i>
+                    </div>
+                    <h3 class="mb-1" style="font-weight: 700; color: var(--text-dark);">{{ stats.created_initiatives }}</h3>
+                    <p class="text-muted mb-0 small">{{ _('Iniciatives Creades') }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 16px;">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="fas fa-users fa-2x text-info"></i>
+                    </div>
+                    <h3 class="mb-1" style="font-weight: 700; color: var(--text-dark);">{{ stats.participated_initiatives }}</h3>
+                    <p class="text-muted mb-0 small">{{ _('Iniciatives Participades') }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 16px;">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="fas fa-chart-line fa-2x text-warning"></i>
+                    </div>
+                    <h3 class="mb-1" style="font-weight: 700; color: var(--text-dark);">{{ stats.total_contributions }}</h3>
+                    <p class="text-muted mb-0 small">{{ _('Contribucions Totals') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Stats -->
+    <div class="row g-4 mb-4">
+        <!-- Items Status Breakdown -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 16px;">
+                <div class="card-header bg-transparent border-0 p-4 pb-0">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-list-check me-2 text-primary"></i>{{ _('Estat dels Items') }}
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-check-circle me-2 text-success"></i>
+                            <span>{{ _('Aprovats') }}</span>
+                        </div>
+                        <span class="badge bg-success" style="border-radius: 50px; padding: 0.4rem 0.8rem;">{{ stats.approved_items }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-check-double me-2 text-info"></i>
+                            <span>{{ _('Actius') }}</span>
+                        </div>
+                        <span class="badge bg-info" style="border-radius: 50px; padding: 0.4rem 0.8rem;">{{ stats.active_items }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-check-square me-2 text-secondary"></i>
+                            <span>{{ _('Resolts') }}</span>
+                        </div>
+                        <span class="badge bg-secondary" style="border-radius: 50px; padding: 0.4rem 0.8rem;">{{ stats.resolved_items }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-clock me-2 text-warning"></i>
+                            <span>{{ _('Pendents') }}</span>
+                        </div>
+                        <span class="badge bg-warning text-dark" style="border-radius: 50px; padding: 0.4rem 0.8rem;">{{ stats.reported_items - stats.approved_items - stats.active_items - stats.resolved_items }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 16px;">
+                <div class="card-header bg-transparent border-0 p-4 pb-0">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-clock me-2 text-primary"></i>{{ _('Activitat Recent') }}
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    {% if recent_items or recent_initiatives %}
+                    <div class="list-group list-group-flush">
+                        {% for item in recent_items[:3] %}
+                        <div class="list-group-item border-0 px-0 py-2">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-map-marker-alt me-2 text-primary"></i>
+                                <div class="flex-grow-1">
+                                    <div class="small fw-bold">{{ _('Item reportat') }}</div>
+                                    <div class="small text-muted">{{ item.created_at.strftime('%d/%m/%Y') if item.created_at else '' }}</div>
+                                </div>
+                                {% set icon_class, color_class = get_inventory_icon(item.category, item.subcategory) %}
+                                <i class="fas {{ icon_class }} {{ color_class }}"></i>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% for initiative in recent_initiatives[:3] %}
+                        <div class="list-group-item border-0 px-0 py-2">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-calendar-check me-2 text-success"></i>
+                                <div class="flex-grow-1">
+                                    <div class="small fw-bold">{{ _('Iniciativa creada') }}</div>
+                                    <div class="small text-muted">{{ initiative.created_at.strftime('%d/%m/%Y') if initiative.created_at else '' }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center mb-0">{{ _('Encara no hi ha activitat recent') }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Items -->
+    {% if reported_items %}
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px;">
+        <div class="card-header bg-transparent border-0 p-4 pb-0 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">
+                <i class="fas fa-map-marker-alt me-2 text-primary"></i>{{ _('Els Meus Items Reportats') }}
+            </h5>
+            <a href="{{ url_for('inventory.inventory_map') }}" class="btn btn-sm btn-outline-primary" style="border-radius: 50px;">
+                {{ _('Veure Tots') }} <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+        </div>
+        <div class="card-body p-4">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>{{ _('Categoria') }}</th>
+                            <th>{{ _('Adreça') }}</th>
+                            <th>{{ _('Estat') }}</th>
+                            <th>{{ _('Data') }}</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in reported_items[:10] %}
+                        <tr>
+                            <td>
+                                {% set icon_class, color_class = get_inventory_icon(item.category, item.subcategory) %}
+                                <i class="fas {{ icon_class }} {{ color_class }} me-2"></i>
+                                {{ get_inventory_category_name(item.category, item.subcategory) }}
+                            </td>
+                            <td>
+                                {% if item.address %}
+                                <small class="text-muted">{{ item.address[:50] }}{% if item.address|length > 50 %}...{% endif %}</small>
+                                {% else %}
+                                <small class="text-muted">-</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if item.status == 'approved' %}
+                                <span class="badge bg-success" style="border-radius: 50px;">{{ _('Aprovat') }}</span>
+                                {% elif item.status == 'active' %}
+                                <span class="badge bg-info" style="border-radius: 50px;">{{ _('Actiu') }}</span>
+                                {% elif item.status == 'resolved' %}
+                                <span class="badge bg-secondary" style="border-radius: 50px;">{{ _('Resolt') }}</span>
+                                {% elif item.status == 'pending' %}
+                                <span class="badge bg-warning text-dark" style="border-radius: 50px;">{{ _('Pendent') }}</span>
+                                {% else %}
+                                <span class="badge bg-secondary" style="border-radius: 50px;">{{ item.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small class="text-muted">{{ item.created_at.strftime('%d/%m/%Y') if item.created_at else '' }}</small>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('inventory.inventory_map') }}?lat={{ item.latitude }}&lng={{ item.longitude }}" 
+                                   class="btn btn-sm btn-outline-primary" style="border-radius: 50px;" title="{{ _('Veure al mapa') }}">
+                                    <i class="fas fa-map"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Initiatives -->
+    {% if created or participated %}
+    <div class="row g-4">
+        {% if created %}
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 16px;">
+                <div class="card-header bg-transparent border-0 p-4 pb-0 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-calendar-plus me-2 text-success"></i>{{ _('Iniciatives Creades') }}
+                    </h5>
+                    <a href="{{ url_for('initiatives.list_initiatives') }}" class="btn btn-sm btn-outline-success" style="border-radius: 50px;">
+                        {{ _('Veure Totes') }} <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                <div class="card-body p-4">
+                    {% for initiative in created[:5] %}
+                    <div class="mb-3 pb-3 {% if not loop.last %}border-bottom{% endif %}">
+                        <h6 class="mb-1">
+                            <a href="{{ url_for('initiatives.initiative_detail', slug=initiative.slug) }}" class="text-dark text-decoration-none">
+                                {{ initiative.title }}
+                            </a>
+                        </h6>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>{{ initiative.date.strftime('%d/%m/%Y') if initiative.date else '' }}
+                            </small>
+                            {% if initiative.status == 'approved' %}
+                            <span class="badge bg-success" style="border-radius: 50px; font-size: 0.75rem;">{{ _('Aprovada') }}</span>
+                            {% elif initiative.status == 'active' %}
+                            <span class="badge bg-info" style="border-radius: 50px; font-size: 0.75rem;">{{ _('Activa') }}</span>
+                            {% elif initiative.status == 'pending' %}
+                            <span class="badge bg-warning text-dark" style="border-radius: 50px; font-size: 0.75rem;">{{ _('Pendent') }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if participated %}
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 16px;">
+                <div class="card-header bg-transparent border-0 p-4 pb-0 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-users me-2 text-info"></i>{{ _('Iniciatives Participades') }}
+                    </h5>
+                    <a href="{{ url_for('initiatives.list_initiatives') }}" class="btn btn-sm btn-outline-info" style="border-radius: 50px;">
+                        {{ _('Veure Totes') }} <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                <div class="card-body p-4">
+                    {% for initiative in participated[:5] %}
+                    <div class="mb-3 pb-3 {% if not loop.last %}border-bottom{% endif %}">
+                        <h6 class="mb-1">
+                            <a href="{{ url_for('initiatives.initiative_detail', slug=initiative.slug) }}" class="text-dark text-decoration-none">
+                                {{ initiative.title }}
+                            </a>
+                        </h6>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>{{ initiative.date.strftime('%d/%m/%Y') if initiative.date else '' }}
+                            </small>
+                            <small class="text-muted">
+                                <i class="fas fa-users me-1"></i>{{ initiative.participant_count }} {{ _('participants') }}
+                            </small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Report Purchases -->
+    {% if report_purchases %}
+    <div class="card border-0 shadow-sm mt-4" style="border-radius: 16px;">
+        <div class="card-header bg-transparent border-0 p-4 pb-0">
+            <h5 class="mb-0 fw-bold">
+                <i class="fas fa-file-download me-2 text-primary"></i>{{ _('Reports Descarregats') }}
+            </h5>
+        </div>
+        <div class="card-body p-4">
+            <div class="list-group list-group-flush">
+                {% for purchase in report_purchases %}
+                <div class="list-group-item border-0 px-0 py-3 {% if not loop.last %}border-bottom{% endif %}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-bold">{{ purchase.report_type|replace('_', ' ')|title }}</div>
+                            <small class="text-muted">
+                                {{ _('Descarregat el') }} {{ purchase.completed_at.strftime('%d/%m/%Y %H:%M') if purchase.completed_at else '' }}
+                            </small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-primary" style="border-radius: 50px;">{{ "%.2f"|format(purchase.amount_euros) }}€</span>
+                            {% if purchase.download_token %}
+                            <a href="{{ url_for('reports.download_purchased_report', token=purchase.download_token) }}" 
+                               class="btn btn-sm btn-outline-primary ms-2" style="border-radius: 50px;" title="{{ _('Descarregar de nou') }}">
+                                <i class="fas fa-download"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

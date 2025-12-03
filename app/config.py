@@ -63,6 +63,13 @@ class Config:
     STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')
     STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
     
+    # Report pricing (in euros, will be converted to cents)
+    REPORT_PRICE_EUROS = float(os.environ.get('REPORT_PRICE_EUROS', '1.0'))  # Default 1€
+    
+    # Feature flag: Enable/disable payment for reports
+    # When False, reports are free to download (no payment required)
+    REPORTS_PAYMENT_ENABLED = os.environ.get('REPORTS_PAYMENT_ENABLED', 'False').lower() in ('true', '1', 'yes')
+    
     # Mail configuration (Hostinger)
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.hostinger.com')
     MAIL_PORT = int(os.environ.get('MAIL_PORT', 465))  # 465 for SSL, 587 for TLS
@@ -95,8 +102,17 @@ class Config:
     EMAIL_PROVIDER = os.environ.get('EMAIL_PROVIDER', 'smtp')
     
     # Celery configuration
-    CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
-    CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
+    # Railway provides REDIS_URL automatically, but we can override with CELERY_BROKER_URL
+    # If REDIS_URL is set and CELERY_BROKER_URL is not, use REDIS_URL
+    redis_url = os.environ.get('REDIS_URL')
+    if redis_url and not os.environ.get('CELERY_BROKER_URL'):
+        # Use REDIS_URL if provided by Railway
+        CELERY_BROKER_URL = f"{redis_url}/0"
+        CELERY_RESULT_BACKEND = f"{redis_url}/0"
+    else:
+        # Use explicit CELERY_BROKER_URL/CELERY_RESULT_BACKEND or default
+        CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+        CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
     # Use Celery for async email sending (default: True)
     MAIL_USE_SSL=True
 

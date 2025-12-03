@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Tendències Temporals') }} - Tarracograf{% endblock %}
+
+{% block content %}
+<section class="py-5" style="padding-top: 8rem !important;">
+    <div class="container-fluid px-4">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="display-5 fw-bold mb-2">
+                    <i class="fas fa-chart-line text-success me-2"></i>
+                    {{ _('Tendències Temporals') }}
+                </h1>
+                <p class="text-muted mb-0">{{ _('Evolució dels reports al llarg del temps') }}</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('analytics.analytics_dashboard') }}" class="btn btn-outline-secondary" style="border-radius: 50px;">
+                    <i class="fas fa-arrow-left me-2"></i>{{ _('Tornar') }}
+                </a>
+                <a href="{{ url_for('analytics.trends', format='csv', **filters) }}" class="btn btn-success" style="border-radius: 50px;">
+                    <i class="fas fa-download me-2"></i>{{ _('Descarregar CSV') }}
+                </a>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px;">
+            <div class="card-body p-4">
+                <form method="GET" action="{{ url_for('analytics.trends') }}" class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">{{ _('Categoria') }}</label>
+                        <select name="category" class="form-select">
+                            <option value="">{{ _('Totes') }}</option>
+                            <option value="coloms" {% if filters.category == 'coloms' %}selected{% endif %}>{{ _('Coloms') }}</option>
+                            <option value="brossa" {% if filters.category == 'brossa' %}selected{% endif %}>{{ _('Brossa') }}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">{{ _('Data des de') }}</label>
+                        <input type="date" name="date_from" class="form-control" value="{{ filters.date_from or '' }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">{{ _('Data fins') }}</label>
+                        <input type="date" name="date_to" class="form-control" value="{{ filters.date_to or '' }}">
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-success w-100" style="border-radius: 50px;">
+                            <i class="fas fa-filter me-2"></i>{{ _('Filtrar') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Trends Chart Data -->
+        <div class="card border-0 shadow-sm" style="border-radius: 20px;">
+            <div class="card-body p-4">
+                {% if trends_data %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>{{ _('Data') }}</th>
+                                <th class="text-center">{{ _('Total') }}</th>
+                                <th class="text-center">{{ _('Coloms') }}</th>
+                                <th class="text-center">{{ _('Brossa') }}</th>
+                                <th class="text-center">{{ _('Altres') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for date_key, data in trends_data %}
+                            <tr>
+                                <td><strong>{{ date_key }}</strong></td>
+                                <td class="text-center">
+                                    <span class="badge bg-primary fs-6">{{ data.total }}</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-info">{{ data.by_category.get(get_inventory_category_name('palomas'), 0) }}</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-warning">{{ data.by_category.get(get_inventory_category_name('basura'), 0) }}</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-secondary">
+                                        {{ data.total - data.by_category.get(get_inventory_category_name('palomas'), 0) - data.by_category.get(get_inventory_category_name('basura'), 0) }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">{{ _('No hi ha dades per mostrar amb els filtres seleccionats') }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+

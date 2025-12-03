@@ -24,6 +24,94 @@ def allowed_file(filename):
     """Check if file extension is allowed"""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def calculate_distance_km(lat1, lon1, lat2, lon2):
+    """
+    Calculate the distance between two GPS coordinates in kilometers using Haversine formula.
+    Returns distance in kilometers.
+    """
+    from math import radians, sin, cos, sqrt, atan2
+    
+    # Convert to radians
+    lat1_rad = radians(lat1)
+    lon1_rad = radians(lon1)
+    lat2_rad = radians(lat2)
+    lon2_rad = radians(lon2)
+    
+    # Haversine formula
+    dlat = lat2_rad - lat1_rad
+    dlon = lon2_rad - lon1_rad
+    
+    a = sin(dlat / 2)**2 + cos(lat1_rad) * cos(lat2_rad) * sin(dlon / 2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    
+    # Earth radius in kilometers
+    R = 6371.0
+    
+    return R * c
+
+def extract_gps_from_image(file_path):
+    """
+    Extract GPS coordinates from image EXIF data.
+    Returns (latitude, longitude) tuple or (None, None) if not found.
+    """
+    try:
+        from PIL.ExifTags import TAGS, GPSTAGS
+        
+        img = Image.open(file_path)
+        exif_data = img._getexif()
+        
+        if exif_data is None:
+            return None, None
+        
+        # Find GPS info in EXIF
+        gps_info = None
+        for tag_id, value in exif_data.items():
+            tag = TAGS.get(tag_id, tag_id)
+            if tag == 'GPSInfo':
+                gps_info = value
+                break
+        
+        if gps_info is None:
+            return None, None
+        
+        # Extract GPS coordinates
+        gps_data = {}
+        for key, value in gps_info.items():
+            tag = GPSTAGS.get(key, key)
+            gps_data[tag] = value
+        
+        # Get latitude
+        lat_ref = gps_data.get('GPSLatitudeRef', 'N')
+        lat = gps_data.get('GPSLatitude')
+        
+        # Get longitude
+        lon_ref = gps_data.get('GPSLongitudeRef', 'E')
+        lon = gps_data.get('GPSLongitude')
+        
+        if lat is None or lon is None:
+            return None, None
+        
+        # Convert to decimal degrees
+        # lat/lon are tuples: (degrees, minutes, seconds)
+        latitude = float(lat[0]) + (float(lat[1]) / 60.0) + (float(lat[2]) / 3600.0)
+        if lat_ref == 'S':
+            latitude = -latitude
+        
+        longitude = float(lon[0]) + (float(lon[1]) / 60.0) + (float(lon[2]) / 3600.0)
+        if lon_ref == 'W':
+            longitude = -longitude
+        
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"✅ GPS extraído de imagen: lat={latitude}, lng={longitude}")
+        return latitude, longitude
+        
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.warning(f"❌ Error extrayendo GPS de imagen: {e}")
+        return None, None
+
 def optimize_image(file_path):
     """Optimize uploaded images"""
     try:
@@ -62,7 +150,7 @@ def get_category_name(category_key):
         'educacion': _('Environmental Education'),
         'cultura': _('Culture and Civics'),
         'social': _('Social Action'),
-        'basura_desbordada': _('Brossa Desbordada'),
+        'escombreries_desbordades': _('Escombreries Desbordades'),
         'vertidos': _('Dumping')
     }
     return category_names.get(category_key, category_key)
@@ -72,26 +160,107 @@ def get_inventory_category_name(category, subcategory=None):
     from flask_babel import gettext as _
     
     # Main categories (en catalán por defecto)
+    # Las traducciones se evalúan en el momento de la llamada, no en la definición
     main_categories = {
-        'palomas': _('Coloms'),
-        'basura': _('Brossa')
+        'palomas': lambda: _('Coloms'),
+        'basura': lambda: _('Brossa'),
+        'perros': lambda: _('Gossos'),
+        'material_deteriorat': lambda: _('Material Deteriorat'),
+        'bruticia': lambda: _('Brutícia'),
+        'mobiliari_urba': lambda: _('Mobiliari Urbà'),
+        'vegetacio': lambda: _('Vegetació'),
+        'infraestructura': lambda: _('Infraestructura')
     }
     
     # Subcategories (en catalán por defecto)
     subcategories = {
-        'excremento': _('Excrement'),
-        'nido': _('Niu'),
-        'plumas': _('Plomes'),
-        'basura_desbordada': _('Brossa Desbordada'),
-        'vertidos': _('Abocaments'),
-        'otro': _('Altres')
+        # Palomas
+        'excremento': lambda: _('Excrement'),
+        'nido': lambda: _('Niu'),
+        'plumas': lambda: _('Plomes'),
+        # Basura
+        'escombreries_desbordades': lambda: _('Escombreries Desbordades'),
+        'basura_desbordada': lambda: _('Escombreries Desbordades'),  # Alias para compatibilidad con datos antiguos
+        'vertidos': lambda: _('Abocaments'),
+        # Perros
+        'excrements': lambda: _('Excrements'),
+        'pixades': lambda: _('Pixades'),
+        # Material Deteriorat
+        'faroles': lambda: _('Faroles'),
+        'bancs': lambda: _('Bancs'),
+        'senyals': lambda: _('Senyals'),
+        'paviment': lambda: _('Paviment'),
+        # Brutícia
+        'terra': lambda: _('Terra'),
+        'fulles': lambda: _('Fulles'),
+        'grafit': lambda: _('Grafit'),
+        # Mobiliari Urbà
+        'papereres': lambda: _('Papereres'),
+        'parades': lambda: _('Parades'),
+        # Vegetació
+        'arbres': lambda: _('Arbres'),
+        'arbustos': lambda: _('Arbustos'),
+        'gespa': lambda: _('Gespa'),
+        # Infraestructura
+        'carreteres': lambda: _('Carreteres'),
+        'voreres': lambda: _('Voreres'),
+        'enllumenat': lambda: _('Enllumenat'),
+        # General
+        'otro': lambda: _('Altres')
     }
     
-    main_name = main_categories.get(category, category)
+    # Obtener el nombre traducido llamando a la función lambda
+    get_main_name = main_categories.get(category)
+    main_name = get_main_name() if get_main_name else category
+    
     if subcategory:
-        sub_name = subcategories.get(subcategory, subcategory)
+        get_sub_name = subcategories.get(subcategory)
+        sub_name = get_sub_name() if get_sub_name else subcategory
         return f"{main_name} → {sub_name}"
     return main_name
+
+def get_inventory_subcategory_name(subcategory):
+    """Get translated subcategory name only"""
+    from flask_babel import gettext as _
+    
+    subcategories = {
+        # Palomas
+        'excremento': lambda: _('Excrement'),
+        'nido': lambda: _('Niu'),
+        'plumas': lambda: _('Plomes'),
+        # Basura
+        'escombreries_desbordades': lambda: _('Escombreries Desbordades'),
+        'basura_desbordada': lambda: _('Escombreries Desbordades'),  # Alias para compatibilidad con datos antiguos
+        'vertidos': lambda: _('Abocaments'),
+        # Perros
+        'excrements': lambda: _('Excrements'),
+        'pixades': lambda: _('Pixades'),
+        # Material Deteriorat
+        'faroles': lambda: _('Faroles'),
+        'bancs': lambda: _('Bancs'),
+        'senyals': lambda: _('Senyals'),
+        'paviment': lambda: _('Paviment'),
+        # Brutícia
+        'terra': lambda: _('Terra'),
+        'fulles': lambda: _('Fulles'),
+        'grafit': lambda: _('Grafit'),
+        # Mobiliari Urbà
+        'papereres': lambda: _('Papereres'),
+        'parades': lambda: _('Parades'),
+        # Vegetació
+        'arbres': lambda: _('Arbres'),
+        'arbustos': lambda: _('Arbustos'),
+        'gespa': lambda: _('Gespa'),
+        # Infraestructura
+        'carreteres': lambda: _('Carreteres'),
+        'voreres': lambda: _('Voreres'),
+        'enllumenat': lambda: _('Enllumenat'),
+        # General
+        'otro': lambda: _('Altres')
+    }
+    
+    get_sub_name = subcategories.get(subcategory)
+    return get_sub_name() if get_sub_name else subcategory
 
 def get_inventory_icon(category, subcategory=None):
     """
@@ -115,10 +284,52 @@ def get_inventory_icon(category, subcategory=None):
         ('palomas', 'otro'): ('fa-dove', 'text-primary'),
         
         # Basura
-        ('basura', 'basura_desbordada'): ('fa-trash-alt', 'text-warning'),
+        ('basura', 'escombreries_desbordades'): ('fa-trash-alt', 'text-warning'),
         ('basura', 'vertidos'): ('fa-tint', 'text-danger'),
         ('basura', None): ('fa-trash', 'text-secondary'),
         ('basura', 'otro'): ('fa-trash', 'text-secondary'),
+        
+        # Perros
+        ('perros', 'excrements'): ('fa-poop', 'text-danger'),
+        ('perros', 'pixades'): ('fa-tint', 'text-warning'),
+        ('perros', None): ('fa-dog', 'text-secondary'),
+        ('perros', 'otro'): ('fa-dog', 'text-secondary'),
+        
+        # Material Deteriorat
+        ('material_deteriorat', 'faroles'): ('fa-lightbulb', 'text-warning'),
+        ('material_deteriorat', 'bancs'): ('fa-chair', 'text-info'),
+        ('material_deteriorat', 'senyals'): ('fa-sign', 'text-warning'),
+        ('material_deteriorat', 'paviment'): ('fa-road', 'text-danger'),
+        ('material_deteriorat', None): ('fa-tools', 'text-secondary'),
+        ('material_deteriorat', 'otro'): ('fa-tools', 'text-secondary'),
+        
+        # Brutícia
+        ('bruticia', 'terra'): ('fa-mountain', 'text-warning'),
+        ('bruticia', 'fulles'): ('fa-leaf', 'text-success'),
+        ('bruticia', 'grafit'): ('fa-spray-can', 'text-danger'),
+        ('bruticia', None): ('fa-broom', 'text-secondary'),
+        ('bruticia', 'otro'): ('fa-broom', 'text-secondary'),
+        
+        # Mobiliari Urbà
+        ('mobiliari_urba', 'papereres'): ('fa-trash', 'text-info'),
+        ('mobiliari_urba', 'parades'): ('fa-bus', 'text-primary'),
+        ('mobiliari_urba', 'bancs'): ('fa-chair', 'text-info'),
+        ('mobiliari_urba', None): ('fa-city', 'text-secondary'),
+        ('mobiliari_urba', 'otro'): ('fa-city', 'text-secondary'),
+        
+        # Vegetació
+        ('vegetacio', 'arbres'): ('fa-tree', 'text-success'),
+        ('vegetacio', 'arbustos'): ('fa-seedling', 'text-success'),
+        ('vegetacio', 'gespa'): ('fa-grass', 'text-success'),
+        ('vegetacio', None): ('fa-tree', 'text-success'),
+        ('vegetacio', 'otro'): ('fa-tree', 'text-success'),
+        
+        # Infraestructura
+        ('infraestructura', 'carreteres'): ('fa-road', 'text-danger'),
+        ('infraestructura', 'voreres'): ('fa-walking', 'text-info'),
+        ('infraestructura', 'enllumenat'): ('fa-lightbulb', 'text-warning'),
+        ('infraestructura', None): ('fa-building', 'text-secondary'),
+        ('infraestructura', 'otro'): ('fa-building', 'text-secondary'),
     }
     
     # Try to get icon for specific category+subcategory combination
@@ -155,16 +366,48 @@ def generate_slug(title):
 CATEGORY_URL_TO_DB = {
     'coloms': 'palomas',
     'brossa': 'basura',
+    'gossos': 'perros',
+    'material_deteriorat': 'material_deteriorat',
+    'bruticia': 'bruticia',
+    'mobiliari_urba': 'mobiliari_urba',
+    'vegetacio': 'vegetacio',
+    'infraestructura': 'infraestructura',
 }
 
 CATEGORY_DB_TO_URL = {v: k for k, v in CATEGORY_URL_TO_DB.items()}
 
 SUBCATEGORY_URL_TO_DB = {
+    # Palomas
     'niu': 'nido',
     'excrement': 'excremento',
     'plomes': 'plumas',
-    'brossa_desbordada': 'basura_desbordada',
+    # Basura
+    'escombreries_desbordades': 'escombreries_desbordades',
     'abocaments': 'vertidos',
+    # Perros
+    'excrements': 'excrements',
+    'pixades': 'pixades',
+    # Material Deteriorat
+    'faroles': 'faroles',
+    'bancs': 'bancs',
+    'senyals': 'senyals',
+    'paviment': 'paviment',
+    # Brutícia
+    'terra': 'terra',
+    'fulles': 'fulles',
+    'grafit': 'grafit',
+    # Mobiliari Urbà
+    'papereres': 'papereres',
+    'parades': 'parades',
+    # Vegetació
+    'arbres': 'arbres',
+    'arbustos': 'arbustos',
+    'gespa': 'gespa',
+    # Infraestructura
+    'carreteres': 'carreteres',
+    'voreres': 'voreres',
+    'enllumenat': 'enllumenat',
+    # General
     'altres': 'otro',
 }
 

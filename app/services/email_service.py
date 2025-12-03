@@ -268,11 +268,22 @@ class EmailService:
     @staticmethod
     def send_admin_notification(admin_email, notification_type, data):
         """Send notification to admin"""
-        return EmailService.send_email(
+        # Create a more descriptive subject based on notification type
+        subject = f"Tarracograf - {notification_type}"
+        if data.get('subject'):
+            subject = f"Tarracograf - {notification_type}: {data.get('subject')}"
+        
+        current_app.logger.info(f'Sending admin notification: {notification_type} to {admin_email}')
+        result = EmailService.send_email(
             to=admin_email,
-            subject=_('Notificació de Tarracograf'),
+            subject=subject,
             template='admin_notification',
             notification_type=notification_type,
             data=data
         )
+        if result:
+            current_app.logger.info(f'Admin notification sent successfully to {admin_email}')
+        else:
+            current_app.logger.warning(f'Admin notification failed to send to {admin_email}')
+        return result
 
