@@ -114,16 +114,19 @@ def init_db_command():
     # Create roles if they don't exist
     try:
         if not Role.query.first():
-        print("Creating default roles...")
-        admin_role = Role(name='admin', description='Administrator')
-        user_role = Role(name='user', description='Regular User')
-        moderator_role = Role(name='moderator', description='Moderator')
-        
-        db.session.add(admin_role)
-        db.session.add(user_role)
-        db.session.add(moderator_role)
-        db.session.commit()
-        print("✓ Roles created")
+            print("Creating default roles...")
+            admin_role = Role(name='admin', description='Administrator')
+            user_role = Role(name='user', description='Regular User')
+            moderator_role = Role(name='moderator', description='Moderator')
+            
+            db.session.add(admin_role)
+            db.session.add(user_role)
+            db.session.add(moderator_role)
+            db.session.commit()
+            print("✓ Roles created")
+    except Exception as e:
+        print(f"❌ Error creating roles: {e}")
+        raise
     
     # Create admin user if it doesn't exist
     from flask import current_app
