@@ -225,7 +225,7 @@ class EmailService:
         # Get full category name for display
         from app.utils import get_inventory_category_name, get_inventory_subcategory_name
         category_name = get_inventory_category_name(item.category)
-        subcategory_name = get_inventory_subcategory_name(item.category, item.subcategory) if item.subcategory else None
+        subcategory_name = get_inventory_subcategory_name(item.subcategory) if item.subcategory else None
         full_category = f"{category_name}" + (f" - {subcategory_name}" if subcategory_name else "")
         
         return EmailService.send_email(

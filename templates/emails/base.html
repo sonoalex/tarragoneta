@@ -23,15 +23,20 @@
             background-color: #FFFFFF;
         }
         .email-header {
-            background-color: #4A9B5C;
+            background-color: #FFFFFF;
             padding: 30px 20px;
             text-align: center;
         }
         .email-header h1 {
-            color: #FFFFFF;
+            color: #2C2C2C;
             margin: 0;
             font-size: 28px;
             font-weight: 700;
+        }
+        .email-logo {
+            max-width: 200px;
+            height: auto;
+            margin-bottom: 15px;
         }
         .email-body {
             padding: 40px 30px;
@@ -120,6 +125,9 @@
             .email-header h1 {
                 font-size: 24px;
             }
+            .email-logo {
+                max-width: 150px;
+            }
         }
     </style>
 </head>
@@ -127,7 +135,8 @@
     <div class="email-container">
         <!-- Header -->
         <div class="email-header">
-            <h1>🌱 Tarracograf</h1>
+            <img src="cid:logo" alt="Tarracograf" class="email-logo">
+            <h1 style="margin-top: 10px;">Tarracograf</h1>
         </div>
         
         <!-- Body -->

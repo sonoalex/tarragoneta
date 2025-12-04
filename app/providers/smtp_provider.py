@@ -40,6 +40,7 @@ class SMTPEmailProvider(EmailProvider):
         
         try:
             from app.extensions import mail
+            import os
             
             # Get sender from config or parameter
             default_sender = current_app.config.get('MAIL_DEFAULT_SENDER', 'Tarracograf <hola@tarracograf.cat>')
@@ -53,6 +54,23 @@ class SMTPEmailProvider(EmailProvider):
                 sender=email_sender,
                 reply_to=reply_to
             )
+            
+            # Attach logo as inline image with Content-ID
+            try:
+                logo_path = os.path.join(current_app.static_folder or 'static', 'images', 'tarracograf_blanc1.png')
+                if os.path.exists(logo_path):
+                    with open(logo_path, 'rb') as f:
+                        logo_data = f.read()
+                    msg.attach(
+                        'tarracograf_logo.png',
+                        'image/png',
+                        logo_data,
+                        'inline',
+                        headers=[['Content-ID', '<logo>']]
+                    )
+                    current_app.logger.debug('Logo attached to email with Content-ID: logo')
+            except Exception as e:
+                current_app.logger.warning(f'Could not attach logo to email: {e}')
             
             current_app.logger.info(f'[EMAIL DEBUG] Sending email via SMTP to {to}...')
             
