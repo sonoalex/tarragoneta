@@ -106,10 +106,62 @@ def init_db_command():
     # Verify tables exist before querying
     inspector = inspect(db.engine)
     existing_tables = inspector.get_table_names()
-    if 'role' not in existing_tables:
-        print("❌ ERROR: 'role' table does not exist!")
-        print(f"   Existing tables: {existing_tables}")
-        raise Exception("Required tables not created. Check database permissions and PostGIS setup.")
+    
+    # Filter out PostGIS/TIGER system tables
+    app_tables = [t for t in existing_tables if t not in [
+        'spatial_ref_sys', 'alembic_version', 'topology', 'layer', 
+        'featnames', 'addr', 'geocode_settings', 'geocode_settings_default',
+        'direction_lookup', 'secondary_unit_lookup', 'state_lookup', 
+        'street_type_lookup', 'place_lookup', 'county_lookup', 
+        'countysub_lookup', 'zip_lookup_all', 'zip_lookup_base', 
+        'zip_lookup', 'county', 'state', 'place', 'zip_state', 
+        'zip_state_loc', 'cousub', 'edges', 'addrfeat', 'zcta5', 
+        'tabblock20', 'faces', 'loader_platform', 'loader_variables',
+        'loader_lookuptables', 'tract', 'tabblock', 'bg', 'pagc_gaz',
+        'pagc_lex', 'pagc_rules'
+    ]]
+    
+    # Required application tables
+    required_tables = ['role', 'user', 'initiative']
+    
+    missing_tables = [t for t in required_tables if t not in app_tables]
+    
+    if missing_tables:
+        print(f"⚠️  WARNING: Missing application tables: {missing_tables}")
+        print(f"   Existing application tables: {app_tables}")
+        print("   Attempting to create missing tables with db.create_all()...")
+        
+        try:
+            # Force create all tables
+            db.create_all()
+            print("✓ Tables created with db.create_all()")
+            
+            # Verify again
+            inspector = inspect(db.engine)
+            existing_tables = inspector.get_table_names()
+            app_tables = [t for t in existing_tables if t not in [
+                'spatial_ref_sys', 'alembic_version', 'topology', 'layer', 
+                'featnames', 'addr', 'geocode_settings', 'geocode_settings_default',
+                'direction_lookup', 'secondary_unit_lookup', 'state_lookup', 
+                'street_type_lookup', 'place_lookup', 'county_lookup', 
+                'countysub_lookup', 'zip_lookup_all', 'zip_lookup_base', 
+                'zip_lookup', 'county', 'state', 'place', 'zip_state', 
+                'zip_state_loc', 'cousub', 'edges', 'addrfeat', 'zcta5', 
+                'tabblock20', 'faces', 'loader_platform', 'loader_variables',
+                'loader_lookuptables', 'tract', 'tabblock', 'bg', 'pagc_gaz',
+                'pagc_lex', 'pagc_rules'
+            ]]
+            
+            missing_tables = [t for t in required_tables if t not in app_tables]
+            if missing_tables:
+                print(f"❌ ERROR: Still missing tables: {missing_tables}")
+                print(f"   All existing tables: {existing_tables}")
+                raise Exception("Required tables not created. Check database permissions and PostGIS setup.")
+            else:
+                print("✓ All required tables now exist")
+        except Exception as e:
+            print(f"❌ Error creating tables: {e}")
+            raise
     
     # Create roles if they don't exist
     try:
