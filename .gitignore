@@ -67,3 +67,4 @@ static/uploads/*
 
 # Railway
 .railway/
+.env.bak
