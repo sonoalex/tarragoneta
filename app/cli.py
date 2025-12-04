@@ -133,6 +133,21 @@ def init_db_command():
 def create_admin_user_command(email=None, password=None, username=None):
     """Create or update admin user."""
     from flask import current_app
+    from app.models import User, Role
+    from flask_security import SQLAlchemyUserDatastore
+    
+    # Get or create user_datastore (may not be initialized in CLI context)
+    # Re-import to get the initialized instance, or create it if needed
+    try:
+        from app.extensions import user_datastore as uds_imported
+        if uds_imported is not None:
+            uds = uds_imported
+        else:
+            # Create it manually if not initialized
+            uds = SQLAlchemyUserDatastore(db, User, Role)
+    except:
+        # Fallback: create it manually
+        uds = SQLAlchemyUserDatastore(db, User, Role)
     
     # Get email from parameter, env var, or default
     if not email:
@@ -174,7 +189,7 @@ def create_admin_user_command(email=None, password=None, username=None):
         
         # Ensure user has admin role
         if admin_role not in admin_user.roles:
-            user_datastore.add_role_to_user(admin_user, admin_role)
+            uds.add_role_to_user(admin_user, admin_role)
             print("✓ Admin role added to user")
         
         # Update password if provided
@@ -207,7 +222,7 @@ def create_admin_user_command(email=None, password=None, username=None):
         print(f"   Email: {email}")
         print(f"   Username: {username}")
         
-        admin_user = user_datastore.create_user(
+        admin_user = uds.create_user(
             email=email,
             username=username,
             password=password,
