@@ -12,13 +12,13 @@
                 <div class="hero-visual">
                     <div class="hero-visual-bg"></div>
                     <!-- Logo image -->
-                    <img src="{{ url_for('static', filename='images/tarracograf_pila.png') }}" alt="Tarracograf" class="hero-image" style="position: relative; z-index: 1; width: 100%; height: 100%; object-fit: contain; border-radius: 20px; background: transparent;">
+                    <img src="{{ url_for('static', filename='images/tarracograf_pila.png') }}" alt="Tarracograf" class="hero-image" style="position: relative; z-index: 1; width: 100%; height: 100%; object-fit: contain; border-radius: 50%; background: transparent; aspect-ratio: 1/1;">
                 </div>
             </div>
             
             <!-- Right: Content -->
             <div class="col-lg-6">
-                <div class="hero-content">
+                <div class="hero-content text-center text-lg-start">
                     <h1 class="hero-title">
                         <span class="highlight">Tarracograf</span><span class="dot">.</span>
                     </h1>
@@ -26,7 +26,7 @@
                         {{ _('La radiografia de la ciutat. Reporta problemes de neteja, visualitza l\'estat de la ciutat i participa en la millora de Tarragona.') }}
                     </p>
                     
-                    <div class="hero-stats">
+                    <div class="hero-stats justify-content-center justify-content-lg-start">
                         <div class="stat-item">
                             <span class="stat-number">{{ total_inventory_items }}</span>
                             <span class="stat-label">{{ _('Reportatges Actius') }}</span>
@@ -41,16 +41,16 @@
                         </div>
                     </div>
                     
-                    <div class="mt-4 d-flex gap-3 flex-wrap">
-                        <a href="{{ url_for('inventory.inventory_map') }}" class="btn btn-primary btn-lg">
+                    <div class="mt-4 d-flex flex-column flex-lg-row gap-3 justify-content-center justify-content-lg-start">
+                        <a href="{{ url_for('inventory.inventory_map') }}" class="btn btn-primary btn-lg w-100 w-lg-auto">
                             <i class="fas fa-map me-2"></i>{{ _('Veure Mapa del Inventari') }}
                         </a>
                         {% if current_user.is_authenticated %}
-                            <a href="{{ url_for('inventory.report_item') }}" class="btn btn-success btn-lg">
+                            <a href="{{ url_for('inventory.report_item') }}" class="btn btn-success btn-lg w-100 w-lg-auto">
                                 <i class="fas fa-plus me-2"></i>{{ _('Reportar Problema') }}
                             </a>
                         {% else %}
-                            <a href="{{ url_for('security.register') }}" class="btn btn-outline-primary btn-lg">
+                            <a href="{{ url_for('security.register') }}" class="btn btn-outline-primary btn-lg w-100 w-lg-auto">
                                 {{ _('Uneix-te per Reportar') }}
                             </a>
                         {% endif %}
@@ -108,16 +108,16 @@
             </div>
         </div>
         
-        <div class="text-center">
-            <a href="{{ url_for('inventory.inventory_map') }}" class="btn btn-light btn-lg px-5 me-3">
+        <div class="text-center d-flex flex-column flex-md-row gap-3 justify-content-center">
+            <a href="{{ url_for('inventory.inventory_map') }}" class="btn btn-light btn-lg px-5 w-100 w-md-auto">
                 <i class="fas fa-map-marked-alt me-2"></i>{{ _('Explorar Mapa') }}
             </a>
             {% if current_user.is_authenticated %}
-                <a href="{{ url_for('inventory.report_item') }}" class="btn btn-outline-light btn-lg px-5">
+                <a href="{{ url_for('inventory.report_item') }}" class="btn btn-outline-light btn-lg px-5 w-100 w-md-auto">
                     <i class="fas fa-plus-circle me-2"></i>{{ _('Reportar Nou Problema') }}
                 </a>
             {% else %}
-                <a href="{{ url_for('security.register') }}" class="btn btn-outline-light btn-lg px-5">
+                <a href="{{ url_for('security.register') }}" class="btn btn-outline-light btn-lg px-5 w-100 w-md-auto">
                     <i class="fas fa-user-plus me-2"></i>{{ _('Registra\'t per Reportar') }}
                 </a>
             {% endif %}
@@ -129,12 +129,12 @@
 {% if recent_inventory_items %}
 <section class="py-5" style="background: var(--bg-white);">
     <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 text-center text-md-start">
+            <div class="mb-3 mb-md-0">
                 <h3 class="fw-bold mb-2">{{ _('Reportatges Recents') }}</h3>
                 <p class="text-muted mb-0">{{ _('Últims problemes reportats pels ciutadans') }}</p>
             </div>
-            <a href="{{ url_for('inventory.inventory_map') }}" class="btn btn-outline-primary">
+            <a href="{{ url_for('inventory.inventory_map') }}" class="btn btn-outline-primary w-100 w-md-auto">
                 {{ _('Veure Tots') }} <i class="fas fa-arrow-right ms-2"></i>
             </a>
         </div>
@@ -169,12 +169,12 @@
 <!-- Initiatives Section - Secondary Position -->
 <section id="initiatives" class="py-5" style="background: var(--bg-cream);">
     <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 text-center text-md-start">
+            <div class="mb-3 mb-md-0">
                 <h3 class="fw-bold mb-2">{{ _('Iniciatives Ciutadanes') }}</h3>
                 <p class="text-muted mb-0">{{ _('Descobreix com pots contribuir al canvi positiu a la nostra ciutat') }}</p>
             </div>
-            <a href="{{ url_for('initiatives.list_initiatives') }}" class="btn btn-outline-primary">
+            <a href="{{ url_for('initiatives.list_initiatives') }}" class="btn btn-outline-primary w-100 w-md-auto">
                 {{ _('Veure Totes') }} <i class="fas fa-arrow-right ms-2"></i>
             </a>
         </div>
