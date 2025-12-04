@@ -393,6 +393,36 @@ h3 {
     color: white;
 }
 
+/* Inventory Section - Clean with Subtle Green Border */
+.inventory-section {
+    background: var(--bg-white);
+    border-top: 3px solid var(--primary-green);
+    border-bottom: 3px solid var(--primary-green);
+    position: relative;
+}
+
+.inventory-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--primary-green-pale), transparent);
+}
+
+.inventory-stat-card {
+    background: var(--bg-light);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.inventory-stat-card:hover {
+    border-color: var(--primary-green);
+    box-shadow: 0 4px 12px rgba(74, 155, 92, 0.1);
+    transform: translateY(-2px);
+}
+
 /* Hero Section - Professional Clean Design */
 .hero {
     background: var(--bg-white);
