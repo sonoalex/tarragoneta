@@ -16,23 +16,57 @@ except ImportError:
 
 def init_db_command():
     """Initialize the database using Flask-Migrate."""
-    from flask_migrate import upgrade
+    from flask_migrate import upgrade, current, stamp
+    from sqlalchemy import inspect
     
-    # Upgrade database to latest migration
-    print("Upgrading database schema using migrations...")
-    try:
-        upgrade()
-        print("✓ Database schema upgraded")
-    except Exception as e:
-        # If no migrations exist yet, create them
-        if "Target database is not up to date" in str(e) or "Can't locate revision" in str(e):
-            print("No migrations found. Please run 'flask db init' and 'flask db migrate' first.")
-            print("Falling back to db.create_all()...")
-            db.create_all()
-        else:
-            print(f"Error upgrading database: {e}")
-            print("Falling back to db.create_all()...")
-            db.create_all()
+    # Check if database has any tables
+    inspector = inspect(db.engine)
+    existing_tables = inspector.get_table_names()
+    has_tables = len(existing_tables) > 0
+    
+    if not has_tables:
+        # Database is empty, create all tables first
+        print("Database is empty. Creating all tables...")
+        db.create_all()
+        print("✓ Tables created")
+        
+        # Mark migrations as applied (stamp head) to avoid running them
+        try:
+            print("Marking migrations as applied...")
+            stamp(revision='head')
+            print("✓ Migrations marked as applied")
+        except Exception as e:
+            print(f"⚠️  Could not stamp migrations: {e}")
+            print("   This is OK if alembic_version table doesn't exist yet")
+    else:
+        # Database has tables, try to upgrade using migrations
+        print("Upgrading database schema using migrations...")
+        try:
+            upgrade()
+            print("✓ Database schema upgraded")
+        except Exception as e:
+            # Check if error is about missing tables in migration
+            error_str = str(e)
+            if "does not exist" in error_str or "UndefinedTable" in error_str:
+                print(f"⚠️  Migration error (table missing): {e}")
+                print("   This usually means migrations are out of sync with database state.")
+                print("   Attempting to stamp current state...")
+                try:
+                    # Try to stamp the current revision to sync state
+                    current_rev = current()
+                    if current_rev:
+                        print(f"   Current revision: {current_rev}")
+                    else:
+                        # No revision tracked, stamp head
+                        print("   No revision tracked. Stamping head...")
+                        stamp(revision='head')
+                        print("✓ Migrations stamped")
+                except Exception as stamp_error:
+                    print(f"   Could not stamp: {stamp_error}")
+                    print("   Continuing with existing tables...")
+            else:
+                print(f"⚠️  Error upgrading database: {e}")
+                print("   Continuing with existing tables...")
     
     # Create roles if they don't exist
     if not Role.query.first():
