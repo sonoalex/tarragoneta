@@ -781,16 +781,21 @@ footer .list-unstyled a:hover {
     }
     
     .hero-stats {
-        gap: 1.5rem;
+        gap: 2rem;
         justify-content: center;
     }
     
     .stat-item {
         text-align: center;
+        min-width: 100px;
     }
     
     .stat-number {
-        font-size: 2rem;
+        font-size: 2.25rem;
+    }
+    
+    .stat-label {
+        font-size: 0.85rem;
     }
     
     .hero-visual {
