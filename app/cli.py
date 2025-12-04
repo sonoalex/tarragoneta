@@ -17,7 +17,7 @@ except ImportError:
 def init_db_command():
     """Initialize the database using Flask-Migrate."""
     from flask_migrate import upgrade, current, stamp
-    from sqlalchemy import inspect
+    from sqlalchemy import inspect, text
     
     # Check if database has any tables
     inspector = inspect(db.engine)
@@ -27,8 +27,43 @@ def init_db_command():
     if not has_tables:
         # Database is empty, create all tables first
         print("Database is empty. Creating all tables...")
-        db.create_all()
-        print("✓ Tables created")
+        
+        # Ensure PostGIS extension is enabled (for PostgreSQL)
+        try:
+            with db.engine.connect() as conn:
+                # Check if we're using PostgreSQL
+                if 'postgresql' in str(db.engine.url):
+                    print("Enabling PostGIS extension...")
+                    conn.execute(text("CREATE EXTENSION IF NOT EXISTS postgis;"))
+                    conn.commit()
+                    print("✓ PostGIS extension enabled")
+        except Exception as e:
+            print(f"⚠️  Could not enable PostGIS extension: {e}")
+            print("   Continuing anyway...")
+        
+        # Create all tables
+        try:
+            db.create_all()
+            print("✓ Tables created")
+            
+            # Verify tables were created
+            inspector = inspect(db.engine)
+            created_tables = inspector.get_table_names()
+            if len(created_tables) == 0:
+                print("⚠️  WARNING: No tables were created!")
+                print("   This might be a permissions issue or schema problem.")
+                raise Exception("No tables created")
+            else:
+                print(f"✓ Verified {len(created_tables)} tables exist")
+        except Exception as e:
+            print(f"❌ Error creating tables: {e}")
+            print("   Attempting to use migrations instead...")
+            try:
+                upgrade()
+                print("✓ Tables created via migrations")
+            except Exception as migration_error:
+                print(f"❌ Migrations also failed: {migration_error}")
+                raise
         
         # Mark migrations as applied (stamp head) to avoid running them
         try:
@@ -68,8 +103,17 @@ def init_db_command():
                 print(f"⚠️  Error upgrading database: {e}")
                 print("   Continuing with existing tables...")
     
+    # Verify tables exist before querying
+    inspector = inspect(db.engine)
+    existing_tables = inspector.get_table_names()
+    if 'role' not in existing_tables:
+        print("❌ ERROR: 'role' table does not exist!")
+        print(f"   Existing tables: {existing_tables}")
+        raise Exception("Required tables not created. Check database permissions and PostGIS setup.")
+    
     # Create roles if they don't exist
-    if not Role.query.first():
+    try:
+        if not Role.query.first():
         print("Creating default roles...")
         admin_role = Role(name='admin', description='Administrator')
         user_role = Role(name='user', description='Regular User')
