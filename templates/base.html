@@ -57,11 +57,6 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'main.about' %}active{% endif %}" href="{{ url_for('main.about') }}">
-                            {{ _('Sobre Nosaltres') }}
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'reports.public_reports' %}active{% endif %}" href="{{ url_for('reports.public_reports') }}">
                             {{ _('Reports') }}
                         </a>
