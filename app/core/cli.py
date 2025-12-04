@@ -3,7 +3,7 @@ CLI commands registration
 """
 import click
 from flask import current_app
-from app.cli import init_db_command, create_sample_data, import_zones_from_geojson
+from app.cli import init_db_command, create_sample_data, import_zones_from_geojson, create_admin_user_command
 from app.models import CityBoundary
 from app.extensions import db
 from datetime import datetime
@@ -15,6 +15,16 @@ def register_cli_commands(app):
     def init_db():
         """Initialize the database using Flask-Migrate."""
         init_db_command()
+    
+    @app.cli.command('create-admin')
+    @click.option('--email', default=None, help='Email del usuario admin (default: hola@tarracograf.cat o ADMIN_USER_EMAIL)')
+    @click.option('--password', default=None, help='Password del usuario admin (default: ADMIN_PASSWORD o admin123 en desarrollo)')
+    @click.option('--username', default=None, help='Username del usuario admin (default: admin)')
+    def create_admin(email, password, username):
+        """Create or update admin user."""
+        success = create_admin_user_command(email=email, password=password, username=username)
+        if not success:
+            raise click.ClickException("Error al crear usuario admin")
     
     @app.cli.command('create-sample-data')
     def create_sample():

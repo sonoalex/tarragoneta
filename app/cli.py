@@ -130,6 +130,97 @@ def init_db_command():
     
     print("Database initialized successfully!")
 
+def create_admin_user_command(email=None, password=None, username=None):
+    """Create or update admin user."""
+    from flask import current_app
+    
+    # Get email from parameter, env var, or default
+    if not email:
+        email = current_app.config.get('ADMIN_USER_EMAIL', 'hola@tarracograf.cat')
+    
+    # Get password from parameter or env var
+    if not password:
+        password = current_app.config.get('ADMIN_PASSWORD')
+        if not password:
+            # Only in development: use default password
+            if current_app.config.get('ENV') == 'development':
+                password = 'admin123'
+                print("⚠️  Using default password 'admin123' (development only)")
+            else:
+                print("❌ ERROR: ADMIN_PASSWORD not configured and no password provided.")
+                print("   Set ADMIN_PASSWORD environment variable or use --password option.")
+                return False
+    
+    # Get username from parameter or default
+    if not username:
+        username = 'admin'
+    
+    # Ensure roles exist
+    admin_role = Role.query.filter_by(name='admin').first()
+    if not admin_role:
+        print("Creating admin role...")
+        admin_role = Role(name='admin', description='Administrator')
+        db.session.add(admin_role)
+        db.session.commit()
+        print("✓ Admin role created")
+    
+    # Check if user exists
+    admin_user = User.query.filter_by(email=email).first()
+    
+    if admin_user:
+        # Update existing user
+        print(f"User with email '{email}' already exists.")
+        print("Updating user to ensure admin role...")
+        
+        # Ensure user has admin role
+        if admin_role not in admin_user.roles:
+            user_datastore.add_role_to_user(admin_user, admin_role)
+            print("✓ Admin role added to user")
+        
+        # Update password if provided
+        if password:
+            admin_user.password = hash_password(password)
+            print("✓ Password updated")
+        
+        # Ensure user is active and confirmed
+        if not admin_user.active:
+            admin_user.active = True
+            print("✓ User activated")
+        
+        if not admin_user.confirmed_at:
+            admin_user.confirmed_at = datetime.now()
+            print("✓ User confirmed")
+        
+        # Update username if provided and different
+        if username and admin_user.username != username:
+            admin_user.username = username
+            print(f"✓ Username updated to '{username}'")
+        
+        db.session.commit()
+        print(f"✅ Admin user updated successfully!")
+        print(f"   Email: {email}")
+        print(f"   Username: {admin_user.username}")
+        return True
+    else:
+        # Create new user
+        print(f"Creating admin user...")
+        print(f"   Email: {email}")
+        print(f"   Username: {username}")
+        
+        admin_user = user_datastore.create_user(
+            email=email,
+            username=username,
+            password=password,
+            active=True,
+            confirmed_at=datetime.now(),
+            roles=[admin_role]
+        )
+        db.session.commit()
+        print("✅ Admin user created successfully!")
+        if current_app.config.get('ENV') == 'development':
+            print(f"   Password: {password} (change after first login!)")
+        return True
+
 def create_sample_data():
     """Create sample data for testing."""
     from flask_babel import gettext as _
