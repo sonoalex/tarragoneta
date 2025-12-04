@@ -393,14 +393,25 @@ h3 {
     color: white;
 }
 
-/* Hero Section - Clean Two Column Layout */
+/* Hero Section - Professional Clean Design */
 .hero {
-    background: var(--bg-cream);
+    background: var(--bg-white);
     color: var(--text-dark);
-    padding: 8rem 0 6rem;
+    padding: 10rem 0 8rem;
     margin-top: 0;
     position: relative;
     overflow: hidden;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-color), transparent);
 }
 
 .hero-content {
@@ -408,29 +419,58 @@ h3 {
     z-index: 1;
 }
 
+.hero-badge {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+}
+
+.badge-text {
+    display: inline-block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--primary-green);
+    padding: 0.5rem 1.25rem;
+    background: var(--primary-green-pale);
+    border-radius: 50px;
+    border: 1px solid rgba(74, 155, 92, 0.2);
+}
+
 .hero-title {
-    font-size: 3.5rem;
+    font-size: 4rem;
     font-weight: 800;
     margin-bottom: 1.5rem;
     line-height: 1.1;
     color: var(--text-dark);
+    letter-spacing: -0.03em;
 }
 
 .hero-title .highlight {
     color: var(--primary-green);
 }
 
-.hero-title .dot {
-    color: var(--accent-yellow);
-    display: inline-block;
+.hero-subtitle {
+    font-size: 1.375rem;
+    margin-bottom: 0;
+    color: var(--text-medium);
+    line-height: 1.7;
+    font-weight: 400;
+    max-width: 540px;
 }
 
-.hero-subtitle {
-    font-size: 1.25rem;
-    margin-bottom: 2rem;
-    color: var(--text-medium);
-    line-height: 1.6;
-    font-weight: 400;
+.hero-divider {
+    width: 60px;
+    height: 3px;
+    background: var(--primary-green);
+    border-radius: 2px;
+    margin: 0 auto;
+}
+
+@media (min-width: 992px) {
+    .hero-divider {
+        margin: 0;
+    }
 }
 
 .hero-stats {
@@ -443,36 +483,58 @@ h3 {
 
 .stat-item {
     text-align: center;
-    padding: 0;
-    min-width: 120px;
+    padding: 1.5rem 2rem;
+    min-width: 140px;
     flex: 0 0 auto;
+    border-right: 1px solid var(--border-color);
+    position: relative;
+}
+
+.stat-item:last-child {
+    border-right: none;
 }
 
 .stat-number {
     display: block;
-    font-size: 2.75rem;
+    font-size: 3rem;
     font-weight: 800;
     margin-bottom: 0.5rem;
-    color: var(--text-dark);
+    color: var(--primary-green);
     line-height: 1;
+    letter-spacing: -0.02em;
 }
 
 .stat-label {
     display: block;
-    font-size: 0.95rem;
+    font-size: 0.875rem;
     color: var(--text-medium);
     font-weight: 500;
-    line-height: 1.3;
+    line-height: 1.4;
     text-align: center;
+    letter-spacing: 0.01em;
 }
 
 @media (min-width: 992px) {
     .stat-item {
         text-align: left;
+        padding: 1.5rem 2.5rem 1.5rem 0;
     }
     
     .stat-label {
         text-align: left;
+    }
+}
+
+@media (max-width: 991px) {
+    .stat-item {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: 1.25rem 1rem;
+        min-width: 120px;
+    }
+    
+    .stat-item:last-child {
+        border-bottom: none;
     }
 }
 
@@ -481,26 +543,28 @@ h3 {
     position: relative;
     height: 100%;
     min-height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .hero-visual-bg {
-    position: absolute;
-    width: 500px;
-    height: 500px;
-    background: var(--primary-green-pale);
-    border-radius: 50%;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 0;
+    display: none; /* Removed for cleaner look */
 }
 
 .hero-image {
     position: relative;
     z-index: 1;
     width: 100%;
-    height: 100%;
+    max-width: 500px;
+    height: auto;
     object-fit: contain;
+    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.08));
+    transition: transform 0.3s ease;
+}
+
+.hero-image:hover {
+    transform: translateY(-5px);
 }
 
 /* Yellow Speech Bubbles */
@@ -771,49 +835,65 @@ footer .list-unstyled a:hover {
     }
     
     .hero-title {
-        font-size: 2.25rem;
+        font-size: 2.5rem;
         text-align: center;
     }
     
     .hero-subtitle {
-        font-size: 1.1rem;
+        font-size: 1.125rem;
         text-align: center;
+        max-width: 100%;
     }
     
     .hero-stats {
-        gap: 2rem;
+        gap: 0;
         justify-content: center;
+        flex-direction: column;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        overflow: hidden;
+        background: var(--bg-light);
     }
     
     .stat-item {
         text-align: center;
-        min-width: 100px;
+        min-width: 100%;
+        padding: 1.5rem 1rem;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .stat-item:last-child {
+        border-bottom: none;
     }
     
     .stat-number {
-        font-size: 2.25rem;
+        font-size: 2.5rem;
     }
     
     .stat-label {
-        font-size: 0.85rem;
+        font-size: 0.875rem;
     }
     
     .hero-visual {
         min-height: 300px;
     }
     
-    .hero-visual-bg {
-        width: 300px;
-        height: 300px;
+    .hero-image {
+        max-width: 300px;
     }
     
     .hero-content {
         text-align: center !important;
     }
     
-    .speech-bubble {
-        font-size: 0.8rem;
-        padding: 0.5rem 1rem;
+    .hero-divider {
+        margin: 0 auto;
+    }
+    
+    .badge-text {
+        font-size: 0.75rem;
+        padding: 0.4rem 1rem;
     }
 }
 

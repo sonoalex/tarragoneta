@@ -19,12 +19,17 @@
             <!-- Right: Content -->
             <div class="col-lg-6">
                 <div class="hero-content text-center text-lg-start">
+                    <div class="hero-badge mb-4">
+                        <span class="badge-text">{{ _('Radiografia Ciutadana') }}</span>
+                    </div>
                     <h1 class="hero-title">
-                        <span class="highlight">Tarracograf</span><span class="dot">.</span>
+                        <span class="highlight">Tarracograf</span>
                     </h1>
                     <p class="hero-subtitle">
                         {{ _('La radiografia de la ciutat. Reporta problemes de neteja, visualitza l\'estat de la ciutat i participa en la millora de Tarragona.') }}
                     </p>
+                    
+                    <div class="hero-divider my-4"></div>
                     
                     <div class="hero-stats justify-content-center justify-content-lg-start">
                         <div class="stat-item">
@@ -41,16 +46,18 @@
                         </div>
                     </div>
                     
+                    <div class="hero-divider my-4"></div>
+                    
                     <div class="mt-4 d-flex flex-column flex-lg-row gap-3 justify-content-center justify-content-lg-start">
-                        <a href="{{ url_for('inventory.inventory_map') }}" class="btn btn-primary btn-lg w-100 w-lg-auto">
+                        <a href="{{ url_for('inventory.inventory_map') }}" class="btn btn-primary btn-lg w-100 w-lg-auto px-4">
                             <i class="fas fa-map me-2"></i>{{ _('Veure Mapa del Inventari') }}
                         </a>
                         {% if current_user.is_authenticated %}
-                            <a href="{{ url_for('inventory.report_item') }}" class="btn btn-success btn-lg w-100 w-lg-auto">
+                            <a href="{{ url_for('inventory.report_item') }}" class="btn btn-outline-primary btn-lg w-100 w-lg-auto px-4">
                                 <i class="fas fa-plus me-2"></i>{{ _('Reportar Problema') }}
                             </a>
                         {% else %}
-                            <a href="{{ url_for('security.register') }}" class="btn btn-outline-primary btn-lg w-100 w-lg-auto">
+                            <a href="{{ url_for('security.register') }}" class="btn btn-outline-primary btn-lg w-100 w-lg-auto px-4">
                                 {{ _('Uneix-te per Reportar') }}
                             </a>
                         {% endif %}
