@@ -102,11 +102,11 @@ class Config:
     EMAIL_PROVIDER = os.environ.get('EMAIL_PROVIDER', 'smtp')
     
     # Celery configuration
-    # Railway provides REDIS_URL automatically, but we can override with CELERY_BROKER_URL
-    # If REDIS_URL is set and CELERY_BROKER_URL is not, use REDIS_URL
-    redis_url = os.environ.get('REDIS_URL')
+    # Railway provides REDIS_URL and REDIS_PUBLIC_URL automatically
+    # Priority: REDIS_PUBLIC_URL > REDIS_URL > CELERY_BROKER_URL
+    redis_url = os.environ.get('REDIS_PUBLIC_URL') or os.environ.get('REDIS_URL')
     if redis_url and not os.environ.get('CELERY_BROKER_URL'):
-        # Use REDIS_URL if provided by Railway
+        # Use REDIS_URL or REDIS_PUBLIC_URL if provided by Railway
         CELERY_BROKER_URL = f"{redis_url}/0"
         CELERY_RESULT_BACKEND = f"{redis_url}/0"
     else:
