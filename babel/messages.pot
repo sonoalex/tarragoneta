@@ -1164,7 +1164,7 @@ msgstr ""
 
 #: templates/index.html:76
 msgid ""
-"Visualitza i reporta problemes de neteja, palomes i altres incidències a "
+"Visualitza i reporta problemes de neteja, coloms i altres incidències a "
 "Tarragona"
 msgstr ""
 
