@@ -1,7 +1,4 @@
 {
-  "$schema": "https://schema.up.railway.app/railway.schema.json",
-  "deploy": {
-    "startCommand": "bash start_railway.sh"
-  }
+  "$schema": "https://schema.up.railway.app/railway.schema.json"
 }
 

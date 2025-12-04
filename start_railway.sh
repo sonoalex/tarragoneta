@@ -1,9 +1,9 @@
 #!/bin/bash
-# Railway startup script - runs both Celery worker and Gunicorn
+# Railway web service startup script (Gunicorn only)
 
 set +e
 
-echo "🚀 Starting Tarracograf on Railway..."
+echo "🚀 Starting Tarracograf web service on Railway..."
 
 # Compile translations
 echo "🌐 Compiling translations..."
@@ -15,15 +15,7 @@ fi
 # Get port from environment
 PORT=${PORT:-5000}
 
-# Start Celery worker in background
-echo "🔧 Starting Celery worker..."
-celery -A celery_worker.celery worker --loglevel=info &
-CELERY_PID=$!
-
-# Wait a moment for Celery to start
-sleep 2
-
-# Start Gunicorn in foreground (this is the main process)
+# Start Gunicorn (this is the main process for web service)
 echo "✅ Starting Gunicorn server on port ${PORT}..."
 exec gunicorn \
     --bind "0.0.0.0:${PORT}" \
@@ -34,7 +26,4 @@ exec gunicorn \
     --error-logfile - \
     --log-level info \
     wsgi:app
-
-# If Gunicorn exits, kill Celery
-kill $CELERY_PID 2>/dev/null
 
