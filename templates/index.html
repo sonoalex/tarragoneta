@@ -11,8 +11,8 @@
             <div class="col-lg-6 mb-5 mb-lg-0">
                 <div class="hero-visual">
                     <div class="hero-visual-bg"></div>
-                    <!-- Placeholder image -->
-                    <img src="https://picsum.photos/600/600?random=1" alt="Tarracograf" class="hero-image" style="position: relative; z-index: 1; width: 100%; height: 100%; object-fit: cover; border-radius: 20px;">
+                    <!-- Logo image -->
+                    <img src="{{ url_for('static', filename='images/tarracograf_pila.png') }}" alt="Tarracograf" class="hero-image" style="position: relative; z-index: 1; width: 100%; height: 100%; object-fit: contain; border-radius: 20px; background: transparent;">
                     <!-- Speech bubbles -->
                     <div class="speech-bubble" style="top: 10%; left: 10%;">
                         {{ _('Reportar Problema') }}
