@@ -435,28 +435,45 @@ h3 {
 
 .hero-stats {
     display: flex;
-    gap: 2rem;
+    gap: 3rem;
     margin: 2.5rem 0;
     flex-wrap: wrap;
+    align-items: flex-start;
 }
 
 .stat-item {
-    text-align: left;
+    text-align: center;
     padding: 0;
+    min-width: 120px;
+    flex: 0 0 auto;
 }
 
 .stat-number {
     display: block;
-    font-size: 2.5rem;
+    font-size: 2.75rem;
     font-weight: 800;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
     color: var(--text-dark);
+    line-height: 1;
 }
 
 .stat-label {
-    font-size: 0.9rem;
+    display: block;
+    font-size: 0.95rem;
     color: var(--text-medium);
     font-weight: 500;
+    line-height: 1.3;
+    text-align: center;
+}
+
+@media (min-width: 992px) {
+    .stat-item {
+        text-align: left;
+    }
+    
+    .stat-label {
+        text-align: left;
+    }
 }
 
 /* Hero Visual Element */
