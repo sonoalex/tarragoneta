@@ -740,14 +740,21 @@ footer .list-unstyled a:hover {
     
     .hero-title {
         font-size: 2.25rem;
+        text-align: center;
     }
     
     .hero-subtitle {
         font-size: 1.1rem;
+        text-align: center;
     }
     
     .hero-stats {
         gap: 1.5rem;
+        justify-content: center;
+    }
+    
+    .stat-item {
+        text-align: center;
     }
     
     .stat-number {
@@ -761,6 +768,10 @@ footer .list-unstyled a:hover {
     .hero-visual-bg {
         width: 300px;
         height: 300px;
+    }
+    
+    .hero-content {
+        text-align: center !important;
     }
     
     .speech-bubble {
