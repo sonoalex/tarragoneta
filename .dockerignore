@@ -29,5 +29,4 @@ instance
 coverage
 .pytest_cache
 .mypy_cache
-geojson_tarragona
 
