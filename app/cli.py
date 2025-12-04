@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 import json
 import re
-from app.extensions import db, user_datastore
+from app.extensions import db
 from app.models import User, Role, Initiative
 from app.utils import generate_slug
 from flask_security import hash_password, verify_password
@@ -101,8 +101,17 @@ def init_db_command():
         print("Creating admin user...")
         admin_role = Role.query.filter_by(name='admin').first()
         if admin_role:
+            # Get or create user_datastore (same logic as create_admin_user_command)
+            from flask_security import SQLAlchemyUserDatastore
+            try:
+                from app.extensions import user_datastore as uds
+                if uds is None:
+                    uds = SQLAlchemyUserDatastore(db, User, Role)
+            except (ImportError, AttributeError):
+                uds = SQLAlchemyUserDatastore(db, User, Role)
+            
             # Use user_datastore.create_user - Flask-Security handles password hashing
-            admin_user = user_datastore.create_user(
+            admin_user = uds.create_user(
                 email=admin_email,
                 username='admin',
                 password=admin_password,
@@ -136,17 +145,19 @@ def create_admin_user_command(email=None, password=None, username=None):
     from app.models import User, Role
     from flask_security import SQLAlchemyUserDatastore
     
-    # Get or create user_datastore (may not be initialized in CLI context)
-    # Re-import to get the initialized instance, or create it if needed
+    # Get user_datastore from extensions (it's initialized in init_extensions)
+    # In CLI context, it may not be initialized yet, so we create it if needed
+    # This ensures it works both in local (where it's already initialized) and Railway
     try:
         from app.extensions import user_datastore as uds_imported
+        # Check if it's actually initialized (not None)
         if uds_imported is not None:
             uds = uds_imported
         else:
-            # Create it manually if not initialized
+            # Not initialized yet, create it manually
             uds = SQLAlchemyUserDatastore(db, User, Role)
-    except:
-        # Fallback: create it manually
+    except (ImportError, AttributeError):
+        # Fallback: create it manually if import fails
         uds = SQLAlchemyUserDatastore(db, User, Role)
     
     # Get email from parameter, env var, or default
