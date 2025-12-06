@@ -3,12 +3,12 @@
         <div class="row g-4">
             <!-- About Section -->
             <div class="col-lg-4 col-md-6">
-                <h5 class="fw-bold mb-3 text-center text-md-start">{{ _('Sobre Tarracograf') }}</h5>
-                <p class="text-muted small mb-3 text-center text-md-start">
+                <h5 class="fw-bold mb-3">{{ _('Sobre Tarracograf') }}</h5>
+                <p class="text-muted small mb-3">
                     {{ _('Radiografia ciutadana de Tarragona. Uneix-te a les iniciatives que estan transformant la nostra ciutat.') }}
                 </p>
-                <div class="d-flex gap-3 justify-content-center justify-content-md-start">
-                    <a href="https://twitter.com/tarracograf_cat" target="_blank" rel="noopener noreferrer" 
+                <div class="d-flex gap-3">
+                    <a href="https://twitter.com/tarracograf" target="_blank" rel="noopener noreferrer" 
                        class="text-muted text-decoration-none" 
                        title="Twitter"
                        style="transition: color 0.2s;">
@@ -20,7 +20,7 @@
                        style="transition: color 0.2s;">
                         <i class="fab fa-facebook fa-lg"></i>
                     </a>
-                    <a href="https://instagram.com/tarracograf_cat" target="_blank" rel="noopener noreferrer" 
+                    <a href="https://instagram.com/tarracograf" target="_blank" rel="noopener noreferrer" 
                        class="text-muted text-decoration-none" 
                        title="Instagram"
                        style="transition: color 0.2s;">
@@ -31,8 +31,8 @@
 
             <!-- Quick Links -->
             <div class="col-lg-2 col-md-6">
-                <h5 class="fw-bold mb-3 text-center text-md-start">{{ _('Enllaços Ràpids') }}</h5>
-                <ul class="list-unstyled text-center text-md-start">
+                <h5 class="fw-bold mb-3">{{ _('Enllaços Ràpids') }}</h5>
+                <ul class="list-unstyled">
                     <li class="mb-2">
                         <a href="{{ url_for('main.index') }}" class="text-muted text-decoration-none small">
                             {{ _('Inici') }}
@@ -63,8 +63,8 @@
 
             <!-- Resources -->
             <div class="col-lg-3 col-md-6">
-                <h5 class="fw-bold mb-3 text-center text-md-start">{{ _('Recursos') }}</h5>
-                <ul class="list-unstyled text-center text-md-start">
+                <h5 class="fw-bold mb-3">{{ _('Recursos') }}</h5>
+                <ul class="list-unstyled">
                     <li class="mb-2">
                         <a href="{{ url_for('main.contact') }}" class="text-muted text-decoration-none small">
                             {{ _('Contacte') }}
@@ -98,16 +98,16 @@
 
             <!-- Contact Info -->
             <div class="col-lg-3 col-md-6">
-                <h5 class="fw-bold mb-3 text-center text-md-start">{{ _('Contacte') }}</h5>
-                <ul class="list-unstyled text-center text-md-start">
+                <h5 class="fw-bold mb-3">{{ _('Contacte') }}</h5>
+                <ul class="list-unstyled">
                     <li class="mb-2">
-                        <a href="mailto:hola@tarracograf.cat" class="text-muted text-decoration-none small d-flex align-items-center justify-content-center justify-content-md-start">
+                        <a href="mailto:hola@tarracograf.cat" class="text-muted text-decoration-none small d-flex align-items-center">
                             <i class="fas fa-envelope me-2" style="width: 20px;"></i>
                             hola@tarracograf.cat
                         </a>
                     </li>
                     <li class="mb-2">
-                        <span class="text-muted small d-flex align-items-center justify-content-center justify-content-md-start">
+                        <span class="text-muted small d-flex align-items-center">
                             <i class="fas fa-map-marker-alt me-2" style="width: 20px;"></i>
                             Tarragona, Catalunya
                         </span>
@@ -118,12 +118,12 @@
 
         <!-- Bottom Bar -->
         <div class="row mt-4 pt-4 border-top">
-            <div class="col-12 col-md-6 text-center text-md-start mb-3 mb-md-0">
+            <div class="col-md-6">
                 <p class="text-muted small mb-0">
                     &copy; 2024 Tarracograf. {{ _('Tots els drets reservats.') }}
                 </p>
             </div>
-            <div class="col-12 col-md-6 text-center text-md-end">
+            <div class="col-md-6 text-md-end">
                 <ul class="list-inline mb-0">
                     <li class="list-inline-item">
                         <a href="#" class="text-muted text-decoration-none small">{{ _('Política de Privacitat') }}</a>
