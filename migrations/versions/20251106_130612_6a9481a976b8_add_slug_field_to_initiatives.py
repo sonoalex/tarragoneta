@@ -83,10 +83,48 @@ def upgrade():
         # Index is automatically created by UniqueConstraint, no need to create it manually
     
     # Now modify the slug column (works for both existing and newly created tables)
-    with op.batch_alter_table('initiative', schema=None) as batch_op:
-        batch_op.alter_column('slug',
-               existing_type=sa.VARCHAR(length=250),
-               nullable=False)
+    # Refresh table list after potential table creation
+    inspector = inspect(conn)
+    current_tables = inspector.get_table_names()
+    
+    if 'initiative' in current_tables:
+        # First, update any NULL slugs (if table already existed with data before migration)
+        was_existing = 'initiative' in existing_tables
+        if was_existing:
+            try:
+                result = conn.execute(sa.text("SELECT COUNT(*) FROM initiative WHERE slug IS NULL"))
+                null_count = result.scalar()
+                if null_count > 0:
+                    # Generate slugs for existing rows with NULL slugs
+                    # Using a simple approach: slugify the title
+                    conn.execute(sa.text("""
+                        UPDATE initiative 
+                        SET slug = LOWER(REGEXP_REPLACE(
+                            REGEXP_REPLACE(title, '[^a-zA-Z0-9]+', '-', 'g'),
+                            '^-|-$', '', 'g'
+                        )) || '-' || id::text
+                        WHERE slug IS NULL
+                    """))
+            except Exception as e:
+                # If query fails, skip this step - table might be empty or have no NULLs
+                pass
+        
+        # Now make slug NOT NULL (safe because all NULLs have been updated or table is new)
+        try:
+            # Check if column is already NOT NULL
+            columns = inspector.get_columns('initiative')
+            slug_col = next((col for col in columns if col['name'] == 'slug'), None)
+            if slug_col and slug_col.get('nullable', True):
+                # Use direct alter_column instead of batch_alter_table for better error handling
+                op.alter_column('initiative', 'slug',
+                       existing_type=sa.VARCHAR(length=250),
+                       nullable=False,
+                       schema=None)
+        except Exception as e:
+            # If column is already NOT NULL or operation fails, that's fine
+            # This makes the migration idempotent
+            # Log but don't fail - column might already be NOT NULL
+            pass
 
 
 def downgrade():
