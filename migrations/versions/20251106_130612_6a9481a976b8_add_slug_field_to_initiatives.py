@@ -18,13 +18,49 @@ depends_on = None
 
 
 def upgrade():
-    # Check if initiative table exists, if not create it
+    # Check if base tables exist, if not create them (for new databases like staging)
     conn = op.get_bind()
     inspector = inspect(conn)
     existing_tables = inspector.get_table_names()
     
+    # Create role table if it doesn't exist (must be first, no dependencies)
+    if 'role' not in existing_tables:
+        op.create_table('role',
+            sa.Column('id', sa.Integer(), nullable=False),
+            sa.Column('name', sa.String(length=80), nullable=True),
+            sa.Column('description', sa.String(length=255), nullable=True),
+            sa.PrimaryKeyConstraint('id'),
+            sa.UniqueConstraint('name')
+        )
+    
+    # Create user table if it doesn't exist (must be before roles_users)
+    if 'user' not in existing_tables:
+        op.create_table('user',
+            sa.Column('id', sa.Integer(), nullable=False),
+            sa.Column('email', sa.String(length=255), nullable=False),
+            sa.Column('username', sa.String(length=255), nullable=False),
+            sa.Column('password', sa.String(length=255), nullable=True),
+            sa.Column('active', sa.Boolean(), nullable=True),
+            sa.Column('fs_uniquifier', sa.String(length=255), nullable=False),
+            sa.Column('confirmed_at', sa.DateTime(), nullable=True),
+            sa.Column('created_at', sa.DateTime(), nullable=True),
+            sa.PrimaryKeyConstraint('id'),
+            sa.UniqueConstraint('email'),
+            sa.UniqueConstraint('fs_uniquifier'),
+            sa.UniqueConstraint('username')
+        )
+    
+    # Create roles_users association table if it doesn't exist (depends on both role and user)
+    if 'roles_users' not in existing_tables:
+        op.create_table('roles_users',
+            sa.Column('user_id', sa.Integer(), nullable=True),
+            sa.Column('role_id', sa.Integer(), nullable=True),
+            sa.ForeignKeyConstraint(['role_id'], ['role.id'], ),
+            sa.ForeignKeyConstraint(['user_id'], ['user.id'], )
+        )
+    
+    # Create initiative table if it doesn't exist
     if 'initiative' not in existing_tables:
-        # Create initiative table (for new databases like staging)
         op.create_table('initiative',
             sa.Column('id', sa.Integer(), nullable=False),
             sa.Column('title', sa.String(length=200), nullable=False),
