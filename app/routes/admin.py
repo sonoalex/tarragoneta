@@ -4,7 +4,7 @@ from flask_security.decorators import roles_required
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import os
-from app.models import Initiative, User, Participation, user_initiatives, InventoryItem, Donation, Section, SectionResponsible, Role, District
+from app.models import Initiative, User, user_initiatives, InventoryItem, Donation, Section, SectionResponsible, Role, District
 from app.extensions import db
 from app.forms import InitiativeForm
 from app.utils import sanitize_html, allowed_file, optimize_image
@@ -55,7 +55,6 @@ def admin_dashboard():
     
     users_count = User.query.count()
     participations_count = db.session.query(db.func.count(user_initiatives.c.user_id)).scalar() or 0
-    participations_count += Participation.query.count()
     pending_initiatives_count = Initiative.query.filter(Initiative.status == 'pending').count()
     
     # Donation statistics
@@ -64,15 +63,11 @@ def admin_dashboard():
     total_donated_euros = total_donated / 100 if total_donated else 0
     recent_donations = Donation.query.filter(Donation.status == 'completed').order_by(Donation.completed_at.desc()).limit(5).all()
     
-    # Get recent participations
-    recent_participations = Participation.query.order_by(Participation.created_at.desc()).limit(10).all()
-    
     return render_template('admin/dashboard.html',
                          initiatives=initiatives,
                          pagination=pagination,
                          users_count=users_count,
                          participations_count=participations_count,
-                         recent_participations=recent_participations,
                          pending_initiatives_count=pending_initiatives_count,
                          total_donations=total_donations,
                          total_donated_euros=total_donated_euros,
@@ -427,12 +422,6 @@ def admin_donations():
                          pending_donations=pending_donations,
                          refunded_donations=refunded_donations)
 
-@bp.route('/participations')
-@login_required
-@roles_required('admin')
-def admin_participations():
-    participations = Participation.query.order_by(Participation.created_at.desc()).all()
-    return render_template('admin/participations.html', participations=participations)
 
 @bp.route('/inventory/<int:id>/approve', methods=['POST'])
 @login_required

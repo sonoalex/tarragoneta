@@ -12,7 +12,7 @@ import json
 import stripe
 import os
 import secrets
-from app.models import InventoryItem, District, Section, Initiative, Participation, user_initiatives, ReportPurchase, InventoryItemStatus
+from app.models import InventoryItem, District, Section, Initiative, user_initiatives, ReportPurchase, InventoryItemStatus
 from app.extensions import db
 from sqlalchemy import func, and_
 

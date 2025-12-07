@@ -127,9 +127,6 @@
                     <a href="{{ url_for('admin.admin_users') }}" class="btn btn-outline-secondary px-4" style="border-radius: 50px;">
                         <i class="fas fa-users me-2"></i>{{ _('Gestionar Usuaris') }}
                     </a>
-                    <a href="{{ url_for('admin.admin_participations') }}" class="btn btn-outline-secondary px-4" style="border-radius: 50px;">
-                        <i class="fas fa-list me-2"></i>{{ _('Veure Participacions') }}
-                    </a>
                     <a href="{{ url_for('admin.admin_donations') }}" class="btn btn-outline-success px-4" style="border-radius: 50px;">
                         <i class="fas fa-heart me-2"></i>{{ _('Veure Donacions') }}
                     </a>
@@ -182,44 +179,6 @@
         </div>
         {% endif %}
 
-        <!-- Recent Participations -->
-        {% if recent_participations %}
-        <div class="card border-0 shadow-sm mb-5" style="border-radius: 20px;">
-            <div class="card-body p-4">
-                <h3 class="fw-bold mb-4">
-                    <i class="fas fa-clock text-primary me-2"></i>
-                    {{ _('Participacions Recents') }}
-                </h3>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>{{ _('Nom') }}</th>
-                                <th>Email</th>
-                                <th>{{ _('Iniciativa') }}</th>
-                                <th>{{ _('Data') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for participation in recent_participations[:5] %}
-                            <tr>
-                                <td><strong>{{ participation.name }}</strong></td>
-                                <td>{{ participation.email or '-' }}</td>
-                                <td>
-                                    <a href="{{ url_for('initiatives.initiative_detail', slug=participation.initiative_rel.slug) }}" 
-                                       class="text-decoration-none">
-                                        {{ participation.initiative_rel.title[:40] }}{% if participation.initiative_rel.title|length > 40 %}...{% endif %}
-                                    </a>
-                                </td>
-                                <td>{{ participation.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        {% endif %}
 
         <!-- Initiatives Table -->
         <div class="card border-0 shadow-sm" style="border-radius: 20px;">

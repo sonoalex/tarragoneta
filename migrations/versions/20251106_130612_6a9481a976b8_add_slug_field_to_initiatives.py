@@ -83,6 +83,16 @@ def upgrade():
             sa.PrimaryKeyConstraint('id'),
             sa.UniqueConstraint('slug')
         )
+    
+    # 5. Create user_initiatives association table if it doesn't exist (depends on user and initiative)
+    if 'user_initiatives' not in existing_tables:
+        op.create_table('user_initiatives',
+            sa.Column('user_id', sa.Integer(), nullable=True),
+            sa.Column('initiative_id', sa.Integer(), nullable=True),
+            sa.Column('joined_at', sa.DateTime(), nullable=True),
+            sa.ForeignKeyConstraint(['initiative_id'], ['initiative.id'], ),
+            sa.ForeignKeyConstraint(['user_id'], ['user.id'], )
+        )
     else:
         # Table exists - add/modify slug column
         # Refresh inspector to get current state

@@ -191,17 +191,6 @@ class Comment(db.Model):
     def __repr__(self):
         return f'<Comment by {self.author.username}>'
 
-class Participation(db.Model):
-    """Track anonymous participations (for non-registered users)"""
-    id = db.Column(db.Integer, primary_key=True)
-    initiative_id = db.Column(db.Integer, db.ForeignKey('initiative.id'), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(100))
-    phone = db.Column(db.String(20))
-    created_at = db.Column(db.DateTime(), default=datetime.utcnow)
-    
-    initiative_rel = db.relationship('Initiative', backref='anonymous_participants')
-
 class District(db.Model):
     """Distritos administrativos de Tarragona"""
     __tablename__ = 'district'

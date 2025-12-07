@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_security import login_required, current_user
 from flask_babel import gettext as _
-from app.models import Initiative, Comment, Participation
+from app.models import Initiative, Comment
 from app.extensions import db
 from app.utils import sanitize_html, get_category_name
 from app.forms import InitiativeForm
@@ -41,11 +41,9 @@ def list_initiatives():
     # Get statistics
     total_initiatives = Initiative.query.filter(Initiative.status == 'approved').count()
     
-    # Count participants (from Participation table and user_initiatives association)
+    # Count participants (from user_initiatives association)
     from app.models import user_initiatives
-    participation_count = db.session.query(db.func.count(Participation.id)).scalar() or 0
-    user_participation_count = db.session.query(db.func.count(db.func.distinct(user_initiatives.c.user_id))).scalar() or 0
-    total_participants = participation_count + user_participation_count
+    total_participants = db.session.query(db.func.count(db.func.distinct(user_initiatives.c.user_id))).scalar() or 0
     
     # Get categories for filter
     categories = db.session.query(Initiative.category).filter(
@@ -164,36 +162,17 @@ def initiative_detail(slug):
                          related_initiatives=related)
 
 @bp.route('/join/<slug>', methods=['POST'])
+@login_required
 def join_initiative(slug):
+    """Join an initiative - requires login"""
     initiative = Initiative.query.filter_by(slug=slug).first_or_404()
     
-    if current_user.is_authenticated:
-        # Registered user participation
-        if current_user not in initiative.participants:
-            initiative.participants.append(current_user)
-            db.session.commit()
-            flash('¡Te has unido a esta iniciativa con éxito!', 'success')
-        else:
-            flash('Ya estás participando en esta iniciativa', 'info')
-    else:
-        # Anonymous participation
-        name = request.form.get('name')
-        email = request.form.get('email')
-        phone = request.form.get('phone')
-        
-        if not name:
-            flash('El nombre es obligatorio', 'error')
-            return redirect(url_for('initiatives.initiative_detail', slug=slug))
-        
-        participation = Participation(
-            initiative_id=initiative.id,
-            name=sanitize_html(name),
-            email=sanitize_html(email) if email else None,
-            phone=sanitize_html(phone) if phone else None
-        )
-        db.session.add(participation)
+    if current_user not in initiative.participants:
+        initiative.participants.append(current_user)
         db.session.commit()
-        flash('¡Te has registrado en esta iniciativa! Te contactaremos pronto.', 'success')
+        flash('¡Te has unido a esta iniciativa con éxito!', 'success')
+    else:
+        flash('Ya estás participando en esta iniciativa', 'info')
     
     return redirect(url_for('initiatives.initiative_detail', slug=slug))
 

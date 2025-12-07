@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
 from flask_babel import gettext as _
-from app.models import Initiative, Comment, Participation, user_initiatives, InventoryItem, InventoryItemStatus
+from app.models import Initiative, Comment, user_initiatives, InventoryItem, InventoryItemStatus
 from app.extensions import db
 from datetime import datetime
 
@@ -48,7 +48,6 @@ def index():
     # Get statistics for initiatives (for secondary section)
     total_initiatives = Initiative.query.filter(Initiative.status == 'approved').count()
     total_participants = db.session.query(db.func.count(user_initiatives.c.user_id)).scalar() or 0
-    total_participants += Participation.query.count()
     active_categories = db.session.query(Initiative.category).distinct().count()
     
     return render_template('index.html',
