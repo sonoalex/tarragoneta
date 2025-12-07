@@ -44,7 +44,7 @@ def upgrade():
             sa.PrimaryKeyConstraint('id'),
             sa.UniqueConstraint('slug')
         )
-        op.create_index(op.f('ix_initiative_slug'), 'initiative', ['slug'], unique=True)
+        # Index is automatically created by UniqueConstraint, no need to create it manually
     
     # Now modify the slug column (works for both existing and newly created tables)
     with op.batch_alter_table('initiative', schema=None) as batch_op:
