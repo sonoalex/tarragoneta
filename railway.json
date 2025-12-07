@@ -3,7 +3,7 @@
   "build": {
     "builder": "RAILPACK"
   },
-  "release": {
-    "command": "export FLASK_APP=app.py && python compile_translations.py && flask db upgrade"
+  "deploy": {
+    "preDeployCommand": "export FLASK_APP=app.py && python compile_translations.py && flask db upgrade"
   }
 }
