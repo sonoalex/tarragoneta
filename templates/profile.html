@@ -111,13 +111,6 @@
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div class="d-flex align-items-center">
-                            <i class="fas fa-check-double me-2 text-info"></i>
-                            <span>{{ _('Actius') }}</span>
-                        </div>
-                        <span class="badge bg-info" style="border-radius: 50px; padding: 0.4rem 0.8rem;">{{ stats.active_items }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="d-flex align-items-center">
                             <i class="fas fa-check-square me-2 text-secondary"></i>
                             <span>{{ _('Resolts') }}</span>
                         </div>
@@ -128,7 +121,7 @@
                             <i class="fas fa-clock me-2 text-warning"></i>
                             <span>{{ _('Pendents') }}</span>
                         </div>
-                        <span class="badge bg-warning text-dark" style="border-radius: 50px; padding: 0.4rem 0.8rem;">{{ stats.reported_items - stats.approved_items - stats.active_items - stats.resolved_items }}</span>
+                        <span class="badge bg-warning text-dark" style="border-radius: 50px; padding: 0.4rem 0.8rem;">{{ stats.pending_items }}</span>
                     </div>
                 </div>
             </div>
@@ -219,8 +212,6 @@
                             <td>
                                 {% if item.status == 'approved' %}
                                 <span class="badge bg-success" style="border-radius: 50px;">{{ _('Aprovat') }}</span>
-                                {% elif item.status == 'active' %}
-                                <span class="badge bg-info" style="border-radius: 50px;">{{ _('Actiu') }}</span>
                                 {% elif item.status == 'resolved' %}
                                 <span class="badge bg-secondary" style="border-radius: 50px;">{{ _('Resolt') }}</span>
                                 {% elif item.status == 'pending' %}

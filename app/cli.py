@@ -170,10 +170,12 @@ def init_db_command():
             admin_role = Role(name='admin', description='Administrator')
             user_role = Role(name='user', description='Regular User')
             moderator_role = Role(name='moderator', description='Moderator')
+            section_responsible_role = Role(name='section_responsible', description='Responsable de Sección')
             
             db.session.add(admin_role)
             db.session.add(user_role)
             db.session.add(moderator_role)
+            db.session.add(section_responsible_role)
             db.session.commit()
             print("✓ Roles created")
     except Exception as e:

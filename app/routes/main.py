@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
 from flask_babel import gettext as _
-from app.models import Initiative, Comment, Participation, user_initiatives, InventoryItem
+from app.models import Initiative, Comment, Participation, user_initiatives, InventoryItem, InventoryItemStatus
 from app.extensions import db
 from datetime import datetime
 
@@ -30,19 +30,19 @@ def index():
     
     # Get inventory statistics (for hero section)
     total_inventory_items = InventoryItem.query.filter(
-        InventoryItem.status.in_(['approved', 'active'])
+        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     ).count()
     
     # Get inventory by category
     inventory_by_category = {}
     for item in InventoryItem.query.filter(
-        InventoryItem.status.in_(['approved', 'active'])
+        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     ).all():
         inventory_by_category[item.category] = inventory_by_category.get(item.category, 0) + 1
     
     # Get recent inventory items (for featured section)
     recent_inventory_items = InventoryItem.query.filter(
-        InventoryItem.status.in_(['approved', 'active'])
+        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     ).order_by(InventoryItem.created_at.desc()).limit(8).all()
     
     # Get statistics for initiatives (for secondary section)

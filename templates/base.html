@@ -91,6 +91,14 @@
                                 </a>
                             </li>
                             {% endif %}
+                            {% if current_user.has_role('section_responsible') %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('inventory.section_responsible_dashboard') }}">
+                                    <i class="fas fa-user-shield me-2 text-primary"></i>{{ _('La Meva Secció') }}
+                                </a>
+                            </li>
+                            {% endif %}
                             {% if current_user.has_role('admin') %}
                             <li><hr class="dropdown-divider"></li>
                             <li>

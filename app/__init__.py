@@ -1,3 +1,4 @@
+from datetime import timezone
 import os
 from flask import Flask
 from app.config import config
@@ -122,9 +123,9 @@ def create_app(config_name=None):
         # Calculate statistics
         stats = {
             'reported_items': len(reported_items),
-            'approved_items': len([item for item in reported_items if item.status == 'approved']),
-            'active_items': len([item for item in reported_items if item.status == 'active']),
-            'resolved_items': len([item for item in reported_items if item.status == 'resolved']),
+            'approved_items': len([item for item in reported_items if item.is_approved()]),
+            'resolved_items': len([item for item in reported_items if item.is_resolved()]),
+            'pending_items': len([item for item in reported_items if item.is_pending()]),
             'created_initiatives': len(created),
             'participated_initiatives': len(participated),
             'comments': len(comments),
@@ -133,7 +134,7 @@ def create_app(config_name=None):
         }
         
         # Recent activity (last 30 days)
-        thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+        thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
         recent_items = InventoryItem.query.filter(
             InventoryItem.reporter_id == current_user.id,
             InventoryItem.created_at >= thirty_days_ago

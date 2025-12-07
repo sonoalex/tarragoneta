@@ -1,5 +1,7 @@
 from datetime import datetime
+from enum import Enum
 from flask_security import UserMixin, RoleMixin
+from flask_babel import _
 from app.extensions import db
 
 # Import GeoAlchemy2 for PostGIS support
@@ -25,6 +27,76 @@ user_initiatives = db.Table('user_initiatives',
     db.Column('joined_at', db.DateTime(), default=datetime.utcnow)
 )
 
+# ========== Enums para Estados ==========
+
+class InventoryItemStatus(str, Enum):
+    """Estados posibles para items del inventario"""
+    PENDING = 'pending'
+    APPROVED = 'approved'
+    REJECTED = 'rejected'
+    RESOLVED = 'resolved'
+    REMOVED = 'removed'
+    # NOTA: Eliminamos 'active' porque es redundante con 'approved'
+    
+    @classmethod
+    def all(cls):
+        """Retorna todos los valores como lista"""
+        return [status.value for status in cls]
+    
+    @classmethod
+    def visible_statuses(cls):
+        """Estados visibles en el mapa público"""
+        return [cls.APPROVED.value]
+    
+    @classmethod
+    def can_be_approved_from(cls):
+        """Estados desde los que se puede aprobar"""
+        return [cls.PENDING.value]
+    
+    @classmethod
+    def can_be_resolved_from(cls):
+        """Estados desde los que se puede resolver"""
+        return [cls.APPROVED.value]
+
+class InitiativeStatus(str, Enum):
+    """Estados posibles para iniciativas"""
+    PENDING = 'pending'
+    APPROVED = 'approved'
+    REJECTED = 'rejected'
+    ACTIVE = 'active'
+    CANCELLED = 'cancelled'
+    
+    @classmethod
+    def all(cls):
+        return [status.value for status in cls]
+    
+    @classmethod
+    def visible_statuses(cls):
+        """Estados visibles públicamente"""
+        return [cls.APPROVED.value, cls.ACTIVE.value]
+
+class DonationStatus(str, Enum):
+    """Estados posibles para donaciones"""
+    PENDING = 'pending'
+    COMPLETED = 'completed'
+    FAILED = 'failed'
+    REFUNDED = 'refunded'
+    
+    @classmethod
+    def all(cls):
+        return [status.value for status in cls]
+
+class ReportPurchaseStatus(str, Enum):
+    """Estados posibles para compras de reports"""
+    PENDING = 'pending'
+    COMPLETED = 'completed'
+    FAILED = 'failed'
+    REFUNDED = 'refunded'
+    
+    @classmethod
+    def all(cls):
+        return [status.value for status in cls]
+
 class Role(db.Model, RoleMixin):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(80), unique=True)
@@ -48,6 +120,16 @@ class User(db.Model, UserMixin):
     created_initiatives = db.relationship('Initiative', backref='creator', lazy='dynamic')
     participated_initiatives = db.relationship('Initiative', secondary=user_initiatives, backref='participants', lazy='dynamic')
     comments = db.relationship('Comment', backref='author', lazy='dynamic', cascade='all, delete-orphan')
+    
+    def is_section_responsible(self, section_id=None):
+        """Verificar si el usuario es responsable de alguna sección o de una específica"""
+        if not section_id:
+            return SectionResponsible.query.filter_by(user_id=self.id).first() is not None
+        return SectionResponsible.query.filter_by(user_id=self.id, section_id=section_id).first() is not None
+    
+    def get_managed_sections(self):
+        """Obtener todas las secciones que gestiona el usuario"""
+        return [sr.section for sr in SectionResponsible.query.filter_by(user_id=self.id).all()]
     
     def __repr__(self):
         return f'<User {self.username}>'
@@ -209,6 +291,27 @@ class Section(db.Model):
     
     def __repr__(self):
         return f'<Section {self.full_code}: {self.name or "Sin nombre"}>'
+
+class SectionResponsible(db.Model):
+    """Relación entre usuarios y secciones que gestionan"""
+    __tablename__ = 'section_responsible'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    section_id = db.Column(db.Integer, db.ForeignKey('section.id'), nullable=False)
+    assigned_at = db.Column(db.DateTime(), default=datetime.utcnow)
+    assigned_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # Admin que asignó
+    
+    # Relationships
+    user = db.relationship('User', foreign_keys=[user_id], backref='managed_sections')
+    section = db.relationship('Section', backref='responsibles')
+    assigner = db.relationship('User', foreign_keys=[assigned_by])
+    
+    # Unique constraint: un usuario puede ser responsable de una sección solo una vez
+    __table_args__ = (db.UniqueConstraint('user_id', 'section_id', name='unique_user_section'),)
+    
+    def __repr__(self):
+        return f'<SectionResponsible user={self.user_id} section={self.section_id}>'
 
 class CityBoundary(db.Model):
     """Boundary externo de Tarragona (unión de todas las secciones)"""
@@ -378,7 +481,11 @@ class InventoryItem(db.Model):
     image_gps_latitude = db.Column(db.Float, nullable=True)  # GPS lat from image EXIF
     image_gps_longitude = db.Column(db.Float, nullable=True)  # GPS lng from image EXIF
     location_source = db.Column(db.String(50), nullable=True)  # 'image_gps', 'browser_geolocation', 'manual', 'form_coordinates'
-    status = db.Column(db.String(20), default='pending')  # 'pending', 'approved', 'rejected', 'active', 'resolved', 'removed'
+    status = db.Column(
+        db.String(20), 
+        default=InventoryItemStatus.PENDING.value,
+        nullable=False
+    )
     importance_count = db.Column(db.Integer, default=0)  # Contador de importancia/votos
     resolved_count = db.Column(db.Integer, default=0)  # Contador de "ya no está"
     created_at = db.Column(db.DateTime(), default=datetime.utcnow)
@@ -426,6 +533,153 @@ class InventoryItem(db.Model):
             self.section_id = section.id
             return True
         return False
+    
+    # ========== Métodos de consulta (Tell, Don't Ask) ==========
+    
+    def is_pending(self):
+        """Verificar si el item está pendiente"""
+        return self.status == InventoryItemStatus.PENDING.value
+    
+    def is_approved(self):
+        """Verificar si el item está aprobado"""
+        return self.status == InventoryItemStatus.APPROVED.value
+    
+    def is_resolved(self):
+        """Verificar si el item está resuelto"""
+        return self.status == InventoryItemStatus.RESOLVED.value
+    
+    def is_rejected(self):
+        """Verificar si el item está rechazado"""
+        return self.status == InventoryItemStatus.REJECTED.value
+    
+    def is_removed(self):
+        """Verificar si el item está eliminado"""
+        return self.status == InventoryItemStatus.REMOVED.value
+    
+    def can_be_approved(self):
+        """Verificar si el item puede ser aprobado"""
+        return self.status in InventoryItemStatus.can_be_approved_from()
+    
+    def can_be_rejected(self):
+        """Verificar si el item puede ser rechazado"""
+        return self.status == InventoryItemStatus.PENDING.value
+    
+    def can_be_resolved(self):
+        """Verificar si el item puede ser resuelto"""
+        return self.status in InventoryItemStatus.can_be_resolved_from()
+    
+    def is_visible(self):
+        """Verificar si el item es visible en el mapa público"""
+        return self.status in InventoryItemStatus.visible_statuses()
+    
+    # ========== Métodos de acción (Tell, Don't Ask) ==========
+    
+    def approve(self, approved_by=None):
+        """Aprobar el item. Retorna (success: bool, message: str)"""
+        if not self.can_be_approved():
+            return False, _('Este item no puede ser aprobado')
+        
+        self.status = InventoryItemStatus.APPROVED.value
+        self.updated_at = datetime.utcnow()
+        
+        from flask import current_app
+        if current_app:
+            current_app.logger.info(
+                f'Item {self.id} approved by {approved_by.id if approved_by else "system"}'
+            )
+        
+        return True, _('Item aprobado correctamente')
+    
+    def reject(self, reason=None, rejected_by=None):
+        """Rechazar el item. Retorna (success: bool, message: str)"""
+        if not self.can_be_rejected():
+            return False, _('Este item no puede ser rechazado')
+        
+        self.status = InventoryItemStatus.REJECTED.value
+        self.updated_at = datetime.utcnow()
+        
+        from flask import current_app
+        if current_app:
+            current_app.logger.info(
+                f'Item {self.id} rejected by {rejected_by.id if rejected_by else "system"}. Reason: {reason}'
+            )
+        
+        return True, _('Item rechazado')
+    
+    def resolve(self, resolved_by=None):
+        """Marcar el item como resuelto. Retorna (success: bool, message: str)"""
+        if not self.can_be_resolved():
+            return False, _('Este item no puede ser resuelto')
+        
+        self.status = InventoryItemStatus.RESOLVED.value
+        self.updated_at = datetime.utcnow()
+        
+        from flask import current_app
+        if current_app:
+            current_app.logger.info(
+                f'Item {self.id} resolved by {resolved_by.id if resolved_by else "system"}'
+            )
+        
+        return True, _('Item marcado como resuelto')
+    
+    def remove(self, removed_by=None):
+        """Eliminar/ocultar el item. Retorna (success: bool, message: str)"""
+        self.status = InventoryItemStatus.REMOVED.value
+        self.updated_at = datetime.utcnow()
+        
+        from flask import current_app
+        if current_app:
+            current_app.logger.info(
+                f'Item {self.id} removed by {removed_by.id if removed_by else "system"}'
+            )
+        
+        return True, _('Item eliminado')
+    
+    def add_resolved_report(self, user_id):
+        """Añadir un reporte de "ya no está" y auto-resolver si alcanza el threshold.
+        Retorna (success: bool, auto_resolved: bool, message: str)"""
+        from app.models import InventoryResolved
+        from flask import current_app
+        
+        if self.has_user_resolved(user_id):
+            return False, False, _('Ya has reportado que este item ya no está')
+        
+        if self.is_resolved():
+            return False, False, _('Este item ya está marcado como resuelto')
+        
+        # Si el usuario votó "encara hi és", remover ese voto
+        if self.has_user_voted(user_id):
+            vote = self.voters.filter_by(user_id=user_id).first()
+            if vote:
+                db.session.delete(vote)
+                if self.importance_count and self.importance_count > 0:
+                    self.importance_count -= 1
+                else:
+                    self.importance_count = 0
+        
+        # Crear reporte de resuelto
+        resolved = InventoryResolved(item_id=self.id, user_id=user_id)
+        db.session.add(resolved)
+        
+        # Incrementar contador
+        if self.resolved_count is None:
+            self.resolved_count = 0
+        self.resolved_count += 1
+        
+        # Auto-resolver si alcanza el threshold
+        auto_resolved = False
+        auto_resolve_threshold = current_app.config.get('INVENTORY_AUTO_RESOLVE_THRESHOLD', 3) if current_app else 3
+        
+        if self.resolved_count >= auto_resolve_threshold and self.can_be_resolved():
+            success, _ = self.resolve()
+            auto_resolved = success
+            if auto_resolved:
+                current_app.logger.info(
+                    f'Item {self.id} auto-resolved after {self.resolved_count} "ya no está" reports'
+                )
+        
+        message = _('Item marcado como resuelto automáticamente') if auto_resolved else _('Reporte registrado correctamente')
+        return True, auto_resolved, message
     
     def __repr__(self):
         return f'<InventoryItem {self.category}->{self.subcategory} at ({self.latitude}, {self.longitude})>'

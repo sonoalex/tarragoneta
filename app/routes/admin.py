@@ -4,12 +4,34 @@ from flask_security.decorators import roles_required
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import os
-from app.models import Initiative, User, Participation, user_initiatives, InventoryItem, Donation
+from app.models import Initiative, User, Participation, user_initiatives, InventoryItem, Donation, Section, SectionResponsible, Role, District
 from app.extensions import db
 from app.forms import InitiativeForm
 from app.utils import sanitize_html, allowed_file, optimize_image
 # Config.UPLOAD_FOLDER removed - using current_app.config['UPLOAD_FOLDER'] instead
 from flask_babel import gettext as _
+
+def get_user_datastore():
+    """Get user_datastore from current_app or create it if needed"""
+    try:
+        # Try to get from Flask-Security extension
+        if 'security' in current_app.extensions:
+            return current_app.extensions['security'].datastore
+    except (KeyError, AttributeError):
+        pass
+    
+    # Fallback: try to import from extensions
+    try:
+        from app.extensions import user_datastore
+        if user_datastore is not None:
+            return user_datastore
+    except (ImportError, AttributeError):
+        pass
+    
+    # Last resort: create it
+    from flask_security import SQLAlchemyUserDatastore
+    from app.models import User, Role
+    return SQLAlchemyUserDatastore(db, User, Role)
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -192,6 +214,12 @@ def admin_users():
     # Obtener todos los usuarios (DataTables manejará la paginación en el cliente)
     users = User.query.order_by(User.created_at.desc()).all()
     
+    # Obtener secciones gestionadas por cada usuario
+    user_sections = {}
+    for user in users:
+        managed_sections = user.get_managed_sections()
+        user_sections[user.id] = managed_sections
+    
     # Estadísticas
     total_users = User.query.count()
     active_users = User.query.filter(User.active == True).count()
@@ -203,6 +231,7 @@ def admin_users():
     
     return render_template('admin/users.html',
                          users=users,
+                         user_sections=user_sections,
                          total_users=total_users,
                          active_users=active_users,
                          inactive_users=inactive_users,
@@ -335,7 +364,6 @@ def reject_initiative(id):
 @roles_required('admin')
 def change_user_role(id):
     """Cambiar el rol de un usuario"""
-    from app.extensions import user_datastore
     from app.models import Role
     
     user = User.query.get_or_404(id)
@@ -354,6 +382,9 @@ def change_user_role(id):
     if not new_role:
         flash(_('Rol no válido'), 'error')
         return redirect(url_for('admin.admin_users'))
+    
+    # Get user_datastore
+    user_datastore = get_user_datastore()
     
     # Remover todos los roles actuales y asignar el nuevo
     user_datastore.remove_role_from_user(user, *user.roles)
@@ -410,12 +441,14 @@ def approve_item(id):
     """Aprobar un item pendiente del inventario"""
     item = InventoryItem.query.get_or_404(id)
     
-    if item.status != 'pending':
-        flash(_('Este item no está pendiente de aprobación'), 'warning')
+    from app.models import InventoryItemStatus
+    
+    success, message = item.approve(approved_by=current_user)
+    
+    if not success:
+        flash(message, 'warning')
         return redirect(url_for('inventory.admin_inventory'))
     
-    item.status = 'approved'
-    item.updated_at = datetime.utcnow()
     db.session.commit()
     
     # Send approval email if reporter exists
@@ -431,7 +464,8 @@ def approve_item(id):
     # Redirect back to pending page with pagination (from form data or args)
     page = request.form.get('page', request.args.get('page', 1, type=int), type=int)
     per_page = request.form.get('per_page', request.args.get('per_page', 20, type=int), type=int)
-    return redirect(url_for('inventory.admin_inventory', status='pending', page=page, per_page=per_page))
+    from app.models import InventoryItemStatus
+    return redirect(url_for('inventory.admin_inventory', status=InventoryItemStatus.PENDING.value, page=page, per_page=per_page))
 
 @bp.route('/inventory/<int:id>/reject', methods=['POST'])
 @login_required
@@ -440,13 +474,15 @@ def reject_item(id):
     """Rechazar un item pendiente del inventario"""
     item = InventoryItem.query.get_or_404(id)
     
-    if item.status != 'pending':
-        flash(_('Este item no está pendiente de aprobación'), 'warning')
+    from app.models import InventoryItemStatus
+    
+    reason = request.form.get('reason', None)
+    success, message = item.reject(reason=reason, rejected_by=current_user)
+    
+    if not success:
+        flash(message, 'warning')
         return redirect(url_for('inventory.admin_inventory'))
     
-    item.status = 'rejected'
-    item.updated_at = datetime.utcnow()
-    reason = request.form.get('reason', None)
     db.session.commit()
     
     # Send rejection email if reporter exists
@@ -462,5 +498,156 @@ def reject_item(id):
     # Redirect back to pending page with pagination (from form data or args)
     page = request.form.get('page', request.args.get('page', 1, type=int), type=int)
     per_page = request.form.get('per_page', request.args.get('per_page', 20, type=int), type=int)
-    return redirect(url_for('inventory.admin_inventory', status='pending', page=page, per_page=per_page))
+    from app.models import InventoryItemStatus
+    return redirect(url_for('inventory.admin_inventory', status=InventoryItemStatus.PENDING.value, page=page, per_page=per_page))
 
+
+# ========== Rutas para Gestionar Responsables de Sección ==========
+
+@bp.route('/sections')
+@login_required
+@roles_required('admin')
+def admin_sections():
+    """Panel para gestionar secciones y asignar responsables"""
+    sections = Section.query.order_by(Section.district_code, Section.code).all()
+    
+    # Obtener responsables por sección
+    section_responsibles = {}
+    for section in sections:
+        responsibles = SectionResponsible.query.filter_by(section_id=section.id).all()
+        section_responsibles[section.id] = [sr.user for sr in responsibles]
+    
+    # Todos los usuarios que pueden ser responsables
+    all_users = User.query.order_by(User.username).all()
+    
+    return render_template('admin/sections.html',
+                         sections=sections,
+                         section_responsibles=section_responsibles,
+                         all_users=all_users)
+
+@bp.route('/sections/assign-responsible', methods=['POST'])
+@login_required
+@roles_required('admin')
+def assign_section_responsible():
+    """Asignar responsable a una sección"""
+    user_id = request.form.get('user_id')
+    section_id = request.form.get('section_id')
+    
+    if not user_id or not section_id:
+        flash(_('Debes seleccionar un usuario y una sección'), 'error')
+        return redirect(url_for('admin.admin_sections'))
+    
+    user = User.query.get_or_404(user_id)
+    section = Section.query.get_or_404(section_id)
+    
+    # Verificar si ya existe la relación
+    existing = SectionResponsible.query.filter_by(
+        user_id=user.id,
+        section_id=section.id
+    ).first()
+    
+    if existing:
+        flash(_('Este usuario ya es responsable de esta sección'), 'warning')
+        return redirect(url_for('admin.admin_sections'))
+    
+    # Asignar rol si no lo tiene
+    if not user.has_role('section_responsible'):
+        role = Role.query.filter_by(name='section_responsible').first()
+        if role:
+            user_datastore = get_user_datastore()
+            user_datastore.add_role_to_user(user, role)
+            db.session.commit()
+        else:
+            flash(_('El rol section_responsible no existe. Ejecuta flask init-db'), 'error')
+            return redirect(url_for('admin.admin_sections'))
+    
+    # Crear relación
+    sr = SectionResponsible(
+        user_id=user.id,
+        section_id=section.id,
+        assigned_by=current_user.id
+    )
+    db.session.add(sr)
+    db.session.commit()
+    
+    current_app.logger.info(f'Admin {current_user.id} assigned user {user.id} as responsible for section {section.id}')
+    flash(_('Responsable asignado correctamente'), 'success')
+    return redirect(url_for('admin.admin_sections'))
+
+@bp.route('/sections/<int:section_id>/remove-responsible/<int:user_id>', methods=['POST'])
+@login_required
+@roles_required('admin')
+def remove_section_responsible(section_id, user_id):
+    """Remover responsable de una sección"""
+    sr = SectionResponsible.query.filter_by(
+        section_id=section_id,
+        user_id=user_id
+    ).first_or_404()
+    
+    db.session.delete(sr)
+    db.session.commit()
+    
+    current_app.logger.info(f'Admin {current_user.id} removed user {user_id} as responsible for section {section_id}')
+    flash(_('Responsable removido correctamente'), 'success')
+    return redirect(url_for('admin.admin_sections'))
+
+
+# ========== Rutas para Editar Distritos y Secciones ==========
+
+@bp.route('/districts-sections')
+@login_required
+@roles_required('admin')
+def admin_districts_sections():
+    """Panel para editar nombres de distritos y secciones"""
+    districts = District.query.order_by(District.code).all()
+    
+    # Organizar secciones por distrito
+    districts_data = []
+    for district in districts:
+        sections = Section.query.filter_by(district_code=district.code).order_by(Section.code).all()
+        districts_data.append({
+            'district': district,
+            'sections': sections
+        })
+    
+    return render_template('admin/districts_sections.html',
+                         districts_data=districts_data)
+
+@bp.route('/district/<int:district_id>/edit-name', methods=['POST'])
+@login_required
+@roles_required('admin')
+def edit_district_name(district_id):
+    """Editar el nombre de un distrito"""
+    district = District.query.get_or_404(district_id)
+    new_name = request.form.get('name', '').strip()
+    
+    if not new_name:
+        flash(_('El nombre no puede estar vacío'), 'error')
+        return redirect(url_for('admin.admin_districts_sections'))
+    
+    old_name = district.name
+    district.name = new_name
+    district.updated_at = datetime.utcnow()
+    db.session.commit()
+    
+    current_app.logger.info(f'Admin {current_user.id} updated district {district.code} name from "{old_name}" to "{new_name}"')
+    flash(_('Nombre del distrito actualizado correctamente'), 'success')
+    return redirect(url_for('admin.admin_districts_sections'))
+
+@bp.route('/section/<int:section_id>/edit-name', methods=['POST'])
+@login_required
+@roles_required('admin')
+def edit_section_name(section_id):
+    """Editar el nombre de una sección"""
+    section = Section.query.get_or_404(section_id)
+    new_name = request.form.get('name', '').strip()
+    
+    # Permitir nombre vacío (opcional)
+    old_name = section.name
+    section.name = new_name if new_name else None
+    section.updated_at = datetime.utcnow()
+    db.session.commit()
+    
+    current_app.logger.info(f'Admin {current_user.id} updated section {section.full_code} name from "{old_name}" to "{section.name}"')
+    flash(_('Nombre de la sección actualizado correctamente'), 'success')
+    return redirect(url_for('admin.admin_districts_sections'))

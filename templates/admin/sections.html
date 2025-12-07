@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Gestionar Seccions') }} - Tarracograf{% endblock %}
+
+{% block content %}
+<section class="py-5" style="padding-top: 8rem !important;">
+    <div class="container-fluid px-4">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="display-5 fw-bold mb-2">
+                    <i class="fas fa-map-marked-alt text-primary me-2"></i>
+                    {{ _('Gestionar Seccions i Responsables') }}
+                </h1>
+                <p class="text-muted mb-0">{{ _('Assigna responsables a les seccions administratives') }}</p>
+            </div>
+            <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>{{ _('Tornar') }}
+            </a>
+        </div>
+
+        <!-- Assignar Responsable -->
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="mb-0"><i class="fas fa-user-plus me-2 text-primary"></i>{{ _('Assignar Responsable') }}</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin.assign_section_responsible') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <label class="form-label">{{ _('Usuari') }}</label>
+                            <select name="user_id" class="form-select" required>
+                                <option value="">{{ _('Selecciona un usuari') }}</option>
+                                {% for user in all_users %}
+                                <option value="{{ user.id }}">{{ user.username }} ({{ user.email }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label">{{ _('Secció') }}</label>
+                            <select name="section_id" class="form-select" required>
+                                <option value="">{{ _('Selecciona una secció') }}</option>
+                                {% for section in sections %}
+                                <option value="{{ section.id }}">{{ section.full_code }} - {{ section.name or _('Sense nom') }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-plus me-2"></i>{{ _('Assignar') }}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Lista de Secciones -->
+        <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="mb-0"><i class="fas fa-list me-2 text-primary"></i>{{ _('Seccions i Responsables') }}</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 150px;">{{ _('Codi') }}</th>
+                                <th>{{ _('Nom') }}</th>
+                                <th>{{ _('Districte') }}</th>
+                                <th>{{ _('Responsables') }}</th>
+                                <th style="width: 150px;">{{ _('Accions') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for section in sections %}
+                            <tr>
+                                <td>
+                                    <span class="badge bg-primary">{{ section.full_code }}</span>
+                                </td>
+                                <td>
+                                    <strong>{{ section.name or _('Sense nom') }}</strong>
+                                </td>
+                                <td>
+                                    <span class="text-muted">{{ section.district_code }}</span>
+                                </td>
+                                <td>
+                                    {% if section_responsibles[section.id] %}
+                                    <div class="d-flex flex-wrap gap-2">
+                                        {% for user in section_responsibles[section.id] %}
+                                        <span class="badge bg-success">
+                                            {{ user.username }}
+                                            <form method="POST" action="{{ url_for('admin.remove_section_responsible', section_id=section.id, user_id=user.id) }}" style="display: inline;" onsubmit="return confirm('{{ _('Estàs segur que vols eliminar aquest responsable?') }}');">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <button type="submit" class="btn btn-sm p-0 text-white" style="background: none; border: none; margin-left: 5px;" title="{{ _('Eliminar') }}">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </form>
+                                        </span>
+                                        {% endfor %}
+                                    </div>
+                                    {% else %}
+                                    <span class="text-muted">{{ _('Sense responsables') }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('inventory.inventory_map', section=section.id) }}" 
+                                       class="btn btn-sm btn-outline-primary" 
+                                       title="{{ _('Veure items') }}">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+

@@ -85,12 +85,13 @@
                 <table id="usersTable" class="table table-hover align-middle mb-0" style="width: 100%;">
                         <thead class="table-light">
                             <tr>
-                                <th style="width: 25%;">{{ _('Usuari') }}</th>
-                                <th style="width: 20%;">{{ _('Email') }}</th>
+                                <th style="width: 20%;">{{ _('Usuari') }}</th>
+                                <th style="width: 18%;">{{ _('Email') }}</th>
                                 <th style="width: 12%;">{{ _('Rol') }}</th>
-                                <th style="width: 15%;">{{ _('Estat') }}</th>
-                                <th style="width: 13%;">{{ _('Data') }}</th>
-                                <th style="width: 15%;" class="text-end">{{ _('Accions') }}</th>
+                                <th style="width: 15%;">{{ _('Seccions') }}</th>
+                                <th style="width: 12%;">{{ _('Estat') }}</th>
+                                <th style="width: 10%;">{{ _('Data') }}</th>
+                                <th style="width: 13%;" class="text-end">{{ _('Accions') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -124,6 +125,19 @@
                                         <span class="text-muted small">{{ _('Sense rol') }}</span>
                                         {% endfor %}
                                     </div>
+                                </td>
+                                <td>
+                                    {% if user_sections[user.id] %}
+                                    <div class="d-flex flex-wrap gap-1">
+                                        {% for section in user_sections[user.id] %}
+                                        <span class="badge bg-success" style="font-size: 0.7rem;" title="{{ section.name or _('Sense nom') }}">
+                                            <i class="fas fa-map-marker-alt me-1"></i>{{ section.full_code }}
+                                        </span>
+                                        {% endfor %}
+                                    </div>
+                                    {% else %}
+                                    <span class="text-muted small">{{ _('Cap') }}</span>
+                                    {% endif %}
                                 </td>
                                 <td>
                                     <div class="d-flex flex-column gap-1">

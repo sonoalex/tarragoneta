@@ -12,7 +12,7 @@ import json
 import stripe
 import os
 import secrets
-from app.models import InventoryItem, District, Section, Initiative, Participation, user_initiatives, ReportPurchase
+from app.models import InventoryItem, District, Section, Initiative, Participation, user_initiatives, ReportPurchase, InventoryItemStatus
 from app.extensions import db
 from sqlalchemy import func, and_
 
@@ -24,7 +24,7 @@ def public_reports():
     """Public page to view and purchase reports"""
     # Get basic statistics (public info only)
     total_items = InventoryItem.query.filter(
-        InventoryItem.status.in_(['approved', 'active'])
+        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     ).count()
     
     total_initiatives = Initiative.query.filter(
@@ -74,7 +74,7 @@ def analytics_dashboard():
     """Main analytics dashboard with report options"""
     # Get basic statistics
     total_items = InventoryItem.query.filter(
-        InventoryItem.status.in_(['approved', 'active'])
+        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     ).count()
     
     total_initiatives = Initiative.query.filter(
@@ -118,7 +118,7 @@ def inventory_by_zone():
     
     # Build query
     query = InventoryItem.query.filter(
-        InventoryItem.status.in_(['approved', 'active'])
+        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     )
     
     # Apply filters
@@ -263,7 +263,7 @@ def trends():
     
     # Build query
     query = InventoryItem.query.filter(
-        InventoryItem.status.in_(['approved', 'active'])
+        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     )
     
     if date_from:
@@ -362,7 +362,7 @@ def top_categories():
     ).join(
         Section, InventoryItem.section_id == Section.id, isouter=True
     ).filter(
-        InventoryItem.status.in_(['approved', 'active'])
+        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     ).group_by(
         InventoryItem.category,
         InventoryItem.subcategory,
@@ -653,7 +653,7 @@ def download_purchased_report(token):
     if purchase.report_type == 'inventory_by_zone':
         # Recreate the query from params (stored at purchase time - immutable)
         query = InventoryItem.query.filter(
-            InventoryItem.status.in_(['approved', 'active'])
+            InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
         )
         
         # Apply filters exactly as they were at purchase time
@@ -717,7 +717,7 @@ def download_purchased_report(token):
     elif purchase.report_type == 'trends':
         # Similar logic for trends - using exact params from purchase time
         query = InventoryItem.query.filter(
-            InventoryItem.status.in_(['approved', 'active'])
+            InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
         )
         
         # CRITICAL: Use the exact date range from purchase time
@@ -767,7 +767,7 @@ def download_purchased_report(token):
         ).join(
             Section, InventoryItem.section_id == Section.id, isouter=True
         ).filter(
-            InventoryItem.status.in_(['approved', 'active'])
+            InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
         ).group_by(
             InventoryItem.category,
             InventoryItem.subcategory,
@@ -812,7 +812,7 @@ def view_inventory_by_zone():
     
     # Get basic statistics (no filters for preview)
     items = InventoryItem.query.filter(
-        InventoryItem.status.in_(['approved', 'active'])
+        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     ).all()
     
     # Calculate summary statistics
@@ -861,7 +861,7 @@ def view_trends():
     # Get items from last 6 months
     six_months_ago = datetime.now() - timedelta(days=180)
     items = InventoryItem.query.filter(
-        InventoryItem.status.in_(['approved', 'active']),
+        InventoryItem.status.in_(InventoryItemStatus.visible_statuses()),
         InventoryItem.created_at >= six_months_ago
     ).order_by(InventoryItem.created_at).all()
     
@@ -898,7 +898,7 @@ def view_top_categories():
         InventoryItem.subcategory,
         func.count(InventoryItem.id).label('count')
     ).filter(
-        InventoryItem.status.in_(['approved', 'active'])
+        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     ).group_by(
         InventoryItem.category,
         InventoryItem.subcategory
@@ -915,7 +915,7 @@ def view_top_categories():
     
     # Total items
     total_items = InventoryItem.query.filter(
-        InventoryItem.status.in_(['approved', 'active'])
+        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     ).count()
     
     return render_template('reports/preview_top_categories.html',

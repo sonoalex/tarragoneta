@@ -5,10 +5,11 @@ from flask_babel import gettext as _
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import os
-from app.models import InventoryItem, InventoryVote, District, Section, CityBoundary
+from app.models import InventoryItem, InventoryVote, District, Section, CityBoundary, InventoryItemStatus
 from app.extensions import db
 from app.forms import InventoryForm
 from app.utils import sanitize_html, allowed_file, optimize_image, extract_gps_from_image, get_inventory_category_name, normalize_category_from_url, normalize_subcategory_from_url, category_to_url, subcategory_to_url
+from app.core.decorators import section_responsible_required
 # Config.UPLOAD_FOLDER removed - using current_app.config['UPLOAD_FOLDER'] instead
 
 bp = Blueprint('inventory', __name__, url_prefix='/inventory')
@@ -24,9 +25,9 @@ def inventory_map():
     category = normalize_category_from_url(category_url)
     subcategory = normalize_subcategory_from_url(subcategory_url)
     
-    # Build query - only show approved or active items
+    # Build query - only show approved items (visible in map)
     query = InventoryItem.query.filter(
-        InventoryItem.status.in_(['approved', 'active'])
+        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     )
     
     if category:
@@ -36,13 +37,13 @@ def inventory_map():
     
     items = query.order_by(InventoryItem.created_at.desc()).all()
     
-    # Get statistics - only count approved/active items
+    # Get statistics - only count approved items
     total_items = InventoryItem.query.filter(
-        InventoryItem.status.in_(['approved', 'active'])
+        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     ).count()
     by_category = {}
     for item in InventoryItem.query.filter(
-        InventoryItem.status.in_(['approved', 'active'])
+        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     ).all():
         cat_key = f"{item.category}->{item.subcategory}"
         by_category[cat_key] = by_category.get(cat_key, 0) + 1
@@ -50,7 +51,7 @@ def inventory_map():
     # Ensure all items have importance_count set (fix for existing items)
     # This handles items created before the importance_count field was added
     items_without_count = InventoryItem.query.filter(
-        InventoryItem.status.in_(['approved', 'active'])
+        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     ).all()
     fixed = False
     for item in items_without_count:
@@ -64,7 +65,7 @@ def inventory_map():
     by_main_category = {}
     by_subcategory = {}
     for item in InventoryItem.query.filter(
-        InventoryItem.status.in_(['approved', 'active'])
+        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     ).all():
         # Count by main category
         by_main_category[item.category] = by_main_category.get(item.category, 0) + 1
@@ -223,9 +224,9 @@ def api_items():
     category = normalize_category_from_url(category_url)
     subcategory = normalize_subcategory_from_url(subcategory_url)
     
-    # Only return approved or active items (not resolved)
+    # Only return approved items (visible in map)
     query = InventoryItem.query.filter(
-        InventoryItem.status.in_(['approved', 'active'])
+        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     )
     
     if category:
@@ -446,7 +447,7 @@ def resolve_item(item_id):
         return jsonify({'error': _('Ya has reportado que este item ya no está')}), 400
     
     # Don't allow resolving if item is already resolved
-    if item.status == 'resolved':
+    if item.is_resolved():
         return jsonify({'error': _('Este item ya está marcado como resuelto')}), 400
     
     # If user has voted "encara hi és", remove that vote first (mutually exclusive)
@@ -469,11 +470,11 @@ def resolve_item(item_id):
         item.resolved_count = 0
     item.resolved_count += 1
     
-    # Check if we should auto-resolve (minimum threshold reached)
-    auto_resolve_threshold = current_app.config.get('INVENTORY_AUTO_RESOLVE_THRESHOLD', 3)
-    if item.resolved_count >= auto_resolve_threshold and item.status in ['approved', 'active']:
-        item.status = 'resolved'
-        current_app.logger.info(f'Item {item.id} auto-resolved after {item.resolved_count} "ya no está" reports')
+    # Use the method that handles all the logic
+    success, auto_resolved, message = item.add_resolved_report(current_user.id)
+    
+    if not success:
+        return jsonify({'error': message}), 400
     
     db.session.commit()
     
@@ -485,8 +486,8 @@ def resolve_item(item_id):
         'importance_count': item.importance_count if item.importance_count is not None else 0,
         'has_voted': False,  # Now false since we removed it
         'status': item.status,
-        'auto_resolved': item.status == 'resolved',
-        'message': _('Reporte registrado correctamente') if item.status != 'resolved' else _('Item marcado como resuelto automáticamente')
+        'auto_resolved': auto_resolved,
+        'message': message
     })
 
 @bp.route('/admin/pending-map')
@@ -494,7 +495,7 @@ def resolve_item(item_id):
 @roles_required('admin')
 def admin_pending_map():
     """Mapa de items pendientes para administradores"""
-    items = InventoryItem.query.filter(InventoryItem.status == 'pending').order_by(InventoryItem.created_at.desc()).all()
+    items = InventoryItem.query.filter(InventoryItem.status == InventoryItemStatus.PENDING.value).order_by(InventoryItem.created_at.desc()).all()
     
     return render_template('inventory/admin_pending_map.html', items=items)
 
@@ -503,7 +504,7 @@ def admin_pending_map():
 @roles_required('admin')
 def api_pending_items():
     """API endpoint para obtener items pendientes (para el mapa de admin)"""
-    items = InventoryItem.query.filter(InventoryItem.status == 'pending').all()
+    items = InventoryItem.query.filter(InventoryItem.status == InventoryItemStatus.PENDING.value).all()
     
     items_data = []
     for item in items:
@@ -548,15 +549,14 @@ def admin_inventory():
     
     # Statistics
     total_items = InventoryItem.query.count()
-    pending_items = InventoryItem.query.filter(InventoryItem.status == 'pending').count()
-    approved_items = InventoryItem.query.filter(InventoryItem.status == 'approved').count()
-    active_items = InventoryItem.query.filter(InventoryItem.status == 'active').count()
-    resolved_items = InventoryItem.query.filter(InventoryItem.status == 'resolved').count()
-    rejected_items = InventoryItem.query.filter(InventoryItem.status == 'rejected').count()
+    pending_items = InventoryItem.query.filter(InventoryItem.status == InventoryItemStatus.PENDING.value).count()
+    approved_items = InventoryItem.query.filter(InventoryItem.status == InventoryItemStatus.APPROVED.value).count()
+    resolved_items = InventoryItem.query.filter(InventoryItem.status == InventoryItemStatus.RESOLVED.value).count()
+    rejected_items = InventoryItem.query.filter(InventoryItem.status == InventoryItemStatus.REJECTED.value).count()
     
     by_category = {}
     for item in InventoryItem.query.filter(
-        InventoryItem.status.in_(['approved', 'active'])
+        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     ).all():
         cat_key = f"{item.category}->{item.subcategory}"
         by_category[cat_key] = by_category.get(cat_key, 0) + 1
@@ -567,7 +567,6 @@ def admin_inventory():
                          total_items=total_items,
                          pending_items=pending_items,
                          approved_items=approved_items,
-                         active_items=active_items,
                          resolved_items=resolved_items,
                          rejected_items=rejected_items,
                          by_category=by_category,
@@ -581,9 +580,11 @@ def admin_inventory():
 def admin_resolve_item(id):
     """Marcar item como resuelto (admin)"""
     item = InventoryItem.query.get_or_404(id)
-    item.status = 'resolved'
-    item.updated_at = datetime.now()
-    db.session.commit()
+    success, message = item.resolve(resolved_by=current_user)
+    if success:
+        db.session.commit()
+    else:
+        flash(message, 'warning')
     
     flash(_('Item marcado como resuelto'), 'success')
     # Redirect back to the same page and filter (from form data or args)
@@ -616,3 +617,96 @@ def delete_item(id):
     per_page = request.form.get('per_page', request.args.get('per_page', 20, type=int), type=int)
     return redirect(url_for('inventory.admin_inventory', status=status_filter, page=page, per_page=per_page))
 
+
+# ========== Rutas para Responsables de Sección ==========
+
+@bp.route('/section-responsible')
+@login_required
+@section_responsible_required
+def section_responsible_dashboard():
+    """Dashboard para responsables de sección"""
+    # Obtener secciones que gestiona el usuario
+    managed_sections = current_user.get_managed_sections()
+    section_ids = [s.id for s in managed_sections]
+    
+    if not section_ids:
+        flash(_('No tienes secciones asignadas'), 'warning')
+        return render_template('inventory/section_responsible.html',
+                             items=[],
+                             pagination=None,
+                             managed_sections=[],
+                             stats={'total': 0, 'pending': 0, 'approved': 0, 'resolved': 0},
+                             status_filter='all')
+    
+    # Filtrar items solo de sus secciones
+    query = InventoryItem.query.filter(InventoryItem.section_id.in_(section_ids))
+    
+    # Filtros
+    status_filter = request.args.get('status', 'all')
+    if status_filter != 'all':
+        query = query.filter(InventoryItem.status == status_filter)
+    
+    # Paginación
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 20, type=int)
+    pagination = query.order_by(InventoryItem.created_at.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+    
+    # Estadísticas
+    stats = {
+        'total': query.count(),
+        'pending': query.filter(InventoryItem.status == InventoryItemStatus.PENDING.value).count(),
+        'approved': query.filter(InventoryItem.status == InventoryItemStatus.APPROVED.value).count(),
+        'resolved': query.filter(InventoryItem.status == InventoryItemStatus.RESOLVED.value).count(),
+    }
+    
+    return render_template('inventory/section_responsible.html',
+                         items=pagination.items,
+                         pagination=pagination,
+                         managed_sections=managed_sections,
+                         stats=stats,
+                         status_filter=status_filter)
+
+@bp.route('/section-responsible/<int:id>/approve', methods=['POST'])
+@login_required
+@section_responsible_required
+def section_responsible_approve(id):
+    """Aprobar item (solo si es de una sección gestionada)"""
+    item = InventoryItem.query.get_or_404(id)
+    
+    # Verificar que el item pertenece a una sección gestionada
+    if not current_user.is_section_responsible(item.section_id):
+        flash(_('No tienes permisos para gestionar este item'), 'error')
+        return redirect(url_for('inventory.section_responsible_dashboard'))
+    
+    success, message = item.approve(approved_by=current_user)
+    
+    if not success:
+        flash(message, 'warning')
+    else:
+        db.session.commit()
+        flash(message, 'success')
+    
+    return redirect(url_for('inventory.section_responsible_dashboard'))
+
+@bp.route('/section-responsible/<int:id>/resolve', methods=['POST'])
+@login_required
+@section_responsible_required
+def section_responsible_resolve(id):
+    """Marcar item como resuelto"""
+    item = InventoryItem.query.get_or_404(id)
+    
+    if not current_user.is_section_responsible(item.section_id):
+        flash(_('No tienes permisos para gestionar este item'), 'error')
+        return redirect(url_for('inventory.section_responsible_dashboard'))
+    
+    success, message = item.resolve(resolved_by=current_user)
+    
+    if not success:
+        flash(message, 'warning')
+    else:
+        db.session.commit()
+        flash(message, 'success')
+    
+    return redirect(url_for('inventory.section_responsible_dashboard'))

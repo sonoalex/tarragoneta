@@ -6,7 +6,7 @@ set +e
 
 echo "🚀 Starting Tarracograf in production mode..."
 
-# Compile translations (migrations are handled by Procfile release phase)
+# Compile translations (migrations are handled by Railway release phase in railway.json)
 echo "🌐 Compiling translations..."
 python compile_translations.py
 if [ $? -ne 0 ]; then

@@ -1,4 +1,9 @@
 {
-  "$schema": "https://schema.up.railway.app/railway.schema.json"
+  "$schema": "https://schema.up.railway.app/railway.schema.json",
+  "build": {
+    "builder": "RAILPACK"
+  },
+  "release": {
+    "command": "export FLASK_APP=app.py && python compile_translations.py && flask db upgrade"
+  }
 }
-
