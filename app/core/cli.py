@@ -59,4 +59,69 @@ def register_cli_commands(app):
             else:
                 print('❌ Could not calculate city boundary')
                 current_app.logger.error('Failed to calculate city boundary')
+    
+    @app.cli.command('sync-migrations')
+    def sync_migrations():
+        """Sincronizar alembic_version cuando se migra de migraciones antiguas a nuevas.
+        
+        Este comando actualiza alembic_version a la migración inicial (6d646413299d)
+        si detecta que hay tablas existentes pero la revisión en alembic_version
+        es antigua y ya no existe en el código.
+        
+        Útil cuando se consolida múltiples migraciones en una sola migración inicial.
+        """
+        from sqlalchemy import inspect, text
+        from flask_migrate import current as get_current_revision
+        
+        with app.app_context():
+            inspector = inspect(db.engine)
+            existing_tables = inspector.get_table_names()
+            
+            # Verificar si hay tablas de aplicación
+            has_app_tables = any(t in existing_tables for t in ['user', 'role', 'initiative', 'inventory_item'])
+            has_alembic_version = 'alembic_version' in existing_tables
+            
+            if not has_app_tables:
+                print("ℹ️  No hay tablas de aplicación. No es necesario sincronizar.")
+                return
+            
+            if not has_alembic_version:
+                print("ℹ️  No hay tabla alembic_version. Las migraciones se crearán normalmente.")
+                return
+            
+            # Obtener revisión actual
+            try:
+                current_rev = get_current_revision()
+                print(f"📋 Revisión actual en alembic_version: {current_rev}")
+            except Exception as e:
+                print(f"⚠️  No se pudo obtener la revisión actual: {e}")
+                return
+            
+            # Verificar si la revisión actual existe en las migraciones disponibles
+            from flask_migrate import history
+            try:
+                migration_history = history()
+                available_revisions = [m.revision for m in migration_history]
+                
+                if current_rev in available_revisions:
+                    print(f"✅ La revisión {current_rev} existe en las migraciones. No es necesario sincronizar.")
+                    return
+                
+                # La revisión actual no existe en el código nuevo
+                print(f"⚠️  La revisión {current_rev} no existe en las migraciones actuales.")
+                print("   Esto significa que se migró de migraciones antiguas a nuevas.")
+                print("   Actualizando alembic_version a la migración inicial (6d646413299d)...")
+                
+                # Actualizar a la migración inicial
+                conn = db.engine.connect()
+                conn.execute(text("UPDATE alembic_version SET version_num = '6d646413299d'"))
+                conn.commit()
+                conn.close()
+                
+                print("✅ alembic_version actualizado a 6d646413299d")
+                print("   Ahora puedes ejecutar 'flask db upgrade' para aplicar las nuevas migraciones.")
+                
+            except Exception as e:
+                print(f"❌ Error al sincronizar: {e}")
+                raise
 

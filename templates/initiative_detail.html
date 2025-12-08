@@ -62,7 +62,7 @@
                             </div>
                             <div>
                                 <div class="small text-muted">{{ _('Participants') }}</div>
-                                <div class="fw-bold">{{ initiative.participant_count + initiative.anonymous_participants|length }} {{ _('persones') }}</div>
+                                <div class="fw-bold">{{ initiative.participant_count }} {{ _('persones') }}</div>
                             </div>
                         </div>
                     </div>
@@ -127,16 +127,8 @@
                                     <span class="small">{{ participant.username }}</span>
                                 </div>
                             {% endfor %}
-                            {% for participant in initiative.anonymous_participants[:5] %}
-                                <div class="d-flex align-items-center" style="background: var(--bg-light); padding: 0.5rem 1rem; border-radius: 50px;">
-                                    <div class="me-2" style="width: 32px; height: 32px; background: var(--primary-green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem;">
-                                        {{ participant.name[0]|upper }}
-                                    </div>
-                                    <span class="small">{{ participant.name }}</span>
-                                </div>
-                            {% endfor %}
                         </div>
-                        {% set total = initiative.participant_count + initiative.anonymous_participants|length %}
+                        {% set total = initiative.participant_count %}
                         {% if total == 0 %}
                             <p class="text-muted mb-0">{{ _('Sigues el primer a unir-te a aquesta iniciativa') }}</p>
                         {% elif total > 17 %}
