@@ -63,9 +63,30 @@ def run_migrations_offline():
     script output.
 
     """
+    # Exclude PostGIS/TIGER tables from migrations
+    def include_object(object, name, type_, reflected, compare_to):
+        if type_ == "table":
+            postgis_tables = {
+                'spatial_ref_sys', 'geometry_columns', 'geography_columns',
+                'raster_columns', 'raster_overviews',
+                'addr', 'addrfeat', 'bg', 'county', 'county_lookup',
+                'countysub_lookup', 'cousub', 'direction_lookup', 'edges',
+                'faces', 'featnames', 'geocode_settings', 'geocode_settings_default',
+                'layer', 'loader_lookuptables', 'loader_platform', 'loader_variables',
+                'pagc_gaz', 'pagc_lex', 'pagc_rules', 'place', 'place_lookup',
+                'secondary_unit_lookup', 'state', 'state_lookup', 'street_type_lookup',
+                'tabblock', 'tabblock20', 'topology', 'tract', 'zcta5',
+                'zip_lookup', 'zip_lookup_all', 'zip_lookup_base', 'zip_state',
+                'zip_state_loc'
+            }
+            if name in postgis_tables:
+                return False
+        return True
+
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
-        url=url, target_metadata=get_metadata(), literal_binds=True
+        url=url, target_metadata=get_metadata(), literal_binds=True,
+        include_object=include_object
     )
 
     with context.begin_transaction():
@@ -90,9 +111,56 @@ def run_migrations_online():
                 directives[:] = []
                 logger.info('No changes in schema detected.')
 
+    # Exclude PostGIS/TIGER tables and system tables from migrations
+    def include_object(object, name, type_, reflected, compare_to):
+        if type_ == "table":
+            # Exclude PostGIS system schemas
+            if hasattr(object, 'schema') and object.schema:
+                if object.schema in ('tiger', 'topology', 'public'):
+                    # In public schema, exclude PostGIS/TIGER tables
+                    postgis_tables = {
+                        'spatial_ref_sys', 'geometry_columns', 'geography_columns',
+                        'raster_columns', 'raster_overviews',
+                        # TIGER tables
+                        'addr', 'addrfeat', 'bg', 'county', 'county_lookup',
+                        'countysub_lookup', 'cousub', 'direction_lookup', 'edges',
+                        'faces', 'featnames', 'geocode_settings', 'geocode_settings_default',
+                        'layer', 'loader_lookuptables', 'loader_platform', 'loader_variables',
+                        'pagc_gaz', 'pagc_lex', 'pagc_rules', 'place', 'place_lookup',
+                        'secondary_unit_lookup', 'state', 'state_lookup', 'street_type_lookup',
+                        'tabblock', 'tabblock20', 'topology', 'tract', 'zcta5',
+                        'zip_lookup', 'zip_lookup_all', 'zip_lookup_base', 'zip_state',
+                        'zip_state_loc'
+                    }
+                    if name in postgis_tables:
+                        return False
+                elif object.schema not in (None, 'public'):
+                    # Exclude all non-public schemas
+                    return False
+            else:
+                # Tables without schema - exclude PostGIS/TIGER tables
+                postgis_tables = {
+                    'spatial_ref_sys', 'geometry_columns', 'geography_columns',
+                    'raster_columns', 'raster_overviews',
+                    'addr', 'addrfeat', 'bg', 'county', 'county_lookup',
+                    'countysub_lookup', 'cousub', 'direction_lookup', 'edges',
+                    'faces', 'featnames', 'geocode_settings', 'geocode_settings_default',
+                    'layer', 'loader_lookuptables', 'loader_platform', 'loader_variables',
+                    'pagc_gaz', 'pagc_lex', 'pagc_rules', 'place', 'place_lookup',
+                    'secondary_unit_lookup', 'state', 'state_lookup', 'street_type_lookup',
+                    'tabblock', 'tabblock20', 'topology', 'tract', 'zcta5',
+                    'zip_lookup', 'zip_lookup_all', 'zip_lookup_base', 'zip_state',
+                    'zip_state_loc'
+                }
+                if name in postgis_tables:
+                    return False
+        return True
+
     conf_args = current_app.extensions['migrate'].configure_args
     if conf_args.get("process_revision_directives") is None:
         conf_args["process_revision_directives"] = process_revision_directives
+    if conf_args.get("include_object") is None:
+        conf_args["include_object"] = include_object
 
     connectable = get_engine()
 
