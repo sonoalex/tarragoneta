@@ -615,11 +615,29 @@ def import_zones_from_geojson(geojson_dir='geojson_tarragona'):
                         final_district_code = district_code  # Usar el del directorio
                     
                     # Convertir geometría a formato apropiado
-                    if geometry and geometry.get('type') == 'Polygon':
+                    if geometry and geometry.get('type') in ('Polygon', 'MultiPolygon'):
                         shapely_geom = shapely_shape(geometry)
+                        
+                        # Si es MultiPolygon, intentar unir los polígonos
+                        # Si los polígonos se tocan, se unirán en uno solo
+                        # Si no se tocan, mantenemos el MultiPolygon (WKT lo soporta)
+                        if geometry.get('type') == 'MultiPolygon':
+                            from shapely.ops import unary_union
+                            # Obtener todos los polígonos del MultiPolygon
+                            polygons = list(shapely_geom.geoms) if hasattr(shapely_geom, 'geoms') else [shapely_geom]
+                            # Intentar unir todos los polígonos
+                            try:
+                                unioned = unary_union(polygons)
+                                # Si la unión resulta en un solo Polygon, usarlo
+                                # Si sigue siendo MultiPolygon, también está bien (WKT lo soporta)
+                                shapely_geom = unioned
+                            except Exception as e:
+                                # Si falla la unión, usar el MultiPolygon original
+                                print(f"   ⚠️  No se pudieron unir los polígonos de {geojson_file.name}, usando MultiPolygon original")
                         
                         # Siempre usar WKT (texto) para almacenar
                         # El campo polygon es Text, así que almacenamos como WKT
+                        # WKT soporta tanto Polygon como MultiPolygon
                         # Si necesitamos PostGIS, podemos convertir usando ST_GeomFromText en queries
                         polygon_value = shapely_geom.wkt
                         

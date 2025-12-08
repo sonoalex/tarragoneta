@@ -511,22 +511,44 @@
                         var polygon = geoJsonToLeaflet(section.geometry);
                         if (polygon) {
                             var color = getDistrictColor(section.district_code);
-                            polygon.setStyle({
-                                fillColor: color,
-                                fillOpacity: 0.5,  // Más opaco para colores más fuertes
-                                color: color,
-                                weight: 1.5,  // Borde delgado
-                                opacity: 0.9  // Borde ligeramente transparente
-                            });
                             
-                            // Popup con información de la sección
-                            polygon.bindPopup(`
-                                <div style="min-width: 150px;">
-                                    <h6 class="fw-bold mb-1">${section.district_name}</h6>
-                                    <p class="small mb-0">${section.name}</p>
-                                    <p class="small text-muted mb-0">Código: ${section.full_code}</p>
-                                </div>
-                            `);
+                            // Si es un LayerGroup (MultiPolygon), aplicar estilo a cada capa
+                            if (polygon instanceof L.LayerGroup) {
+                                polygon.eachLayer(function(layer) {
+                                    layer.setStyle({
+                                        fillColor: color,
+                                        fillOpacity: 0.5,  // Más opaco para colores más fuertes
+                                        color: color,
+                                        weight: 1.5,  // Borde delgado
+                                        opacity: 0.9  // Borde ligeramente transparente
+                                    });
+                                    layer.bindPopup(`
+                                        <div style="min-width: 150px;">
+                                            <h6 class="fw-bold mb-1">${section.district_name}</h6>
+                                            <p class="small mb-0">${section.name}</p>
+                                            <p class="small text-muted mb-0">Código: ${section.full_code}</p>
+                                        </div>
+                                    `);
+                                });
+                            } else {
+                                // Si es un Polygon simple
+                                polygon.setStyle({
+                                    fillColor: color,
+                                    fillOpacity: 0.5,  // Más opaco para colores más fuertes
+                                    color: color,
+                                    weight: 1.5,  // Borde delgado
+                                    opacity: 0.9  // Borde ligeramente transparente
+                                });
+                                
+                                // Popup con información de la sección
+                                polygon.bindPopup(`
+                                    <div style="min-width: 150px;">
+                                        <h6 class="fw-bold mb-1">${section.district_name}</h6>
+                                        <p class="small mb-0">${section.name}</p>
+                                        <p class="small text-muted mb-0">Código: ${section.full_code}</p>
+                                    </div>
+                                `);
+                            }
                             
                             sectionsLayer.addLayer(polygon);
                         }
