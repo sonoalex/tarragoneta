@@ -4,6 +4,6 @@
     "builder": "RAILPACK"
   },
   "deploy": {
-    "preDeployCommand": "export FLASK_APP=app.py && python compile_translations.py && flask db upgrade"
+    "preDeployCommand": "export FLASK_APP=app.py && python compile_translations.py && (flask db upgrade || (flask db stamp 6d646413299d && flask db upgrade))"
   }
 }
