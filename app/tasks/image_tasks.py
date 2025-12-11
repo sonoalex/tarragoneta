@@ -16,6 +16,10 @@ def init_image_tasks(celery_app):
             item_id: ID of the InventoryItem
             image_filename: Original image filename
         """
+        current_app.logger.info(
+            f'🚀 resize_image_task STARTED: item_id={item_id}, image_filename={image_filename}, '
+            f'task_id={self.request.id if hasattr(self.request, "id") else "N/A"}'
+        )
         try:
             from app.utils import generate_image_sizes
             from app.extensions import db
@@ -27,10 +31,31 @@ def init_image_tasks(celery_app):
             upload_folder = current_app.config['UPLOAD_FOLDER']
             original_path = os.path.join(upload_folder, image_filename)
             
-            # Check if file exists
+            # Check if file exists locally
+            # If not, and we're using S3, download it from S3 first
+            storage_provider = current_app.config.get('STORAGE_PROVIDER', 'local').lower()
             if not os.path.exists(original_path):
-                current_app.logger.error(f'Image file not found: {original_path}')
-                return False
+                if storage_provider == 's3':
+                    current_app.logger.info(f'📥 File not found locally, downloading from S3: {image_filename}')
+                    try:
+                        from app.storage import get_storage
+                        storage = get_storage()
+                        # Download from S3
+                        if hasattr(storage, 'client') and hasattr(storage, 'bucket'):
+                            # Ensure directory exists
+                            os.makedirs(upload_folder, exist_ok=True)
+                            # Download file from S3
+                            storage.client.download_file(storage.bucket, image_filename, original_path)
+                            current_app.logger.info(f'✅ Downloaded file from S3: {original_path}')
+                        else:
+                            current_app.logger.error(f'Storage provider does not support download: {type(storage)}')
+                            return False
+                    except Exception as e:
+                        current_app.logger.error(f'❌ Error downloading file from S3: {e}', exc_info=True)
+                        return False
+                else:
+                    current_app.logger.error(f'Image file not found: {original_path}')
+                    return False
             
             # Generate image sizes
             current_app.logger.info(f'🖼️ Generating image sizes for item {item_id}: {image_filename}')
@@ -50,8 +75,14 @@ def init_image_tasks(celery_app):
             db.session.commit()
 
             # Upload all generated files to storage
+            # For S3, delete local files after upload (handled by storage provider)
+            # For local, keep files (they're already in the right place)
             storage_provider = current_app.config.get('STORAGE_PROVIDER', 'local').lower()
-            current_app.logger.info(f'📤 Uploading {len(image_sizes)} image sizes to storage (provider={storage_provider})')
+            delete_after = (storage_provider == 's3')
+            current_app.logger.info(
+                f'📤 Uploading {len(image_sizes)} image sizes to storage '
+                f'(provider={storage_provider}, delete_after_upload={delete_after})'
+            )
             
             for size_name, fname in image_sizes.items():
                 if not fname:
@@ -60,24 +91,18 @@ def init_image_tasks(celery_app):
                 if os.path.exists(path):
                     try:
                         current_app.logger.info(f'  📤 Uploading {size_name}: {fname}')
-                        storage.save(fname, path)
+                        storage.save(fname, path, delete_after_upload=delete_after)
                         current_app.logger.info(f'  ✅ Uploaded {size_name}: {fname}')
                     except Exception as e:
                         current_app.logger.error(f'  ❌ Error uploading {size_name} {fname}: {e}', exc_info=True)
-
-            # If using S3, clean local files to save space
-            if storage_provider == 's3':
-                current_app.logger.info('🗑️ Cleaning up local files after S3 upload')
-                for size_name, fname in image_sizes.items():
-                    if not fname:
-                        continue
-                    path = os.path.join(upload_folder, fname)
-                    try:
-                        if os.path.exists(path):
-                            os.remove(path)
-                            current_app.logger.debug(f'  🗑️ Deleted local file: {fname}')
-                    except Exception as e:
-                        current_app.logger.warning(f'  ⚠️ Could not delete local file {fname}: {e}')
+            
+            # Also delete the original file if it still exists (downloaded from S3)
+            if storage_provider == 's3' and os.path.exists(original_path):
+                try:
+                    os.remove(original_path)
+                    current_app.logger.info(f'🗑️ Deleted original file after processing: {original_path}')
+                except Exception as e:
+                    current_app.logger.warning(f'⚠️ Could not delete original file {original_path}: {e}')
             
             current_app.logger.info(
                 f'✅ Image sizes generated for item {item_id}: '

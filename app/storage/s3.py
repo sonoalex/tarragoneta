@@ -35,14 +35,25 @@ class S3StorageProvider(StorageProvider):
             config=Config(signature_version='s3v4')
         )
 
-    def save(self, key: str, file_path: str) -> str:
-        # key can include folders (e.g., inventory/123/file.jpg)
+    def save(self, key: str, file_path: str, delete_after_upload: bool = False) -> str:
+        """
+        Save file to S3.
+        
+        Args:
+            key: S3 key (path) where to store the file
+            file_path: Local path to the file to upload
+            delete_after_upload: If True, delete local file after successful upload (only for S3)
+        
+        Returns:
+            The key where the file was stored
+        """
         from flask import current_app
         import os
         
         current_app.logger.info(
             f'☁️ S3Storage.save: key={key}, file_path={file_path}, '
-            f'file_exists={os.path.exists(file_path) if file_path else False}'
+            f'file_exists={os.path.exists(file_path) if file_path else False}, '
+            f'delete_after_upload={delete_after_upload}'
         )
         
         if not os.path.exists(file_path):
@@ -52,6 +63,15 @@ class S3StorageProvider(StorageProvider):
         try:
             self.client.upload_file(file_path, self.bucket, key)
             current_app.logger.info(f'✅ S3Storage: Successfully uploaded {key} to s3://{self.bucket}/{key}')
+            
+            # Delete local file after successful upload if requested
+            # This is safe for S3 because the file is already in S3
+            if delete_after_upload:
+                try:
+                    os.remove(file_path)
+                    current_app.logger.info(f'🗑️ S3Storage: Deleted local file after upload: {file_path}')
+                except Exception as e:
+                    current_app.logger.warning(f'⚠️ S3Storage: Could not delete local file {file_path}: {e}')
         except Exception as e:
             current_app.logger.error(f'❌ S3Storage.save: Error uploading {key}: {str(e)}', exc_info=True)
             raise

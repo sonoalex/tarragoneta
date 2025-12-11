@@ -108,23 +108,17 @@ def create_initiative():
                     initiative.image_path = filename
                     
                     # Upload to storage (S3 or local)
+                    # For S3, delete local file after upload (handled by storage provider)
+                    # For local, keep file (it's already in the right place)
                     try:
                         from app.storage import get_storage
                         storage = get_storage()
                         storage_provider = current_app.config.get('STORAGE_PROVIDER', 'local').lower()
+                        delete_after = (storage_provider == 's3')
                         
                         current_app.logger.info(f'📤 Uploading initiative image to storage (provider={storage_provider}): {filename}')
-                        storage.save(filename, file_path)
+                        storage.save(filename, file_path, delete_after_upload=delete_after)
                         current_app.logger.info(f'✅ Initiative image uploaded to storage: {filename}')
-                        
-                        # If using S3, delete local file after upload
-                        if storage_provider == 's3':
-                            try:
-                                if os.path.exists(file_path):
-                                    os.remove(file_path)
-                                    current_app.logger.info(f'🗑️ Deleted local file after S3 upload: {file_path}')
-                            except Exception as e:
-                                current_app.logger.warning(f'⚠️ Could not delete local file {file_path}: {e}')
                     except Exception as e:
                         current_app.logger.error(f'❌ Error uploading initiative image to storage: {e}', exc_info=True)
         

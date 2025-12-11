@@ -56,6 +56,16 @@ def create_app(config_name=None):
     resize_image_task = init_image_tasks(celery)
     app.resize_image_task = resize_image_task
     
+    # Verify Celery is configured
+    app.logger.info(f'🔧 Celery configured: broker={celery.conf.broker_url}, backend={celery.conf.result_backend}')
+    app.logger.info(f'📋 Registered Celery tasks: {list(celery.tasks.keys())}')
+    
+    # Verify tasks are registered
+    if 'resize_image_task' in celery.tasks:
+        app.logger.info('✅ resize_image_task is registered in Celery')
+    else:
+        app.logger.warning('⚠️ resize_image_task NOT found in Celery tasks!')
+    
     # Setup Flask-Security with custom form
     from app.extensions import user_datastore, security
     security.init_app(app, user_datastore, register_form=ExtendedRegisterForm)

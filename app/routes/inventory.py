@@ -192,23 +192,19 @@ def report_item():
             
             # Upload original file to storage (S3 or local)
             # This ensures the file is available even before async resize completes
+            # For S3: delete local file after upload (volumes are not shared, worker will download from S3)
+            # For local: keep file (it's already in the right place)
             try:
                 from app.storage import get_storage
                 storage = get_storage()
                 storage_provider = current_app.config.get('STORAGE_PROVIDER', 'local').lower()
                 
                 current_app.logger.info(f'📤 Uploading original file to storage (provider={storage_provider}): {filename}')
-                storage.save(filename, file_path)
+                # For S3, delete after upload since volumes are not shared with worker
+                # Worker will download from S3 when processing
+                delete_after = (storage_provider == 's3')
+                storage.save(filename, file_path, delete_after_upload=delete_after)
                 current_app.logger.info(f'✅ Original file uploaded to storage: {filename}')
-                
-                # If using S3, delete local file after upload to save space
-                if storage_provider == 's3':
-                    try:
-                        if os.path.exists(file_path):
-                            os.remove(file_path)
-                            current_app.logger.info(f'🗑️ Deleted local file after S3 upload: {file_path}')
-                    except Exception as e:
-                        current_app.logger.warning(f'⚠️ Could not delete local file {file_path}: {e}')
             except Exception as e:
                 current_app.logger.error(f'❌ Error uploading original file to storage: {e}', exc_info=True)
                 # Continue anyway - the file is still in local storage
@@ -245,14 +241,40 @@ def report_item():
             
             # Enqueue image resizing task (async)
             try:
-                resize_task = getattr(current_app, 'resize_image_task', None)
-                if resize_task:
-                    resize_task.delay(item.id, filename)
-                    current_app.logger.info(f'📸 Image resizing task enqueued for item {item.id}: {filename}')
+                # Check if Celery is available
+                celery = getattr(current_app, 'celery', None)
+                if not celery:
+                    current_app.logger.warning('⚠️ Celery not available in current_app, skipping image resize task')
                 else:
-                    current_app.logger.warning('resize_image_task not available, skipping async resize')
+                    # Try to get task from app first
+                    resize_task = getattr(current_app, 'resize_image_task', None)
+                    if not resize_task:
+                        # Try to get from Celery tasks registry
+                        if 'resize_image_task' in celery.tasks:
+                            resize_task = celery.tasks['resize_image_task']
+                            current_app.logger.info('📋 Found resize_image_task in Celery tasks registry')
+                        else:
+                            current_app.logger.warning(
+                                f'⚠️ resize_image_task not found. Available tasks: {list(celery.tasks.keys())[:10]}'
+                            )
+                    
+                    if resize_task:
+                        current_app.logger.info(
+                            f'📸 Attempting to enqueue image resizing task for item {item.id}: {filename}'
+                        )
+                        result = resize_task.delay(item.id, filename)
+                        task_id = result.id if hasattr(result, 'id') else 'N/A'
+                        current_app.logger.info(
+                            f'✅ Image resizing task enqueued successfully for item {item.id}: '
+                            f'filename={filename}, task_id={task_id}'
+                        )
+                    else:
+                        current_app.logger.error(
+                            '❌ resize_image_task not available. '
+                            'Cannot enqueue image resize task. Image will remain in original size.'
+                        )
             except Exception as e:
-                current_app.logger.error(f'Error enqueueing image resize task: {e}', exc_info=True)
+                current_app.logger.error(f'❌ Error enqueueing image resize task: {e}', exc_info=True)
                 # Continue anyway, image will be available in original size
             
             # Verify what was actually saved
