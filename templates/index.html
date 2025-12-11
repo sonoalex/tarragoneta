@@ -224,8 +224,14 @@
                 <div class="col-md-6 col-lg-4">
                     <article class="card border-0 shadow-sm h-100">
                         {% if initiative.image_path %}
-                            <img src="{{ url_for('static', filename='uploads/' + initiative.image_path) }}" 
-                                 alt="{{ initiative.title }}" class="card-img-top" style="height: 180px; object-fit: cover;" loading="lazy">
+                            {% set image_url = get_image_url(initiative.image_path, 'medium') %}
+                            {% if image_url %}
+                                <img src="{{ image_url }}" 
+                                     alt="{{ initiative.title }}" class="card-img-top" style="height: 180px; object-fit: cover;" loading="lazy">
+                            {% else %}
+                                <img src="https://picsum.photos/400/300?random={{ initiative.id }}" 
+                                     alt="{{ initiative.title }}" class="card-img-top" style="height: 180px; object-fit: cover;" loading="lazy">
+                            {% endif %}
                         {% else %}
                             <img src="https://picsum.photos/400/300?random={{ initiative.id }}" 
                                  alt="{{ initiative.title }}" class="card-img-top" style="height: 180px; object-fit: cover;" loading="lazy">

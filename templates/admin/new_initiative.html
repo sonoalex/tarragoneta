@@ -165,13 +165,16 @@
                                 </label>
                                 
                                 {% if initiative and initiative.image_path %}
-                                    <div class="mb-3">
-                                        <img src="{{ url_for('static', filename='uploads/' + initiative.image_path) }}" 
-                                             alt="{{ _('Imatge actual') }}" 
-                                             class="img-thumbnail"
-                                             style="max-width: 300px; border-radius: 12px;">
-                                        <p class="text-muted mt-2 small">{{ _('Imatge actual') }}</p>
-                                    </div>
+                                    {% set image_url = get_image_url(initiative.image_path, 'medium') %}
+                                    {% if image_url %}
+                                        <div class="mb-3">
+                                            <img src="{{ image_url }}" 
+                                                 alt="{{ _('Imatge actual') }}" 
+                                                 class="img-thumbnail"
+                                                 style="max-width: 300px; border-radius: 12px;">
+                                            <p class="text-muted mt-2 small">{{ _('Imatge actual') }}</p>
+                                        </div>
+                                    {% endif %}
                                 {% endif %}
                                 
                                 {{ form.image(class="form-control form-control-lg" + (" is-invalid" if form.image.errors else ""),

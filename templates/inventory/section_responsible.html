@@ -145,9 +145,17 @@
                             <tr>
                                 <td>
                                     {% if item.image_path %}
-                                    <img src="{{ url_for('static', filename='uploads/' + item.image_path) }}" 
-                                         alt="{{ item.category }}" 
-                                         style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                                    {% set image_url = get_image_url(item.image_path, 'thumbnail') %}
+                                    {% if image_url %}
+                                        <img src="{{ image_url }}" 
+                                             alt="{{ item.category }}" 
+                                             style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                                    {% else %}
+                                        <div class="bg-light d-flex align-items-center justify-content-center" 
+                                             style="width: 50px; height: 50px; border-radius: 8px;">
+                                            <i class="fas fa-image text-muted"></i>
+                                        </div>
+                                    {% endif %}
                                     {% else %}
                                     <div class="bg-light d-flex align-items-center justify-content-center" 
                                          style="width: 50px; height: 50px; border-radius: 8px;">

@@ -199,12 +199,17 @@
                                 </td>
                                 <td>
                                     {% if item.image_path %}
-                                        <img src="{{ url_for('static', filename='uploads/' + item.image_path) }}" 
-                                             style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; cursor: pointer;" 
-                                             alt="Foto"
-                                             data-bs-toggle="modal" 
-                                             data-bs-target="#imageModal{{ item.id }}"
-                                             onclick="document.getElementById('modalImage{{ item.id }}').src = this.src">
+                                        {% set image_url = get_image_url(item.image_path, 'thumbnail') %}
+                                        {% if image_url %}
+                                            <img src="{{ image_url }}" 
+                                                 style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; cursor: pointer;" 
+                                                 alt="Foto"
+                                                 data-bs-toggle="modal" 
+                                                 data-bs-target="#imageModal{{ item.id }}"
+                                                 onclick="document.getElementById('modalImage{{ item.id }}').src = this.src">
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
                                     {% else %}
                                         <span class="text-muted">-</span>
                                     {% endif %}
@@ -413,11 +418,14 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center p-0">
-                <img id="modalImage{{ item.id }}" 
-                     src="{{ url_for('static', filename='uploads/' + item.image_path) }}" 
-                     class="img-fluid" 
-                     alt="{{ _('Foto de l\'item') }}"
-                     style="max-height: 70vh; width: auto;">
+                {% set image_url = get_image_url(item.image_path, 'large') %}
+                {% if image_url %}
+                    <img id="modalImage{{ item.id }}" 
+                         src="{{ image_url }}" 
+                         class="img-fluid" 
+                         alt="{{ _('Foto de l\'item') }}"
+                         style="max-height: 70vh; width: auto;">
+                {% endif %}
             </div>
             <div class="modal-footer">
                 <div class="w-100">

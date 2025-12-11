@@ -623,6 +623,8 @@ def api_pending_items():
             'longitude': item.longitude,
             'address': item.address,
             'image_path': item.image_path,
+            'image_url': get_image_url(item.image_path, 'medium') if item.image_path else None,
+            'image_url_thumbnail': get_image_url(item.image_path, 'thumbnail') if item.image_path else None,
             'reporter': item.reporter.username if item.reporter else None,
             'created_at': item.created_at.isoformat() if item.created_at else None
         })
