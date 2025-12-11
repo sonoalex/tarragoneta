@@ -5,10 +5,24 @@ from flask_babel import gettext as _
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import os
-from app.models import InventoryItem, InventoryVote, District, Section, CityBoundary, InventoryItemStatus
+from app.models import InventoryItem, InventoryVote, InventoryResolved, District, Section, CityBoundary, InventoryItemStatus
 from app.extensions import db
 from app.forms import InventoryForm
-from app.utils import sanitize_html, allowed_file, optimize_image, extract_gps_from_image, get_inventory_category_name, normalize_category_from_url, normalize_subcategory_from_url, category_to_url, subcategory_to_url
+from app.utils import (
+    sanitize_html,
+    allowed_file,
+    optimize_image,
+    extract_gps_from_image,
+    calculate_distance_km,
+    get_inventory_category_name,
+    get_inventory_subcategory_name,
+    normalize_category_from_url,
+    normalize_subcategory_from_url,
+    category_to_url,
+    subcategory_to_url,
+    get_image_path,
+    get_image_url,
+)
 from app.core.decorators import section_responsible_required
 # Config.UPLOAD_FOLDER removed - using current_app.config['UPLOAD_FOLDER'] instead
 
@@ -119,14 +133,12 @@ def report_item():
             # If no GPS in image, use coordinates from form (from browser geolocation or manual) (PRIORITY 2)
             if latitude is None or longitude is None:
                 current_app.logger.info("⚠️ No GPS en imagen, usando coordenadas del formulario")
+                location_source = request.form.get('location_source') or 'form_coordinates'
                 if form.latitude.data and form.longitude.data:
                     try:
                         latitude = float(form.latitude.data)
                         longitude = float(form.longitude.data)
                         current_app.logger.info(f"📍 Coordenadas del formulario: lat={latitude}, lng={longitude}")
-                        # We can't distinguish between browser geolocation and manual selection from form data
-                        # Both come through the same hidden fields. The frontend shows the source to the user.
-                        location_source = 'form_coordinates'  # Could be browser geolocation or manual
                     except (ValueError, TypeError) as e:
                         current_app.logger.warning(f"❌ Error parseando coordenadas del formulario: {e}")
                         latitude = None
@@ -145,6 +157,23 @@ def report_item():
                 form.subcategory.data = form.subcategory.data
                 form.description.data = form.description.data
                 return render_template('inventory/report.html', form=form)
+
+            # If both image GPS and chosen coords differ significantly, warn but keep user choice
+            if image_gps_lat is not None and image_gps_lng is not None and latitude is not None and longitude is not None:
+                try:
+                    dist_km = calculate_distance_km(image_gps_lat, image_gps_lng, latitude, longitude)
+                    if dist_km > 0.15:  # ~150 m
+                        flash(
+                            _('La ubicació seleccionada està a %(m)d m de la ubicació de la foto. Hem utilitzat la ubicació seleccionada.',
+                              m=int(dist_km * 1000)),
+                            'warning'
+                        )
+                        current_app.logger.warning(
+                            f"Location differs from image GPS by {dist_km*1000:.1f} m "
+                            f"(image_gps=({image_gps_lat},{image_gps_lng}), chosen=({latitude},{longitude}), source={location_source})"
+                        )
+                except Exception as e:
+                    current_app.logger.warning(f"Error calculating distance image vs chosen coords: {e}")
             
             # Validate coordinates using CityBoundary (precise validation)
             if not CityBoundary.point_is_inside(latitude, longitude):
@@ -158,8 +187,8 @@ def report_item():
                     os.remove(file_path)
                 return render_template('inventory/report.html', form=form)
             
-            # Optimize image (this may remove EXIF, but we already extracted GPS)
-            optimize_image(file_path)  # Optimize in place
+            # Optimize original image (basic optimization, full resize will be done async)
+            optimize_image(file_path)  # Basic optimization in place
             
             # Get address from form or geocode (optional)
             address = form.address.data if form.address.data else None
@@ -179,7 +208,7 @@ def report_item():
                 latitude=latitude,
                 longitude=longitude,
                 address=sanitize_html(address) if address else None,
-                image_path=filename,  # Set image path directly
+                image_path=filename,  # Store original filename, will be updated by Celery task
                 reporter_id=current_user.id,
                 status='pending',
                 # Store GPS from image for comparison (even if not used as final location)
@@ -190,6 +219,18 @@ def report_item():
             
             db.session.add(item)
             db.session.commit()
+            
+            # Enqueue image resizing task (async)
+            try:
+                resize_task = getattr(current_app, 'resize_image_task', None)
+                if resize_task:
+                    resize_task.delay(item.id, filename)
+                    current_app.logger.info(f'📸 Image resizing task enqueued for item {item.id}: {filename}')
+                else:
+                    current_app.logger.warning('resize_image_task not available, skipping async resize')
+            except Exception as e:
+                current_app.logger.error(f'Error enqueueing image resize task: {e}', exc_info=True)
+                # Continue anyway, image will be available in original size
             
             # Verify what was actually saved
             current_app.logger.info(
@@ -217,6 +258,9 @@ def report_item():
 @bp.route('/api/items')
 def api_items():
     """API endpoint para obtener items del inventario (para el mapa)"""
+    # Si se accede directamente desde el navegador, redirigir al mapa
+    if request.headers.get('Accept', '').find('text/html') != -1:
+        return redirect(url_for('inventory.inventory_map'))
     category_url = request.args.get('category')
     subcategory_url = request.args.get('subcategory')
     
@@ -257,6 +301,8 @@ def api_items():
             'longitude': item.longitude,
             'address': item.address,
             'image_path': item.image_path,
+            'image_url': get_image_url(item.image_path, 'medium'),
+            'image_url_thumbnail': get_image_url(item.image_path, 'thumbnail'),
             'importance_count': importance_count,
             'has_voted': has_voted,
             'resolved_count': resolved_count,
@@ -269,6 +315,10 @@ def api_items():
 @bp.route('/api/sections')
 def api_sections():
     """API endpoint para obtener todas las secciones con sus polígonos"""
+    # Si se accede directamente desde el navegador, redirigir al mapa
+    if request.headers.get('Accept', '').find('text/html') != -1:
+        return redirect(url_for('inventory.inventory_map'))
+    
     try:
         from shapely import wkt
         import json
@@ -282,7 +332,8 @@ def api_sections():
                     # Parsear WKT a geometría Shapely
                     geom = wkt.loads(section.polygon)
                     
-                    # Convertir a GeoJSON
+                    # No aplicar buffer - usar geometría original para evitar solapamientos
+                    # Convertir a GeoJSON directamente
                     geojson = json.loads(json.dumps(geom.__geo_interface__))
                     
                     result.append({
@@ -309,6 +360,10 @@ def api_sections():
 @bp.route('/api/boundary')
 def api_boundary():
     """API endpoint para obtener el boundary de la ciudad"""
+    # Si se accede directamente desde el navegador, redirigir al mapa
+    if request.headers.get('Accept', '').find('text/html') != -1:
+        return redirect(url_for('inventory.inventory_map'))
+    
     try:
         from shapely import wkt
         import json
@@ -387,6 +442,55 @@ def api_boundary():
         current_app.logger.error(f"Error in api_boundary: {e}")
         return jsonify({'error': str(e)}), 500
 
+@bp.route('/<int:item_id>')
+def item_detail(item_id):
+    """Página de detalle de un item del inventario"""
+    item = InventoryItem.query.get_or_404(item_id)
+    
+    # Check if user can view this item
+    # Public can only see approved items
+    if item.status != InventoryItemStatus.APPROVED.value:
+        if not current_user.is_authenticated:
+            from flask import abort
+            abort(404)
+        # Check if user is reporter, admin, or section responsible
+        is_reporter = item.reporter_id == current_user.id
+        is_admin = current_user.has_role('admin')
+        is_section_responsible = False
+        if item.section and current_user.has_role('section_responsible'):
+            # Check if user is responsible for this section
+            from app.models import SectionResponsible
+            section_responsible = SectionResponsible.query.filter_by(
+                user_id=current_user.id,
+                section_id=item.section_id
+            ).first()
+            is_section_responsible = section_responsible is not None
+        
+        if not (is_reporter or is_admin or is_section_responsible):
+            from flask import abort
+            abort(404)
+    
+    # Check if user has voted/resolved
+    has_voted = False
+    has_resolved = False
+    if current_user.is_authenticated:
+        has_voted = InventoryVote.query.filter_by(
+            item_id=item_id,
+            user_id=current_user.id
+        ).first() is not None
+        has_resolved = InventoryResolved.query.filter_by(
+            item_id=item_id,
+            user_id=current_user.id
+        ).first() is not None
+    
+    return render_template('inventory/detail.html',
+                         item=item,
+                         has_voted=has_voted,
+                         has_resolved=has_resolved,
+                         get_inventory_category_name=get_inventory_category_name,
+                         get_inventory_subcategory_name=get_inventory_subcategory_name,
+                         get_image_path=get_image_path)
+
 @bp.route('/<int:item_id>/vote', methods=['POST'])
 @login_required
 def vote_item(item_id):
@@ -401,17 +505,6 @@ def vote_item(item_id):
     # Check if user has already voted
     if item.has_user_voted(current_user.id):
         return jsonify({'error': _('Ya has votado este item')}), 400
-    
-    # If user has reported "ya no está", remove that report first (mutually exclusive)
-    if item.has_user_resolved(current_user.id):
-        resolved_report = item.resolved_by.filter_by(user_id=current_user.id).first()
-        if resolved_report:
-            db.session.delete(resolved_report)
-            # Decrement resolved count
-            if item.resolved_count and item.resolved_count > 0:
-                item.resolved_count -= 1
-            else:
-                item.resolved_count = 0
     
     # Create vote
     vote = InventoryVote(item_id=item.id, user_id=current_user.id)
@@ -429,7 +522,7 @@ def vote_item(item_id):
         'success': True,
         'importance_count': item.importance_count,
         'resolved_count': item.resolved_count if item.resolved_count is not None else 0,
-        'has_resolved': False,  # Now false since we removed it
+        'has_resolved': item.has_user_resolved(current_user.id),
         'message': _('Voto registrado correctamente')
     })
 
@@ -449,17 +542,6 @@ def resolve_item(item_id):
     # Don't allow resolving if item is already resolved
     if item.is_resolved():
         return jsonify({'error': _('Este item ya está marcado como resuelto')}), 400
-    
-    # If user has voted "encara hi és", remove that vote first (mutually exclusive)
-    if item.has_user_voted(current_user.id):
-        vote = item.voters.filter_by(user_id=current_user.id).first()
-        if vote:
-            db.session.delete(vote)
-            # Decrement importance count
-            if item.importance_count and item.importance_count > 0:
-                item.importance_count -= 1
-            else:
-                item.importance_count = 0
     
     # Create resolved report
     resolved = InventoryResolved(item_id=item.id, user_id=current_user.id)

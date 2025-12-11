@@ -133,6 +133,162 @@ def optimize_image(file_path):
         print(f"Error optimizing image: {e}")
         return False
 
+def generate_image_sizes(original_path, base_filename):
+    """
+    Generate multiple sizes of an image: thumbnail, medium, and large.
+    Returns a dict with paths for each size.
+    
+    Args:
+        original_path: Full path to the original image
+        base_filename: Base filename (without extension) to use for generated sizes
+    
+    Returns:
+        dict with keys: 'thumbnail', 'medium', 'large', 'original'
+        Each value is the filename (not full path) for that size
+    """
+    try:
+        img = Image.open(original_path)
+        
+        # Convert to RGB if necessary
+        if img.mode in ('RGBA', 'LA', 'P'):
+            rgb_img = Image.new('RGB', img.size, (255, 255, 255))
+            rgb_img.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+            img = rgb_img
+        
+        # Get directory and base name
+        upload_dir = os.path.dirname(original_path)
+        base_name, ext = os.path.splitext(base_filename)
+        if not ext or ext.lower() not in ['.jpg', '.jpeg', '.png']:
+            ext = '.jpg'
+        
+        # Define sizes
+        sizes = {
+            'thumbnail': (150, 150),  # Square thumbnail for map markers
+            'medium': (800, 600),     # Medium for popups and lists
+            'large': (1200, 800),     # Large for detail views
+        }
+        
+        generated_files = {}
+        
+        # Generate each size
+        for size_name, (max_width, max_height) in sizes.items():
+            # Create a copy for resizing
+            resized_img = img.copy()
+            
+            # Calculate aspect ratio preserving dimensions
+            img_width, img_height = resized_img.size
+            aspect_ratio = img_width / img_height
+            
+            if aspect_ratio > max_width / max_height:
+                # Image is wider
+                new_width = max_width
+                new_height = int(max_width / aspect_ratio)
+            else:
+                # Image is taller
+                new_height = max_height
+                new_width = int(max_height * aspect_ratio)
+            
+            # Resize with high-quality resampling
+            resized_img = resized_img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+            
+            # Generate filename
+            size_filename = f"{base_name}_{size_name}{ext}"
+            size_path = os.path.join(upload_dir, size_filename)
+            
+            # Save with quality optimization
+            quality = 85 if size_name == 'large' else 90
+            resized_img.save(size_path, 'JPEG', quality=quality, optimize=True)
+            
+            generated_files[size_name] = size_filename
+        
+        # Save optimized original as 'large' (or keep original if smaller)
+        # The 'large' version is what we'll use as the main image
+        original_img = img.copy()
+        if original_img.size[0] > sizes['large'][0] or original_img.size[1] > sizes['large'][1]:
+            # Original is larger than 'large', resize it
+            original_img.thumbnail(sizes['large'], Image.Resampling.LANCZOS)
+        
+        # Save as 'large' version (this will be the main image_path stored in DB)
+        large_filename = f"{base_name}_large{ext}"
+        large_path = os.path.join(upload_dir, large_filename)
+        original_img.save(large_path, 'JPEG', quality=85, optimize=True)
+        generated_files['large'] = large_filename
+        
+        # Remove the original file (we now have large, medium, thumbnail)
+        if os.path.exists(original_path):
+            os.remove(original_path)
+        
+        # The 'original' key points to 'large' (which is the main optimized image)
+        generated_files['original'] = large_filename
+        
+        return generated_files
+        
+    except Exception as e:
+        print(f"Error generating image sizes: {e}")
+        # Return original filename if generation fails
+        return {'original': base_filename, 'thumbnail': base_filename, 'medium': base_filename, 'large': base_filename}
+
+def get_image_path(image_filename, size='large'):
+    """
+    Get the image path for a specific size.
+    
+    Args:
+        image_filename: The image filename (could be base or already have a suffix like '_large.jpg')
+        size: One of 'thumbnail', 'medium', 'large', or 'original' (original = large)
+    
+    Returns:
+        The filename for the requested size
+    """
+    if not image_filename:
+        return None
+    
+    # If size is 'original', use 'large' (they're the same)
+    if size == 'original':
+        size = 'large'
+    
+    # If filename already has a size suffix, remove it first
+    import re
+    base_name = re.sub(r'_(thumbnail|medium|large)(\.[^.]+)$', r'\2', image_filename)
+    base_name, ext = os.path.splitext(base_name)
+    if not ext or ext.lower() not in ['.jpg', '.jpeg', '.png']:
+        ext = '.jpg'
+    
+    # Construct filename with size suffix
+    return f"{base_name}_{size}{ext}"
+
+
+def get_image_url(image_filename, size='large'):
+    """
+    Get URL for an image stored via the configured storage provider.
+    Falls back to original filename if sized version is not found.
+    """
+    from flask import current_app
+    from app.storage import get_storage
+    import os
+
+    if not image_filename:
+        return None
+
+    sized_filename = get_image_path(image_filename, size)
+
+    storage = get_storage()
+    provider = current_app.config.get('STORAGE_PROVIDER', 'local').lower()
+
+    if provider == 's3':
+        key_to_use = sized_filename
+    else:
+        upload_folder = current_app.config.get('UPLOAD_FOLDER', 'static/uploads')
+        sized_path = os.path.join(upload_folder, sized_filename)
+        key_to_use = sized_filename if os.path.exists(sized_path) else image_filename
+
+    try:
+        return storage.url_for(key_to_use)
+    except Exception:
+        try:
+            return storage.url_for(image_filename)
+        except Exception:
+            return None
+
 def sanitize_html(text):
     """Sanitize user input to prevent XSS"""
     allowed_tags = ['p', 'br', 'strong', 'em', 'u', 'a']

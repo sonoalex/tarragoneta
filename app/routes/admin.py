@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, jsonify
 from flask_security import login_required, current_user
 from flask_security.decorators import roles_required
 from werkzeug.utils import secure_filename
@@ -640,3 +640,191 @@ def edit_section_name(section_id):
     current_app.logger.info(f'Admin {current_user.id} updated section {section.full_code} name from "{old_name}" to "{section.name}"')
     flash(_('Nombre de la sección actualizado correctamente'), 'success')
     return redirect(url_for('admin.admin_districts_sections'))
+
+@bp.route('/sections/edit-geometry')
+@login_required
+@roles_required('admin')
+def edit_section_geometry():
+    """Página para editar la geometría de secciones en el mapa (múltiples secciones)"""
+    # Get section IDs from query params
+    section_ids = request.args.getlist('sections', type=int)
+    
+    if not section_ids:
+        # If no sections specified, redirect to districts-sections page
+        flash(_('Selecciona almenys una secció per editar'), 'info')
+        return redirect(url_for('admin.admin_districts_sections'))
+    
+    sections = Section.query.filter(Section.id.in_(section_ids)).all()
+    
+    if not sections:
+        flash(_('No s\'han trobat les seccions especificades'), 'error')
+        return redirect(url_for('admin.admin_districts_sections'))
+    
+    # Get all sections for the selector (same district or all)
+    all_sections = Section.query.join(District).order_by(Section.district_code, Section.code).all()
+    
+    return render_template('admin/edit_section_geometry.html', 
+                         sections=sections, 
+                         all_sections=all_sections)
+
+@bp.route('/sections/<int:section_id>/edit-geometry')
+@login_required
+@roles_required('admin')
+def edit_single_section_geometry(section_id):
+    """Redirige a la página de edición múltiple con una sola sección"""
+    return redirect(url_for('admin.edit_section_geometry', sections=section_id))
+
+@bp.route('/api/sections/update-multiple-geometry', methods=['POST'])
+@login_required
+@roles_required('admin')
+def update_multiple_sections_geometry():
+    """API endpoint para actualizar la geometría de múltiples secciones"""
+    from sqlalchemy import text
+    
+    data = request.get_json()
+    
+    if not data or 'geometries' not in data:
+        return jsonify({'error': 'Geometries data required'}), 400
+    
+    geometries = data['geometries']
+    updated_count = 0
+    errors = []
+    
+    try:
+        for section_id_str, geom_data in geometries.items():
+            try:
+                section_id = int(section_id_str)
+                section = Section.query.get(section_id)
+                
+                if not section:
+                    errors.append(f'Section {section_id} not found')
+                    continue
+                
+                # Convert GeoJSON to WKT
+                if isinstance(geom_data, dict):
+                    from shapely.geometry import shape
+                    geom = shape(geom_data)
+                    geom_wkt = geom.wkt
+                else:
+                    geom_wkt = geom_data
+                
+                # Validate geometry
+                validation_sql = text("""
+                    SELECT ST_IsValid(ST_GeomFromText(:geom, 4326)) as is_valid,
+                           ST_GeometryType(ST_GeomFromText(:geom, 4326)) as geom_type
+                """)
+                result = db.session.execute(validation_sql, {'geom': geom_wkt}).fetchone()
+                
+                if not result.is_valid:
+                    errors.append(f'Section {section_id}: Invalid geometry')
+                    continue
+                
+                if result.geom_type not in ('ST_Polygon', 'ST_MultiPolygon'):
+                    errors.append(f'Section {section_id}: Must be Polygon or MultiPolygon')
+                    continue
+                
+                # Update section
+                section.polygon = geom_wkt
+                section.updated_at = datetime.utcnow()
+                updated_count += 1
+                
+            except Exception as e:
+                errors.append(f'Section {section_id_str}: {str(e)}')
+                continue
+        
+        # Commit all changes
+        db.session.commit()
+        
+        # Recalculate boundary
+        from app.models import CityBoundary
+        boundary_wkt = CityBoundary.calculate_boundary()
+        if boundary_wkt:
+            existing = CityBoundary.query.first()
+            if existing:
+                existing.polygon = boundary_wkt
+                existing.updated_at = datetime.utcnow()
+                db.session.commit()
+        
+        current_app.logger.info(f'Admin {current_user.id} updated geometry for {updated_count} sections')
+        
+        return jsonify({
+            'success': True,
+            'updated_count': updated_count,
+            'errors': errors if errors else None,
+            'message': f'Updated {updated_count} sections successfully'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f'Error updating sections geometry: {str(e)}', exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/api/sections/<int:section_id>/update-geometry', methods=['POST'])
+@login_required
+@roles_required('admin')
+def update_section_geometry(section_id):
+    """API endpoint para actualizar la geometría de una sección"""
+    from sqlalchemy import text
+    from app.extensions import csrf
+    
+    # Flask-WTF automatically validates CSRF token from X-CSRFToken header for JSON requests
+    
+    section = Section.query.get_or_404(section_id)
+    data = request.get_json()
+    
+    if not data or 'geometry' not in data:
+        return jsonify({'error': 'Geometry data required'}), 400
+    
+    try:
+        # data['geometry'] puede venir como GeoJSON o WKT
+        # Si viene como GeoJSON, convertirlo a WKT
+        geom_data = data['geometry']
+        
+        if isinstance(geom_data, dict):
+            # Es GeoJSON, convertir a WKT
+            from shapely.geometry import shape
+            geom = shape(geom_data)
+            geom_wkt = geom.wkt
+        else:
+            # Asumir que es WKT
+            geom_wkt = geom_data
+        
+        # Validar que la geometría es válida
+        validation_sql = text("""
+            SELECT ST_IsValid(ST_GeomFromText(:geom, 4326)) as is_valid,
+                   ST_GeometryType(ST_GeomFromText(:geom, 4326)) as geom_type
+        """)
+        result = db.session.execute(validation_sql, {'geom': geom_wkt}).fetchone()
+        
+        if not result.is_valid:
+            return jsonify({'error': 'Invalid geometry'}), 400
+        
+        if result.geom_type not in ('ST_Polygon', 'ST_MultiPolygon'):
+            return jsonify({'error': 'Geometry must be a Polygon or MultiPolygon'}), 400
+        
+        # Actualizar la sección
+        section.polygon = geom_wkt
+        section.updated_at = datetime.utcnow()
+        db.session.commit()
+        
+        # Recalcular boundary si es necesario
+        from app.models import CityBoundary
+        boundary_wkt = CityBoundary.calculate_boundary()
+        if boundary_wkt:
+            existing = CityBoundary.query.first()
+            if existing:
+                existing.polygon = boundary_wkt
+                existing.updated_at = datetime.utcnow()
+                db.session.commit()
+        
+        current_app.logger.info(f'Admin {current_user.id} updated geometry for section {section.full_code}')
+        
+        return jsonify({
+            'success': True,
+            'message': 'Geometry updated successfully'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f'Error updating section geometry: {str(e)}', exc_info=True)
+        return jsonify({'error': str(e)}), 500

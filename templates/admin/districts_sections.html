@@ -80,6 +80,11 @@
                                                title="{{ _('Veure al mapa') }}">
                                                 <i class="fas fa-map-marker-alt"></i>
                                             </a>
+                                            <a href="{{ url_for('admin.edit_section_geometry', sections=section.id) }}" 
+                                               class="btn btn-sm btn-outline-primary" 
+                                               title="{{ _('Editar geometria') }}">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
                                         </td>
                                     </tr>
                                     {% endfor %}

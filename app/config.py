@@ -30,7 +30,7 @@ class Config:
     SECURITY_PASSWORD_HASH = 'bcrypt'
     SECURITY_REGISTERABLE = True
     SECURITY_SEND_REGISTER_EMAIL = False
-    SECURITY_POST_LOGIN_VIEW = 'admin.admin_dashboard'
+    SECURITY_POST_LOGIN_VIEW = 'main.index'    
     SECURITY_POST_LOGOUT_VIEW = 'main.index'
     SECURITY_POST_REGISTER_VIEW = 'main.index'
     SECURITY_UNAUTHORIZED_VIEW = 'main.index'

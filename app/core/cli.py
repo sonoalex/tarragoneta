@@ -3,10 +3,11 @@ CLI commands registration
 """
 import click
 from flask import current_app
+from sqlalchemy import text
+from datetime import datetime
 from app.cli import init_db_command, create_sample_data, import_zones_from_geojson, create_admin_user_command
 from app.models import CityBoundary
 from app.extensions import db
-from datetime import datetime
 
 
 def register_cli_commands(app):
@@ -38,7 +39,163 @@ def register_cli_commands(app):
         success = import_zones_from_geojson(geojson_dir)
         if not success:
             raise click.ClickException("Error al importar zonas")
+
+    @app.cli.command('fix-sections-geometry')
+    @click.option('--snap', default=0.00001, show_default=True, help='Tamaño de la rejilla para SnapToGrid (grados). 0.00001 ≈ 1-2m.')
+    @click.option('--buffer', 'buffer_dist', default=0.00005, show_default=True, help='Buffer positivo para cerrar gaps (grados). 0.00005 ≈ 5-6m en Tarragona.')
+    @click.option('--recalculate-boundary/--no-recalculate-boundary', default=True, show_default=True, help='Recalcular el boundary de ciudad después de ajustar secciones.')
+    def fix_sections_geometry(snap, buffer_dist, recalculate_boundary):
+        """Ajustar geometrías de secciones para cerrar micro-gaps (SnapToGrid + Buffer)."""
+        with app.app_context():
+            sql = text("""
+                UPDATE section
+                SET polygon = ST_AsText(
+                  ST_Buffer(
+                    ST_SnapToGrid(
+                      ST_Buffer(ST_MakeValid(ST_GeomFromText(polygon,4326)), 0),
+                      :snap
+                    ),
+                    :buffer_dist
+                  )
+                )
+            """)
+            try:
+                result = db.session.execute(sql, {'snap': snap, 'buffer_dist': buffer_dist})
+                db.session.commit()
+                updated = result.rowcount if result.rowcount is not None else 'desconocido'
+                print(f"✅ Secciones ajustadas (SnapToGrid={snap}, Buffer={buffer_dist}). Filas afectadas: {updated}")
+            except Exception as e:
+                db.session.rollback()
+                print(f"❌ Error ajustando secciones: {e}")
+                raise
+
+            if recalculate_boundary:
+                boundary_wkt = CityBoundary.calculate_boundary()
+                if boundary_wkt:
+                    existing = CityBoundary.query.first()
+                    if existing:
+                        existing.polygon = boundary_wkt
+                        existing.updated_at = datetime.utcnow()
+                        print('✅ Boundary actualizado tras ajuste de secciones')
+                    else:
+                        existing = CityBoundary(name='Tarragona', polygon=boundary_wkt)
+                        db.session.add(existing)
+                        print('✅ Boundary creado tras ajuste de secciones')
+                    db.session.commit()
+                else:
+                    print('⚠️  No se pudo recalcular el boundary tras el ajuste de secciones')
     
+    @app.cli.command('fix-sections-gaps-smart')
+    @click.option('--max-gap', default=0.0001, show_default=True, help='Distancia máxima para considerar gap (grados). 0.0001 ≈ 10-15m.')
+    @click.option('--buffer', default=0.00002, show_default=True, help='Buffer para cerrar gaps (grados). 0.00002 ≈ 2-3m.')
+    @click.option('--recalculate-boundary/--no-recalculate-boundary', default=True, show_default=True, help='Recalcular boundary tras ajuste.')
+    def fix_sections_gaps_smart(max_gap, buffer, recalculate_boundary):
+        """
+        Cerrar gaps solo entre secciones que están cerca pero no se tocan.
+        Usa ST_Distance/ST_DWithin para detectar gaps pequeños y aplica buffer solo a esas secciones.
+        """
+        with app.app_context():
+            # Primero, contar cuántas secciones tienen gaps detectados
+            # Usar ST_Distance > 0 para asegurar que hay un gap real (no solo que no se toquen)
+            min_gap = max_gap * 0.1  # Solo considerar gaps mayores al 10% del max_gap
+            count_sql = text("""
+                SELECT COUNT(DISTINCT section_id) as count
+                FROM (
+                    SELECT s1.id as section_id
+                    FROM section s1, section s2
+                    WHERE s1.id < s2.id
+                      AND ST_DWithin(
+                          ST_MakeValid(ST_GeomFromText(s1.polygon, 4326)),
+                          ST_MakeValid(ST_GeomFromText(s2.polygon, 4326)),
+                          :max_gap
+                      )
+                      AND ST_Distance(
+                          ST_MakeValid(ST_GeomFromText(s1.polygon, 4326)),
+                          ST_MakeValid(ST_GeomFromText(s2.polygon, 4326))
+                      ) > :min_gap
+                    UNION
+                    SELECT s2.id as section_id
+                    FROM section s1, section s2
+                    WHERE s1.id < s2.id
+                      AND ST_DWithin(
+                          ST_MakeValid(ST_GeomFromText(s1.polygon, 4326)),
+                          ST_MakeValid(ST_GeomFromText(s2.polygon, 4326)),
+                          :max_gap
+                      )
+                      AND ST_Distance(
+                          ST_MakeValid(ST_GeomFromText(s1.polygon, 4326)),
+                          ST_MakeValid(ST_GeomFromText(s2.polygon, 4326))
+                      ) > :min_gap
+                ) as gaps
+            """)
+            
+            count_result = db.session.execute(count_sql, {'max_gap': max_gap, 'min_gap': min_gap}).scalar()
+            print(f"🔍 Secciones con gaps detectados (distancia > {min_gap}): {count_result}")
+            
+            if count_result == 0:
+                print("ℹ️  No se encontraron gaps significativos. Las secciones ya están correctamente ajustadas.")
+                return
+            
+            # Aplicar buffer solo a secciones con gaps
+            sql = text("""
+                WITH sections_with_gaps AS (
+                    SELECT DISTINCT s1.id as section_id
+                    FROM section s1, section s2
+                    WHERE s1.id < s2.id
+                      AND ST_DWithin(
+                          ST_MakeValid(ST_GeomFromText(s1.polygon, 4326)),
+                          ST_MakeValid(ST_GeomFromText(s2.polygon, 4326)),
+                          :max_gap
+                      )
+                      AND ST_Distance(
+                          ST_MakeValid(ST_GeomFromText(s1.polygon, 4326)),
+                          ST_MakeValid(ST_GeomFromText(s2.polygon, 4326))
+                      ) > :min_gap
+                    UNION
+                    SELECT DISTINCT s2.id as section_id
+                    FROM section s1, section s2
+                    WHERE s1.id < s2.id
+                      AND ST_DWithin(
+                          ST_MakeValid(ST_GeomFromText(s1.polygon, 4326)),
+                          ST_MakeValid(ST_GeomFromText(s2.polygon, 4326)),
+                          :max_gap
+                      )
+                      AND ST_Distance(
+                          ST_MakeValid(ST_GeomFromText(s1.polygon, 4326)),
+                          ST_MakeValid(ST_GeomFromText(s2.polygon, 4326))
+                      ) > :min_gap
+                )
+                UPDATE section s
+                SET polygon = ST_AsText(
+                    ST_Buffer(
+                        ST_MakeValid(ST_GeomFromText(s.polygon, 4326)),
+                        :buffer
+                    )
+                )
+                WHERE s.id IN (SELECT section_id FROM sections_with_gaps)
+            """)
+            
+            result = db.session.execute(sql, {'max_gap': max_gap, 'min_gap': min_gap, 'buffer': buffer})
+            db.session.commit()
+            updated = result.rowcount if result.rowcount is not None else 'desconocido'
+            print(f"✅ Secciones con gaps ajustadas: {updated}")
+            
+            if recalculate_boundary:
+                boundary_wkt = CityBoundary.calculate_boundary()
+                if boundary_wkt:
+                    existing = CityBoundary.query.first()
+                    if existing:
+                        existing.polygon = boundary_wkt
+                        existing.updated_at = datetime.utcnow()
+                        print('✅ Boundary actualizado tras ajuste de gaps')
+                    else:
+                        existing = CityBoundary(name='Tarragona', polygon=boundary_wkt)
+                        db.session.add(existing)
+                        print('✅ Boundary creado tras ajuste de gaps')
+                    db.session.commit()
+                else:
+                    print('⚠️  No se pudo recalcular el boundary tras ajuste de gaps')
+
     @app.cli.command('calculate-boundary')
     def calculate_boundary():
         """Calculate and save the city boundary (convex hull of all sections)"""

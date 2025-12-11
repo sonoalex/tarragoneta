@@ -1,0 +1,556 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Editar Geometria de Seccions') }} - Tarracograf{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+<style>
+    #map { 
+        height: 600px; 
+        border-radius: 16px; 
+        z-index: 0;
+        border: 2px solid var(--primary-green);
+    }
+    .edit-controls {
+        background: white;
+        padding: 1rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+    }
+    .leaflet-interactive {
+        cursor: pointer;
+    }
+    .leaflet-interactive.editing {
+        cursor: crosshair !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="py-5" style="padding-top: 8rem !important;">
+    <div class="container-fluid px-4">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="display-5 fw-bold mb-2">
+                    <i class="fas fa-edit text-primary me-2"></i>
+                    {{ _('Editar Geometria de Seccions') }}
+                </h1>
+                <p class="text-muted mb-0">{{ _('Selecciona i edita múltiples seccions per ajustar les seves geometries') }}</p>
+            </div>
+            <div>
+                <a href="{{ url_for('admin.admin_districts_sections') }}" class="btn btn-outline-secondary me-2">
+                    <i class="fas fa-arrow-left me-2"></i>{{ _('Tornar') }}
+                </a>
+                <button id="save-btn" class="btn btn-primary" disabled>
+                    <i class="fas fa-save me-2"></i>{{ _('Guardar Canvis') }}
+                </button>
+            </div>
+        </div>
+
+        <!-- Section Selector -->
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px;">
+            <div class="card-body">
+                <label for="section-selector" class="form-label fw-bold mb-3">
+                    <i class="fas fa-map-marked-alt me-2"></i>{{ _('Selecciona Seccions per Editar') }}
+                </label>
+                <select id="section-selector" class="form-select" multiple size="8">
+                    {% for sec in all_sections %}
+                    <option value="{{ sec.id }}" 
+                            {% if sec in sections %}selected{% endif %}
+                            data-district="{{ sec.district_code }}"
+                            data-code="{{ sec.full_code }}">
+                        {{ sec.full_code }} - {{ sec.name or _('Sense nom') }} ({{ sec.district.name }})
+                    </option>
+                    {% endfor %}
+                </select>
+                <small class="text-muted d-block mt-2">
+                    <i class="fas fa-info-circle me-1"></i>
+                    {{ _('Mantén presionat Ctrl (Cmd en Mac) per seleccionar múltiples seccions') }}
+                </small>
+                <button id="load-sections-btn" class="btn btn-primary mt-3">
+                    <i class="fas fa-map me-2"></i>{{ _('Carregar Seccions al Mapa') }}
+                </button>
+            </div>
+        </div>
+
+        <!-- Edit Controls -->
+        <div class="edit-controls">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="edit-mode-toggle" checked>
+                        <label class="form-check-label" for="edit-mode-toggle">
+                            <strong>{{ _('Mode Edició') }}</strong>
+                        </label>
+                    </div>
+                    <small class="text-muted d-block mt-1">
+                        {{ _('Activa el mode edició per moure punts i modificar la geometria') }}
+                    </small>
+                </div>
+                <div class="col-md-6 text-end">
+                    <button id="reset-btn" class="btn btn-outline-warning btn-sm">
+                        <i class="fas fa-undo me-1"></i>{{ _('Restaurar Original') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map -->
+        <div class="card border-0 shadow-sm" style="border-radius: 16px; overflow: hidden;">
+            <div class="card-body p-0">
+                <div id="map"></div>
+            </div>
+        </div>
+
+        <!-- Info -->
+        <div class="alert alert-info mt-3" role="alert">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>{{ _('Instruccions:') }}</strong>
+            <ul class="mb-0 mt-2">
+                <li>{{ _('Activa el mode edició per començar a editar') }}</li>
+                <li>{{ _('Clica i arrossega els punts per moure\'ls') }}</li>
+                <li>{{ _('Clica sobre una línia per afegir un nou punt') }}</li>
+                <li>{{ _('Clica amb el botó dret sobre un punt per eliminar-lo') }}</li>
+                <li>{{ _('Guarda els canvis quan estiguis satisfet') }}</li>
+            </ul>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+<script>
+    // Initialize map with higher max zoom
+    var map = L.map('map', {
+        maxZoom: 20,
+        zoomControl: true
+    }).setView([41.1189, 1.2445], 13);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
+    }).addTo(map);
+
+    var originalGeometries = {}; // Store original geometries by section ID
+    var sectionPolygons = {}; // Store polygons by section ID
+    var editMode = true;
+    var featureGroup = null;
+    var drawControl = null;
+    var selectedSectionIds = [{% for sec in sections %}{{ sec.id }}{% if not loop.last %}, {% endif %}{% endfor %}];
+    var sectionColors = {}; // Store colors for each section to keep them consistent
+
+    // District colors (same as in inventory map)
+    var districtColors = [
+        '#E74C3C', // Districte 1 - Rojo fuerte
+        '#1ABC9C', // Districte 2 - Turquesa fuerte
+        '#3498DB', // Districte 3 - Azul fuerte
+        '#E67E22', // Districte 4 - Naranja fuerte
+        '#2ECC71', // Districte 5 - Verde fuerte
+        '#F1C40F', // Districte 6 - Amarillo fuerte
+        '#9B59B6', // Districte 7 - Púrpura fuerte
+        '#16A085', // Districte 8 - Verde esmeralda
+        '#D35400'  // Districte 9 - Naranja oscuro
+    ];
+    
+    function getDistrictColor(districtCode) {
+        var districtNum = parseInt(districtCode) - 1;
+        if (districtNum >= 0 && districtNum < districtColors.length) {
+            return districtColors[districtNum];
+        }
+        return '#CCCCCC'; // Default color
+    }
+    
+    // Generate a random color for each section
+    function getRandomColor() {
+        // Generate bright, distinct colors
+        var hue = Math.floor(Math.random() * 360);
+        var saturation = 70 + Math.floor(Math.random() * 30); // 70-100%
+        var lightness = 50 + Math.floor(Math.random() * 20); // 50-70%
+        return 'hsl(' + hue + ', ' + saturation + '%, ' + lightness + '%)';
+    }
+    
+    // Store colors for each section to keep them consistent
+    var sectionColors = {};
+
+    // Load multiple section geometries
+    function loadSectionGeometries(sectionIds) {
+        // Clear existing polygons and controls
+        if (featureGroup) {
+            map.removeLayer(featureGroup);
+            featureGroup = null;
+        }
+        if (drawControl) {
+            map.removeControl(drawControl);
+            drawControl = null;
+        }
+        
+        // Clear all existing polygons from map
+        for (var sectionId in sectionPolygons) {
+            if (sectionPolygons[sectionId]) {
+                map.removeLayer(sectionPolygons[sectionId]);
+            }
+        }
+        
+        sectionPolygons = {};
+        originalGeometries = {};
+        
+        if (!sectionIds || sectionIds.length === 0) {
+            alert('{{ _("Selecciona almenys una secció") }}');
+            return;
+        }
+        
+        // Convert all IDs to numbers for comparison
+        var sectionIdsNum = sectionIds.map(function(id) {
+            return parseInt(id);
+        });
+        
+        fetch('{{ url_for("inventory.api_sections") }}')
+            .then(response => response.json())
+            .then(data => {
+                var polygons = [];
+                var bounds = L.latLngBounds();
+                
+                // Filter sections by IDs
+                var selectedSections = data.filter(function(section) {
+                    var sectionId = typeof section.id === 'string' ? parseInt(section.id) : section.id;
+                    return sectionIdsNum.indexOf(sectionId) !== -1;
+                });
+                
+                if (selectedSections.length === 0) {
+                    alert('{{ _("No s\'han trobat les seccions seleccionades") }}');
+                    return;
+                }
+                
+                selectedSections.forEach(function(sectionData) {
+                    if (sectionData.geometry) {
+                        var sectionId = typeof sectionData.id === 'string' ? parseInt(sectionData.id) : sectionData.id;
+                        // Use random color for each section (consistent per section)
+                        if (!sectionColors[sectionId]) {
+                            sectionColors[sectionId] = getRandomColor();
+                        }
+                        var sectionColor = sectionColors[sectionId];
+                        
+                        // Store original geometry
+                        originalGeometries[sectionId] = sectionData.geometry;
+                        
+                        // Convert GeoJSON to Leaflet polygon manually to ensure correct format
+                        var geom = sectionData.geometry;
+                        var polygon = null;
+                        
+                        if (geom.type === 'Polygon' && geom.coordinates && geom.coordinates[0]) {
+                            // Convert from [lng, lat] to [lat, lng] for Leaflet
+                            var latlngs = geom.coordinates[0].map(function(coord) {
+                                if (!coord || coord.length < 2) {
+                                    console.error('Invalid coordinate:', coord);
+                                    return null;
+                                }
+                                return [coord[1], coord[0]]; // [lat, lng]
+                            }).filter(function(coord) {
+                                return coord !== null;
+                            });
+                            
+                            if (latlngs.length >= 3) {
+                                polygon = L.polygon(latlngs, {
+                                    color: sectionColor,
+                                    weight: 3,
+                                    opacity: 0.9,
+                                    fillOpacity: 0.3
+                                });
+                            }
+                        } else if (geom.type === 'MultiPolygon' && geom.coordinates && geom.coordinates.length > 0) {
+                            // For MultiPolygon, create all polygons and add them all
+                            var multiPolygonLayers = [];
+                            
+                            geom.coordinates.forEach(function(polygonCoords) {
+                                if (polygonCoords && polygonCoords[0]) {
+                                    var latlngs = polygonCoords[0].map(function(coord) {
+                                        if (!coord || coord.length < 2) {
+                                            console.error('Invalid coordinate:', coord);
+                                            return null;
+                                        }
+                                        return [coord[1], coord[0]]; // [lat, lng]
+                                    }).filter(function(coord) {
+                                        return coord !== null;
+                                    });
+                                    
+                                    if (latlngs.length >= 3) {
+                                        var poly = L.polygon(latlngs, {
+                                            color: sectionColor,
+                                            weight: 3,
+                                            opacity: 0.9,
+                                            fillOpacity: 0.3
+                                        });
+                                        poly.sectionId = sectionId; // Store section ID
+                                        multiPolygonLayers.push(poly);
+                                    }
+                                }
+                            });
+                            
+                            // Add all polygons from MultiPolygon
+                            if (multiPolygonLayers.length > 0) {
+                                multiPolygonLayers.forEach(function(poly) {
+                                    sectionPolygons[sectionId] = poly; // Store last one as main (for saving)
+                                    polygons.push(poly);
+                                    bounds.extend(poly.getBounds());
+                                });
+                                polygon = multiPolygonLayers[0]; // Use first as main reference
+                            }
+                        }
+                        
+                        if (polygon) {
+                            // Only add if not already added (MultiPolygon case)
+                            if (!polygon.sectionId) {
+                                polygon.sectionId = sectionId; // Store section ID
+                                sectionPolygons[sectionId] = polygon;
+                                polygons.push(polygon);
+                                bounds.extend(polygon.getBounds());
+                            }
+                        } else {
+                            console.warn('Could not create polygon for section', sectionId);
+                        }
+                    }
+                });
+                
+                if (polygons.length > 0) {
+                    // Fit map to show all polygons with padding and max zoom
+                    map.fitBounds(bounds, {
+                        padding: [20, 20],
+                        maxZoom: 18
+                    });
+                    
+                    // Create feature group for editing
+                    featureGroup = new L.FeatureGroup(polygons);
+                    map.addLayer(featureGroup);
+                    
+                    // Initialize draw control for editing
+                    if (editMode) {
+                        enableEditing();
+                    }
+                } else {
+                    alert('{{ _("No s\'han pogut crear els polígons per a les seccions seleccionades") }}');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading section geometries:', error);
+                alert('{{ _("Error carregant les geometries") }}: ' + error.message);
+            });
+    }
+    
+    // Load sections button handler
+    document.getElementById('load-sections-btn').addEventListener('click', function() {
+        var selector = document.getElementById('section-selector');
+        var selectedOptions = selector.selectedOptions;
+        console.log('Selected options:', selectedOptions.length);
+        
+        var selectedIds = Array.from(selectedOptions).map(function(opt) {
+            return parseInt(opt.value);
+        });
+        
+        console.log('Selected IDs:', selectedIds);
+        
+        if (selectedIds.length === 0) {
+            alert('{{ _("Selecciona almenys una secció") }}');
+            return;
+        }
+        
+        selectedSectionIds = selectedIds;
+        loadSectionGeometries(selectedIds);
+    });
+
+    // Handle geometry changes
+    function onGeometryChange() {
+        document.getElementById('save-btn').disabled = false;
+    }
+
+    function enableEditing() {
+        if (!featureGroup || featureGroup.getLayers().length === 0) return;
+        
+        if (!drawControl) {
+            drawControl = new L.Control.Draw({
+                draw: false,
+                edit: {
+                    featureGroup: featureGroup,
+                    remove: false
+                }
+            });
+            drawControl.addTo(map);
+            
+            // Listen for edit events
+            map.on(L.Draw.Event.EDITED, function(e) {
+                var layers = e.layers;
+                layers.eachLayer(function(layer) {
+                    // Update the polygon reference if it has a sectionId
+                    if (layer.sectionId) {
+                        sectionPolygons[layer.sectionId] = layer;
+                    }
+                    onGeometryChange();
+                });
+            });
+        }
+        
+        // Programmatically trigger edit mode
+        // Click the edit button if it exists
+        setTimeout(function() {
+            var editButton = document.querySelector('.leaflet-draw-edit-edit');
+            if (editButton) {
+                editButton.click();
+            }
+        }, 100);
+    }
+    
+    function disableEditing() {
+        if (drawControl) {
+            map.removeControl(drawControl);
+            drawControl = null;
+        }
+        // Exit edit mode by clicking cancel if in edit mode
+        var cancelButton = document.querySelector('.leaflet-draw-edit-remove');
+        if (cancelButton) {
+            cancelButton.click();
+        }
+    }
+    
+    // Toggle edit mode
+    document.getElementById('edit-mode-toggle').addEventListener('change', function(e) {
+        editMode = e.target.checked;
+        if (editMode) {
+            enableEditing();
+        } else {
+            disableEditing();
+        }
+    });
+
+    // Save changes for all edited sections
+    document.getElementById('save-btn').addEventListener('click', function() {
+        if (Object.keys(sectionPolygons).length === 0) return;
+        
+        // Group polygons by section ID (for MultiPolygon support)
+        var polygonsBySection = {};
+        for (var key in sectionPolygons) {
+            var polygon = sectionPolygons[key];
+            var sectionId = polygon.sectionId;
+            
+            if (!polygonsBySection[sectionId]) {
+                polygonsBySection[sectionId] = [];
+            }
+            polygonsBySection[sectionId].push(polygon);
+        }
+        
+        // Convert all polygons to GeoJSON
+        var updates = {};
+        for (var sectionId in polygonsBySection) {
+            var sectionPolygonsList = polygonsBySection[sectionId];
+            var allCoordinates = [];
+            
+            sectionPolygonsList.forEach(function(polygon) {
+                var latlngs = polygon.getLatLngs();
+                
+                if (latlngs && latlngs[0]) {
+                    // Convert from [lat, lng] to [lng, lat] for GeoJSON
+                    var coordinates = latlngs[0].map(function(ll) {
+                        return [ll.lng, ll.lat];
+                    });
+                    // Close the polygon (first point = last point)
+                    if (coordinates.length > 0 && 
+                        (coordinates[0][0] !== coordinates[coordinates.length - 1][0] || 
+                         coordinates[0][1] !== coordinates[coordinates.length - 1][1])) {
+                        coordinates.push(coordinates[0]);
+                    }
+                    allCoordinates.push(coordinates);
+                }
+            });
+            
+            if (allCoordinates.length > 0) {
+                if (allCoordinates.length === 1) {
+                    // Single polygon
+                    updates[sectionId] = {
+                        type: 'Polygon',
+                        coordinates: allCoordinates
+                    };
+                } else {
+                    // Multiple polygons -> MultiPolygon
+                    updates[sectionId] = {
+                        type: 'MultiPolygon',
+                        coordinates: allCoordinates.map(function(coords) {
+                            return [coords]; // Wrap each polygon in an array for MultiPolygon
+                        })
+                    };
+                }
+            }
+        }
+        
+        if (Object.keys(updates).length === 0) {
+            alert('{{ _("Error: No s\'han pogut obtenir les geometries") }}');
+            return;
+        }
+        
+        // Get CSRF token
+        var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        
+        // Show loading
+        var btn = this;
+        var originalHTML = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ _("Guardant...") }}';
+        
+        // Send to server (send all geometries)
+        fetch('{{ url_for("admin.update_multiple_sections_geometry") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                geometries: updates
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                var count = data.updated_count || Object.keys(updates).length;
+                alert('{{ _("Geometries actualitzades correctament") }}: ' + count + ' {{ _("seccions") }}');
+                // Update original geometries
+                for (var sectionId in updates) {
+                    originalGeometries[sectionId] = updates[sectionId];
+                }
+                btn.disabled = true;
+                btn.innerHTML = originalHTML;
+            } else {
+                throw new Error(data.error || '{{ _("Error desconegut") }}');
+            }
+        })
+        .catch(error => {
+            console.error('Error saving geometries:', error);
+            alert('{{ _("Error guardant les geometries") }}: ' + error.message);
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        });
+    });
+
+    // Reset to original
+    document.getElementById('reset-btn').addEventListener('click', function() {
+        if (Object.keys(originalGeometries).length === 0 || 
+            !confirm('{{ _("Estàs segur que vols restaurar les geometries originals?") }}')) {
+            return;
+        }
+        
+        // Reload original geometries
+        loadSectionGeometries(selectedSectionIds);
+        document.getElementById('save-btn').disabled = true;
+    });
+
+    // Load geometries on page load if sections are selected
+    if (selectedSectionIds && selectedSectionIds.length > 0) {
+        console.log('Auto-loading sections on page load:', selectedSectionIds);
+        loadSectionGeometries(selectedSectionIds);
+    } else {
+        console.log('No sections pre-selected, waiting for user selection');
+    }
+</script>
+{% endblock %}
+

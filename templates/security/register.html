@@ -2,6 +2,23 @@
 
 {% block title %}{{ _('Registrarse') }} - Tarracograf{% endblock %}
 
+{% block extra_css %}
+<style>
+  /* Asegurar que el modal quede por encima del navbar y sin parpadeos */
+  .modal-backdrop {
+    z-index: 2050 !important;
+  }
+  .modal {
+    z-index: 2060 !important;
+  }
+  /* Evitar saltos de scroll que causan parpadeo con navbar fixed */
+  .modal-open {
+    padding-right: 0 !important;
+    overflow: hidden;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <section class="py-5">
     <div class="container">
@@ -71,12 +88,29 @@
                             </div>
                             {% endif %}
                             
+                            <div class="mb-3 form-check">
+                                {{ register_user_form.accept_terms(class="form-check-input", id="acceptTerms") }}
+                                <label class="form-check-label" for="acceptTerms">
+                                    {{ _('Accepto les condicions d\'ús i privacitat') }}
+                                </label>
+                                <button type="button" class="btn btn-link btn-sm text-decoration-none ms-2 p-0 align-baseline" data-bs-toggle="modal" data-bs-target="#termsModal">
+                                    {{ _('Veure condicions') }}
+                                </button>
+                                {% if register_user_form.accept_terms.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in register_user_form.accept_terms.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
                             <button type="submit" class="btn btn-success btn-lg w-100 mb-3">
                                 <i class="fas fa-user-plus me-2"></i>{{ _('Crear Cuenta') }}
                             </button>
                         </form>
                         
-                        <div class="text-center">
+                        <div class="text-center mt-4">
                             <p class="text-muted mb-0">
                                 {{ _('¿Ya tienes cuenta?') }} 
                                 <a href="{{ url_for('security.login') }}" class="text-decoration-none fw-bold">
@@ -90,4 +124,39 @@
         </div>
     </div>
 </section>
+
+<!-- Terms Modal placed outside to avoid layout reflows -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="termsModalLabel">{{ _('Condicions d\'ús, privacitat i cessió de continguts') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6 class="fw-bold mb-2">{{ _('Resum pràctic') }}</h6>
+                <ul>
+                    <li>{{ _('Respecta la llei: no publiquis contingut il·legal, difamatori o amb dades personals de tercers sense consentiment.') }}</li>
+                    <li>{{ _('Imatges: en pujar-les ens concedeixes una llicència no exclusiva per usar-les a la plataforma, comunicacions i accions de difusió del projecte. No pengis imatges amb menors o persones identificables sense permís, ni dades sensibles.') }}</li>
+                    <li>{{ _('Dades personals: recollim només el necessari per al servei (registre, comunicacions, moderació). Pots exercir els teus drets de protecció de dades escrivint a hola@tarracograf.cat.') }}</li>
+                    <li>{{ _('Donacions: no emmagatzemem dades bancàries; el pagament es processa pel proveïdor de pagaments.') }}</li>
+                    <li>{{ _('Moderació: podem editar o eliminar continguts que incompleixin aquestes condicions o la normativa vigent.') }}</li>
+                </ul>
+                <h6 class="fw-bold mt-4">{{ _('Text complet (resum)') }}</h6>
+                <p class="mb-2"><strong>{{ _('Responsable') }}</strong>: Tarracograf.</p>
+                <p class="mb-2"><strong>{{ _('Finalitats') }}</strong>: gestió del registre i autenticació d\'usuaris, comunicacions relacionades amb el servei, moderació de continguts i millora de la plataforma.</p>
+                <p class="mb-2"><strong>{{ _('Base legal') }}</strong>: execució del contracte (ús del servei) i consentiment per a la gestió de comunicacions i tractament d\'imatges que puguis aportar.</p>
+                <p class="mb-2"><strong>{{ _('Drets') }}</strong>: accés, rectificació, supressió, limitació, oposició i portabilitat. Pots exercir-los escrivint a hola@tarracograf.cat.</p>
+                <p class="mb-2"><strong>{{ _('Imatges i continguts aportats') }}</strong>: en pujar imatges o textos concedeixes a Tarracograf una llicència no exclusiva, mundial i gratuïta per a la seva reproducció, comunicació pública i transformació vinculada al projecte (web, newsletters, xarxes socials i materials informatius). Et compromets a tenir drets suficients sobre el contingut i a no incloure dades personals de tercers sense consentiment.</p>
+                <p class="mb-2"><strong>{{ _('Conservació') }}</strong>: mantindrem les dades mentre siguis usuari actiu; pots sol·licitar la supressió, excepte quan hi hagi obligació legal de conservar-les.</p>
+                <p class="mb-2"><strong>{{ _('Seguretat') }}</strong>: apliquem mesures raonables per protegir les dades; evita compartir credencials i no publiquis dades sensibles.</p>
+                <p class="mb-2"><strong>{{ _('Pagaments i donacions') }}</strong>: les dades de pagament es processen pel proveïdor de pagaments; no emmagatzemem la informació bancària.</p>
+                <p class="mb-0"><strong>{{ _('Contacte') }}</strong>: hola@tarracograf.cat</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Tancar') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

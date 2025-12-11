@@ -113,6 +113,7 @@ class User(db.Model, UserMixin):
     active = db.Column(db.Boolean(), default=True)
     fs_uniquifier = db.Column(db.String(255), unique=True, nullable=False)
     confirmed_at = db.Column(db.DateTime())
+    accept_terms = db.Column(db.Boolean, nullable=False, default=False)
     created_at = db.Column(db.DateTime(), default=datetime.utcnow)
     
     # Relationships
@@ -329,9 +330,17 @@ class CityBoundary(db.Model):
             ).where(Section.polygon.isnot(None)).subquery()
             
             # Unir todas las geometrías válidas
+            union_geom = func.ST_Union(valid_geoms.c.geom)
+            
+            # Aplicar un buffer de ~50 metros para cubrir gaps pequeños entre secciones
+            # ST_Buffer necesita distancia en grados (SRID 4326)
+            # Aproximadamente 0.0005 grados ≈ 50 metros en latitud (varía según latitud)
+            # Para Tarragona (lat ~41°), 0.0005 grados ≈ 55 metros
+            buffer_distance = 0.0005  # ~50-55 metros en grados
+            
             result = db.session.query(
                 func.ST_AsText(
-                    func.ST_Union(valid_geoms.c.geom)
+                    func.ST_Buffer(union_geom, buffer_distance)
                 ).label('boundary')
             ).first()
             
@@ -355,7 +364,9 @@ class CityBoundary(db.Model):
                 
                 if polygons:
                     union = unary_union(polygons)
-                    return union.wkt
+                    # Aplicar buffer con Shapely (distancia en grados, ~0.0005 para 50m)
+                    buffered = union.buffer(0.0005)
+                    return buffered.wkt
             except Exception as e:
                 import logging
                 logging.getLogger(__name__).warning(f"Shapely boundary calculation failed: {e}")
@@ -636,16 +647,6 @@ class InventoryItem(db.Model):
         if self.is_resolved():
             return False, False, _('Este item ya está marcado como resuelto')
         
-        # Si el usuario votó "encara hi és", remover ese voto
-        if self.has_user_voted(user_id):
-            vote = self.voters.filter_by(user_id=user_id).first()
-            if vote:
-                db.session.delete(vote)
-                if self.importance_count and self.importance_count > 0:
-                    self.importance_count -= 1
-                else:
-                    self.importance_count = 0
-        
         # Crear reporte de resuelto
         resolved = InventoryResolved(item_id=self.id, user_id=user_id)
         db.session.add(resolved)
@@ -660,7 +661,7 @@ class InventoryItem(db.Model):
         auto_resolve_threshold = current_app.config.get('INVENTORY_AUTO_RESOLVE_THRESHOLD', 3) if current_app else 3
         
         if self.resolved_count >= auto_resolve_threshold and self.can_be_resolved():
-            success, _ = self.resolve()
+            success, resolve_msg = self.resolve()
             auto_resolved = success
             if auto_resolved:
                 current_app.logger.info(

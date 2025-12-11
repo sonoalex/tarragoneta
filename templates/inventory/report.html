@@ -64,10 +64,11 @@
                         <form method="POST" action="{{ url_for('inventory.report_item') }}" enctype="multipart/form-data" class="needs-validation" novalidate>
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             
-                            <!-- Hidden coordinates -->
+                            <!-- Hidden coordinates and source -->
                             <input type="hidden" name="latitude" id="latitude" required>
                             <input type="hidden" name="longitude" id="longitude" required>
                             <input type="hidden" name="address" id="address">
+                            <input type="hidden" name="location_source" id="location_source" value="">
                             
                             <!-- Category -->
                             <div class="mb-4">
@@ -141,12 +142,44 @@
 
 {% block extra_js %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var map = null;
         var marker = null;
         var locationMode = 'auto'; // 'auto' or 'manual'
         var currentLocation = null;
+        // Helper: convert EXIF DMS to decimal
+        function dmsToDecimal(dms, ref) {
+            if (!dms || dms.length !== 3) return null;
+            var deg = dms[0];
+            var min = dms[1];
+            var sec = dms[2];
+            var dec = deg + (min / 60.0) + (sec / 3600.0);
+            if (ref === 'S' || ref === 'W') dec = -dec;
+            return dec;
+        }
+        // Extract GPS from image using EXIF.js (frontend preview only; backend volverá a extraer)
+        function extractGpsFromFile(file) {
+            return new Promise((resolve) => {
+                if (!file) return resolve(null);
+                EXIF.getData(file, function() {
+                    var lat = EXIF.getTag(this, 'GPSLatitude');
+                    var latRef = EXIF.getTag(this, 'GPSLatitudeRef');
+                    var lng = EXIF.getTag(this, 'GPSLongitude');
+                    var lngRef = EXIF.getTag(this, 'GPSLongitudeRef');
+                    if (lat && lng) {
+                        var latDec = dmsToDecimal(lat.map(Number), latRef || 'N');
+                        var lngDec = dmsToDecimal(lng.map(Number), lngRef || 'E');
+                        if (!isNaN(latDec) && !isNaN(lngDec)) {
+                            resolve({ lat: latDec, lng: lngDec });
+                            return;
+                        }
+                    }
+                    resolve(null);
+                });
+            });
+        }
         
         // Initialize map (but don't show it yet - only when manual mode is activated)
         function initializeMap() {
@@ -172,6 +205,7 @@
             // Update hidden inputs
             document.getElementById('latitude').value = lat;
             document.getElementById('longitude').value = lng;
+            document.getElementById('location_source').value = source || 'form_coordinates';
             
             // Geocode to get address
             fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`, {
@@ -253,6 +287,7 @@
             // Update hidden inputs
             document.getElementById('latitude').value = lat;
             document.getElementById('longitude').value = lng;
+            document.getElementById('location_source').value = 'manual_selection';
             
             // Remove existing marker
             if (marker) {
@@ -660,17 +695,15 @@
             };
             reader.readAsDataURL(file);
             
-            // Note: GPS extraction will be done on the server side (Python)
-            // The server will try GPS from image first, then use form coordinates (browser geolocation or manual)
-            // We don't require location selection before uploading image - server will handle it
-            // If we have current location, show it as fallback (but server will prioritize GPS from image)
-            if (currentLocation) {
-                // Show that we have a fallback location ready
-                // The server will prioritize GPS from image
-                setLocationFromAuto(currentLocation.lat, currentLocation.lng, 'browser_geolocation');
-            }
-            // If no current location, user can still submit - server will extract GPS from image
-            // If image has no GPS, server will return error asking for location
+            // Intentar extraer GPS en frontend (el backend también lo hará)
+            extractGpsFromFile(file).then(function(gps) {
+                if (gps && gps.lat && gps.lng) {
+                    setLocationFromAuto(gps.lat, gps.lng, 'image_gps');
+                } else if (currentLocation) {
+                    // Fallback a la geolocalización del navegador si ya la tenemos
+                    setLocationFromAuto(currentLocation.lat, currentLocation.lng, 'browser_geolocation');
+                }
+            });
         }
         
         // Remove image button

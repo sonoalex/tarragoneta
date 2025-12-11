@@ -2,13 +2,14 @@ from flask import has_request_context
 from flask_wtf import FlaskForm
 from flask_security.forms import RegisterForm
 from flask_babel import gettext as _, lazy_gettext as _l
-from wtforms import StringField, TextAreaField, DateField, SelectField, FileField
+from wtforms import StringField, TextAreaField, DateField, SelectField, FileField, BooleanField
 from wtforms.validators import DataRequired, Email, Length, Optional
 from app.extensions import db
 from app.models import User
 
 class ExtendedRegisterForm(RegisterForm):
     username = StringField(_l('Nombre de usuario'), validators=[DataRequired(), Length(min=3, max=255)])
+    accept_terms = BooleanField(_l('Accepto les condicions d\'ús i privacitat'), validators=[DataRequired(message=_l('Has d\'acceptar les condicions'))])
     
     def validate(self, extra_validators=None):
         # Call parent validate without extra_validators to avoid signature mismatch

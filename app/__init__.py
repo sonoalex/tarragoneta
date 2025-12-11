@@ -45,12 +45,16 @@ def create_app(config_name=None):
     # Initialize Celery
     from app.celery_app import make_celery
     from app.tasks.email_tasks import init_tasks
+    from app.tasks.image_tasks import init_image_tasks
     celery = make_celery(app)
     app.celery = celery
     
     # Register Celery tasks
     send_email_task = init_tasks(celery)
     app.send_email_task = send_email_task
+    
+    resize_image_task = init_image_tasks(celery)
+    app.resize_image_task = resize_image_task
     
     # Setup Flask-Security with custom form
     from app.extensions import user_datastore, security

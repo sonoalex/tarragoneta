@@ -8,6 +8,97 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 <style>
     #map { height: 600px; border-radius: 16px; z-index: 0; }
+    
+    /* Improved Leaflet popup styles */
+    .leaflet-popup-content-wrapper {
+        border-radius: 12px !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+        padding: 0 !important;
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    }
+    
+    .leaflet-popup-content {
+        margin: 8px !important;
+        padding: 0 !important;
+        min-width: 150px;
+        max-width: 220px;
+    }
+    
+    .leaflet-popup-tip {
+        background: white !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+        border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    }
+    
+    .leaflet-popup-close-button {
+        width: 24px !important;
+        height: 24px !important;
+        line-height: 24px !important;
+        font-size: 16px !important;
+        color: #666 !important;
+        padding: 0 !important;
+        margin: 6px 6px 0 0 !important;
+        border-radius: 50% !important;
+        background: rgba(255, 255, 255, 0.95) !important;
+        transition: all 0.2s ease !important;
+        text-align: center !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    .leaflet-popup-close-button:hover {
+        background: rgba(0, 0, 0, 0.08) !important;
+        color: #000 !important;
+        transform: scale(1.1);
+    }
+    
+    /* Mobile-optimized popup styles */
+    @media (max-width: 768px) {
+        .leaflet-popup-content-wrapper {
+            max-width: 200px !important;
+        }
+        .leaflet-popup-content {
+            margin: 6px !important;
+            font-size: 0.875rem !important;
+            max-width: 200px !important;
+        }
+        .leaflet-popup-content h6 {
+            font-size: 0.9rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+        .leaflet-popup-content p {
+            font-size: 0.8rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+        .leaflet-popup-content img {
+            max-width: 100% !important;
+            max-height: 150px !important;
+            object-fit: cover !important;
+            display: block !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
+        .leaflet-popup-content .btn {
+            font-size: 0.75rem !important;
+            padding: 0.25rem 0.5rem !important;
+        }
+        .leaflet-popup-content .small {
+            font-size: 0.7rem !important;
+        }
+    }
+    
+    /* Desktop popup image size */
+    @media (min-width: 769px) {
+        .leaflet-popup-content img {
+            max-height: 120px !important;
+            display: block !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
+    }
+    
     .category-filter {
         background: white;
         padding: 1rem;
@@ -517,10 +608,10 @@
                                 polygon.eachLayer(function(layer) {
                                     layer.setStyle({
                                         fillColor: color,
-                                        fillOpacity: 0.5,  // Más opaco para colores más fuertes
-                                        color: color,
-                                        weight: 1.5,  // Borde delgado
-                                        opacity: 0.9  // Borde ligeramente transparente
+                                        fillOpacity: 0.35,  // Más color para identificar secciones
+                                        color: color,  // Borde del color del distrito
+                                        weight: 0.8,  // Borde fino
+                                        opacity: 0.85  // Borde ligeramente visible
                                     });
                                     layer.bindPopup(`
                                         <div style="min-width: 150px;">
@@ -534,10 +625,10 @@
                                 // Si es un Polygon simple
                                 polygon.setStyle({
                                     fillColor: color,
-                                    fillOpacity: 0.5,  // Más opaco para colores más fuertes
-                                    color: color,
-                                    weight: 1.5,  // Borde delgado
-                                    opacity: 0.9  // Borde ligeramente transparente
+                                    fillOpacity: 0.35,  // Más color para identificar secciones
+                                    color: color,  // Borde del color del distrito
+                                    weight: 0.8,  // Borde fino
+                                    opacity: 0.85  // Borde ligeramente visible
                                 });
                                 
                                 // Popup con información de la sección
@@ -585,10 +676,10 @@
                             polygon.eachLayer(function(layer) {
                                 layer.setStyle({
                                     fillColor: '#4A9B5C',  // Verde de Tarracograf
-                                    fillOpacity: 0.1,      // Muy transparente
+                                    fillOpacity: 0.0,      // Sin relleno
                                     color: '#4A9B5C',      // Borde verde
-                                    weight: 5,             // Borde más grueso para el boundary
-                                    opacity: 0.9,          // Borde más opaco
+                                    weight: 1.5,           // Borde más fino
+                                    opacity: 0.7,          // Borde menos opaco
                                     dashArray: '10, 5'     // Línea punteada para diferenciarlo
                                 });
                                 layer.bindPopup(`
@@ -603,10 +694,10 @@
                             // Si es un Polygon simple
                             polygon.setStyle({
                                 fillColor: '#4A9B5C',  // Verde de Tarracograf
-                                fillOpacity: 0.1,      // Muy transparente
+                                fillOpacity: 0.0,      // Sin relleno
                                 color: '#4A9B5C',      // Borde verde
-                                weight: 5,             // Borde más grueso para el boundary
-                                opacity: 0.9,          // Borde más opaco
+                                weight: 1.5,           // Borde más fino
+                                opacity: 0.7,          // Borde menos opaco
                                 dashArray: '10, 5'     // Línea punteada para diferenciarlo
                             });
                             
@@ -676,6 +767,33 @@
             return { icon: 'fa-circle', color: '#6c757d' };
         }
         
+        // Helper function to get image path for a specific size
+        // Removes any existing size suffix and adds the requested one
+        function getImagePathForSize(imagePath, size) {
+            if (!imagePath) return null;
+            // If it's already a full URL (S3), return as-is
+            if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+                return imagePath;
+            }
+            
+            // Find the last dot (extension)
+            var lastDot = imagePath.lastIndexOf('.');
+            if (lastDot === -1) {
+                // No extension found, return original
+                return imagePath;
+            }
+            
+            var ext = imagePath.substring(lastDot);
+            var nameWithPossibleSuffix = imagePath.substring(0, lastDot);
+            
+            // Remove any existing size suffix (_thumbnail, _medium, _large)
+            // Pattern: _thumbnail, _medium, or _large at the end
+            var baseName = nameWithPossibleSuffix.replace(/_?(thumbnail|medium|large)$/i, '');
+            
+            // Add the requested size suffix
+            return baseName + '_' + size + ext;
+        }
+        
         // Category icons with optional image
         function getCategoryIcon(category, subcategory, imagePath) {
             var colors = {
@@ -708,7 +826,7 @@
                                       display: flex;
                                       align-items: center;
                                       justify-content: center;">
-                                <img src="/static/uploads/${imagePath}" 
+                                <img src="${getImagePathForSize(imagePath, 'thumbnail')}" 
                                      style="width: 100%; 
                                             height: 100%; 
                                             object-fit: cover;
@@ -757,89 +875,73 @@
                     var voteButton = '';
                     var resolveButton = '';
                     var isAuthenticated = {{ 'true' if current_user.is_authenticated else 'false' }};
+                    const imageThumb = item.image_url_thumbnail || item.image_url || null;
+                    const imageMedium = item.image_url || null;
                     
                     if (isAuthenticated) {
-                        // Vote button (Encara hi és) - disabled if user has reported "ya no está"
+                        // Vote button (Encara hi és) - solo icono
                         if (item.has_voted) {
                             voteButton = `
-                                <button class="btn btn-sm btn-primary flex-fill vote-btn" disabled>
-                                    +1
-                                </button>
-                            `;
-                        } else if (item.has_resolved) {
-                            // User has reported "ya no está", so voting is disabled
-                            voteButton = `
-                                <button class="btn btn-sm btn-outline-primary flex-fill" disabled>
-                                    +1
+                                <button class="btn btn-sm btn-primary vote-btn" disabled style="padding: 0.25rem 0.5rem;" title="+1">
+                                    <i class="fas fa-plus"></i>
                                 </button>
                             `;
                         } else {
                             voteButton = `
-                                <button class="btn btn-sm btn-primary flex-fill vote-btn" data-item-id="${item.id}">
-                                    +1
+                                <button class="btn btn-sm btn-primary vote-btn" data-item-id="${item.id}" style="padding: 0.25rem 0.5rem;" title="+1">
+                                    <i class="fas fa-plus"></i>
                                 </button>
                             `;
                         }
                         
-                        // Resolve button (Ya no está) - disabled if user has voted
-                        if (item.has_resolved) {
-                            resolveButton = `
-                                <button class="btn btn-sm btn-warning flex-fill resolve-btn rounded-pill" disabled>
-                                    <i class="fas fa-times-circle me-1"></i>{{ _('Ja no hi és') }}
-                                </button>
-                            `;
-                        } else if (item.has_voted) {
-                            // User has voted "encara hi és", so resolving is disabled
-                            resolveButton = `
-                                <button class="btn btn-sm btn-outline-warning flex-fill rounded-pill" disabled>
-                                    <i class="fas fa-times-circle me-1"></i>{{ _('Ja no hi és') }}
-                                </button>
-                            `;
-                        } else {
-                            resolveButton = `
-                                <button class="btn btn-sm btn-warning flex-fill resolve-btn rounded-pill" data-item-id="${item.id}">
-                                    <i class="fas fa-times-circle me-1"></i>{{ _('Ja no hi és') }}
-                                </button>
-                            `;
-                        }
+                        // Resolve button (Ya no está) - solo icono
+                        resolveButton = `
+                            <button class="btn btn-sm ${item.has_resolved ? 'btn-warning' : 'btn-warning'} resolve-btn rounded-pill" ${item.has_resolved ? 'disabled' : ''} ${item.has_resolved ? '' : `data-item-id="${item.id}"`} style="padding: 0.25rem 0.5rem;" title="{{ _('Ja no hi és') }}">
+                                <i class="fas fa-times-circle"></i>
+                            </button>
+                        `;
                     }
                     
                     var iconInfo = getCategoryIconInfo(item.category, item.subcategory);
+                    // Detect mobile screen size
+                    var isMobile = window.innerWidth <= 768;
+                    var popupMinWidth = isMobile ? '150px' : '180px';
+                    
+                    // Truncate address to max 25 characters
+                    var truncatedAddress = item.address ? (item.address.length > 25 ? item.address.substring(0, 25) + '...' : item.address) : '';
+                    
                     var popupContent = `
-                        <div style="min-width: 200px;">
-                            <h6 class="fw-bold mb-2"><i class="fas ${iconInfo.icon} ${iconInfo.color ? 'text-primary' : ''} me-1"></i>${item.full_category}</h6>
-                            ${item.description ? `<p class="small mb-2">${item.description}</p>` : ''}
-                            ${item.address ? `<p class="small text-muted mb-2"><i class="fas fa-map-marker-alt"></i> ${item.address}</p>` : ''}
-                            ${item.image_path ? `<img src="/static/uploads/${item.image_path}" style="max-width: 100%; border-radius: 8px; margin-top: 0.5rem;" />` : ''}
-                            <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
-                                <span class="small text-muted">
-                                    <i class="fas fa-star text-warning me-1"></i>
-                                    <strong>${item.importance_count || 0}</strong> {{ _('confirmacions') }}
-                                </span>
-                                <span class="small text-muted">${new Date(item.created_at).toLocaleDateString('ca-ES')}</span>
+                        <div style="min-width: ${popupMinWidth}; max-width: ${isMobile ? '200px' : '220px'};">
+                            <div class="d-flex align-items-center mb-1">
+                                <i class="fas ${iconInfo.icon} ${iconInfo.color ? 'text-primary' : ''} me-1" style="font-size: 0.85rem;"></i>
+                                <h6 class="fw-bold mb-0" style="font-size: ${isMobile ? '0.75rem' : '0.8rem'}; line-height: 1.2;">${item.full_category}</h6>
                             </div>
-                            ${item.resolved_count > 0 ? `
-                                <div class="mt-2 pt-2 border-top">
-                                    <span class="small text-warning">
-                                        <i class="fas fa-times-circle me-1"></i>
-                                        <strong>${item.resolved_count}</strong> {{ _('reportat que ja no hi és') }}
-                                    </span>
-                                </div>
-                            ` : ''}
+                            ${truncatedAddress ? `<p class="small text-muted mb-1" style="font-size: ${isMobile ? '0.65rem' : '0.7rem'}; line-height: 1.2;"><i class="fas fa-map-marker-alt" style="font-size: 0.6rem;"></i> ${truncatedAddress}</p>` : ''}
+                            ${imageMedium ? `<img src="${getImagePathForSize(imageMedium, 'thumbnail')}" style="width: 100%; max-height: 70px; border-radius: 6px; margin: 0.25rem 0; object-fit: cover;" />` : ''}
+                            <div class="d-flex justify-content-between align-items-center mt-1 pt-1 border-top" style="padding-top: 0.25rem !important; margin-top: 0.25rem !important; font-size: ${isMobile ? '0.65rem' : '0.7rem'} !important;">
+                                <span class="text-muted">
+                                    <i class="fas fa-star text-warning" style="font-size: 0.65rem;"></i>
+                                    <strong>${item.importance_count || 0}</strong>
+                                </span>
+                                ${item.resolved_count > 0 ? `<span class="text-warning"><i class="fas fa-times-circle" style="font-size: 0.65rem;"></i> <strong>${item.resolved_count}</strong></span>` : ''}
+                                <a href="/inventory/${item.id}" class="text-primary" style="font-size: 0.7rem;" title="{{ _('Veure detalls') }}">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
                             ${voteButton || resolveButton ? `
-                                <div class="mt-2 pt-2 border-top d-flex gap-2">
-                                    ${voteButton}
-                                    ${resolveButton}
+                                <div class="mt-1 pt-1 border-top d-flex gap-1 justify-content-center" style="padding-top: 0.25rem !important; margin-top: 0.25rem !important;">
+                                    ${voteButton || ''}
+                                    ${resolveButton || ''}
                                 </div>
                             ` : ''}
                         </div>
                     `;
                     
                     var marker = L.marker([item.latitude, item.longitude], {
-                        icon: getCategoryIcon(item.category, item.subcategory, item.image_path)
+                        icon: getCategoryIcon(item.category, item.subcategory, imageThumb)
                     });
                     
-                    marker.bindPopup(popupContent);
+                    marker.bindPopup(popupContent, { autoClose: true, closeOnClick: false });
                     markers.addLayer(marker);
                 });
                 
@@ -859,7 +961,9 @@
                     // Re-bind vote buttons after popup opens
                     setTimeout(function() {
                         document.querySelectorAll('.vote-btn').forEach(function(btn) {
-                            btn.addEventListener('click', function() {
+                            btn.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
                                 var itemId = this.getAttribute('data-item-id');
                                 voteForItem(itemId, this);
                             });
@@ -867,7 +971,9 @@
                         
                         // Re-bind resolve buttons after popup opens
                         document.querySelectorAll('.resolve-btn').forEach(function(btn) {
-                            btn.addEventListener('click', function() {
+                            btn.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
                                 var itemId = this.getAttribute('data-item-id');
                                 resolveItem(itemId, this);
                             });
@@ -1068,7 +1174,19 @@
                         button.closest('.d-flex').closest('.border-top').after(alert);
                     }
                 } else {
-                    alert(data.error || '{{ _("Error al reportar") }}');
+                    // Mostrar error inline en el popup
+                    var popup = button.closest('.leaflet-popup-content');
+                    if (popup) {
+                        var alertDiv = document.createElement('div');
+                        alertDiv.className = 'alert alert-warning alert-dismissible fade show mt-2';
+                        alertDiv.innerHTML = `
+                            <i class="fas fa-exclamation-triangle me-2"></i>${data.error || '{{ _("Error al reportar") }}'}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        `;
+                        popup.appendChild(alertDiv);
+                    } else {
+                        alert(data.error || '{{ _("Error al reportar") }}');
+                    }
                     button.disabled = false;
                     // Ensure rounded-pill class is present
                     if (!button.classList.contains('rounded-pill')) {
@@ -1079,7 +1197,18 @@
             })
             .catch(error => {
                 console.error('Error resolving item:', error);
-                alert('{{ _("Error al reportar. Intenta-ho de nou.") }}');
+                var popup = button.closest('.leaflet-popup-content');
+                if (popup) {
+                    var alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-warning alert-dismissible fade show mt-2';
+                    alertDiv.innerHTML = `
+                        <i class="fas fa-exclamation-triangle me-2"></i>{{ _("Error al reportar. Intenta-ho de nou.") }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    popup.appendChild(alertDiv);
+                } else {
+                    alert('{{ _("Error al reportar. Intenta-ho de nou.") }}');
+                }
                 button.disabled = false;
                 button.innerHTML = '<i class="fas fa-times-circle me-1"></i>{{ _("Ja no hi és") }}';
             });
