@@ -273,20 +273,36 @@ def get_image_url(image_filename, size='large'):
 
     storage = get_storage()
     provider = current_app.config.get('STORAGE_PROVIDER', 'local').lower()
+    
+    current_app.logger.debug(
+        f'🖼️ get_image_url: filename={image_filename}, size={size}, '
+        f'sized_filename={sized_filename}, provider={provider}'
+    )
 
     if provider == 's3':
         key_to_use = sized_filename
+        current_app.logger.debug(f'☁️ Using S3, key={key_to_use}')
     else:
         upload_folder = current_app.config.get('UPLOAD_FOLDER', 'static/uploads')
         sized_path = os.path.join(upload_folder, sized_filename)
         key_to_use = sized_filename if os.path.exists(sized_path) else image_filename
+        current_app.logger.debug(
+            f'📁 Using local storage, key={key_to_use}, '
+            f'sized_path_exists={os.path.exists(sized_path)}'
+        )
 
     try:
-        return storage.url_for(key_to_use)
-    except Exception:
+        url = storage.url_for(key_to_use)
+        current_app.logger.debug(f'✅ get_image_url: Returning URL={url}')
+        return url
+    except Exception as e:
+        current_app.logger.warning(f'⚠️ get_image_url: Error with key {key_to_use}: {e}')
         try:
-            return storage.url_for(image_filename)
-        except Exception:
+            url = storage.url_for(image_filename)
+            current_app.logger.debug(f'✅ get_image_url: Fallback URL={url}')
+            return url
+        except Exception as e2:
+            current_app.logger.error(f'❌ get_image_url: Both attempts failed: {e2}')
             return None
 
 def sanitize_html(text):

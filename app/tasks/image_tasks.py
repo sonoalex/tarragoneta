@@ -50,22 +50,34 @@ def init_image_tasks(celery_app):
             db.session.commit()
 
             # Upload all generated files to storage
-            for _, fname in image_sizes.items():
+            storage_provider = current_app.config.get('STORAGE_PROVIDER', 'local').lower()
+            current_app.logger.info(f'📤 Uploading {len(image_sizes)} image sizes to storage (provider={storage_provider})')
+            
+            for size_name, fname in image_sizes.items():
                 if not fname:
                     continue
                 path = os.path.join(upload_folder, fname)
                 if os.path.exists(path):
-                    storage.save(fname, path)
+                    try:
+                        current_app.logger.info(f'  📤 Uploading {size_name}: {fname}')
+                        storage.save(fname, path)
+                        current_app.logger.info(f'  ✅ Uploaded {size_name}: {fname}')
+                    except Exception as e:
+                        current_app.logger.error(f'  ❌ Error uploading {size_name} {fname}: {e}', exc_info=True)
 
             # If using S3, clean local files to save space
-            if current_app.config.get('STORAGE_PROVIDER', 'local').lower() == 's3':
-                for _, fname in image_sizes.items():
+            if storage_provider == 's3':
+                current_app.logger.info('🗑️ Cleaning up local files after S3 upload')
+                for size_name, fname in image_sizes.items():
+                    if not fname:
+                        continue
                     path = os.path.join(upload_folder, fname)
                     try:
                         if os.path.exists(path):
                             os.remove(path)
-                    except Exception:
-                        pass
+                            current_app.logger.debug(f'  🗑️ Deleted local file: {fname}')
+                    except Exception as e:
+                        current_app.logger.warning(f'  ⚠️ Could not delete local file {fname}: {e}')
             
             current_app.logger.info(
                 f'✅ Image sizes generated for item {item_id}: '

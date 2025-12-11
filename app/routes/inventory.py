@@ -190,6 +190,29 @@ def report_item():
             # Optimize original image (basic optimization, full resize will be done async)
             optimize_image(file_path)  # Basic optimization in place
             
+            # Upload original file to storage (S3 or local)
+            # This ensures the file is available even before async resize completes
+            try:
+                from app.storage import get_storage
+                storage = get_storage()
+                storage_provider = current_app.config.get('STORAGE_PROVIDER', 'local').lower()
+                
+                current_app.logger.info(f'📤 Uploading original file to storage (provider={storage_provider}): {filename}')
+                storage.save(filename, file_path)
+                current_app.logger.info(f'✅ Original file uploaded to storage: {filename}')
+                
+                # If using S3, delete local file after upload to save space
+                if storage_provider == 's3':
+                    try:
+                        if os.path.exists(file_path):
+                            os.remove(file_path)
+                            current_app.logger.info(f'🗑️ Deleted local file after S3 upload: {file_path}')
+                    except Exception as e:
+                        current_app.logger.warning(f'⚠️ Could not delete local file {file_path}: {e}')
+            except Exception as e:
+                current_app.logger.error(f'❌ Error uploading original file to storage: {e}', exc_info=True)
+                # Continue anyway - the file is still in local storage
+            
             # Get address from form or geocode (optional)
             address = form.address.data if form.address.data else None
             

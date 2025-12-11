@@ -58,6 +58,20 @@ class Config:
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
     
+    # Storage configuration
+    # Options: 'local' or 's3'
+    # When 's3', files are saved to local volume first, then uploaded to S3, then deleted from local
+    STORAGE_PROVIDER = os.environ.get('STORAGE_PROVIDER', 'local').lower()
+    
+    # S3 configuration (only used when STORAGE_PROVIDER='s3')
+    S3_BUCKET = os.environ.get('S3_BUCKET', '')
+    S3_ENDPOINT = os.environ.get('S3_ENDPOINT', '')  # Internal endpoint for uploads (e.g., http://storage.railway.internal:9000)
+    S3_PUBLIC_ENDPOINT = os.environ.get('S3_PUBLIC_ENDPOINT', '')  # Public endpoint for URLs (optional, falls back to S3_ENDPOINT)
+    S3_REGION = os.environ.get('S3_REGION', 'us-east-1')
+    S3_USE_SSL = os.environ.get('S3_USE_SSL', 'true').lower() in ('true', '1', 'yes')
+    S3_ACCESS_KEY_ID = os.environ.get('S3_ACCESS_KEY_ID', '')
+    S3_SECRET_ACCESS_KEY = os.environ.get('S3_SECRET_ACCESS_KEY', '')
+    
     # Stripe
     STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY', '')
     STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')

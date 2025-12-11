@@ -8,14 +8,23 @@ class S3StorageProvider(StorageProvider):
     """S3-compatible storage (Railway Simple S3 / MinIO / AWS S3)."""
 
     def __init__(self, config):
+        from flask import current_app
         self.bucket = config.get('S3_BUCKET')
-        self.endpoint = config.get('S3_ENDPOINT')
+        self.endpoint = config.get('S3_ENDPOINT')  # Internal endpoint for uploads
+        self.public_endpoint = config.get('S3_PUBLIC_ENDPOINT') or self.endpoint  # Public endpoint for URLs
         self.region = config.get('S3_REGION', 'us-east-1')
         self.use_ssl = str(config.get('S3_USE_SSL', 'true')).lower() == 'true'
         access_key = config.get('S3_ACCESS_KEY_ID')
         secret_key = config.get('S3_SECRET_ACCESS_KEY')
 
-        # Client
+        current_app.logger.info(
+            f'🔧 S3StorageProvider initialized: '
+            f'bucket={self.bucket}, endpoint={self.endpoint}, '
+            f'public_endpoint={self.public_endpoint}, '
+            f'region={self.region}, use_ssl={self.use_ssl}'
+        )
+
+        # Client uses internal endpoint for uploads
         self.client = boto3.client(
             's3',
             endpoint_url=self.endpoint,
@@ -28,11 +37,38 @@ class S3StorageProvider(StorageProvider):
 
     def save(self, key: str, file_path: str) -> str:
         # key can include folders (e.g., inventory/123/file.jpg)
-        self.client.upload_file(file_path, self.bucket, key)
+        from flask import current_app
+        import os
+        
+        current_app.logger.info(
+            f'☁️ S3Storage.save: key={key}, file_path={file_path}, '
+            f'file_exists={os.path.exists(file_path) if file_path else False}'
+        )
+        
+        if not os.path.exists(file_path):
+            current_app.logger.error(f'❌ S3Storage.save: File not found: {file_path}')
+            raise FileNotFoundError(f'File not found: {file_path}')
+        
+        try:
+            self.client.upload_file(file_path, self.bucket, key)
+            current_app.logger.info(f'✅ S3Storage: Successfully uploaded {key} to s3://{self.bucket}/{key}')
+        except Exception as e:
+            current_app.logger.error(f'❌ S3Storage.save: Error uploading {key}: {str(e)}', exc_info=True)
+            raise
+        
         return key
 
     def url_for(self, key: str) -> str:
         # Public URL (assumes bucket/object is public or MinIO signed policy).
+        # Uses S3_PUBLIC_ENDPOINT if available, otherwise falls back to S3_ENDPOINT.
         # If private is needed, switch to generate_presigned_url.
-        return f"{self.endpoint.rstrip('/')}/{self.bucket}/{key.lstrip('/')}"
+        from flask import current_app
+        # Use public endpoint for URLs (accessible from web), internal endpoint for uploads
+        endpoint_to_use = self.public_endpoint
+        url = f"{endpoint_to_use.rstrip('/')}/{self.bucket}/{key.lstrip('/')}"
+        current_app.logger.debug(
+            f'🔗 S3Storage.url_for: key={key}, '
+            f'public_endpoint={self.public_endpoint}, internal_endpoint={self.endpoint} -> {url}'
+        )
+        return url
 
