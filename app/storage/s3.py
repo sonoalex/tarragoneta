@@ -12,18 +12,18 @@ class S3StorageProvider(StorageProvider):
     def __init__(self, config):
         from flask import current_app
         # 1. Recuperación de Configuración
-        self.bucket = config.get('S3_BUCKET')
+        self.bucket = config.get('BUCKET')
         
         # Endpoint interno (Ej: http://storage.railway.internal:9000)
-        self.endpoint = config.get('S3_ENDPOINT')  
+        self.endpoint = config.get('ENDPOINT')  
         
         # Endpoint público (Ej: https://storage-xxxx.up.railway.app)
         # Se asume que el usuario QUITARÁ el :443 manualmente en Railway
-        self.public_endpoint = config.get('S3_PUBLIC_ENDPOINT') or self.endpoint
+        self.public_endpoint = config.get('PUBLIC_ENDPOINT') or self.endpoint
         
-        self.region = config.get('S3_REGION', 'us-east-1')
-        access_key = config.get('S3_ACCESS_KEY_ID')
-        secret_key = config.get('S3_SECRET_ACCESS_KEY')
+        self.region = config.get('REGION', 'us-east-1')
+        access_key = config.get('ACCESS_KEY_ID')
+        secret_key = config.get('SECRET_ACCESS_KEY')
         
         # La variable S3_USE_SSL está pensada para el cliente INTERNO
         # Si no está configurada, detectar automáticamente basado en el endpoint

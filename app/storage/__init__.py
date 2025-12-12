@@ -22,13 +22,13 @@ def get_storage():
     
     if provider == 's3':
         s3_config = {
-            'S3_BUCKET': current_app.config.get('S3_BUCKET'),
-            'S3_ENDPOINT': current_app.config.get('S3_ENDPOINT'),
-            'S3_PUBLIC_ENDPOINT': current_app.config.get('S3_PUBLIC_ENDPOINT') or 'not set (using S3_ENDPOINT)',
-            'S3_REGION': current_app.config.get('S3_REGION'),
+            'BUCKET': current_app.config.get('BUCKET'),
+            'ENDPOINT': current_app.config.get('ENDPOINT'),
+            'PUBLIC_ENDPOINT': current_app.config.get('PUBLIC_ENDPOINT') or 'not set (using ENDPOINT)',
+            'REGION': current_app.config.get('REGION'),
             'S3_USE_SSL': current_app.config.get('S3_USE_SSL'),
-            'S3_ACCESS_KEY_ID': '***' if current_app.config.get('S3_ACCESS_KEY_ID') else None,
-            'S3_SECRET_ACCESS_KEY': '***' if current_app.config.get('S3_SECRET_ACCESS_KEY') else None,
+            'ACCESS_KEY_ID': '***' if current_app.config.get('ACCESS_KEY_ID') else None,
+            'SECRET_ACCESS_KEY': '***' if current_app.config.get('SECRET_ACCESS_KEY') else None,
         }
         current_app.logger.info(f'🔧 S3 config: {s3_config}')
         storage_instance = S3StorageProvider(current_app.config)
