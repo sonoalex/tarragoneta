@@ -11,18 +11,26 @@ class S3StorageProvider(StorageProvider):
 
     def __init__(self, config):
         from flask import current_app
+        # 1. Recuperación de Configuración
         self.bucket = config.get('S3_BUCKET')
-        self.endpoint = config.get('S3_ENDPOINT')  # Internal endpoint for uploads
-        self.public_endpoint = config.get('S3_PUBLIC_ENDPOINT') or self.endpoint  # Public endpoint for URLs
+        
+        # Endpoint interno (Ej: http://storage.railway.internal:9000)
+        self.endpoint = config.get('S3_ENDPOINT')  
+        
+        # Endpoint público (Ej: https://storage-xxxx.up.railway.app)
+        # Se asume que el usuario QUITARÁ el :443 manualmente en Railway
+        self.public_endpoint = config.get('S3_PUBLIC_ENDPOINT') or self.endpoint
+        
         self.region = config.get('S3_REGION', 'us-east-1')
-        self.use_ssl = str(config.get('S3_USE_SSL', 'true')).lower() == 'true'
         access_key = config.get('S3_ACCESS_KEY_ID')
         secret_key = config.get('S3_SECRET_ACCESS_KEY')
         
-        # Cache for presigned URLs expiration times: {key: expires_at}
-        # Used to invalidate lru_cache when URL is close to expiration
+        # La variable S3_USE_SSL está pensada para el cliente INTERNO
+        self.use_ssl = str(config.get('S3_USE_SSL', 'true')).lower() == 'true'
+
+        # Cache para URLs (se mantiene la lógica)
         self._url_expires = {}
-        self._cache_refresh_threshold = 300  # Refresh URL if it expires in less than 5 minutes
+        self._cache_refresh_threshold = 300 
 
         current_app.logger.info(
             f'🔧 S3StorageProvider initialized: '
@@ -31,30 +39,35 @@ class S3StorageProvider(StorageProvider):
             f'region={self.region}, use_ssl={self.use_ssl}'
         )
 
-        # Client uses internal endpoint for uploads
+        # --- 2. Cliente INTERNO (self.client) para uploads ---
+        # Se conecta por la red privada de Railway, usa self.use_ssl (que debería ser False)
         self.client = boto3.client(
             's3',
             endpoint_url=self.endpoint,
             aws_access_key_id=access_key,
             aws_secret_access_key=secret_key,
             region_name=self.region,
-            use_ssl=self.use_ssl,
+            use_ssl=self.use_ssl, # Debería ser False (HTTP)
             config=Config(signature_version='s3v4')
         )
         
-        # Client for presigned URLs uses public endpoint if available
-        # This ensures presigned URLs work correctly with the public endpoint
+        # --- 3. Cliente PÚBLICO (self.public_client) para URLs firmadas ---
         if self.public_endpoint != self.endpoint:
+            # Determinamos si el cliente público debe usar SSL basado en su URL
+            # Esto corrige el problema de usar use_ssl=False para un endpoint HTTPS
+            public_use_ssl = self.public_endpoint.lower().startswith('https')
+
             self.public_client = boto3.client(
                 's3',
                 endpoint_url=self.public_endpoint,
                 aws_access_key_id=access_key,
                 aws_secret_access_key=secret_key,
                 region_name=self.region,
-                use_ssl=self.use_ssl,
+                use_ssl=public_use_ssl, # Forzamos True si la URL es HTTPS
                 config=Config(signature_version='s3v4')
             )
         else:
+            # Si el endpoint público y el interno son iguales, usamos el mismo cliente
             self.public_client = self.client
 
     def save(self, key: str, file_path: str, delete_after_upload: bool = False) -> str:
@@ -117,7 +130,9 @@ class S3StorageProvider(StorageProvider):
                     'Bucket': self.bucket,
                     'Key': key
                 },
-                ExpiresIn=expires_in
+                ExpiresIn=expires_in,
+                ResponseContentType='image/jpeg', 
+                ResponseContentDisposition='inline'
             )
             
             # Track expiration time for cache invalidation
