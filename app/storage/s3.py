@@ -173,11 +173,11 @@ class S3StorageProvider(StorageProvider):
                 'get_object',
                 Params={
                     'Bucket': self.bucket,
-                    'Key': key
+                    'Key': key,
+                    'ResponseContentType': 'image/jpeg',
+                    'ResponseContentDisposition': 'inline'
                 },
-                ExpiresIn=expires_in,
-                ResponseContentType='image/jpeg', 
-                ResponseContentDisposition='inline'
+                ExpiresIn=expires_in
             )
             
             # Track expiration time for cache invalidation
