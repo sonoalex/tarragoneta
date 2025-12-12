@@ -11,19 +11,51 @@ class S3StorageProvider(StorageProvider):
 
     def __init__(self, config):
         from flask import current_app
+        import os
+        
+        # Debug: Log available environment variables (only keys, not values for security)
+        s3_env_vars = {k: '***' if 'KEY' in k or 'SECRET' in k else v 
+                      for k, v in os.environ.items() 
+                      if any(x in k.upper() for x in ['BUCKET', 'ENDPOINT', 'REGION', 'ACCESS_KEY', 'SECRET_ACCESS', 'S3_'])}
+        current_app.logger.info(f'🔍 Available S3-related env vars: {list(s3_env_vars.keys())}')
+        
         # 1. Recuperación de Configuración
-        self.bucket = config.get('BUCKET')
+        # Leer directamente de variables de entorno si no están en config
+        # Esto es necesario porque Railway puede no pasar todas las variables a Flask config
+        self.bucket = config.get('BUCKET') or os.environ.get('BUCKET', '')
+        current_app.logger.debug(f'📦 BUCKET from config: {config.get("BUCKET")}, from env: {os.environ.get("BUCKET", "NOT_SET")}, final: {self.bucket}')
         
         # Endpoint interno (Ej: http://storage.railway.internal:9000)
-        self.endpoint = config.get('ENDPOINT')  
+        self.endpoint = config.get('ENDPOINT') or os.environ.get('ENDPOINT', '')
+        current_app.logger.debug(f'🌐 ENDPOINT from config: {config.get("ENDPOINT")}, from env: {os.environ.get("ENDPOINT", "NOT_SET")}, final: {self.endpoint}')
         
         # Endpoint público (Ej: https://storage-xxxx.up.railway.app)
         # Se asume que el usuario QUITARÁ el :443 manualmente en Railway
-        self.public_endpoint = config.get('PUBLIC_ENDPOINT') or self.endpoint
+        public_endpoint_config = config.get('PUBLIC_ENDPOINT') or os.environ.get('S3_PUBLIC_ENDPOINT', '')
+        self.public_endpoint = public_endpoint_config or self.endpoint
         
-        self.region = config.get('REGION', 'us-east-1')
-        access_key = config.get('ACCESS_KEY_ID')
-        secret_key = config.get('SECRET_ACCESS_KEY')
+        self.region = config.get('REGION') or os.environ.get('REGION', 'us-east-1')
+        access_key = config.get('ACCESS_KEY_ID') or os.environ.get('ACCESS_KEY_ID', '')
+        secret_key = config.get('SECRET_ACCESS_KEY') or os.environ.get('SECRET_ACCESS_KEY', '')
+        
+        current_app.logger.debug(
+            f'🔑 ACCESS_KEY_ID from config: {bool(config.get("ACCESS_KEY_ID"))}, '
+            f'from env: {bool(os.environ.get("ACCESS_KEY_ID"))}, final: {bool(access_key)}'
+        )
+        
+        # Validar que las variables requeridas estén presentes
+        if not self.bucket:
+            current_app.logger.error('❌ BUCKET not configured! Check environment variables BUCKET or S3_BUCKET')
+            raise ValueError('BUCKET is required but not set. Please set BUCKET environment variable.')
+        if not self.endpoint:
+            current_app.logger.error('❌ ENDPOINT not configured! Check environment variables ENDPOINT or S3_ENDPOINT')
+            raise ValueError('ENDPOINT is required but not set. Please set ENDPOINT environment variable.')
+        if not access_key:
+            current_app.logger.error('❌ ACCESS_KEY_ID not configured! Check environment variable ACCESS_KEY_ID')
+            raise ValueError('ACCESS_KEY_ID is required but not set. Please set ACCESS_KEY_ID environment variable.')
+        if not secret_key:
+            current_app.logger.error('❌ SECRET_ACCESS_KEY not configured! Check environment variable SECRET_ACCESS_KEY')
+            raise ValueError('SECRET_ACCESS_KEY is required but not set. Please set SECRET_ACCESS_KEY environment variable.')
         
         # La variable S3_USE_SSL está pensada para el cliente INTERNO
         # Si no está configurada, detectar automáticamente basado en el endpoint

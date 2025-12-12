@@ -66,13 +66,13 @@ class Config:
     # S3 configuration (only used when STORAGE_PROVIDER='s3')
     # Use Railway native bucket variables directly (BUCKET, ENDPOINT, etc.)
     # Support fallback to S3_ prefixed variables for backwards compatibility
-    BUCKET = os.environ.get('BUCKET') or os.environ.get('S3_BUCKET', '')
-    ENDPOINT = os.environ.get('ENDPOINT') or os.environ.get('S3_ENDPOINT', '')  # Internal endpoint for uploads (e.g., http://storage.railway.internal:9000)
+    BUCKET = os.environ.get('BUCKET')
+    ENDPOINT = os.environ.get('ENDPOINT')# Internal endpoint for uploads (e.g., http://storage.railway.internal:9000)
     PUBLIC_ENDPOINT = os.environ.get('S3_PUBLIC_ENDPOINT', '')  # Public endpoint for URLs (optional, falls back to ENDPOINT)
-    REGION = os.environ.get('REGION') or os.environ.get('S3_REGION', 'us-east-1')
+    REGION = os.environ.get('REGION', 'us-east-1')
     S3_USE_SSL = os.environ.get('S3_USE_SSL', 'true').lower() in ('true', '1', 'yes')
-    ACCESS_KEY_ID = os.environ.get('ACCESS_KEY_ID') or os.environ.get('S3_ACCESS_KEY_ID', '')
-    SECRET_ACCESS_KEY = os.environ.get('SECRET_ACCESS_KEY') or os.environ.get('S3_SECRET_ACCESS_KEY', '')
+    ACCESS_KEY_ID = os.environ.get('ACCESS_KEY_ID')
+    SECRET_ACCESS_KEY = os.environ.get('SECRET_ACCESS_KEY')
     
     # Stripe
     STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY', '')
