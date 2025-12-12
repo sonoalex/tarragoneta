@@ -26,7 +26,13 @@ class S3StorageProvider(StorageProvider):
         secret_key = config.get('S3_SECRET_ACCESS_KEY')
         
         # La variable S3_USE_SSL está pensada para el cliente INTERNO
-        self.use_ssl = str(config.get('S3_USE_SSL', 'true')).lower() == 'true'
+        # Si no está configurada, detectar automáticamente basado en el endpoint
+        use_ssl_config = config.get('S3_USE_SSL')
+        if use_ssl_config is None or use_ssl_config == '':
+            # Auto-detect SSL based on endpoint protocol
+            self.use_ssl = self.endpoint.lower().startswith('https')
+        else:
+            self.use_ssl = str(use_ssl_config).lower() in ('true', '1', 'yes')
 
         # Cache para URLs (se mantiene la lógica)
         self._url_expires = {}
@@ -124,6 +130,13 @@ class S3StorageProvider(StorageProvider):
         
         try:
             # Generate presigned URL using the public client
+            # For MinIO, we need to ensure the endpoint is correct
+            current_app.logger.debug(
+                f'🔗 S3Storage: Generating presigned URL for key={key}, '
+                f'bucket={self.bucket}, endpoint={self.public_endpoint}, '
+                f'expires_in={expires_in}s'
+            )
+            
             url = self.public_client.generate_presigned_url(
                 'get_object',
                 Params={
@@ -139,8 +152,10 @@ class S3StorageProvider(StorageProvider):
             expires_at = time.time() + expires_in
             self._url_expires[key] = expires_at
             
-            current_app.logger.debug(
-                f'🔗 S3Storage: Generated presigned URL for {key}, expires_in={expires_in}s'
+            current_app.logger.info(
+                f'🔗 S3Storage: Generated presigned URL for {key}, '
+                f'expires_in={expires_in}s, url_length={len(url)}, '
+                f'url_preview={url[:150]}...'
             )
             return url
         except Exception as e:
