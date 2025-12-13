@@ -118,9 +118,9 @@ class S3StorageProvider(StorageProvider):
                     connect_timeout=30,
                     read_timeout=60,
                     retries={'max_attempts': 1},
-                    # Forzar que use el endpoint público en la URL generada
+                    # Railway recomienda usar virtual-hosted-style URLs
                     s3={
-                        'addressing_style': 'path'  # Usar path-style URLs
+                        'addressing_style': 'virtual'  # Usar virtual-hosted-style URLs (recomendado por Railway)
                     }
                 )
             )
