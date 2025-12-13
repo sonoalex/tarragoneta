@@ -69,7 +69,7 @@ class Config:
     BUCKET = os.environ.get('BUCKET')
     ENDPOINT = os.environ.get('ENDPOINT')# Internal endpoint for uploads (e.g., http://storage.railway.internal:9000)
     PUBLIC_ENDPOINT = os.environ.get('S3_PUBLIC_ENDPOINT', '')  # Public endpoint for URLs (optional, falls back to ENDPOINT)
-    REGION = os.environ.get('REGION', 'us-east-1')
+    REGION = os.environ.get('REGION', 'auto')  # Railway S3 usa 'auto' por defecto
     S3_USE_SSL = os.environ.get('S3_USE_SSL', 'true').lower() in ('true', '1', 'yes')
     ACCESS_KEY_ID = os.environ.get('ACCESS_KEY_ID')
     SECRET_ACCESS_KEY = os.environ.get('SECRET_ACCESS_KEY')
