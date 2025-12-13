@@ -68,15 +68,11 @@ class S3StorageProvider(StorageProvider):
         else:
             self.use_ssl = str(use_ssl_config).lower() in ('true', '1', 'yes')
 
-        # Cache para URLs (se mantiene la lógica)
-        self._url_expires = {}
-        self._cache_refresh_threshold = 300  # 5 minutos antes de expirar, regenerar URL
-        
-        # Cache de Python para presigned URLs con LRU (Least Recently Used)
-        # Se invalidará cuando la URL esté cerca de expirar
-        # Usa OrderedDict para implementar LRU: las entradas más recientes al final
-        self._presigned_cache = OrderedDict()
-        self._cache_max_size = 5000  # Aumentado de 128 a 5000 entradas 
+        # Cache deshabilitado temporalmente para debugging
+        # self._url_expires = {}
+        # self._cache_refresh_threshold = 300  # 5 minutos antes de expirar, regenerar URL
+        # self._presigned_cache = OrderedDict()
+        # self._cache_max_size = 5000 
 
         current_app.logger.info(
             f'🔧 S3StorageProvider initialized: '
@@ -177,114 +173,54 @@ class S3StorageProvider(StorageProvider):
 
     def _generate_presigned_url_cached(self, key: str, expires_in: int) -> str:
         """
-        Internal cached method to generate presigned URL.
-        Uses manual cache with expiration tracking.
+        Generate presigned URL without cache (for debugging).
         """
         from flask import current_app
-        
-        # Check if we have a cached URL that's still valid
-        cache_key = f"{key}:{expires_in}"
-        current_time = time.time()
-        
-        if cache_key in self._presigned_cache:
-            # Move to end (most recently used) - LRU behavior
-            cached_data = self._presigned_cache.pop(cache_key)
-            cached_url = cached_data['url']
-            cached_expires_at = cached_data['expires_at']
-            
-            # If URL is still valid (has more than 5 minutes left), return cached version
-            if cached_expires_at > current_time + self._cache_refresh_threshold:
-                # Re-insert at end (most recently used)
-                self._presigned_cache[cache_key] = cached_data
-                current_app.logger.debug(
-                    f'💾 S3Storage: Using cached presigned URL for {key} '
-                    f'(expires in {int(cached_expires_at - current_time)}s)'
-                )
-                return cached_url
-            else:
-                # URL is expiring soon, don't re-insert (will regenerate below)
-                current_app.logger.debug(
-                    f'🔄 S3Storage: Cached URL for {key} expiring soon, regenerating'
-                )
         
         try:
             # Generate presigned URL using the public client
             # Note: generate_presigned_url does NOT make a network call, it only signs locally
-            # However, boto3 may validate configuration, so we wrap it with error handling
             current_app.logger.debug(
                 f'🔗 S3Storage: Generating presigned URL for key={key}, '
                 f'bucket={self.bucket}, endpoint={self.public_endpoint}, '
                 f'expires_in={expires_in}s'
             )
             
+            # Log configuration before generating URL
+            current_app.logger.debug(
+                f'🔧 S3Storage: Generating presigned URL with config: '
+                f'bucket={self.bucket}, endpoint={self.public_endpoint}, '
+                f'region={self.region}, expires_in={expires_in}'
+            )
+            
             # Generate presigned URL (this is a local operation, no network call)
-            # Wrap in try-except to catch any unexpected errors
-            try:
-                # Log configuration before generating URL
-                current_app.logger.debug(
-                    f'🔧 S3Storage: Generating presigned URL with config: '
-                    f'bucket={self.bucket}, endpoint={self.public_endpoint}, '
-                    f'region={self.region}, expires_in={expires_in}'
-                )
-                
-                url = self.public_client.generate_presigned_url(
-                    'get_object',
-                    Params={
-                        'Bucket': self.bucket,
-                        'Key': key,
-                        'ResponseContentType': 'image/jpeg',
-                        'ResponseContentDisposition': 'inline'
-                    },
-                    ExpiresIn=expires_in
-                )
-                
-                # Log generated URL (first 200 chars for debugging)
-                if url:
-                    current_app.logger.debug(
-                        f'✅ S3Storage: Generated presigned URL (first 200 chars): {url[:200]}...'
-                    )
-            except Exception as url_gen_error:
-                current_app.logger.error(
-                    f'❌ S3Storage: Error in generate_presigned_url for {key}: {url_gen_error}',
-                    exc_info=True
-                )
-                # Re-raise to be caught by outer try-except
-                raise
+            url = self.public_client.generate_presigned_url(
+                'get_object',
+                Params={
+                    'Bucket': self.bucket,
+                    'Key': key,
+                    'ResponseContentType': 'image/jpeg',
+                    'ResponseContentDisposition': 'inline'
+                },
+                ExpiresIn=expires_in
+            )
             
             if not url:
                 raise ValueError(f'Failed to generate presigned URL for {key} (returned None)')
             
-            # Track expiration time for cache invalidation
-            expires_at = time.time() + expires_in
-            self._url_expires[key] = expires_at
-            
-            # Store in cache (at end - most recently used)
-            self._presigned_cache[cache_key] = {
-                'url': url,
-                'expires_at': expires_at
-            }
-            
-            # Limit cache size using LRU: remove oldest entries (from front) if needed
-            while len(self._presigned_cache) > self._cache_max_size:
-                # Remove oldest entry (from front of OrderedDict)
-                oldest_key = next(iter(self._presigned_cache))
-                del self._presigned_cache[oldest_key]
-                current_app.logger.debug(
-                    f'🗑️ S3Storage: Removed oldest cache entry (LRU): {oldest_key}'
-                )
-            
+            # Log generated URL (first 200 chars for debugging)
             current_app.logger.info(
-                f'🔗 S3Storage: Generated presigned URL for {key}, '
+                f'✅ S3Storage: Generated presigned URL for {key}, '
                 f'expires_in={expires_in}s, url_length={len(url)}, '
-                f'url_preview={url[:150]}...'
+                f'url_preview={url[:200]}...'
             )
+            
             return url
         except Exception as e:
             current_app.logger.error(
                 f'❌ S3Storage: Error generating presigned URL for {key}: {e}',
                 exc_info=True
             )
-            # Re-raise to let caller handle (url_for has fallback)
             raise
 
     def url_for(self, key: str, expires_in: int = 604800) -> str:
