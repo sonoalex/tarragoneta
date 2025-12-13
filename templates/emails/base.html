@@ -115,6 +115,15 @@
             background-color: #E5E5E0;
             margin: 30px 0;
         }
+        .staging-banner {
+            background-color: #FF6B35;
+            color: #FFFFFF;
+            padding: 12px 20px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 14px;
+            margin: 0;
+        }
         @media only screen and (max-width: 600px) {
             .email-body {
                 padding: 30px 20px;
@@ -133,10 +142,16 @@
 </head>
 <body>
     <div class="email-container">
+        {% if is_staging %}
+        <!-- Staging Banner -->
+        <div class="staging-banner">
+            🧪 AMBIENT DE PROVES - STAGING - Aquest és un email de prova
+        </div>
+        {% endif %}
+        
         <!-- Header -->
         <div class="email-header">
             <img src="cid:logo" alt="Tarracograf" class="email-logo">
-            <h1 style="margin-top: 10px;">Tarracograf</h1>
         </div>
         
         <!-- Body -->
@@ -148,8 +163,7 @@
         
         <!-- Footer -->
         <div class="email-footer">
-            <p><strong>Tarracograf</strong><br>
-            Plataforma ciutadana per a iniciatives cíviques a Tarragona</p>
+            <p>Plataforma ciutadana per a iniciatives cíviques a Tarragona</p>
             <p>
                 <a href="{{ url_for('main.index', _external=True) }}">Visita la web</a> |
                 <a href="{{ url_for('inventory.inventory_map', _external=True) }}">Inventari</a> |

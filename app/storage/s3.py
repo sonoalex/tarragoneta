@@ -1,6 +1,6 @@
 import os
 import time
-from functools import lru_cache
+from collections import OrderedDict
 import boto3
 from botocore.client import Config
 from app.storage.base import StorageProvider
@@ -68,7 +68,13 @@ class S3StorageProvider(StorageProvider):
 
         # Cache para URLs (se mantiene la lógica)
         self._url_expires = {}
-        self._cache_refresh_threshold = 300 
+        self._cache_refresh_threshold = 300  # 5 minutos antes de expirar, regenerar URL
+        
+        # Cache de Python para presigned URLs con LRU (Least Recently Used)
+        # Se invalidará cuando la URL esté cerca de expirar
+        # Usa OrderedDict para implementar LRU: las entradas más recientes al final
+        self._presigned_cache = OrderedDict()
+        self._cache_max_size = 5000  # Aumentado de 128 a 5000 entradas 
 
         current_app.logger.info(
             f'🔧 S3StorageProvider initialized: '
@@ -151,18 +157,40 @@ class S3StorageProvider(StorageProvider):
         
         return key
 
-    @lru_cache(maxsize=128)
     def _generate_presigned_url_cached(self, key: str, expires_in: int) -> str:
         """
         Internal cached method to generate presigned URL.
-        Uses functools.lru_cache for caching.
-        Note: This method signature must be hashable for lru_cache to work.
+        Uses manual cache with expiration tracking.
         """
         from flask import current_app
         
+        # Check if we have a cached URL that's still valid
+        cache_key = f"{key}:{expires_in}"
+        current_time = time.time()
+        
+        if cache_key in self._presigned_cache:
+            # Move to end (most recently used) - LRU behavior
+            cached_data = self._presigned_cache.pop(cache_key)
+            cached_url = cached_data['url']
+            cached_expires_at = cached_data['expires_at']
+            
+            # If URL is still valid (has more than 5 minutes left), return cached version
+            if cached_expires_at > current_time + self._cache_refresh_threshold:
+                # Re-insert at end (most recently used)
+                self._presigned_cache[cache_key] = cached_data
+                current_app.logger.debug(
+                    f'💾 S3Storage: Using cached presigned URL for {key} '
+                    f'(expires in {int(cached_expires_at - current_time)}s)'
+                )
+                return cached_url
+            else:
+                # URL is expiring soon, don't re-insert (will regenerate below)
+                current_app.logger.debug(
+                    f'🔄 S3Storage: Cached URL for {key} expiring soon, regenerating'
+                )
+        
         try:
             # Generate presigned URL using the public client
-            # For MinIO, we need to ensure the endpoint is correct
             current_app.logger.debug(
                 f'🔗 S3Storage: Generating presigned URL for key={key}, '
                 f'bucket={self.bucket}, endpoint={self.public_endpoint}, '
@@ -184,6 +212,21 @@ class S3StorageProvider(StorageProvider):
             expires_at = time.time() + expires_in
             self._url_expires[key] = expires_at
             
+            # Store in cache (at end - most recently used)
+            self._presigned_cache[cache_key] = {
+                'url': url,
+                'expires_at': expires_at
+            }
+            
+            # Limit cache size using LRU: remove oldest entries (from front) if needed
+            while len(self._presigned_cache) > self._cache_max_size:
+                # Remove oldest entry (from front of OrderedDict)
+                oldest_key = next(iter(self._presigned_cache))
+                del self._presigned_cache[oldest_key]
+                current_app.logger.debug(
+                    f'🗑️ S3Storage: Removed oldest cache entry (LRU): {oldest_key}'
+                )
+            
             current_app.logger.info(
                 f'🔗 S3Storage: Generated presigned URL for {key}, '
                 f'expires_in={expires_in}s, url_length={len(url)}, '
@@ -197,14 +240,14 @@ class S3StorageProvider(StorageProvider):
             )
             raise
 
-    def url_for(self, key: str, expires_in: int = 3600) -> str:
+    def url_for(self, key: str, expires_in: int = 604800) -> str:
         """
         Generate a presigned URL for accessing the object.
-        URLs are cached using functools.lru_cache to avoid regenerating them.
+        URLs are cached to avoid regenerating them.
         
         Args:
             key: S3 key (path) of the object
-            expires_in: URL expiration time in seconds (default: 1 hour)
+            expires_in: URL expiration time in seconds (default: 7 days = 604800 seconds)
         
         Returns:
             Presigned URL that allows temporary access to the object

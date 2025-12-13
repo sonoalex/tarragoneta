@@ -19,6 +19,41 @@ class EmailService:
     """Service for sending emails with Tarracograf branding"""
     
     @staticmethod
+    def _is_staging():
+        """Check if we're in staging environment"""
+        # Check Railway environment variable
+        railway_env = os.environ.get('RAILWAY_ENVIRONMENT', '').lower()
+        if railway_env == 'staging':
+            return True
+        
+        # Check Railway service name (often contains 'staging')
+        railway_service = os.environ.get('RAILWAY_SERVICE_NAME', '').lower()
+        if 'staging' in railway_service:
+            return True
+        
+        # Check FLASK_ENV
+        flask_env = os.environ.get('FLASK_ENV', '').lower()
+        if flask_env == 'staging':
+            return True
+        
+        # Check app config ENV
+        try:
+            app_env = current_app.config.get('ENV', 'development').lower()
+            if app_env == 'staging':
+                return True
+        except:
+            pass
+        
+        return False
+    
+    @staticmethod
+    def _add_staging_prefix(subject):
+        """Add staging prefix to email subject if in staging"""
+        if EmailService._is_staging():
+            return f"[STAGING] {subject}"
+        return subject
+    
+    @staticmethod
     def _send_email_direct(to, subject, template, **kwargs):
         """
         Send an email directly using the provider (without Celery).
@@ -60,8 +95,14 @@ class EmailService:
                 current_app.logger.error('Email provider not available')
                 return False
             
+            # Add staging prefix to subject if in staging
+            final_subject = EmailService._add_staging_prefix(subject)
+            
+            # Add staging indicator to email context
+            kwargs['is_staging'] = EmailService._is_staging()
+            
             # Send email via provider
-            result = provider.send_email(to, subject, html)
+            result = provider.send_email(to, final_subject, html)
             return result
         except Exception as e:
             current_app.logger.error(f'Error sending email to {to}: {str(e)}', exc_info=True)
@@ -78,6 +119,9 @@ class EmailService:
             template: Template name (without .html)
             **kwargs: Additional context variables for the template
         """
+        # Add staging indicator to kwargs
+        kwargs['is_staging'] = EmailService._is_staging()
+        
         # Check if Celery should be used
         use_celery = current_app.config.get('USE_CELERY_FOR_EMAILS', True)
         
@@ -92,6 +136,7 @@ class EmailService:
             return EmailService._send_email_direct(to, subject, template, **kwargs)
         
         # Enqueue email task (kwargs should already be JSON-serializable)
+        # Note: staging prefix will be added in _send_email_direct
         task = send_email_task.delay(to, subject, template, **kwargs)
         current_app.logger.info(f'Email task enqueued to {to}: {subject} (task_id: {task.id})')
         return True
