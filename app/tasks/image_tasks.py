@@ -32,27 +32,16 @@ def init_image_tasks(celery_app):
             original_path = os.path.join(upload_folder, image_filename)
             
             # Check if file exists locally
-            # If not, and we're using S3, download it from S3 first
+            # Note: BunnyCDN files are not processed by worker - they use CDN URLs directly
             storage_provider = current_app.config.get('STORAGE_PROVIDER', 'local').lower()
             if not os.path.exists(original_path):
-                if storage_provider == 's3':
-                    current_app.logger.info(f'📥 File not found locally, downloading from S3: {image_filename}')
-                    try:
-                        from app.storage import get_storage
-                        storage = get_storage()
-                        # Download from S3
-                        if hasattr(storage, 'client') and hasattr(storage, 'bucket'):
-                            # Ensure directory exists
-                            os.makedirs(upload_folder, exist_ok=True)
-                            # Download file from S3
-                            storage.client.download_file(storage.bucket, image_filename, original_path)
-                            current_app.logger.info(f'✅ Downloaded file from S3: {original_path}')
-                        else:
-                            current_app.logger.error(f'Storage provider does not support download: {type(storage)}')
-                            return False
-                    except Exception as e:
-                        current_app.logger.error(f'❌ Error downloading file from S3: {e}', exc_info=True)
-                        return False
+                if storage_provider == 'bunny':
+                    # BunnyCDN: Files are served directly from CDN, no worker processing needed
+                    current_app.logger.warning(
+                        f'⚠️ Image file not found locally for BunnyCDN: {original_path}. '
+                        f'BunnyCDN files should be processed synchronously in the web service, not in worker.'
+                    )
+                    return False
                 else:
                     current_app.logger.error(f'Image file not found: {original_path}')
                     return False
@@ -75,10 +64,9 @@ def init_image_tasks(celery_app):
             db.session.commit()
 
             # Upload all generated files to storage
-            # For S3, delete local files after upload (handled by storage provider)
             # For local, keep files (they're already in the right place)
             storage_provider = current_app.config.get('STORAGE_PROVIDER', 'local').lower()
-            delete_after = (storage_provider == 's3')
+            delete_after = False
             current_app.logger.info(
                 f'📤 Uploading {len(image_sizes)} image sizes to storage '
                 f'(provider={storage_provider}, delete_after_upload={delete_after})'
@@ -96,13 +84,6 @@ def init_image_tasks(celery_app):
                     except Exception as e:
                         current_app.logger.error(f'  ❌ Error uploading {size_name} {fname}: {e}', exc_info=True)
             
-            # Also delete the original file if it still exists (downloaded from S3)
-            if storage_provider == 's3' and os.path.exists(original_path):
-                try:
-                    os.remove(original_path)
-                    current_app.logger.info(f'🗑️ Deleted original file after processing: {original_path}')
-                except Exception as e:
-                    current_app.logger.warning(f'⚠️ Could not delete original file {original_path}: {e}')
             
             current_app.logger.info(
                 f'✅ Image sizes generated for item {item_id}: '

@@ -1,7 +1,7 @@
 from flask import current_app
 
 from app.storage.local import LocalStorageProvider
-from app.storage.s3 import S3StorageProvider
+from app.storage.bunny import BunnyStorageProvider
 
 # Key for storing storage provider in Flask app extensions
 _STORAGE_EXTENSION_KEY = 'storage_provider'
@@ -20,18 +20,15 @@ def get_storage():
     provider = current_app.config.get('STORAGE_PROVIDER', 'local').lower()
     current_app.logger.info(f'📦 Storage provider requested: {provider} (creating new instance)')
     
-    if provider == 's3':
-        s3_config = {
-            'BUCKET': current_app.config.get('BUCKET'),
-            'ENDPOINT': current_app.config.get('ENDPOINT'),
-            'PUBLIC_ENDPOINT': current_app.config.get('PUBLIC_ENDPOINT') or 'not set (using ENDPOINT)',
-            'REGION': current_app.config.get('REGION'),
-            'S3_USE_SSL': current_app.config.get('S3_USE_SSL'),
-            'ACCESS_KEY_ID': '***' if current_app.config.get('ACCESS_KEY_ID') else None,
-            'SECRET_ACCESS_KEY': '***' if current_app.config.get('SECRET_ACCESS_KEY') else None,
+    if provider == 'bunny':
+        bunny_config = {
+            'BUNNY_STORAGE_ZONE': current_app.config.get('BUNNY_STORAGE_ZONE'),
+            'BUNNY_STORAGE_API_KEY': '***' if current_app.config.get('BUNNY_STORAGE_API_KEY') else None,
+            'BUNNY_PULL_ZONE': current_app.config.get('BUNNY_PULL_ZONE'),
+            'BUNNY_STORAGE_REGION': current_app.config.get('BUNNY_STORAGE_REGION'),
         }
-        current_app.logger.info(f'🔧 S3 config: {s3_config}')
-        storage_instance = S3StorageProvider(current_app.config)
+        current_app.logger.info(f'🔧 BunnyCDN config: {bunny_config}')
+        storage_instance = BunnyStorageProvider(current_app.config)
     else:
         current_app.logger.info('📁 Using LocalStorageProvider')
         storage_instance = LocalStorageProvider(current_app.config)

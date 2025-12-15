@@ -190,19 +190,19 @@ def report_item():
             # Optimize original image (basic optimization, full resize will be done async)
             optimize_image(file_path)  # Basic optimization in place
             
-            # Upload original file to storage (S3 or local)
+            # Upload original file to storage (Bunny or local)
             # This ensures the file is available even before async resize completes
-            # For S3: delete local file after upload (volumes are not shared, worker will download from S3)
-            # For local: keep file (it's already in the right place)
+            # For Bunny: delete local file after upload (volumes are not shared, resize on-the-fly)
+            # For local: keep file (it's already in the right place, worker will process it)
             try:
                 from app.storage import get_storage
                 storage = get_storage()
                 storage_provider = current_app.config.get('STORAGE_PROVIDER', 'local').lower()
                 
                 current_app.logger.info(f'📤 Uploading original file to storage (provider={storage_provider}): {filename}')
-                # For S3, delete after upload since volumes are not shared with worker
-                # Worker will download from S3 when processing
-                delete_after = (storage_provider == 's3')
+                # For Bunny, delete after upload since volumes are not shared
+                # Bunny: resize is done on-the-fly by CDN, no worker needed
+                delete_after = (storage_provider == 'bunny')
                 storage.save(filename, file_path, delete_after_upload=delete_after)
                 current_app.logger.info(f'✅ Original file uploaded to storage: {filename}')
             except Exception as e:
@@ -239,43 +239,50 @@ def report_item():
             db.session.add(item)
             db.session.commit()
             
-            # Enqueue image resizing task (async)
-            try:
-                # Check if Celery is available
-                celery = getattr(current_app, 'celery', None)
-                if not celery:
-                    current_app.logger.warning('⚠️ Celery not available in current_app, skipping image resize task')
-                else:
-                    # Try to get task from app first
-                    resize_task = getattr(current_app, 'resize_image_task', None)
-                    if not resize_task:
-                        # Try to get from Celery tasks registry
-                        if 'resize_image_task' in celery.tasks:
-                            resize_task = celery.tasks['resize_image_task']
-                            current_app.logger.info('📋 Found resize_image_task in Celery tasks registry')
-                        else:
-                            current_app.logger.warning(
-                                f'⚠️ resize_image_task not found. Available tasks: {list(celery.tasks.keys())[:10]}'
-                            )
-                    
-                    if resize_task:
-                        current_app.logger.info(
-                            f'📸 Attempting to enqueue image resizing task for item {item.id}: {filename}'
-                        )
-                        result = resize_task.delay(item.id, filename)
-                        task_id = result.id if hasattr(result, 'id') else 'N/A'
-                        current_app.logger.info(
-                            f'✅ Image resizing task enqueued successfully for item {item.id}: '
-                            f'filename={filename}, task_id={task_id}'
-                        )
+            # Enqueue image resizing task (async) - only for local, not for Bunny
+            # BunnyCDN does resize on-the-fly using Image Classes, no worker processing needed
+            if storage_provider != 'bunny':
+                try:
+                    # Check if Celery is available
+                    celery = getattr(current_app, 'celery', None)
+                    if not celery:
+                        current_app.logger.warning('⚠️ Celery not available in current_app, skipping image resize task')
                     else:
-                        current_app.logger.error(
-                            '❌ resize_image_task not available. '
-                            'Cannot enqueue image resize task. Image will remain in original size.'
-                        )
-            except Exception as e:
-                current_app.logger.error(f'❌ Error enqueueing image resize task: {e}', exc_info=True)
-                # Continue anyway, image will be available in original size
+                        # Try to get task from app first
+                        resize_task = getattr(current_app, 'resize_image_task', None)
+                        if not resize_task:
+                            # Try to get from Celery tasks registry
+                            if 'resize_image_task' in celery.tasks:
+                                resize_task = celery.tasks['resize_image_task']
+                                current_app.logger.info('📋 Found resize_image_task in Celery tasks registry')
+                            else:
+                                current_app.logger.warning(
+                                    f'⚠️ resize_image_task not found. Available tasks: {list(celery.tasks.keys())[:10]}'
+                                )
+                        
+                        if resize_task:
+                            current_app.logger.info(
+                                f'📸 Attempting to enqueue image resizing task for item {item.id}: {filename}'
+                            )
+                            result = resize_task.delay(item.id, filename)
+                            task_id = result.id if hasattr(result, 'id') else 'N/A'
+                            current_app.logger.info(
+                                f'✅ Image resizing task enqueued successfully for item {item.id}: '
+                                f'filename={filename}, task_id={task_id}'
+                            )
+                        else:
+                            current_app.logger.error(
+                                '❌ resize_image_task not available. '
+                                'Cannot enqueue image resize task. Image will remain in original size.'
+                            )
+                except Exception as e:
+                    current_app.logger.error(f'❌ Error enqueueing image resize task: {e}', exc_info=True)
+                    # Continue anyway, image will be available in original size
+            else:
+                current_app.logger.info(
+                    f'ℹ️ Skipping image resize task for BunnyCDN (provider={storage_provider}). '
+                    f'Resize will be done on-the-fly by CDN using Image Classes.'
+                )
             
             # Verify what was actually saved
             current_app.logger.info(
@@ -576,28 +583,10 @@ def vote_item(item_id):
 def resolve_item(item_id):
     """Reportar que un item "ya no está" (resuelto)"""
     from app.extensions import csrf
-    from app.models import InventoryResolved
     
     item = InventoryItem.query.get_or_404(item_id)
     
-    # Check if user has already reported "ya no está"
-    if item.has_user_resolved(current_user.id):
-        return jsonify({'error': _('Ya has reportado que este item ya no está')}), 400
-    
-    # Don't allow resolving if item is already resolved
-    if item.is_resolved():
-        return jsonify({'error': _('Este item ya está marcado como resuelto')}), 400
-    
-    # Create resolved report
-    resolved = InventoryResolved(item_id=item.id, user_id=current_user.id)
-    db.session.add(resolved)
-    
-    # Increment resolved count
-    if item.resolved_count is None:
-        item.resolved_count = 0
-    item.resolved_count += 1
-    
-    # Use the method that handles all the logic
+    # Use the method that handles all the logic (creates report, increments count, auto-resolves if needed)
     success, auto_resolved, message = item.add_resolved_report(current_user.id)
     
     if not success:

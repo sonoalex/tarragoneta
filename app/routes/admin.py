@@ -117,14 +117,15 @@ def new_initiative():
                 if optimize_image(file_path):
                     initiative.image_path = filename
                     
-                    # Upload to storage (S3 or local)
-                    # For S3, delete local file after upload (handled by storage provider)
+                    # Upload to storage (Bunny or local)
+                    # For Bunny, delete local file after upload (handled by storage provider)
                     # For local, keep file (it's already in the right place)
                     try:
                         from app.storage import get_storage
                         storage = get_storage()
                         storage_provider = current_app.config.get('STORAGE_PROVIDER', 'local').lower()
-                        delete_after = (storage_provider == 's3')
+                        # For Bunny, delete after upload since volumes are not shared
+                        delete_after = (storage_provider == 'bunny')
                         
                         current_app.logger.info(f'📤 Uploading initiative image to storage (provider={storage_provider}): {filename}')
                         storage.save(filename, file_path, delete_after_upload=delete_after)
@@ -177,12 +178,12 @@ def edit_initiative(id):
         if form.image.data:
             file = form.image.data
             if file and allowed_file(file.filename):
-                # Delete old image if exists (both local and S3)
+                # Delete old image if exists (both local and storage)
                 if initiative.image_path:
                     old_path = os.path.join(current_app.config['UPLOAD_FOLDER'], initiative.image_path)
                     if os.path.exists(old_path):
                         os.remove(old_path)
-                    # TODO: Delete from S3 if using S3 storage
+                    # TODO: Delete from storage if using remote storage (Bunny)
                 
                 filename = secure_filename(f"{datetime.now().timestamp()}_{file.filename}")
                 file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
@@ -191,14 +192,15 @@ def edit_initiative(id):
                 if optimize_image(file_path):
                     initiative.image_path = filename
                     
-                    # Upload to storage (S3 or local)
-                    # For S3, delete local file after upload (handled by storage provider)
+                    # Upload to storage (Bunny or local)
+                    # For Bunny, delete local file after upload (handled by storage provider)
                     # For local, keep file (it's already in the right place)
                     try:
                         from app.storage import get_storage
                         storage = get_storage()
                         storage_provider = current_app.config.get('STORAGE_PROVIDER', 'local').lower()
-                        delete_after = (storage_provider == 's3')
+                        # For Bunny, delete after upload since volumes are not shared
+                        delete_after = (storage_provider == 'bunny')
                         
                         current_app.logger.info(f'📤 Uploading initiative image to storage (provider={storage_provider}): {filename}')
                         storage.save(filename, file_path, delete_after_upload=delete_after)

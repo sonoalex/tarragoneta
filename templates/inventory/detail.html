@@ -82,16 +82,16 @@
                         <div class="row g-3">
                             <div class="col-6">
                                 <div class="text-center p-3" style="background: var(--bg-light); border-radius: 12px;">
-                                    <div class="h4 mb-0 text-warning">
-                                        <i class="fas fa-star"></i> {{ item.importance_count }}
+                                    <div class="h4 mb-0 text-warning" id="importance-count">
+                                        <i class="fas fa-star"></i> <span>{{ item.importance_count }}</span>
                                     </div>
                                     <div class="small text-muted">{{ _('confirmacions') }}</div>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="text-center p-3" style="background: var(--bg-light); border-radius: 12px;">
-                                    <div class="h4 mb-0 text-danger">
-                                        <i class="fas fa-times-circle"></i> {{ item.resolved_count }}
+                                    <div class="h4 mb-0 text-danger" id="resolved-count">
+                                        <i class="fas fa-times-circle"></i> <span>{{ item.resolved_count }}</span>
                                     </div>
                                     <div class="small text-muted">{{ _('ja no hi és') }}</div>
                                 </div>
@@ -140,29 +140,23 @@
                         <h3 class="h5 fw-bold mb-4">{{ _('Accions') }}</h3>
                         <div class="d-flex gap-2">
                             {% if has_voted %}
-                                <button class="btn btn-primary flex-fill" disabled>
+                                <button class="btn btn-primary flex-fill" disabled id="vote-btn">
                                     <i class="fas fa-plus me-1"></i>+1 {{ _('(Ja has confirmat)') }}
                                 </button>
                             {% else %}
-                                <form method="POST" action="{{ url_for('inventory.vote_item', item_id=item.id) }}" class="flex-fill">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <button type="submit" class="btn btn-primary w-100">
-                                        <i class="fas fa-plus me-1"></i>+1
-                                    </button>
-                                </form>
+                                <button class="btn btn-primary flex-fill" id="vote-btn" data-item-id="{{ item.id }}">
+                                    <i class="fas fa-plus me-1"></i>+1
+                                </button>
                             {% endif %}
                             
                             {% if has_resolved %}
-                                <button class="btn btn-warning flex-fill" disabled>
+                                <button class="btn btn-warning flex-fill" disabled id="resolve-btn">
                                     <i class="fas fa-times-circle me-1"></i>{{ _('Ja no hi és') }} {{ _('(Ja has reportat)') }}
                                 </button>
                             {% else %}
-                                <form method="POST" action="{{ url_for('inventory.resolve_item', item_id=item.id) }}" class="flex-fill">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <button type="submit" class="btn btn-warning w-100">
-                                        <i class="fas fa-times-circle me-1"></i>{{ _('Ja no hi és') }}
-                                    </button>
-                                </form>
+                                <button class="btn btn-warning flex-fill" id="resolve-btn" data-item-id="{{ item.id }}">
+                                    <i class="fas fa-times-circle me-1"></i>{{ _('Ja no hi és') }}
+                                </button>
                             {% endif %}
                         </div>
                     </div>
@@ -222,6 +216,128 @@
     // Add marker
     var marker = L.marker([{{ item.latitude }}, {{ item.longitude }}]).addTo(map);
     marker.bindPopup('<strong>{{ get_inventory_category_name(item.category) }}</strong><br>{{ item.address or _("Coordenades") }}');
+    
+    // Vote button handler
+    document.getElementById('vote-btn')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        var btn = this;
+        var itemId = btn.getAttribute('data-item-id');
+        if (!itemId || btn.disabled) return;
+        
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ _("Processant...") }}';
+        
+        var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || 
+                       document.querySelector('input[name="csrf_token"]')?.value || 
+                       '{{ csrf_token() }}';
+        
+        fetch(`{{ url_for('inventory.vote_item', item_id=0) }}`.replace('0', itemId), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `csrf_token=${encodeURIComponent(csrfToken)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update importance count
+                var countSpan = document.querySelector('#importance-count span');
+                if (countSpan) {
+                    countSpan.textContent = data.importance_count;
+                }
+                
+                // Update button state
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-plus me-1"></i>+1 {{ _("(Ja has confirmat)") }}';
+                
+                // Show success message
+                var alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-success alert-dismissible fade show mt-2';
+                alertDiv.innerHTML = `
+                    ${data.message || '{{ _("Vot registrat correctament") }}'}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                btn.parentElement.parentElement.appendChild(alertDiv);
+            } else {
+                throw new Error(data.error || '{{ _("Error al votar") }}');
+            }
+        })
+        .catch(error => {
+            console.error('Error voting:', error);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-plus me-1"></i>+1';
+            
+            var alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger alert-dismissible fade show mt-2';
+            alertDiv.innerHTML = `
+                ${error.message || '{{ _("Error al votar. Torna-ho a intentar.") }}'}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            btn.parentElement.parentElement.appendChild(alertDiv);
+        });
+    });
+    
+    // Resolve button handler
+    document.getElementById('resolve-btn')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        var btn = this;
+        var itemId = btn.getAttribute('data-item-id');
+        if (!itemId || btn.disabled) return;
+        
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ _("Processant...") }}';
+        
+        var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || 
+                       document.querySelector('input[name="csrf_token"]')?.value || 
+                       '{{ csrf_token() }}';
+        
+        fetch(`{{ url_for('inventory.resolve_item', item_id=0) }}`.replace('0', itemId), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `csrf_token=${encodeURIComponent(csrfToken)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update resolved count
+                var countSpan = document.querySelector('#resolved-count span');
+                if (countSpan) {
+                    countSpan.textContent = data.resolved_count;
+                }
+                
+                // Update button state
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-times-circle me-1"></i>{{ _("Ja no hi és") }} {{ _("(Ja has reportat)") }}';
+                
+                // Show success message
+                var alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-success alert-dismissible fade show mt-2';
+                alertDiv.innerHTML = `
+                    ${data.message || '{{ _("Report registrat correctament") }}'}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                btn.parentElement.parentElement.appendChild(alertDiv);
+            } else {
+                throw new Error(data.error || '{{ _("Error al reportar") }}');
+            }
+        })
+        .catch(error => {
+            console.error('Error resolving:', error);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-times-circle me-1"></i>{{ _("Ja no hi és") }}';
+            
+            var alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger alert-dismissible fade show mt-2';
+            alertDiv.innerHTML = `
+                ${error.message || '{{ _("Error al reportar. Torna-ho a intentar.") }}'}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            btn.parentElement.parentElement.appendChild(alertDiv);
+        });
+    });
 </script>
 {% endblock %}
 

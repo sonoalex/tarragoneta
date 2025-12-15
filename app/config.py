@@ -59,20 +59,15 @@ class Config:
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
     
     # Storage configuration
-    # Options: 'local' or 's3'
-    # When 's3', files are saved to local volume first, then uploaded to S3, then deleted from local
+    # Options: 'local' or 'bunny'
+    # When 'bunny', files are saved to local volume first, then uploaded to storage, then deleted from local
     STORAGE_PROVIDER = os.environ.get('STORAGE_PROVIDER', 'local').lower()
     
-    # S3 configuration (only used when STORAGE_PROVIDER='s3')
-    # Use Railway native bucket variables directly (BUCKET, ENDPOINT, etc.)
-    # Support fallback to S3_ prefixed variables for backwards compatibility
-    BUCKET = os.environ.get('BUCKET')
-    ENDPOINT = os.environ.get('ENDPOINT')# Internal endpoint for uploads (e.g., http://storage.railway.internal:9000)
-    PUBLIC_ENDPOINT = os.environ.get('S3_PUBLIC_ENDPOINT', '')  # Public endpoint for URLs (optional, falls back to ENDPOINT)
-    REGION = os.environ.get('REGION', 'auto')  # Railway S3 usa 'auto' por defecto
-    S3_USE_SSL = os.environ.get('S3_USE_SSL', 'true').lower() in ('true', '1', 'yes')
-    ACCESS_KEY_ID = os.environ.get('ACCESS_KEY_ID')
-    SECRET_ACCESS_KEY = os.environ.get('SECRET_ACCESS_KEY')
+    # BunnyCDN configuration (only used when STORAGE_PROVIDER='bunny')
+    BUNNY_STORAGE_ZONE = os.environ.get('BUNNY_STORAGE_ZONE', '')
+    BUNNY_STORAGE_API_KEY = os.environ.get('BUNNY_STORAGE_API_KEY', '')
+    BUNNY_PULL_ZONE = os.environ.get('BUNNY_PULL_ZONE', '')  # CDN Pull Zone (e.g., 'your-zone.b-cdn.net')
+    BUNNY_STORAGE_REGION = os.environ.get('BUNNY_STORAGE_REGION', '')  # Optional: de, ny, la, sg, syd, uk, se, br
     
     # Stripe
     STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY', '')

@@ -270,7 +270,7 @@ def get_image_url(image_filename, size='large'):
         return None
 
     sized_filename = get_image_path(image_filename, size)
-
+    
     storage = get_storage()
     provider = current_app.config.get('STORAGE_PROVIDER', 'local').lower()
     
@@ -279,18 +279,63 @@ def get_image_url(image_filename, size='large'):
         f'sized_filename={sized_filename}, provider={provider}'
     )
 
-    if provider == 's3':
-        key_to_use = sized_filename
-        current_app.logger.debug(f'☁️ Using S3, key={key_to_use}')
-    else:
-        upload_folder = current_app.config.get('UPLOAD_FOLDER', 'static/uploads')
-        sized_path = os.path.join(upload_folder, sized_filename)
-        key_to_use = sized_filename if os.path.exists(sized_path) else image_filename
-        current_app.logger.debug(
-            f'📁 Using local storage, key={key_to_use}, '
-            f'sized_path_exists={os.path.exists(sized_path)}'
-        )
+    # BunnyCDN: usar transformaciones del CDN (Image Classes o parámetros) en lugar de ficheros redimensionados locales
+    if provider == 'bunny':
+        key_to_use = image_filename.lstrip('/')  # usamos siempre el nombre base que se subió
+        current_app.logger.debug(f'☁️ Using BunnyCDN, base key={key_to_use}')
 
+        # 1) Intentar mapear tamaños lógicos a Image Classes de BunnyCDN (recomendado)
+        # Configura estas clases en Bunny:
+        #  - thumbnail: 150x150 crop 1:1
+        #  - medium:    tamaño para listados
+        #  - large:     tamaño para detalle (opcional)
+        size_classes = {
+            'thumbnail': 'thumbnail',
+            'large': 'large',
+            'original': None,  # sin clase = original
+        }
+        bunny_class = size_classes.get(size, None)
+
+        # Si el provider implementa url_for_resized, usarlo
+        if hasattr(storage, 'url_for_resized'):
+            try:
+                if bunny_class:
+                    # Usar Image Class de BunnyCDN
+                    url = storage.url_for_resized(key_to_use, **{'class': bunny_class})
+                else:
+                    # Sin clase => URL base sin transformaciones
+                    url = storage.url_for(key_to_use)
+                current_app.logger.debug(f'✅ get_image_url (bunny): Returning URL={url}')
+                return url
+            except Exception as e:
+                current_app.logger.warning(f'⚠️ get_image_url (bunny): Error with key {key_to_use}: {e}')
+                # Fallback a url_for normal
+                try:
+                    url = storage.url_for(key_to_use)
+                    current_app.logger.debug(f'✅ get_image_url (bunny): Fallback URL={url}')
+                    return url
+                except Exception as e2:
+                    current_app.logger.error(f'❌ get_image_url (bunny): Both attempts failed: {e2}')
+                    return None
+        else:
+            # Si no hay url_for_resized, usar url_for normal
+            try:
+                url = storage.url_for(key_to_use)
+                current_app.logger.debug(f'✅ get_image_url (bunny,no-resize): URL={url}')
+                return url
+            except Exception as e:
+                current_app.logger.error(f'❌ get_image_url (bunny,no-resize): Error: {e}')
+                return None
+
+    # Local storage: buscar fichero redimensionado en disco
+    upload_folder = current_app.config.get('UPLOAD_FOLDER', 'static/uploads')
+    sized_path = os.path.join(upload_folder, sized_filename)
+    key_to_use = sized_filename if os.path.exists(sized_path) else image_filename
+    current_app.logger.debug(
+        f'📁 Using local storage, key={key_to_use}, '
+        f'sized_path_exists={os.path.exists(sized_path)}'
+    )
+    
     try:
         url = storage.url_for(key_to_use)
         current_app.logger.debug(f'✅ get_image_url: Returning URL={url}')

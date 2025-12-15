@@ -507,6 +507,20 @@
             </div>
         </div>
 
+        <!-- Attribution -->
+        <div class="text-center mb-4">
+            <p class="text-muted small mb-0">
+                <i class="fas fa-info-circle me-1"></i>
+                {{ _('Les zones han estat importades del') }} 
+                <a href="https://geoportal.tarragona.cat/portal/apps/sites/#/geoportal-ajuntament-de-tarragona" 
+                   target="_blank" 
+                   rel="noopener noreferrer" 
+                   class="text-decoration-none">
+                    {{ _('Geoportal de Tarragona') }}
+                </a>
+            </p>
+        </div>
+
         <!-- Action Buttons -->
         <div class="text-center mb-4">
             {% if current_user.is_authenticated %}
@@ -917,7 +931,7 @@
                                 <h6 class="fw-bold mb-0" style="font-size: ${isMobile ? '0.75rem' : '0.8rem'}; line-height: 1.2;">${item.full_category}</h6>
                             </div>
                             ${truncatedAddress ? `<p class="small text-muted mb-1" style="font-size: ${isMobile ? '0.65rem' : '0.7rem'}; line-height: 1.2;"><i class="fas fa-map-marker-alt" style="font-size: 0.6rem;"></i> ${truncatedAddress}</p>` : ''}
-                            ${imageMedium ? `<img src="${getImagePathForSize(imageMedium, 'thumbnail')}" style="width: 100%; max-height: 70px; border-radius: 6px; margin: 0.25rem 0; object-fit: cover;" />` : ''}
+                            ${imageThumb ? `<img src="${imageThumb}" style="width: 100%; max-height: 70px; border-radius: 6px; margin: 0.25rem 0; object-fit: cover;" />` : ''}
                             <div class="d-flex justify-content-between align-items-center mt-1 pt-1 border-top" style="padding-top: 0.25rem !important; margin-top: 0.25rem !important; font-size: ${isMobile ? '0.65rem' : '0.7rem'} !important;">
                                 <span class="text-muted">
                                     <i class="fas fa-star text-warning" style="font-size: 0.65rem;"></i>
