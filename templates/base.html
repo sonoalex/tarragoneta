@@ -36,10 +36,14 @@
 
                 </span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+            
+            <!-- Botón para menú móvil (offcanvas) -->
+            <button class="btn btn-outline-primary mobile-menu-toggle" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" aria-controls="mobileMenu">
+                <i class="fas fa-bars"></i>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
+            
+            <!-- Menú Desktop (visible en pantallas grandes) -->
+            <div class="collapse navbar-collapse desktop-menu" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}" href="{{ url_for('main.index') }}">
@@ -199,7 +203,158 @@
         </div>
     </nav>
     
+    <!-- Offcanvas Menu para Móvil -->
+    <div class="offcanvas offcanvas-start offcanvas-menu" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
+        <div class="offcanvas-header border-bottom bg-light">
+            <div class="d-flex align-items-center">
+                <img src="{{ url_for('static', filename='images/tarracograf_blanc1.png') }}"
+                     alt="Tarracograf" 
+                     class="offcanvas-logo"
+                     onerror="this.style.display='none';">
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body p-0">
+            <nav class="nav flex-column">
+                <!-- Enlaces principales -->
+                <a class="nav-link mobile-menu-link {% if request.endpoint == 'main.index' %}active{% endif %}" href="{{ url_for('main.index') }}">
+                    <i class="fas fa-home"></i>
+                    <span>{{ _('Inici') }}</span>
+                </a>
+                
+                <a class="nav-link mobile-menu-link {% if request.endpoint == 'initiatives.list_initiatives' and request.args.get('status') == 'upcoming' %}active{% endif %}" 
+                   href="{{ url_for('initiatives.list_initiatives', status='upcoming') }}">
+                    <i class="fas fa-calendar"></i>
+                    <span>{{ _('Pròximes') }}</span>
+                </a>
+                
+                <a class="nav-link mobile-menu-link {% if request.endpoint == 'main.about' %}active{% endif %}" href="{{ url_for('main.about') }}">
+                    <i class="fas fa-info-circle"></i>
+                    <span>{{ _('Sobre Nosaltres') }}</span>
+                </a>
+                
+                <a class="nav-link mobile-menu-link {% if request.endpoint == 'reports.public_reports' %}active{% endif %}" href="{{ url_for('reports.public_reports') }}">
+                    <i class="fas fa-file-alt"></i>
+                    <span>{{ _('Reports') }}</span>
+                </a>
+                
+                <a class="nav-link mobile-menu-link {% if request.endpoint == 'main.contact' %}active{% endif %}" href="{{ url_for('main.contact') }}">
+                    <i class="fas fa-envelope"></i>
+                    <span>{{ _('Contacte') }}</span>
+                </a>
+                
+                <!-- Sección de Inventari expandible -->
+                <a class="nav-link nav-link-collapsible {% if request.endpoint and 'inventory' in request.endpoint %}active{% endif %}" 
+                   data-bs-toggle="collapse" href="#inventoryCollapse" role="button" 
+                   aria-expanded="{% if request.endpoint and 'inventory' in request.endpoint %}true{% else %}false{% endif %}" 
+                   aria-controls="inventoryCollapse"
+                   onclick="event.preventDefault(); event.stopPropagation();">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span>{{ _('Inventari') }}</span>
+                    <i class="fas fa-chevron-down chevron-icon ms-auto"></i>
+                </a>
+                <div class="collapse {% if request.endpoint and 'inventory' in request.endpoint %}show{% endif %}" id="inventoryCollapse">
+                    <a class="nav-link nav-link-sub mobile-menu-link" href="{{ url_for('inventory.inventory_map') }}">
+                        <i class="fas fa-map text-primary"></i>
+                        <span>{{ _('Veure Mapa') }}</span>
+                    </a>
+                    {% if current_user.is_authenticated %}
+                    <a class="nav-link nav-link-sub mobile-menu-link" href="{{ url_for('inventory.report_item') }}">
+                        <i class="fas fa-plus text-success"></i>
+                        <span>{{ _('Reportar Item') }}</span>
+                    </a>
+                    {% else %}
+                    <a class="nav-link nav-link-sub mobile-menu-link" href="{{ url_for('security.login') }}">
+                        <i class="fas fa-sign-in-alt text-warning"></i>
+                        <span>{{ _('Iniciar sessió per reportar') }}</span>
+                    </a>
+                    {% endif %}
+                    {% if current_user.has_role('section_responsible') %}
+                    <a class="nav-link nav-link-sub mobile-menu-link" href="{{ url_for('inventory.section_responsible_dashboard') }}">
+                        <i class="fas fa-user-shield text-primary"></i>
+                        <span>{{ _('La Meva Secció') }}</span>
+                    </a>
+                    {% endif %}
+                    {% if current_user.has_role('admin') %}
+                    <a class="nav-link nav-link-sub mobile-menu-link" href="{{ url_for('inventory.admin_inventory') }}">
+                        <i class="fas fa-cog text-info"></i>
+                        <span>{{ _('Administrar') }}</span>
+                    </a>
+                    {% endif %}
+                </div>
+                
+                <hr class="my-2">
+                
+                <!-- Language Selector en móvil -->
+                <a class="nav-link nav-link-collapsible" 
+                   data-bs-toggle="collapse" href="#languageCollapse" role="button" 
+                   aria-expanded="false" aria-controls="languageCollapse"
+                   onclick="event.preventDefault(); event.stopPropagation();">
+                    <i class="fas fa-globe"></i>
+                    <span>{{ _('Idioma') }}: {% if get_locale() == 'ca' %}CAT{% else %}ES{% endif %}</span>
+                    <i class="fas fa-chevron-down chevron-icon ms-auto"></i>
+                </a>
+                <div class="collapse" id="languageCollapse">
+                    <a class="nav-link nav-link-sub mobile-menu-link {% if get_locale() == 'ca' %}active{% endif %}" 
+                       href="{{ url_for('main.set_language', lang='ca') }}">
+                        <i class="fas fa-check me-2 {% if get_locale() == 'ca' %}opacity-100{% else %}opacity-0{% endif %}"></i>
+                        <span>CAT</span>
+                    </a>
+                    <a class="nav-link nav-link-sub mobile-menu-link {% if get_locale() == 'es' %}active{% endif %}" 
+                       href="{{ url_for('main.set_language', lang='es') }}">
+                        <i class="fas fa-check me-2 {% if get_locale() == 'es' %}opacity-100{% else %}opacity-0{% endif %}"></i>
+                        <span>ES</span>
+                    </a>
+                </div>
+                
+                {% if current_user.is_authenticated %}
+                <hr class="my-2">
+                <!-- User Info en móvil -->
+                <div class="px-3 py-3 border-bottom bg-light">
+                    <div class="d-flex align-items-center">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary text-white me-3 flex-shrink-0" 
+                             style="width: 48px; height: 48px; font-size: 1.25rem; font-weight: 600;">
+                            {{ current_user.username[0].upper() if current_user.username else 'U' }}
+                        </div>
+                        <div class="flex-grow-1 min-w-0">
+                            <div class="fw-bold text-dark text-truncate">{{ current_user.username }}</div>
+                            <div class="text-muted small text-truncate">{{ current_user.email }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <a class="nav-link mobile-menu-link" href="{{ url_for('profile') }}">
+                    <i class="fas fa-user text-primary"></i>
+                    <span>{{ _('El Meu Perfil') }}</span>
+                </a>
+                
+                {% if current_user.has_role('admin') %}
+                <a class="nav-link mobile-menu-link" href="{{ url_for('admin.admin_dashboard') }}">
+                    <i class="fas fa-tachometer-alt text-warning"></i>
+                    <span>{{ _('Admin') }}</span>
+                </a>
+                {% endif %}
+                
+                <a class="nav-link mobile-menu-link text-danger" href="{{ url_for('security.logout') }}">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>{{ _('Sortir') }}</span>
+                </a>
+                {% else %}
+                <div class="p-3 mt-3 border-top">
+                    <a class="btn btn-outline-primary w-100 mb-2 mobile-menu-link" href="{{ url_for('security.login') }}">
+                        <i class="fas fa-sign-in-alt me-2"></i>{{ _('Accedir') }}
+                    </a>
+                    <a class="btn btn-primary w-100 mobile-menu-link" href="{{ url_for('security.register') }}">
+                        <i class="fas fa-user-plus me-2"></i>{{ _('Registrar-se') }}
+                    </a>
+                </div>
+                {% endif %}
+            </nav>
+        </div>
+    </div>
+    
     <!-- Donation Banner -->
+    {% if config.get('DONATIONS_ENABLED', False) %}
     <div id="donationBanner" class="donation-banner" style="display: none;">
         <div class="container">
             <div class="row align-items-center">
@@ -225,6 +380,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
     
     <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -256,6 +412,41 @@
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     {% block extra_js %}{% endblock %}
     
+    <!-- Terms and Privacy Modal -->
+    <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="termsModalLabel">{{ _('Condicions d\'ús, privacitat i cessió de continguts') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6 class="fw-bold mb-2">{{ _('Resum pràctic') }}</h6>
+                    <ul>
+                        <li>{{ _('Respecta la llei: no publiquis contingut il·legal, difamatori o amb dades personals de tercers sense consentiment.') }}</li>
+                        <li>{{ _('Imatges: en pujar-les ens concedeixes una llicència no exclusiva per usar-les a la plataforma, comunicacions i accions de difusió del projecte. No pengis imatges amb menors o persones identificables sense permís, ni dades sensibles.') }}</li>
+                        <li>{{ _('Dades personals: recollim només el necessari per al servei (registre, comunicacions, moderació). Pots exercir els teus drets de protecció de dades escrivint a hola@tarracograf.cat.') }}</li>
+                        <li>{{ _('Donacions: no emmagatzemem dades bancàries; el pagament es processa pel proveïdor de pagaments.') }}</li>
+                        <li>{{ _('Moderació: podem editar o eliminar continguts que incompleixin aquestes condicions o la normativa vigent.') }}</li>
+                    </ul>
+                    <h6 class="fw-bold mt-4">{{ _('Text complet (resum)') }}</h6>
+                    <p class="mb-2"><strong>{{ _('Responsable') }}</strong>: Tarracograf.</p>
+                    <p class="mb-2"><strong>{{ _('Finalitats') }}</strong>: gestió del registre i autenticació d'usuaris, comunicacions relacionades amb el servei, moderació de continguts i millora de la plataforma.</p>
+                    <p class="mb-2"><strong>{{ _('Base legal') }}</strong>: execució del contracte (ús del servei) i consentiment per a la gestió de comunicacions i tractament d'imatges que puguis aportar.</p>
+                    <p class="mb-2"><strong>{{ _('Drets') }}</strong>: accés, rectificació, supressió, limitació, oposició i portabilitat. Pots exercir-los escrivint a hola@tarracograf.cat.</p>
+                    <p class="mb-2"><strong>{{ _('Imatges i continguts aportats') }}</strong>: en pujar imatges o textos concedeixes a Tarracograf una llicència no exclusiva, mundial i gratuïta per a la seva reproducció, comunicació pública i transformació vinculada al projecte (web, newsletters, xarxes socials i materials informatius). Et compromets a tenir drets suficients sobre el contingut i a no incloure dades personals de tercers sense consentiment.</p>
+                    <p class="mb-2"><strong>{{ _('Conservació') }}</strong>: mantindrem les dades mentre siguis usuari actiu; pots sol·licitar la supressió, excepte quan hi hagi obligació legal de conservar-les.</p>
+                    <p class="mb-2"><strong>{{ _('Seguretat') }}</strong>: apliquem mesures raonables per protegir les dades; evita compartir credencials i no publiquis dades sensibles.</p>
+                    <p class="mb-2"><strong>{{ _('Pagaments i donacions') }}</strong>: les dades de pagament es processen pel proveïdor de pagaments; no emmagatzemem la informació bancària.</p>
+                    <p class="mb-0"><strong>{{ _('Contacte') }}</strong>: hola@tarracograf.cat</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Tancar') }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <script>
         // Function to update body padding based on navbar height
         function updateBodyPadding() {
@@ -280,19 +471,12 @@
         window.addEventListener('scroll', function() {
             const navbar = document.getElementById('mainNavbar');
             const body = document.body;
-            const heroSection = document.getElementById('hero-section');
             if (window.scrollY > 50) {
                 navbar.classList.add('scrolled');
                 body.classList.add('navbar-scrolled');
-                if (heroSection) {
-                    heroSection.style.paddingTop = '70px';
-                }
             } else {
                 navbar.classList.remove('scrolled');
                 body.classList.remove('navbar-scrolled');
-                if (heroSection) {
-                    heroSection.style.paddingTop = '110px';
-                }
             }
             // Update padding and banner position when navbar size changes
             updateBodyPadding();
@@ -322,8 +506,10 @@
         window.addEventListener('load', updateBodyPadding);
         
         // Donation Banner Management
+        {% if config.get('DONATIONS_ENABLED', False) %}
         function showDonationBanner() {
             const banner = document.getElementById('donationBanner');
+            if (!banner) return;
             const dismissed = localStorage.getItem('donationBannerDismissed');
             // Show banner if not dismissed in last 7 days
             if (!dismissed || (Date.now() - parseInt(dismissed)) > 7 * 24 * 60 * 60 * 1000) {
@@ -335,23 +521,33 @@
         
         function closeDonationBanner() {
             const banner = document.getElementById('donationBanner');
+            if (!banner) return;
             banner.style.display = 'none';
             localStorage.setItem('donationBannerDismissed', Date.now().toString());
             // Update body padding after closing
             setTimeout(updateBodyPadding, 100);
         }
+        {% else %}
+        function showDonationBanner() {
+            // Donations disabled, do nothing
+        }
+        function closeDonationBanner() {
+            // Donations disabled, do nothing
+        }
+        {% endif %}
         
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
             const navbar = document.getElementById('mainNavbar');
             const body = document.body;
-            const heroSection = document.getElementById('hero-section');
             
             // Update body padding initially
             updateBodyPadding();
             
-            // Show donation banner
+            // Show donation banner (if enabled)
+            {% if config.get('DONATIONS_ENABLED', False) %}
             showDonationBanner();
+            {% endif %}
             
             // Watch for navbar class changes (scrolled/unscrolled) to update banner position
             if (navbar) {
@@ -369,13 +565,6 @@
             if (window.scrollY > 50) {
                 navbar.classList.add('scrolled');
                 body.classList.add('navbar-scrolled');
-                if (heroSection) {
-                    heroSection.style.paddingTop = '70px';
-                }
-            } else {
-                if (heroSection) {
-                    heroSection.style.paddingTop = '110px';
-                }
             }
         });
         
@@ -396,6 +585,52 @@
         document.querySelectorAll('.initiative-card').forEach(el => {
             observer.observe(el);
         });
+        
+        // Actualizar estado de aria-expanded en los collapsibles del offcanvas
+        const inventoryCollapse = document.getElementById('inventoryCollapse');
+        const languageCollapse = document.getElementById('languageCollapse');
+        
+        if (inventoryCollapse) {
+            inventoryCollapse.addEventListener('show.bs.collapse', function() {
+                const trigger = document.querySelector('[href="#inventoryCollapse"]');
+                if (trigger) trigger.setAttribute('aria-expanded', 'true');
+            });
+            inventoryCollapse.addEventListener('hide.bs.collapse', function() {
+                const trigger = document.querySelector('[href="#inventoryCollapse"]');
+                if (trigger) trigger.setAttribute('aria-expanded', 'false');
+            });
+        }
+        
+        if (languageCollapse) {
+            languageCollapse.addEventListener('show.bs.collapse', function() {
+                const trigger = document.querySelector('[href="#languageCollapse"]');
+                if (trigger) trigger.setAttribute('aria-expanded', 'true');
+            });
+            languageCollapse.addEventListener('hide.bs.collapse', function() {
+                const trigger = document.querySelector('[href="#languageCollapse"]');
+                if (trigger) trigger.setAttribute('aria-expanded', 'false');
+            });
+        }
+        
+        // Cerrar offcanvas cuando se hace click en enlaces del menú móvil
+        const mobileMenu = document.getElementById('mobileMenu');
+        if (mobileMenu) {
+            mobileMenu.addEventListener('click', function(e) {
+                const link = e.target.closest('a.mobile-menu-link');
+                if (link && link.hasAttribute('href')) {
+                    const href = link.getAttribute('href');
+                    // Si el href es válido y no es solo #, cerrar offcanvas y navegar
+                    if (href && href !== '#' && !href.startsWith('javascript:')) {
+                        const offcanvas = bootstrap.Offcanvas.getInstance(mobileMenu);
+                        if (offcanvas) {
+                            // Cerrar el offcanvas
+                            offcanvas.hide();
+                        }
+                        // El navegador seguirá con la navegación normal del enlace
+                    }
+                }
+            });
+        }
     </script>
 </body>
 </html>

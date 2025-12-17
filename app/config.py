@@ -81,6 +81,10 @@ class Config:
     # When False, reports are free to download (no payment required)
     REPORTS_PAYMENT_ENABLED = os.environ.get('REPORTS_PAYMENT_ENABLED', 'False').lower() in ('true', '1', 'yes')
     
+    # Feature flag: Enable/disable donation links and banner
+    # When False, donation links and banner are hidden from frontend
+    DONATIONS_ENABLED = os.environ.get('DONATIONS_ENABLED', 'False').lower() in ('true', '1', 'yes')
+    
     # Mail configuration (Hostinger)
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.hostinger.com')
     MAIL_PORT = int(os.environ.get('MAIL_PORT', 465))  # 465 for SSL, 587 for TLS

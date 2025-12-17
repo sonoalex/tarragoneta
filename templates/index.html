@@ -2,65 +2,822 @@
 
 {% block title %}Tarracograf - Radiografía de la Ciudad{% endblock %}
 
-{% block content %}
-<!-- Hero Section - Two Column Layout -->
-<section class="hero">
-    <div class="container">
-        <div class="row align-items-center">
-            <!-- Left: Visual Element -->
-            <div class="col-lg-6 mb-5 mb-lg-0">
-                <div class="hero-visual">
-                    <div class="hero-visual-bg"></div>
-                    <!-- Logo image -->
-                    <img src="{{ url_for('static', filename='images/tarracograf_pila.png') }}" alt="Tarracograf" class="hero-image" style="position: relative; z-index: 1; width: 100%; height: 100%; object-fit: contain; border-radius: 50%; background: transparent; aspect-ratio: 1/1;">
-                </div>
-            </div>
+{% block extra_css %}
+<style>
+/* Hero Section - Carousel with Tarragona Photos */
+.hero-section-tarragona {
+    position: relative;
+    overflow: hidden;
+    height: 100vh;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+.hero-carousel {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+}
+
+.hero-carousel .carousel-inner {
+    height: 100%;
+}
+
+.hero-carousel .carousel-item {
+    height: 100%;
+    position: relative;
+}
+
+.hero-carousel .carousel-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    filter: brightness(0.7);
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.hero-content-tarragona {
+    transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+}
+
+.hero-content-tarragona.fade-out {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+.hero-content-tarragona.fade-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 1;
+}
+
+.hero-content-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    padding: 0;
+}
+
+@media (min-width: 769px) {
+    .hero-content-wrapper {
+        align-items: flex-start;
+        padding-top: 8vh;
+    }
+}
+
+.hero-content-tarragona {
+    color: white;
+    text-align: center;
+    width: 100%;
+    padding: 0 2rem;
+}
+
+.hero-content-slide {
+    transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.hero-features-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 0.6rem 1.25rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.hero-feature-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(5px);
+}
+
+.hero-feature-item i {
+    font-size: 1.2rem;
+    width: 24px;
+    text-align: center;
+}
+
+.hero-categories-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-category-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+}
+
+.hero-category-item:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-3px);
+}
+
+.hero-category-item i {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+}
+
+@media (max-width: 768px) {
+    .hero-features-list {
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+    }
+    
+    .hero-feature-item {
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+    }
+    
+    .hero-feature-item i {
+        font-size: 1rem;
+        width: 20px;
+    }
+    
+    .hero-categories-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+    }
+    
+    .hero-category-item {
+        padding: 0.75rem;
+        font-size: 0.75rem;
+    }
+    
+    .hero-category-item i {
+        font-size: 1.2rem;
+    }
+}
+
+.hero-badge-tarragona {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    padding: 0.5rem 1.5rem;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: white;
+}
+
+.hero-title-tarragona {
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    line-height: 1.1;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    letter-spacing: -0.02em;
+    color: white;
+}
+
+.hero-subtitle-tarragona {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    color: white;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.hero-stats-tarragona {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    margin: 1.5rem 0;
+    flex-wrap: wrap;
+    padding: 1.5rem 2rem;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.hero-stat-item {
+    text-align: center;
+    position: relative;
+    padding: 0 1.5rem;
+    transition: transform 0.3s ease;
+}
+
+.hero-stat-item:hover {
+    transform: translateY(-5px);
+}
+
+.hero-stat-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 60%;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.hero-stat-number {
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: white;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.02em;
+}
+
+.hero-stat-label {
+    font-size: 0.9rem;
+    opacity: 0.95;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: white;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.hero-cta-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 2.5rem;
+}
+
+.hero-cta-buttons .btn {
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.hero-cta-buttons .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.hero-cta-buttons .btn-primary {
+    background: white;
+    color: var(--primary-green);
+    border: none;
+}
+
+.hero-cta-buttons .btn-primary:hover {
+    background: #f8f9fa;
+    color: var(--primary-green);
+}
+
+.hero-cta-buttons .btn-outline-light {
+    border: 2px solid white;
+    color: white;
+    background: transparent;
+}
+
+.hero-cta-buttons .btn-outline-light:hover {
+    background: white;
+    color: var(--primary-green);
+}
+
+/* Carousel controls */
+.hero-carousel .carousel-control-prev,
+.hero-carousel .carousel-control-next {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.8;
+    transition: all 0.3s ease;
+    z-index: 10;
+    position: absolute;
+}
+
+.hero-carousel .carousel-control-prev:hover,
+.hero-carousel .carousel-control-next:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.hero-carousel .carousel-control-prev {
+    left: 20px;
+}
+
+.hero-carousel .carousel-control-next {
+    right: 20px;
+}
+
+.hero-carousel .carousel-indicators {
+    bottom: 20px;
+    z-index: 10;
+    position: absolute;
+}
+
+.hero-carousel .carousel-indicators button {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+}
+
+.hero-carousel .carousel-indicators button.active {
+    background: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero-section-tarragona {
+        height: 70vh;
+        min-height: 500px;
+        max-height: 600px;
+    }
+    
+    .hero-carousel,
+    .hero-carousel .carousel-inner,
+    .hero-carousel .carousel-item {
+        height: 100%;
+    }
+    
+    .hero-content-wrapper {
+        padding: 1rem 0;
+        align-items: flex-start;
+        padding-top: 2rem;
+        overflow-y: auto;
+    }
+    
+    .hero-content-tarragona {
+        padding: 0 1rem;
+    }
+    
+    .hero-badge-tarragona {
+        font-size: 0.75rem;
+        padding: 0.4rem 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .hero-title-tarragona {
+        font-size: 1.75rem;
+        margin-bottom: 1rem;
+        line-height: 1.2;
+    }
+    
+    .hero-subtitle-tarragona {
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin-bottom: 1.5rem;
+        padding: 0;
+    }
+    
+    .hero-stats-tarragona {
+        gap: 1.5rem;
+        padding: 1.5rem 1rem;
+        margin: 1.5rem 0;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        border-radius: 16px;
+    }
+    
+    .hero-stat-item {
+        min-width: 80px;
+        padding: 0 0.75rem;
+    }
+    
+    .hero-stat-item:not(:last-child)::after {
+        height: 50%;
+    }
+    
+    .hero-stat-number {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .hero-stat-label {
+        font-size: 0.7rem;
+        letter-spacing: 1px;
+    }
+    
+    .hero-cta-buttons {
+        flex-direction: column;
+        width: 100%;
+        padding: 0;
+        margin-top: 1.5rem;
+        gap: 0.75rem;
+    }
+    
+    .hero-cta-buttons .btn {
+        width: 100%;
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
+    }
+    
+    .hero-carousel .carousel-control-prev,
+    .hero-carousel .carousel-control-next {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .hero-carousel .carousel-control-prev {
+        left: 10px;
+    }
+    
+    .hero-carousel .carousel-control-next {
+        right: 10px;
+    }
+    
+    .hero-carousel .carousel-indicators {
+        bottom: 10px;
+    }
+    
+    .hero-carousel .carousel-indicators button {
+        width: 8px;
+        height: 8px;
+    }
+}
+</style>
+<script>
+// Force remove any padding-top from hero section
+document.addEventListener('DOMContentLoaded', function() {
+    const heroSection = document.getElementById('hero-section');
+    if (heroSection) {
+        heroSection.style.paddingTop = '0';
+        heroSection.style.marginTop = '0';
+        
+        // Watch for any changes and remove padding-top
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                    if (heroSection.style.paddingTop && heroSection.style.paddingTop !== '0px') {
+                        heroSection.style.paddingTop = '0';
+                    }
+                    if (heroSection.style.marginTop && heroSection.style.marginTop !== '0px') {
+                        heroSection.style.marginTop = '0';
+                    }
+                }
+            });
+        });
+        observer.observe(heroSection, { attributes: true, attributeFilter: ['style'] });
+    }
+    
+    // Hero carousel content sync and smooth transitions
+    const carousel = document.getElementById('heroCarousel');
+    const heroContent = document.getElementById('heroContent');
+    
+    if (carousel && heroContent) {
+        let isTransitioning = false;
+        let currentSlideIndex = 0;
+        
+        // Function to update content with smooth fade
+        function updateContent(slideIndex) {
+            // Prevent multiple simultaneous transitions
+            if (isTransitioning || slideIndex === currentSlideIndex) {
+                return;
+            }
             
-            <!-- Right: Content -->
-            <div class="col-lg-6">
-                <div class="hero-content text-center text-lg-start">
-                    <div class="hero-badge mb-4">
-                        <span class="badge-text">{{ _('Radiografia Ciutadana') }}</span>
-                    </div>
-                    <h1 class="hero-title">
-                        <span class="highlight">Tarracograf</span>
-                    </h1>
-                    <p class="hero-subtitle">
-                        {{ _('La radiografia de la ciutat. Reporta problemes de neteja, visualitza l\'estat de la ciutat i participa en la millora de Tarragona.') }}
-                    </p>
+            isTransitioning = true;
+            currentSlideIndex = slideIndex;
+            
+            const contentSlides = heroContent.querySelectorAll('.hero-content-slide');
+            const currentSlide = heroContent.querySelector('.hero-content-slide[data-slide="' + slideIndex + '"]');
+            const previousSlide = Array.from(contentSlides).find(slide => 
+                slide.style.display !== 'none' && slide !== currentSlide
+            );
+            
+            // If there's a previous slide, fade it out first
+            if (previousSlide) {
+                previousSlide.style.transition = 'opacity 0.4s ease-in-out, transform 0.4s ease-in-out';
+                previousSlide.style.opacity = '0';
+                previousSlide.style.transform = 'translateY(-20px)';
+                
+                // After fade out, switch and fade in
+                setTimeout(() => {
+                    // Hide all slides
+                    contentSlides.forEach(slide => {
+                        slide.style.display = 'none';
+                    });
                     
-                    <div class="hero-divider my-4"></div>
-                    
-                    <div class="hero-stats justify-content-center justify-content-lg-start">
-                        <div class="stat-item">
-                            <div class="stat-number">{{ total_inventory_items }}</div>
-                            <div class="stat-label">{{ _('Reportatges Actius') }}</div>
+                    // Show and fade in new slide
+                    if (currentSlide) {
+                        currentSlide.style.display = 'block';
+                        currentSlide.style.opacity = '0';
+                        currentSlide.style.transform = 'translateY(20px)';
+                        currentSlide.style.transition = 'opacity 0.5s ease-in-out, transform 0.5s ease-in-out';
+                        
+                        // Force reflow
+                        currentSlide.offsetHeight;
+                        
+                        setTimeout(() => {
+                            currentSlide.style.opacity = '1';
+                            currentSlide.style.transform = 'translateY(0)';
+                            
+                            setTimeout(() => {
+                                isTransitioning = false;
+                            }, 500);
+                        }, 50);
+                    } else {
+                        isTransitioning = false;
+                    }
+                }, 400);
+            } else {
+                // No previous slide, just show the new one
+                contentSlides.forEach(slide => {
+                    slide.style.display = 'none';
+                });
+                
+                if (currentSlide) {
+                    currentSlide.style.display = 'block';
+                    currentSlide.style.opacity = '1';
+                    currentSlide.style.transform = 'translateY(0)';
+                }
+                
+                isTransitioning = false;
+            }
+        }
+        
+        // Only listen for when slide is shown (after transition completes)
+        carousel.addEventListener('slid.bs.carousel', function(e) {
+            const activeSlide = carousel.querySelector('.carousel-item.active');
+            if (activeSlide) {
+                const slideIndex = parseInt(activeSlide.getAttribute('data-content'));
+                if (!isNaN(slideIndex)) {
+                    updateContent(slideIndex);
+                }
+            }
+        });
+        
+        // Initialize with first slide
+        const firstSlide = heroContent.querySelector('.hero-content-slide[data-slide="0"]');
+        if (firstSlide) {
+            firstSlide.style.display = 'block';
+            firstSlide.style.opacity = '1';
+            firstSlide.style.transform = 'translateY(0)';
+        }
+    }
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section - Carousel with Tarragona Photos -->
+<section class="hero-section-tarragona" id="hero-section" style="padding-top: 0 !important; margin-top: 0 !important;">
+    <!-- Carousel -->
+    <div id="heroCarousel" class="carousel slide carousel-fade hero-carousel" data-bs-ride="carousel" data-bs-interval="6000" data-bs-pause="false">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="3" aria-label="Slide 4"></button>
+        </div>
+        <div class="carousel-inner">
+            <div class="carousel-item active" data-content="0">
+                <img src="{{ url_for('static', filename='images/anfiteatre-tgn.jpg') }}" 
+                     class="d-block w-100" 
+                     alt="Tarragona - Amfiteatre Romà"
+                     loading="eager">
+            </div>
+            <div class="carousel-item" data-content="1">
+                <img src="{{ url_for('static', filename='images/diable-tgn.jpg') }}" 
+                     class="d-block w-100" 
+                     alt="Tarragona - Pont del Diable"
+                     loading="lazy">
+            </div>
+            <div class="carousel-item" data-content="2">
+                <img src="{{ url_for('static', filename='images/catedralaire.jpg') }}" 
+                     class="d-block w-100" 
+                     alt="Tarragona - Catedral"
+                     loading="lazy">
+            </div>
+            <div class="carousel-item" data-content="3">
+                <img src="{{ url_for('static', filename='images/vista-tgn.jpg') }}" 
+                     class="d-block w-100" 
+                     alt="Tarragona - Vista de la Ciutat"
+                     loading="lazy">
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">{{ _('Anterior') }}</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">{{ _('Següent') }}</span>
+        </button>
+    </div>
+    
+    <!-- Overlay -->
+    <div class="hero-overlay"></div>
+    
+    <!-- Content Overlay -->
+    <div class="hero-content-wrapper">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="hero-content-tarragona fade-in" id="heroContent">
+                        <!-- Content for slide 0 - Welcome -->
+                        <div class="hero-content-slide" data-slide="0">
+                            <div class="hero-badge-tarragona">
+                                <i class="fas fa-map-marked-alt me-2"></i>{{ _('Radiografia Ciutadana de Tarragona') }}
+                            </div>
+                            
+                            <h1 class="hero-title-tarragona">
+                                {{ _('La teva ciutat, la teva veu') }}
+                            </h1>
+                            
+                            <p class="hero-subtitle-tarragona">
+                                {{ _('Reporta problemes, visualitza l\'estat de la ciutat i participa en la millora de Tarragona. Junts construïm una ciutat millor.') }}
+                            </p>
+                            
+                            <!-- Stats (only on first slide) -->
+                            <div class="hero-stats-tarragona">
+                                <div class="hero-stat-item">
+                                    <div class="hero-stat-number">{{ total_inventory_items }}</div>
+                                    <div class="hero-stat-label">{{ _('Reportatges') }}</div>
+                                </div>
+                                <div class="hero-stat-item">
+                                    <div class="hero-stat-number">{{ total_initiatives }}</div>
+                                    <div class="hero-stat-label">{{ _('Iniciatives') }}</div>
+                                </div>
+                                <div class="hero-stat-item">
+                                    <div class="hero-stat-number">{{ total_participants }}+</div>
+                                    <div class="hero-stat-label">{{ _('Ciutadans') }}</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="stat-item">
-                            <div class="stat-number">{{ inventory_by_category.get('palomas', 0) + inventory_by_category.get('basura', 0) }}</div>
-                            <div class="stat-label">{{ _('Problemàtiques') }}</div>
+                        
+                        <!-- Content for slide 1 - Cómo Reportar -->
+                        <div class="hero-content-slide" data-slide="1" style="display: none;">
+                            <div class="hero-badge-tarragona">
+                                <i class="fas fa-camera me-2"></i>{{ _('Com Reportar') }}
+                            </div>
+                            
+                            <h1 class="hero-title-tarragona">
+                                {{ _('Fes Visible el que Veus') }}
+                            </h1>
+                            
+                            <div class="hero-features-list">
+                                <div class="hero-feature-item">
+                                    <i class="fas fa-camera-retro"></i>
+                                    <span>{{ _('Puja una foto del problema') }}</span>
+                                </div>
+                                <div class="hero-feature-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>{{ _('Indica la ubicació exacta') }}</span>
+                                </div>
+                                <div class="hero-feature-item">
+                                    <i class="fas fa-tags"></i>
+                                    <span>{{ _('Selecciona la categoria i subcategoria') }}</span>
+                                </div>
+                                <div class="hero-feature-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>{{ _('Envia el reportatge') }}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="stat-item">
-                            <div class="stat-number">{{ total_initiatives }}</div>
-                            <div class="stat-label">{{ _('Iniciatives') }}</div>
+                        
+                        <!-- Content for slide 2 - Categorías -->
+                        <div class="hero-content-slide" data-slide="2" style="display: none;">
+                            <div class="hero-badge-tarragona">
+                                <i class="fas fa-list me-2"></i>{{ _('Categories Disponibles') }}
+                            </div>
+                            
+                            <h1 class="hero-title-tarragona">
+                                {{ _('Què Pots Reportar?') }}
+                            </h1>
+                            
+                            <div class="hero-categories-grid">
+                                <div class="hero-category-item">
+                                    <i class="fas fa-dove"></i>
+                                    <span>{{ _('Coloms') }}</span>
+                                </div>
+                                <div class="hero-category-item">
+                                    <i class="fas fa-trash-alt"></i>
+                                    <span>{{ _('Brossa') }}</span>
+                                </div>
+                                <div class="hero-category-item">
+                                    <i class="fas fa-dog"></i>
+                                    <span>{{ _('Gossos') }}</span>
+                                </div>
+                                <div class="hero-category-item">
+                                    <i class="fas fa-tools"></i>
+                                    <span>{{ _('Material Deteriorat') }}</span>
+                                </div>
+                                <div class="hero-category-item">
+                                    <i class="fas fa-broom"></i>
+                                    <span>{{ _('Brutícia') }}</span>
+                                </div>
+                                <div class="hero-category-item">
+                                    <i class="fas fa-city"></i>
+                                    <span>{{ _('Mobiliari Urbà') }}</span>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="hero-divider my-4"></div>
-                    
-                    <div class="mt-4 d-flex flex-column flex-lg-row gap-3 justify-content-center justify-content-lg-start">
-                        <a href="{{ url_for('inventory.inventory_map') }}" class="btn btn-primary btn-lg w-100 w-lg-auto px-4">
-                            <i class="fas fa-map me-2"></i>{{ _('Veure Mapa del Inventari') }}
-                        </a>
-                        {% if current_user.is_authenticated %}
-                            <a href="{{ url_for('inventory.report_item') }}" class="btn btn-outline-primary btn-lg w-100 w-lg-auto px-4">
-                                <i class="fas fa-plus me-2"></i>{{ _('Reportar Problema') }}
+                        
+                        <!-- Content for slide 3 - Mapa -->
+                        <div class="hero-content-slide" data-slide="3" style="display: none;">
+                            <div class="hero-badge-tarragona">
+                                <i class="fas fa-map me-2"></i>{{ _('Mapa Interactiu') }}
+                            </div>
+                            
+                            <h1 class="hero-title-tarragona">
+                                {{ _('Explora la Ciutat') }}
+                            </h1>
+                            
+                            <div class="hero-features-list">
+                                <div class="hero-feature-item">
+                                    <i class="fas fa-map-marked-alt"></i>
+                                    <span>{{ _('Visualitza tots els reportatges en temps real') }}</span>
+                                </div>
+                                <div class="hero-feature-item">
+                                    <i class="fas fa-filter"></i>
+                                    <span>{{ _('Filtra per categoria i ubicació') }}</span>
+                                </div>
+                                <div class="hero-feature-item">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span>{{ _('Vota pels problemes més importants') }}</span>
+                                </div>
+                                <div class="hero-feature-item">
+                                    <i class="fas fa-check-double"></i>
+                                    <span>{{ _('Marca els problemes resolts') }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- CTA Buttons (always visible) -->
+                        <div class="hero-cta-buttons">
+                            <a href="{{ url_for('inventory.inventory_map') }}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-map me-2"></i>{{ _('Explorar Mapa') }}
                             </a>
-                        {% else %}
-                            <a href="{{ url_for('security.register') }}" class="btn btn-outline-primary btn-lg w-100 w-lg-auto px-4">
-                                {{ _('Uneix-te per Reportar') }}
-                            </a>
-                        {% endif %}
+                            {% if current_user.is_authenticated %}
+                                <a href="{{ url_for('inventory.report_item') }}" class="btn btn-outline-light btn-lg">
+                                    <i class="fas fa-plus me-2"></i>{{ _('Reportar Problema') }}
+                                </a>
+                            {% else %}
+                                <a href="{{ url_for('security.register') }}" class="btn btn-outline-light btn-lg">
+                                    <i class="fas fa-user-plus me-2"></i>{{ _('Uneix-te') }}
+                                </a>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>

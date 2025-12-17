@@ -2,6 +2,178 @@
 
 {% block title %}{{ _('Sobre Nosaltres') }} - Tarracograf{% endblock %}
 
+{% block extra_css %}
+<style>
+.how-it-works-section {
+    padding: 3rem 0;
+}
+
+.how-it-works-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid transparent;
+}
+
+.how-it-works-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-green), var(--primary-green-light));
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.how-it-works-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    border-color: var(--primary-green);
+}
+
+.how-it-works-card:hover::before {
+    transform: scaleX(1);
+}
+
+.step-number {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 40px;
+    height: 40px;
+    background: var(--primary-green);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.2rem;
+    box-shadow: 0 2px 10px rgba(74, 155, 92, 0.3);
+}
+
+.step-icon-wrapper {
+    margin: 1.5rem 0 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.step-icon {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: white;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.step-icon::after {
+    content: '';
+    position: absolute;
+    inset: -5px;
+    border-radius: 50%;
+    opacity: 0.2;
+    transition: all 0.3s ease;
+}
+
+.how-it-works-card:hover .step-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.how-it-works-card:hover .step-icon::after {
+    transform: scale(1.2);
+    opacity: 0.3;
+}
+
+.step-icon-1 {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+}
+
+.step-icon-1::after {
+    background: #667eea;
+}
+
+.step-icon-2 {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    box-shadow: 0 4px 20px rgba(240, 147, 251, 0.3);
+}
+
+.step-icon-2::after {
+    background: #f093fb;
+}
+
+.step-icon-3 {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    box-shadow: 0 4px 20px rgba(79, 172, 254, 0.3);
+}
+
+.step-icon-3::after {
+    background: #4facfe;
+}
+
+.step-icon-4 {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    box-shadow: 0 4px 20px rgba(67, 233, 123, 0.3);
+}
+
+.step-icon-4::after {
+    background: #43e97b;
+}
+
+.step-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-dark);
+}
+
+.step-description {
+    color: var(--text-medium);
+    line-height: 1.6;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .how-it-works-section {
+        padding: 2rem 0;
+    }
+    
+    .how-it-works-card {
+        padding: 2rem 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .step-icon {
+        width: 80px;
+        height: 80px;
+        font-size: 2rem;
+    }
+    
+    .step-title {
+        font-size: 1.25rem;
+    }
+    
+    .step-description {
+        font-size: 0.9rem;
+    }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <section class="container mt-5">
     <div class="bg-white p-5" style="border-radius: var(--border-radius); box-shadow: var(--shadow-md);">
@@ -85,39 +257,63 @@
             </div>
         </div>
         
-        <div class="text-center mt-5">
-            <h3 class="mb-4">{{ _('Com Funciona?') }}</h3>
-            <div class="d-flex justify-content-around flex-wrap gap-4">
-                <div class="text-center" style="max-width: 200px;">
-                    <div class="stat-card-icon bg-primary mx-auto mb-2" style="width: 60px; height: 60px;">
-                        <i class="fas fa-lightbulb" style="font-size: 1.5rem;"></i>
+        <div class="how-it-works-section mt-5 mb-5">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold mb-3">{{ _('Com Funciona?') }}</h2>
+                <p class="lead text-muted">{{ _('Quatre passos simples per començar a transformar Tarragona') }}</p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="how-it-works-card h-100">
+                        <div class="step-number">1</div>
+                        <div class="step-icon-wrapper">
+                            <div class="step-icon step-icon-1">
+                                <i class="fas fa-search"></i>
+                            </div>
+                        </div>
+                        <h4 class="step-title">{{ _('Descobreix') }}</h4>
+                        <p class="step-description">{{ _('Explora les iniciatives actives i reportatges a la teva ciutat. Visualitza el mapa interactiu i descobreix què està passant al teu voltant.') }}</p>
                     </div>
-                    <h5>1. {{ _('Descobreix') }}</h5>
-                    <p class="text-light">{{ _('Explora les iniciatives actives a la teva ciutat') }}</p>
                 </div>
                 
-                <div class="text-center" style="max-width: 200px;">
-                    <div class="stat-card-icon bg-success mx-auto mb-2" style="width: 60px; height: 60px;">
-                        <i class="fas fa-hand-paper" style="font-size: 1.5rem;"></i>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="how-it-works-card h-100">
+                        <div class="step-number">2</div>
+                        <div class="step-icon-wrapper">
+                            <div class="step-icon step-icon-2">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                        </div>
+                        <h4 class="step-title">{{ _('Reporta') }}</h4>
+                        <p class="step-description">{{ _('Identifica problemes de neteja, coloms o altres incidències. Puja una foto i indica la ubicació exacta al mapa.') }}</p>
                     </div>
-                    <h5>2. {{ _('Participa') }}</h5>
-                    <p class="text-light">{{ _('Uneix-te a les iniciatives que et motivin') }}</p>
                 </div>
                 
-                <div class="text-center" style="max-width: 200px;">
-                    <div class="stat-card-icon bg-warning mx-auto mb-2" style="width: 60px; height: 60px;">
-                        <i class="fas fa-users" style="font-size: 1.5rem;"></i>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="how-it-works-card h-100">
+                        <div class="step-number">3</div>
+                        <div class="step-icon-wrapper">
+                            <div class="step-icon step-icon-3">
+                                <i class="fas fa-users"></i>
+                            </div>
+                        </div>
+                        <h4 class="step-title">{{ _('Participa') }}</h4>
+                        <p class="step-description">{{ _('Uneix-te a iniciatives ciutadanes, vota per les problemàtiques més importants i connecta amb altres ciutadans compromesos.') }}</p>
                     </div>
-                    <h5>3. {{ _('Actua') }}</h5>
-                    <p class="text-light">{{ _('Col·labora amb altres ciutadans compromesos') }}</p>
                 </div>
                 
-                <div class="text-center" style="max-width: 200px;">
-                    <div class="stat-card-icon bg-info mx-auto mb-2" style="width: 60px; height: 60px;">
-                        <i class="fas fa-chart-line" style="font-size: 1.5rem;"></i>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="how-it-works-card h-100">
+                        <div class="step-number">4</div>
+                        <div class="step-icon-wrapper">
+                            <div class="step-icon step-icon-4">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                        </div>
+                        <h4 class="step-title">{{ _('Impacta') }}</h4>
+                        <p class="step-description">{{ _('Segueix l\'evolució dels reportatges i veu com la teva participació genera canvis positius a la comunitat.') }}</p>
                     </div>
-                    <h5>4. {{ _('Impacta') }}</h5>
-                    <p class="text-light">{{ _('Genera canvis positius a la teva comunitat') }}</p>
                 </div>
             </div>
         </div>

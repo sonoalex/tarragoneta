@@ -139,6 +139,171 @@ h3 {
     font-size: 1.25rem;
 }
 
+/* Estilos para el offcanvas en móvil */
+.offcanvas-menu {
+    width: 300px !important;
+}
+
+.offcanvas-header {
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(180deg, #FFFFFF 0%, #FAFAFA 100%);
+}
+
+.offcanvas-logo {
+    height: 45px;
+    width: auto;
+    max-width: 200px;
+    object-fit: contain;
+}
+
+.offcanvas-menu .nav-link {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    position: relative;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+.offcanvas-menu .nav-link:hover {
+    background-color: #f8f9fa;
+    color: var(--primary-green);
+    padding-left: 1.75rem;
+    text-decoration: none;
+}
+
+.offcanvas-menu .nav-link:active {
+    background-color: #e9ecef;
+}
+
+.offcanvas-menu .nav-link.active {
+    background-color: var(--primary-green-pale);
+    color: var(--primary-green);
+    font-weight: 600;
+    border-left: 3px solid var(--primary-green);
+}
+
+.offcanvas-menu .nav-link i:first-child {
+    width: 24px;
+    text-align: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.offcanvas-menu .nav-link span {
+    flex-grow: 1;
+}
+
+/* Enlaces colapsables */
+.offcanvas-menu .nav-link-collapsible {
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    pointer-events: auto;
+}
+
+.offcanvas-menu .nav-link-collapsible:hover {
+    background-color: #f0f0f0;
+    text-decoration: none;
+}
+
+.offcanvas-menu .nav-link-collapsible[aria-expanded="true"] {
+    background-color: var(--primary-green-pale);
+    color: var(--primary-green);
+}
+
+/* Asegurar que los enlaces dentro de collapse funcionen */
+.offcanvas-menu .collapse .nav-link-sub {
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.offcanvas-menu .collapse .nav-link-sub:hover {
+    text-decoration: none;
+}
+
+/* Icono chevron animado */
+.offcanvas-menu .chevron-icon {
+    transition: transform 0.3s ease;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.offcanvas-menu .nav-link-collapsible[aria-expanded="true"] .chevron-icon {
+    transform: rotate(180deg);
+    color: var(--primary-green);
+}
+
+/* Enlaces sub (dentro de collapse) */
+.offcanvas-menu .nav-link-sub {
+    padding-left: 3.5rem !important;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    font-size: 0.95rem;
+    background-color: rgba(0,0,0,0.02);
+}
+
+.offcanvas-menu .nav-link-sub:hover {
+    background-color: rgba(0,0,0,0.05);
+    padding-left: 3.75rem !important;
+}
+
+.offcanvas-menu .nav-link-sub.active {
+    background-color: var(--primary-green-pale);
+    color: var(--primary-green);
+    font-weight: 600;
+    border-left: 3px solid var(--primary-green);
+}
+
+.offcanvas-menu .nav-link-sub i {
+    width: 20px;
+    font-size: 0.95rem;
+}
+
+/* Botón del menú móvil */
+.mobile-menu-toggle {
+    border: 2px solid var(--primary-green);
+    color: var(--primary-green);
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.mobile-menu-toggle:hover {
+    background-color: var(--primary-green);
+    color: white;
+    transform: scale(1.05);
+}
+
+.mobile-menu-toggle i {
+    font-size: 1.2rem;
+}
+
+/* Ocultar menú mobile en desktop */
+@media (min-width: 992px) {
+    .mobile-menu-toggle {
+        display: none !important;
+    }
+}
+
+/* Ocultar menú desktop en mobile */
+@media (max-width: 991px) {
+    .desktop-menu {
+        display: none !important;
+    }
+    
+    /* Asegurar que el navbar-collapse no se muestre en mobile */
+    .navbar-collapse.desktop-menu {
+        display: none !important;
+    }
+}
+
 /* Logo styles */
 .navbar-logo {
     height: 60px !important; /* Increased from 40px for better visibility */
