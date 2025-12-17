@@ -734,3 +734,73 @@ def import_zones_from_geojson(geojson_dir='geojson_tarragona'):
         traceback.print_exc()
         return False
 
+def assign_sections_to_items():
+    """Asignar secciones a items del inventario que no tienen section_id"""
+    from app.models import InventoryItem, Section
+    
+    print("=" * 70)
+    print("🗺️  Asignación de Secciones a Items del Inventario")
+    print("=" * 70)
+    print()
+    
+    # Obtener items sin sección
+    items_without_section = InventoryItem.query.filter(
+        InventoryItem.section_id.is_(None)
+    ).all()
+    
+    total_items = len(items_without_section)
+    print(f"📊 Items sin sección asignada: {total_items}")
+    print()
+    
+    if total_items == 0:
+        print("✅ Todos los items ya tienen sección asignada")
+        return True
+    
+    assigned_count = 0
+    failed_count = 0
+    errors = []
+    
+    for i, item in enumerate(items_without_section, 1):
+        try:
+            success = item.assign_section()
+            if success and item.section_id:
+                assigned_count += 1
+                if i % 10 == 0:
+                    print(f"   Procesando... {i}/{total_items} ({assigned_count} asignados)")
+            else:
+                failed_count += 1
+                errors.append(f"Item {item.id} en ({item.latitude}, {item.longitude}): No se encontró sección")
+        except Exception as e:
+            failed_count += 1
+            error_msg = f"Item {item.id} en ({item.latitude}, {item.longitude}): {str(e)}"
+            errors.append(error_msg)
+            print(f"   ⚠️  {error_msg}")
+    
+    # Commit todos los cambios
+    try:
+        db.session.commit()
+        print()
+        print(f"✅ Asignación completada:")
+        print(f"   - Items con sección asignada: {assigned_count}")
+        print(f"   - Items sin sección (fuera de límites o error): {failed_count}")
+        
+        if errors and len(errors) <= 10:
+            print()
+            print("⚠️  Errores encontrados:")
+            for error in errors:
+                print(f"   - {error}")
+        elif errors:
+            print()
+            print(f"⚠️  {len(errors)} errores encontrados (mostrando primeros 10):")
+            for error in errors[:10]:
+                print(f"   - {error}")
+            print(f"   ... y {len(errors) - 10} más")
+        
+        return True
+    except Exception as e:
+        db.session.rollback()
+        print(f"❌ Error al hacer commit: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+

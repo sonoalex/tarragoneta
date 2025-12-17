@@ -236,6 +236,17 @@ def report_item():
                 location_source=location_source
             )
             
+            # Asignar sección automáticamente basándose en las coordenadas
+            try:
+                item.assign_section()
+                if item.section_id:
+                    current_app.logger.info(f"✅ Sección asignada automáticamente: section_id={item.section_id} para item en ({latitude}, {longitude})")
+                else:
+                    current_app.logger.warning(f"⚠️ No se pudo asignar sección para item en ({latitude}, {longitude})")
+            except Exception as e:
+                current_app.logger.error(f"❌ Error asignando sección para item en ({latitude}, {longitude}): {e}", exc_info=True)
+                # Continuar sin sección asignada
+            
             db.session.add(item)
             db.session.commit()
             

@@ -5,7 +5,7 @@ import click
 from flask import current_app
 from sqlalchemy import text
 from datetime import datetime
-from app.cli import init_db_command, create_sample_data, import_zones_from_geojson, create_admin_user_command
+from app.cli import init_db_command, create_sample_data, import_zones_from_geojson, create_admin_user_command, assign_sections_to_items
 from app.models import CityBoundary
 from app.extensions import db
 
@@ -281,4 +281,11 @@ def register_cli_commands(app):
             except Exception as e:
                 print(f"❌ Error al sincronizar: {e}")
                 raise
+    
+    @app.cli.command('assign-sections')
+    def assign_sections():
+        """Asignar secciones a items del inventario que no tienen section_id asignado."""
+        success = assign_sections_to_items()
+        if not success:
+            raise click.ClickException("Error al asignar secciones a items")
 

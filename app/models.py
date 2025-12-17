@@ -579,6 +579,23 @@ class InventoryItem(db.Model):
         if not self.can_be_approved():
             return False, _('Este item no puede ser aprobado')
         
+        # Asignar sección si no tiene una (por si acaso no se asignó al crear)
+        if not self.section_id:
+            try:
+                self.assign_section()
+                if self.section_id:
+                    from flask import current_app
+                    if current_app:
+                        current_app.logger.info(
+                            f'Item {self.id} section assigned during approval: section_id={self.section_id}'
+                        )
+            except Exception as e:
+                from flask import current_app
+                if current_app:
+                    current_app.logger.warning(
+                        f'Could not assign section to item {self.id} during approval: {e}'
+                    )
+        
         self.status = InventoryItemStatus.APPROVED.value
         self.updated_at = datetime.utcnow()
         
