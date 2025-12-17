@@ -1277,6 +1277,90 @@ msgstr "Reportar Nuevo Problema"
 msgid "Registra't per Reportar"
 msgstr "Regístrate para Reportar"
 
+#: templates/index.html:671
+msgid "Radiografia Ciutadana de Tarragona"
+msgstr "Radiografía Ciudadana de Tarragona"
+
+#: templates/index.html:675
+msgid "La teva ciutat, la teva veu"
+msgstr "Tu ciudad, tu voz"
+
+#: templates/index.html:679
+msgid "Reporta problemes, visualitza l'estat de la ciutat i participa en la millora de Tarragona. Junts construïm una ciutat millor."
+msgstr "Reporta problemas, visualiza el estado de la ciudad y participa en la mejora de Tarragona. Juntos construimos una ciudad mejor."
+
+#: templates/index.html:686
+msgid "Reportatges"
+msgstr "Reportajes"
+
+#: templates/index.html:690
+msgid "Iniciatives"
+msgstr "Iniciativas"
+
+#: templates/index.html:694
+msgid "Ciutadans"
+msgstr "Ciudadanos"
+
+#: templates/index.html:702
+msgid "Com Reportar"
+msgstr "Cómo Reportar"
+
+#: templates/index.html:706
+msgid "Fes Visible el que Veus"
+msgstr "Haz Visible lo que Ves"
+
+#: templates/index.html:712
+msgid "Puja una foto del problema"
+msgstr "Sube una foto del problema"
+
+#: templates/index.html:716
+msgid "Indica la ubicació exacta"
+msgstr "Indica la ubicación exacta"
+
+#: templates/index.html:720
+msgid "Selecciona la categoria i subcategoria"
+msgstr "Selecciona la categoría y subcategoría"
+
+#: templates/index.html:724
+msgid "Envia el reportatge"
+msgstr "Envía el reportaje"
+
+#: templates/index.html:732
+msgid "Categories Disponibles"
+msgstr "Categorías Disponibles"
+
+#: templates/index.html:736
+msgid "Què Pots Reportar?"
+msgstr "¿Qué Puedes Reportar?"
+
+#: templates/index.html:770
+msgid "Mapa Interactiu"
+msgstr "Mapa Interactivo"
+
+#: templates/index.html:774
+msgid "Explora la Ciutat"
+msgstr "Explora la Ciudad"
+
+#: templates/index.html:780
+msgid "Visualitza tots els reportatges en temps real"
+msgstr "Visualiza todos los reportajes en tiempo real"
+
+#: templates/index.html:784
+msgid "Filtra per categoria i ubicació"
+msgstr "Filtra por categoría y ubicación"
+
+#: templates/index.html:788
+msgid "Vota pels problemes més importants"
+msgstr "Vota por los problemas más importantes"
+
+#: templates/index.html:792
+msgid "Marca els problemes resolts"
+msgstr "Marca los problemas resueltos"
+
+#: templates/index.html:808
+msgid "Uneix-te"
+msgstr "Únete"
+
 #: templates/index.html:141
 msgid "Reportatges Recents"
 msgstr "Reportajes Recientes"
