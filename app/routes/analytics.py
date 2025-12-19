@@ -12,19 +12,41 @@ import json
 import stripe
 import os
 import secrets
-from app.models import InventoryItem, District, Section, Initiative, user_initiatives, ReportPurchase, InventoryItemStatus
+from app.models import (
+    InventoryItem,
+    District,
+    Section,
+    Initiative,
+    user_initiatives,
+    ReportPurchase,
+    InventoryItemStatus,
+    ContainerPoint,
+    ContainerOverflowReport,
+)
 from app.extensions import db
 from sqlalchemy import func, and_
 
 bp = Blueprint('analytics', __name__, url_prefix='/admin/analytics')
 bp_public = Blueprint('reports', __name__, url_prefix='/reports')
 
+def _exclude_container_overflow_items(query):
+    """
+    Helper function to exclude 'escombreries_desbordades' and 'basura_desbordada' 
+    from inventory item queries, as these are now handled by Container Points.
+    """
+    return query.filter(
+        ~((InventoryItem.category == 'basura') & 
+          (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada'])))
+    )
+
 @bp_public.route('/')
 def public_reports():
     """Public page to view and purchase reports"""
     # Get basic statistics (public info only)
-    total_items = InventoryItem.query.filter(
-        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
+    total_items = _exclude_container_overflow_items(
+        InventoryItem.query.filter(
+            InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
+        )
     ).count()
     
     total_initiatives = Initiative.query.filter(
@@ -73,8 +95,10 @@ def report_purchases():
 def analytics_dashboard():
     """Main analytics dashboard with report options"""
     # Get basic statistics
-    total_items = InventoryItem.query.filter(
-        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
+    total_items = _exclude_container_overflow_items(
+        InventoryItem.query.filter(
+            InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
+        )
     ).count()
     
     total_initiatives = Initiative.query.filter(
@@ -102,6 +126,80 @@ def analytics_dashboard():
                              'last_quarter': last_quarter,
                              'all_time': None
                          })
+
+
+@bp.route('/container-overflows')
+@login_required
+@roles_required('admin')
+def container_overflows():
+    """Analytics de desbordaments de contenedors per zona i en el temps."""
+    # Estadístiques bàsiques
+    total_overflow_reports = ContainerOverflowReport.query.count()
+    
+    total_points_with_overflow = ContainerPoint.query.filter(
+        ContainerPoint.overflow_reports_count > 0
+    ).count()
+    
+    last_30_days = datetime.utcnow() - timedelta(days=30)
+    last_30_days_reports = ContainerOverflowReport.query.filter(
+        ContainerOverflowReport.created_at >= last_30_days
+    ).count()
+    
+    # Seccions amb més desbordes
+    by_section_query = (
+        db.session.query(
+            District.name.label('district_name'),
+            Section.code.label('section_code'),
+            Section.name.label('section_name'),
+            func.count(ContainerPoint.id).label('points_count'),
+            func.coalesce(func.sum(ContainerPoint.overflow_reports_count), 0).label('reports_count'),
+        )
+        .join(Section, ContainerPoint.section_id == Section.id, isouter=True)
+        .join(District, Section.district_code == District.code, isouter=True)
+        .group_by(District.name, Section.code, Section.name)
+        .order_by(func.coalesce(func.sum(ContainerPoint.overflow_reports_count), 0).desc())
+        .limit(20)
+    )
+    by_section = by_section_query.all()
+    
+    # Punts amb més desbordes
+    top_points = (
+        ContainerPoint.query
+        .filter(ContainerPoint.overflow_reports_count > 0)
+        .order_by(ContainerPoint.overflow_reports_count.desc(), ContainerPoint.last_overflow_report.desc().nullslast())
+        .limit(20)
+        .all()
+    )
+    
+    # Tendència mensual
+    by_month_query = (
+        db.session.query(
+            func.to_char(ContainerOverflowReport.created_at, 'YYYY-MM').label('month'),
+            func.count(ContainerOverflowReport.id).label('reports_count'),
+            func.count(func.distinct(ContainerOverflowReport.container_point_id)).label('points_count'),
+        )
+        .group_by(func.to_char(ContainerOverflowReport.created_at, 'YYYY-MM'))
+        .order_by(func.to_char(ContainerOverflowReport.created_at, 'YYYY-MM'))
+    )
+    by_month_rows = by_month_query.all()
+    by_month = [
+        {
+            'month': row.month,
+            'reports_count': row.reports_count,
+            'points_count': row.points_count,
+        }
+        for row in by_month_rows
+    ]
+    
+    return render_template(
+        'admin/analytics_container_overflows.html',
+        total_overflow_reports=total_overflow_reports,
+        total_points_with_overflow=total_points_with_overflow,
+        last_30_days_reports=last_30_days_reports,
+        by_section=by_section,
+        top_points=top_points,
+        by_month=by_month,
+    )
 
 @bp.route('/inventory-by-zone')
 @login_required
@@ -262,8 +360,10 @@ def trends():
     format = request.args.get('format', 'html')
     
     # Build query
-    query = InventoryItem.query.filter(
-        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
+    query = _exclude_container_overflow_items(
+        InventoryItem.query.filter(
+            InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
+        )
     )
     
     if date_from:
@@ -363,6 +463,9 @@ def top_categories():
         Section, InventoryItem.section_id == Section.id, isouter=True
     ).filter(
         InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
+    ).filter(
+        ~((InventoryItem.category == 'basura') & 
+          (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada'])))
     ).group_by(
         InventoryItem.category,
         InventoryItem.subcategory,
@@ -652,8 +755,10 @@ def download_purchased_report(token):
     # This ensures the user gets exactly what they paid for, not a different time period
     if purchase.report_type == 'inventory_by_zone':
         # Recreate the query from params (stored at purchase time - immutable)
-        query = InventoryItem.query.filter(
-            InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
+        query = _exclude_container_overflow_items(
+            InventoryItem.query.filter(
+                InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
+            )
         )
         
         # Apply filters exactly as they were at purchase time
@@ -716,8 +821,10 @@ def download_purchased_report(token):
     
     elif purchase.report_type == 'trends':
         # Similar logic for trends - using exact params from purchase time
-        query = InventoryItem.query.filter(
-            InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
+        query = _exclude_container_overflow_items(
+            InventoryItem.query.filter(
+                InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
+            )
         )
         
         # CRITICAL: Use the exact date range from purchase time
@@ -768,6 +875,9 @@ def download_purchased_report(token):
             Section, InventoryItem.section_id == Section.id, isouter=True
         ).filter(
             InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
+        ).filter(
+            ~((InventoryItem.category == 'basura') & 
+              (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada'])))
         ).group_by(
             InventoryItem.category,
             InventoryItem.subcategory,
@@ -811,8 +921,10 @@ def view_inventory_by_zone():
     from app.utils import get_inventory_category_name, get_inventory_subcategory_name
     
     # Get basic statistics (no filters for preview)
-    items = InventoryItem.query.filter(
-        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
+    items = _exclude_container_overflow_items(
+        InventoryItem.query.filter(
+            InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
+        )
     ).all()
     
     # Calculate summary statistics
@@ -860,9 +972,11 @@ def view_trends():
     
     # Get items from last 6 months
     six_months_ago = datetime.now() - timedelta(days=180)
-    items = InventoryItem.query.filter(
-        InventoryItem.status.in_(InventoryItemStatus.visible_statuses()),
-        InventoryItem.created_at >= six_months_ago
+    items = _exclude_container_overflow_items(
+        InventoryItem.query.filter(
+            InventoryItem.status.in_(InventoryItemStatus.visible_statuses()),
+            InventoryItem.created_at >= six_months_ago
+        )
     ).order_by(InventoryItem.created_at).all()
     
     # Group by month
@@ -899,6 +1013,9 @@ def view_top_categories():
         func.count(InventoryItem.id).label('count')
     ).filter(
         InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
+    ).filter(
+        ~((InventoryItem.category == 'basura') & 
+          (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada'])))
     ).group_by(
         InventoryItem.category,
         InventoryItem.subcategory
@@ -914,8 +1031,10 @@ def view_top_categories():
         })
     
     # Total items
-    total_items = InventoryItem.query.filter(
-        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
+    total_items = _exclude_container_overflow_items(
+        InventoryItem.query.filter(
+            InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
+        )
     ).count()
     
     return render_template('reports/preview_top_categories.html',

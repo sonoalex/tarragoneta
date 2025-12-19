@@ -132,6 +132,28 @@
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         margin-bottom: 1.5rem;
     }
+
+    /* Icono dels punts de contenedors */
+    .container-point-icon-wrapper {
+        pointer-events: none;
+    }
+    .container-point-icon {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        color: #ffffff;
+        box-shadow: 0 0 4px rgba(0,0,0,0.4);
+    }
+    .container-point-icon.normal {
+        background-color: #4A9B5C;
+    }
+    .container-point-icon.overflow {
+        background-color: #FF3B3B;
+    }
 </style>
 {% endblock %}
 
@@ -538,6 +560,11 @@
                 <i class="fas fa-cog me-2"></i>{{ _('Administrar') }}
             </a>
             {% endif %}
+            {% if current_user.is_authenticated and (current_user.has_role('admin') or current_user.has_role('section_responsible')) %}
+            <button id="toggle-container-mode" class="btn btn-outline-primary btn-sm ms-2" type="button" style="border-radius: 50px;">
+                <i class="fas fa-trash-alt me-1"></i>{{ _('Mode punts de contenidors') }}
+            </button>
+            {% endif %}
         </div>
     </div>
 </section>
@@ -556,11 +583,21 @@
             maxZoom: 19
         });
         
-        // Add OpenStreetMap tiles
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        // Pane específic per als punts de contenidors (per estar per sobre de seccions)
+        map.createPane('containerPane');
+        var containerPane = map.getPane('containerPane');
+        containerPane.style.zIndex = 650; // per sobre d'overlay i markers
+        // Per defecte, no intercepta clics: així es pot clicar el marker d'inventari que hi ha a sota
+        containerPane.style.pointerEvents = 'none';
+        
+        // Capa base: OpenStreetMap
+        var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors',
             maxZoom: 19
-        }).addTo(map);
+        });
+        
+        // Añadir capa base por defecto
+        osmLayer.addTo(map);
         
         // Colores para cada distrito (9 distritos) - Colores más vibrantes y distintos
         var districtColors = [
@@ -585,13 +622,14 @@
         }
         
         // Función para convertir GeoJSON a Leaflet layer
-        function geoJsonToLeaflet(geojson) {
+        function geoJsonToLeaflet(geojson, options) {
+            options = options || {};
             if (geojson.type === 'Polygon') {
                 // Convertir coordenadas de [lng, lat] a [lat, lng] para Leaflet
                 var latlngs = geojson.coordinates[0].map(function(coord) {
                     return [coord[1], coord[0]]; // [lat, lng]
                 });
-                return L.polygon(latlngs);
+                return L.polygon(latlngs, options);
             } else if (geojson.type === 'MultiPolygon') {
                 // Manejar MultiPolygon: crear un layer group con múltiples polígonos
                 var layerGroup = L.layerGroup();
@@ -599,12 +637,19 @@
                     var latlngs = polygonCoords[0].map(function(coord) {
                         return [coord[1], coord[0]]; // [lat, lng]
                     });
-                    layerGroup.addLayer(L.polygon(latlngs));
+                    layerGroup.addLayer(L.polygon(latlngs, options));
                 });
                 return layerGroup;
             }
             return null;
         }
+        
+        var isAuthenticated = {{ 'true' if current_user.is_authenticated else 'false' }};
+        
+        // Capa para puntos de contenedores
+        var containerPointsLayer = L.layerGroup();  // se añadirá/retirará según visibilidad (gestionado por control de capas)
+        var isContainerPointMode = false;
+        var canManageContainers = {{ 'true' if current_user.is_authenticated and (current_user.has_role('admin') or current_user.has_role('section_responsible')) else 'false' }};
         
         // Cargar y dibujar secciones
         var sectionsLayer = L.layerGroup();
@@ -634,6 +679,21 @@
                                             <p class="small text-muted mb-0">Código: ${section.full_code}</p>
                                         </div>
                                     `);
+                                    // Interceptar clics en mode contenidors
+                                    if (canManageContainers) {
+                                        layer.on('click', function(e) {
+                                            if (!isContainerPointMode) {
+                                                return;
+                                            }
+                                            if (e.originalEvent && L.DomEvent) {
+                                                L.DomEvent.stop(e.originalEvent);
+                                            }
+                                            this.closePopup();
+                                            if (e.latlng) {
+                                                handleContainerPointCreation(e.latlng);
+                                            }
+                                        });
+                                    }
                                 });
                             } else {
                                 // Si es un Polygon simple
@@ -653,6 +713,21 @@
                                         <p class="small text-muted mb-0">Código: ${section.full_code}</p>
                                     </div>
                                 `);
+                                
+                                if (canManageContainers) {
+                                    polygon.on('click', function(e) {
+                                        if (!isContainerPointMode) {
+                                            return;
+                                        }
+                                        if (e.originalEvent && L.DomEvent) {
+                                            L.DomEvent.stop(e.originalEvent);
+                                        }
+                                        this.closePopup();
+                                        if (e.latlng) {
+                                            handleContainerPointCreation(e.latlng);
+                                        }
+                                    });
+                                }
                             }
                             
                             sectionsLayer.addLayer(polygon);
@@ -660,7 +735,7 @@
                     }
                 });
                 
-                // Añadir capa de secciones al mapa
+                // Añadir capa de secciones al mapa (el control de capas la gestionará)
                 map.addLayer(sectionsLayer);
             })
             .catch(error => {
@@ -726,6 +801,7 @@
                         }
                         
                         boundaryLayer.addLayer(polygon);
+                        // Añadir capa de límites al mapa (el control de capas la gestionará)
                         map.addLayer(boundaryLayer);
                         console.log('Boundary added to map');
                         
@@ -749,8 +825,60 @@
                 console.error('Error loading boundary:', error);
             });
         
-        // Create marker cluster group
+        // Crear grupo de marcadores de inventario
         var markers = L.markerClusterGroup();
+        
+        // Definir capas base (solo OpenStreetMap por ahora, satelital se añadirá después)
+        var baseLayers = {
+            "{{ _('Mapa') }}": osmLayer
+        };
+        
+        // Definir capas overlay
+        var overlayLayers = {
+            "{{ _('Items d\'inventari') }}": markers,
+            "{{ _('Punts de contenidors') }}": containerPointsLayer,
+            "{{ _('Seccions') }}": sectionsLayer,
+            "{{ _('Límits de la ciutat') }}": boundaryLayer
+        };
+        
+        // Añadir capas overlay al mapa por defecto (el control de capas las gestionará)
+        map.addLayer(markers);
+        map.addLayer(containerPointsLayer);
+        map.addLayer(sectionsLayer);
+        map.addLayer(boundaryLayer);
+        
+        // Añadir control de capas al mapa
+        var layerControl = L.control.layers(baseLayers, overlayLayers, {
+            position: 'topright',
+            collapsed: true
+        }).addTo(map);
+        
+        // Crear leyenda para puntos de contenedores
+        var legend = L.control({ position: 'bottomright' });
+        
+        legend.onAdd = function(map) {
+            var div = L.DomUtil.create('div', 'legend');
+            div.innerHTML = `
+                <div style="background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); font-size: 12px;">
+                    <div style="font-weight: bold; margin-bottom: 8px; color: #333;">{{ _('Punts de contenidors') }}</div>
+                    <div style="display: flex; align-items: center; margin-bottom: 6px;">
+                        <div class="container-point-icon normal" style="width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #ffffff; box-shadow: 0 0 4px rgba(0,0,0,0.4); background-color: #4A9B5C; margin-right: 8px;">
+                            <i class="fas fa-dumpster"></i>
+                        </div>
+                        <span>{{ _('Normal') }}</span>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <div class="container-point-icon overflow" style="width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #ffffff; box-shadow: 0 0 4px rgba(0,0,0,0.4); background-color: #FF3B3B; margin-right: 8px;">
+                            <i class="fas fa-dumpster"></i>
+                        </div>
+                        <span>{{ _('Desbordat') }}</span>
+                    </div>
+                </div>
+            `;
+            return div;
+        };
+        
+        legend.addTo(map);
         
         // Category icons mapping (matches Python get_inventory_icon function)
         function getCategoryIconInfo(category, subcategory) {
@@ -872,6 +1000,349 @@
             });
         }
         
+        // Función auxiliar para crear un punt de contenidors desde una lat/lng
+        function handleContainerPointCreation(latlng) {
+            if (!isContainerPointMode || !canManageContainers) return;
+            
+            var lat = latlng.lat;
+            var lng = latlng.lng;
+            
+            if (!confirm('{{ _("Crear un punt de contenidors en aquesta ubicació?") }}')) {
+                return;
+            }
+            
+            fetch('{{ url_for("inventory.create_container_point") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    latitude: lat,
+                    longitude: lng,
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                // Recargar puntos
+                loadContainerPoints();
+            })
+            .catch(err => {
+                console.error('Error creating container point:', err);
+                alert('Error creant el punt de contenidors');
+            });
+        }
+        
+        // Función para cargar puntos de contenedores
+        function loadContainerPoints() {
+            fetch('{{ url_for("inventory.api_container_points") }}')
+                .then(response => response.json())
+                .then(points => {
+                    containerPointsLayer.clearLayers();
+                    
+                    points.forEach(function(point) {
+                        if (!point.geometry) {
+                            return;
+                        }
+                        var polygon = geoJsonToLeaflet(point.geometry, { pane: 'containerPane' });
+                        if (!polygon) {
+                            return;
+                        }
+                        
+                        var isOverflow = point.status === 'overflow';
+                        
+                        function styleOverflowLayer(layer) {
+                            layer.setStyle({
+                                fillColor: isOverflow ? '#FF3B3B' : '#4A9B5C',
+                                fillOpacity: isOverflow ? 0.7 : 0.15,
+                                color: isOverflow ? '#FF3B3B' : '#4A9B5C',
+                                weight: isOverflow ? 4 : 2,
+                                opacity: 1,
+                            });
+                        }
+                        
+                        // Aplicar estilo según sea Polygon o LayerGroup
+                        if (polygon instanceof L.LayerGroup) {
+                            polygon.eachLayer(styleOverflowLayer);
+                        } else {
+                            styleOverflowLayer(polygon);
+                        }
+                        
+                        // Animación parpadeante para desbordados (más agressiva)
+                        if (isOverflow) {
+                            var blinkLayers = [];
+                            if (polygon instanceof L.LayerGroup) {
+                                polygon.eachLayer(function(layer) {
+                                    blinkLayers.push(layer);
+                                });
+                            } else {
+                                blinkLayers.push(polygon);
+                            }
+                            
+                            blinkLayers.forEach(function(layer) {
+                                var on = true;
+                                var interval = setInterval(function() {
+                                    on = !on;
+                                    if (on) {
+                                        layer.setStyle({
+                                            fillOpacity: 0.85,
+                                            weight: 5,
+                                            color: '#FF0000'
+                                        });
+                                    } else {
+                                        layer.setStyle({
+                                            fillOpacity: 0.05,
+                                            weight: 1,
+                                            color: '#FFB3B3'
+                                        });
+                                    }
+                                }, 350); // parpadeo rápido para que se note incluso con zoom out
+                                layer._containerBlinkInterval = interval;
+                                layer.on('remove', function() {
+                                    if (this._containerBlinkInterval) {
+                                        clearInterval(this._containerBlinkInterval);
+                                    }
+                                });
+                            });
+                        }
+                        
+                        // Popup con controles (solo lectura o gestión según permisos)
+                        var statusLabel = isOverflow ? '{{ _("Desbordat") }}' : '{{ _("Normal") }}';
+                        var coordsText = point.address 
+                            ? point.address 
+                            : `(${point.latitude.toFixed(5)}, ${point.longitude.toFixed(5)})`;
+                        var actionsHtml = '';
+                        if (canManageContainers) {
+                            actionsHtml = `
+                                <div class="mt-2 d-flex gap-1">
+                                    <button class="btn btn-sm ${isOverflow ? 'btn-success' : 'btn-warning'} flex-fill" onclick="window.toggleContainerStatus(${point.id}, '${isOverflow ? 'normal' : 'overflow'}')">
+                                        ${isOverflow ? '{{ _("Marcar com a normal") }}' : '{{ _("Marcar com desbordat") }}'}
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="window.deleteContainerPoint(${point.id})">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            `;
+                        } else if (isAuthenticated && !isOverflow) {
+                            // Usuari normal, punt en estat NORMAL -> pot reportar que està desbordat
+                            actionsHtml = `
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-warning w-100" onclick="window.reportContainerOverflow(${point.id}, this)">
+                                        {{ _('Estan desbordats') }}
+                                    </button>
+                                </div>
+                            `;
+                        } else if (isAuthenticated && isOverflow) {
+                            // Usuari normal, punt ja està marcat com desbordat
+                            actionsHtml = `
+                                <div class="mt-2">
+                                    <small class="text-muted">{{ _('Aquest punt ja està marcat com desbordat') }}</small>
+                                </div>
+                            `;
+                        } else {
+                            actionsHtml = `
+                                <div class="mt-2">
+                                    <small class="text-muted">{{ _('Inicia sessió per reportar que està desbordat') }}</small>
+                                </div>
+                            `;
+                        }
+                        
+                        var popupHtml = `
+                            <div style="min-width: 160px;">
+                                <h6 class="fw-bold mb-1">{{ _('Punt de contenidors') }}</h6>
+                                <p class="small mb-1">
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    ${coordsText}
+                                </p>
+                                <p class="small mb-1">
+                                    <span class="badge ${isOverflow ? 'bg-danger' : 'bg-success'}">${statusLabel}</span>
+                                </p>
+                                ${point.last_overflow_report ? `
+                                    <p class="small text-muted mb-1">{{ _('Darrer report de desbordament') }}:<br>${new Date(point.last_overflow_report).toLocaleString()}</p>
+                                ` : ''}
+                                ${point.notes ? `<p class="small mb-1">${point.notes}</p>` : ''}
+                                ${actionsHtml}
+                            </div>
+                        `;
+                        
+                        // Añadir polígono (zona clicable)
+                        if (polygon instanceof L.LayerGroup) {
+                            polygon.eachLayer(function(layer) {
+                                layer.bindPopup(popupHtml);
+                                containerPointsLayer.addLayer(layer);
+                            });
+                        } else {
+                            polygon.bindPopup(popupHtml);
+                            containerPointsLayer.addLayer(polygon);
+                        }
+
+                        // Añadir icono de contenedor en el centre del punt
+                        var iconHtml = `
+                            <div class="container-point-icon ${isOverflow ? 'overflow' : 'normal'}">
+                                <i class="fas fa-dumpster"></i>
+                            </div>
+                        `;
+                        var icon = L.divIcon({
+                            className: 'container-point-icon-wrapper',
+                            html: iconHtml,
+                            iconSize: [20, 20],
+                            iconAnchor: [10, 10]
+                        });
+                        var iconMarker = L.marker([point.latitude, point.longitude], {
+                            icon: icon,
+                            pane: 'containerPane',
+                            interactive: false
+                        });
+                        containerPointsLayer.addLayer(iconMarker);
+                    });
+                    
+                    // La visibilidad de la capa se gestiona mediante el control de capas
+                    // Si la capa está activa en el control, los puntos se verán automáticamente
+                })
+                .catch(error => {
+                    console.error('Error loading container points:', error);
+                });
+        }
+        
+        // Funciones accesibles desde popup (window.*)
+        window.reportContainerOverflow = function(pointId, button) {
+            if (!confirm('{{ _("Confirmes que aquest punt de contenidors està desbordat?") }}')) {
+                return;
+            }
+            if (button) {
+                button.disabled = true;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ _("Enviant...") }}';
+            }
+            fetch(`{{ url_for('inventory.report_container_point_overflow', point_id=0) }}`.replace('0', pointId), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({}),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    if (button) {
+                        button.disabled = false;
+                        button.innerHTML = '{{ _("Estan desbordats") }}';
+                    }
+                    return;
+                }
+                // Recarregar punts per actualitzar estat/blinking
+                loadContainerPoints();
+                if (button) {
+                    button.disabled = true;
+                    button.innerHTML = '{{ _("Gràcies!") }}';
+                }
+            })
+            .catch(err => {
+                console.error('Error reporting container overflow:', err);
+                alert('{{ _("Error en registrar el report. Intenta-ho de nou més tard.") }}');
+                if (button) {
+                    button.disabled = false;
+                    button.innerHTML = '{{ _("Estan desbordats") }}';
+                }
+            });
+        };
+        
+        if (canManageContainers) {
+            window.toggleContainerStatus = function(pointId, newStatus) {
+                fetch(`{{ url_for('inventory.update_container_point_status', point_id=0) }}`.replace('0', pointId), {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ status: newStatus }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    }
+                    loadContainerPoints();
+                })
+                .catch(err => {
+                    console.error('Error updating container point status:', err);
+                    alert('Error actualitzant l\'estat del punt de contenidors');
+                });
+            };
+            
+            window.deleteContainerPoint = function(pointId) {
+                if (!confirm('{{ _("Vols eliminar aquest punt de contenidors?") }}')) {
+                    return;
+                }
+                fetch(`{{ url_for('inventory.delete_container_point', point_id=0) }}`.replace('0', pointId), {
+                    method: 'DELETE',
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success && data.error) {
+                        alert(data.error);
+                    }
+                    loadContainerPoints();
+                })
+                .catch(err => {
+                    console.error('Error deleting container point:', err);
+                    alert('Error eliminant el punt de contenidors');
+                });
+            };
+        }
+        
+        // Cargar puntos de contenedores al iniciar
+        loadContainerPoints();
+        
+        // Si estamos en mode contenidors y clicamos sobre un punt existent,
+        // queremos veure el popup, NO crear un nou punt.
+        if (canManageContainers) {
+            containerPointsLayer.on('click', function(e) {
+                if (!isContainerPointMode) {
+                    return; // comportament normal: obrir popup
+                }
+                // Evitar que el clic arribi al handler global del mapa
+                if (e.originalEvent && L.DomEvent) {
+                    L.DomEvent.stop(e.originalEvent);
+                }
+                // Deixem que Leaflet gestioni el popup del layer
+            });
+        }
+        
+        // Modo creación de puntos de contenedores (solo admin / responsables)
+        if (canManageContainers) {
+            var toggleModeBtn = document.getElementById('toggle-container-mode');
+            
+            if (toggleModeBtn) {
+                toggleModeBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    isContainerPointMode = !isContainerPointMode;
+                    if (isContainerPointMode) {
+                        this.classList.remove('btn-outline-primary');
+                        this.classList.add('btn-primary');
+                        this.innerHTML = '<i class="fas fa-mouse-pointer me-1"></i>{{ _("Fes clic al mapa per afegir un punt") }}';
+                        map.getContainer().style.cursor = 'crosshair';
+                        // En mode contenidors, els cercles han de poder rebre clics
+                        containerPane.style.pointerEvents = 'auto';
+                    } else {
+                        this.classList.remove('btn-primary');
+                        this.classList.add('btn-outline-primary');
+                        this.innerHTML = '<i class="fas fa-trash-alt me-1"></i>{{ _("Mode punts de contenidors") }}';
+                        map.getContainer().style.cursor = '';
+                        // Fora de mode contenidors, deixem passar els clics als markers d'inventari
+                        containerPane.style.pointerEvents = 'none';
+                    }
+                });
+            }
+            
+            // Crear punto al hacer clic en el mapa cuando el modo está activo
+            map.on('click', function(e) {
+                handleContainerPointCreation(e.latlng);
+            });
+        }
+        
         // Load items from API (usar valores de URL en catalán)
         var category = '{{ selected_category or "" }}';
         var subcategory = '{{ selected_subcategory or "" }}';
@@ -959,6 +1430,7 @@
                     markers.addLayer(marker);
                 });
                 
+                // Añadir capa de items al mapa (el control de capas la gestionará)
                 map.addLayer(markers);
                 
                 // Fit map to show all markers

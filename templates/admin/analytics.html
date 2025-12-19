@@ -119,6 +119,25 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Container Overflows -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 20px; transition: transform 0.2s;">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-danger bg-opacity-10 me-3" 
+                                 style="width: 50px; height: 50px;">
+                                <i class="fas fa-dumpster-fire fa-lg text-danger"></i>
+                            </div>
+                            <h4 class="fw-bold mb-0">{{ _('Desbordaments de Contenidors') }}</h4>
+                        </div>
+                        <p class="text-muted mb-4">{{ _('Anàlisi dels punts de contenedors desbordats per secció i tendència temporal.') }}</p>
+                        <a href="{{ url_for('analytics.container_overflows') }}" class="btn btn-danger w-100" style="border-radius: 50px;">
+                            <i class="fas fa-eye me-2"></i>{{ _('Veure Analytics') }}
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </section>

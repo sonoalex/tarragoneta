@@ -112,7 +112,7 @@ class InventoryForm(FlaskForm):
                 ('excremento', '💩 ' + str(_('Excrement'))),
                 ('plumas', '🪶 ' + str(_('Plomes'))),
                 # Basura subcategories
-                ('escombreries_desbordades', '🗑️ ' + str(_('Escombreries Desbordades'))),
+                # 'escombreries_desbordades' removed - now handled by Container Points
                 ('vertidos', '💧 ' + str(_('Abocaments'))),
                 # Perros subcategories
                 ('excrements', '💩 ' + str(_('Excrements'))),
@@ -155,7 +155,7 @@ class InventoryForm(FlaskForm):
                 ('excremento', '💩 Excrement'),
                 ('plumas', '🪶 Plomes'),
                 # Basura
-                ('escombreries_desbordades', '🗑️ Escombreries Desbordades'),
+                # 'escombreries_desbordades' removed - now handled by Container Points
                 ('vertidos', '💧 Abocaments'),
                 # Perros
                 ('excrements', '💩 Excrements'),
@@ -190,7 +190,7 @@ class InventoryForm(FlaskForm):
         # Define valid subcategories for each category
         valid_subcategories = {
             'palomas': ['nido', 'excremento', 'plumas'],
-            'basura': ['escombreries_desbordades', 'vertidos'],
+            'basura': ['vertidos'],  # 'escombreries_desbordades' removed - now handled by Container Points
             'perros': ['excrements', 'pixades'],
             'material_deteriorat': ['faroles', 'bancs', 'senyals', 'paviment'],
             'bruticia': ['terra', 'fulles', 'grafit'],

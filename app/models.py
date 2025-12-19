@@ -97,6 +97,16 @@ class ReportPurchaseStatus(str, Enum):
     def all(cls):
         return [status.value for status in cls]
 
+
+class ContainerPointStatus(str, Enum):
+    """Estados de los puntos de contenedores"""
+    NORMAL = 'normal'
+    OVERFLOW = 'overflow'  # Desbordado
+    
+    @classmethod
+    def all(cls):
+        return [status.value for status in cls]
+
 class Role(db.Model, RoleMixin):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(80), unique=True)
@@ -775,4 +785,130 @@ class ReportPurchase(db.Model):
     
     def __repr__(self):
         return f'<ReportPurchase {self.report_type} - {self.amount_euros}€ - {self.status}>'
+
+
+class ContainerPoint(db.Model):
+    """Puntos de contenedores en la ciudad"""
+    __tablename__ = 'container_point'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    
+    # Posición central del punto de contenedores
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
+    
+    # Polígono cuadrado alrededor del punto (WKT)
+    polygon = db.Column(db.Text, nullable=False)
+    
+    # Estado (normal / desbordado)
+    status = db.Column(
+        db.String(20),
+        default=ContainerPointStatus.NORMAL.value,
+        nullable=False,
+        index=True,
+    )
+    
+    # Información adicional
+    address = db.Column(db.String(200))  # Dirección legible (opcional)
+    notes = db.Column(db.Text)          # Notas internas (opcional)
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime(), default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
+    last_overflow_report = db.Column(db.DateTime())  # Última vez que se marcó como desbordado
+    overflow_reports_count = db.Column(db.Integer, default=0)  # Nº de reports de desbordament (ciutadans/admin)
+    
+    # Relaciones
+    created_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    section_id = db.Column(db.Integer, db.ForeignKey('section.id'), nullable=True, index=True)
+    
+    created_by = db.relationship('User', backref='created_container_points')
+    section = db.relationship('Section', backref='container_points')
+    
+    @staticmethod
+    def create_square_polygon(lat, lng, radius_meters: float = 20.0) -> str:
+        """Crear un polígono circular alrededor de un punto (aprox).
+        
+        radius_meters: radio aproximado del círculo en metros.
+        Devuelve WKT (POLYGON) aproximando la circunferencia con varios segmentos.
+        """
+        try:
+            from shapely.geometry import Point
+            import math
+
+            # Conversión aproximada de metros a grados en lat/lng
+            lat_radius = radius_meters / 111000.0
+            lng_radius = radius_meters / (111000.0 * math.cos(math.radians(lat)))
+
+            # Construir puntos de un círculo (aprox elíptico) alrededor del centro
+            num_segments = 36  # cada 10 grados
+            coords = []
+            for i in range(num_segments + 1):
+                angle = 2 * math.pi * (i / num_segments)
+                dy = lat_radius * math.sin(angle)
+                dx = lng_radius * math.cos(angle)
+                coords.append((lng + dx, lat + dy))  # (lng, lat)
+
+            polygon = Point(lng, lat).buffer(0)  # dummy para tener tipo
+            from shapely.geometry import Polygon
+            polygon = Polygon(coords)
+            return polygon.wkt
+        except Exception as e:
+            import logging, math
+            logging.getLogger(__name__).error(f"Error creating circular polygon for ContainerPoint: {e}")
+            # Fallback muy simple: pequeño círculo con 8 puntos
+            lat_radius = radius_meters / 111000.0
+            lng_radius = radius_meters / (111000.0 * math.cos(math.radians(lat)))
+            coords = []
+            for i in range(9):
+                angle = 2 * math.pi * (i / 8.0)
+                dy = lat_radius * math.sin(angle)
+                dx = lng_radius * math.cos(angle)
+                coords.append((lng + dx, lat + dy))
+            return "POLYGON((" + ", ".join(f"{x} {y}" for x, y in coords) + "))"
+    
+    def assign_section(self) -> bool:
+        """Asignar automáticamente la sección basándose en las coordenadas."""
+        if self.section_id:
+            return True
+        section = Section.find_section_for_point(self.latitude, self.longitude)
+        if section:
+            self.section_id = section.id
+            return True
+        return False
+    
+    def is_overflow(self) -> bool:
+        return self.status == ContainerPointStatus.OVERFLOW.value
+    
+    def mark_overflow(self):
+        self.status = ContainerPointStatus.OVERFLOW.value
+        self.last_overflow_report = datetime.utcnow()
+        self.updated_at = datetime.utcnow()
+    
+    def mark_normal(self):
+        self.status = ContainerPointStatus.NORMAL.value
+        self.updated_at = datetime.utcnow()
+    
+    def __repr__(self):
+        return f'<ContainerPoint {self.id} at ({self.latitude}, {self.longitude}) - {self.status}>'
+
+
+class ContainerOverflowReport(db.Model):
+    """Reports de ciutadans/admins indicant que un punt de contenidors està desbordat"""
+    __tablename__ = 'container_overflow_report'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    container_point_id = db.Column(db.Integer, db.ForeignKey('container_point.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # Pot ser anònim si cal
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    source = db.Column(db.String(20), default='user')  # 'user', 'admin', etc.
+    
+    container_point = db.relationship('ContainerPoint', backref=db.backref('overflow_reports', lazy='dynamic', cascade='all, delete-orphan'))
+    user = db.relationship('User')
+    
+    # Evitar múltiples reports del mateix usuari sobre el mateix punt
+    __table_args__ = (db.UniqueConstraint('container_point_id', 'user_id', name='unique_container_user_overflow_report'),)
+    
+    def __repr__(self):
+        return f'<ContainerOverflowReport point:{self.container_point_id} user:{self.user_id}>'
 

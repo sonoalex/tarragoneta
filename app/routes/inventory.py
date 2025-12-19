@@ -5,8 +5,20 @@ from flask_babel import gettext as _
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import os
-from app.models import InventoryItem, InventoryVote, InventoryResolved, District, Section, CityBoundary, InventoryItemStatus
-from app.extensions import db
+from app.models import (
+    InventoryItem,
+    InventoryVote,
+    InventoryResolved,
+    District,
+    Section,
+    CityBoundary,
+    InventoryItemStatus,
+    ContainerPoint,
+    ContainerPointStatus,
+    ContainerOverflowReport,
+)
+from app.extensions import db, csrf
+from sqlalchemy import not_
 from app.forms import InventoryForm
 from app.utils import (
     sanitize_html,
@@ -52,13 +64,17 @@ def inventory_map():
     items = query.order_by(InventoryItem.created_at.desc()).all()
     
     # Get statistics - only count approved items
+    # Exclude 'escombreries_desbordades' - now handled by Container Points
+    container_overflow_filter = not_((InventoryItem.category == 'basura') & 
+                                      (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada'])))
+    
     total_items = InventoryItem.query.filter(
         InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
-    ).count()
+    ).filter(container_overflow_filter).count()
     by_category = {}
     for item in InventoryItem.query.filter(
         InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
-    ).all():
+    ).filter(container_overflow_filter).all():
         cat_key = f"{item.category}->{item.subcategory}"
         by_category[cat_key] = by_category.get(cat_key, 0) + 1
     
@@ -66,7 +82,7 @@ def inventory_map():
     # This handles items created before the importance_count field was added
     items_without_count = InventoryItem.query.filter(
         InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
-    ).all()
+    ).filter(container_overflow_filter).all()
     fixed = False
     for item in items_without_count:
         if item.importance_count is None:
@@ -80,7 +96,7 @@ def inventory_map():
     by_subcategory = {}
     for item in InventoryItem.query.filter(
         InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
-    ).all():
+    ).filter(container_overflow_filter).all():
         # Count by main category
         by_main_category[item.category] = by_main_category.get(item.category, 0) + 1
         # Count by subcategory (only if category is selected)
@@ -211,6 +227,14 @@ def report_item():
             
             # Get address from form or geocode (optional)
             address = form.address.data if form.address.data else None
+            
+            # Validate: reject 'escombreries_desbordades' - now handled by Container Points
+            if form.subcategory.data == 'escombreries_desbordades':
+                flash(_('Els punts de contenidors desbordats ara es gestionen mitjançant el sistema de punts de contenidors al mapa. Si us plau, utilitza aquesta funcionalitat per reportar desbordaments.'), 'error')
+                # Clean up uploaded file
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                return render_template('inventory/report.html', form=form)
             
             # Create item with all data including GPS from image
             current_app.logger.info(
@@ -504,6 +528,228 @@ def api_boundary():
     except Exception as e:
         current_app.logger.error(f"Error in api_boundary: {e}")
         return jsonify({'error': str(e)}), 500
+
+
+@bp.route('/api/container-points')
+def api_container_points():
+    """API endpoint para obtener puntos de contenedores (para el mapa).
+    
+    Público en lectura: cualquiera puede ver los puntos para que el mapa
+    muestre los polígonos (y parpadeo si están desbordados).
+    """
+    # Si se accede directamente desde el navegador, redirigir al mapa
+    if request.headers.get('Accept', '').find('text/html') != -1:
+        return redirect(url_for('inventory.inventory_map'))
+    
+    try:
+        from shapely import wkt
+        import json
+        
+        points = ContainerPoint.query.all()
+        result = []
+        
+        for point in points:
+            geometry = None
+            if point.polygon:
+                try:
+                    geom = wkt.loads(point.polygon)
+                    geometry = json.loads(json.dumps(geom.__geo_interface__))
+                except Exception as e:
+                    current_app.logger.warning(f"Error parsing polygon for container point {point.id}: {e}")
+            
+            result.append({
+                'id': point.id,
+                'latitude': point.latitude,
+                'longitude': point.longitude,
+                'status': point.status,
+                'address': point.address,
+                'notes': point.notes,
+                'section_id': point.section_id,
+                'created_by_id': point.created_by_id,
+                'last_overflow_report': point.last_overflow_report.isoformat() if point.last_overflow_report else None,
+                'geometry': geometry,
+            })
+        
+        return jsonify(result)
+    except ImportError:
+        current_app.logger.error("Shapely not available for WKT parsing (container points)")
+        return jsonify({'error': 'WKT parsing not available'}), 500
+    except Exception as e:
+        current_app.logger.error(f"Error in api_container_points: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@bp.route('/api/container-points', methods=['POST'])
+@login_required
+@section_responsible_required
+@csrf.exempt
+def create_container_point():
+    """Crear un nuevo punto de contenedores (solo admin / responsables de sección)."""
+    try:
+        data = request.get_json(silent=True) or {}
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
+        address = data.get('address') or None
+        notes = data.get('notes') or None
+        
+        if latitude is None or longitude is None:
+            return jsonify({'error': 'Latitude and longitude are required'}), 400
+        
+        try:
+            latitude = float(latitude)
+            longitude = float(longitude)
+        except (TypeError, ValueError):
+            return jsonify({'error': 'Invalid latitude/longitude'}), 400
+        
+        # Validar que el punto esté dentro del boundary de la ciudad
+        if not CityBoundary.point_is_inside(latitude, longitude):
+            return jsonify({'error': 'Point is outside city boundary'}), 400
+        
+        # Crear polígono (círculo aproximado) alrededor del punto (~10m de radio)
+        polygon_wkt = ContainerPoint.create_square_polygon(latitude, longitude, radius_meters=10.0)
+        
+        point = ContainerPoint(
+            latitude=latitude,
+            longitude=longitude,
+            polygon=polygon_wkt,
+            address=sanitize_html(address) if address else None,
+            notes=sanitize_html(notes) if notes else None,
+            created_by_id=current_user.id,
+        )
+        
+        # Asignar sección automáticamente (si es posible)
+        try:
+            point.assign_section()
+        except Exception as e:
+            current_app.logger.warning(f"Could not assign section to ContainerPoint at ({latitude}, {longitude}): {e}")
+        
+        db.session.add(point)
+        db.session.commit()
+        
+        return jsonify({
+            'id': point.id,
+            'latitude': point.latitude,
+            'longitude': point.longitude,
+            'status': point.status,
+            'address': point.address,
+            'notes': point.notes,
+            'section_id': point.section_id,
+        }), 201
+    except Exception as e:
+        current_app.logger.error(f"Error creating container point: {e}", exc_info=True)
+        return jsonify({'error': 'Error creating container point'}), 500
+
+
+@bp.route('/api/container-points/<int:point_id>/status', methods=['PUT'])
+@login_required
+@section_responsible_required
+@csrf.exempt
+def update_container_point_status(point_id):
+    """Actualizar el estado de un punto de contenedores (normal / overflow)."""
+    point = ContainerPoint.query.get_or_404(point_id)
+    
+    # Permisos finos: admin o responsable de la sección del punto
+    if not current_user.has_role('admin'):
+        if not point.section_id or not current_user.is_section_responsible(point.section_id):
+            return jsonify({'error': _('No tienes permisos para gestionar este punto')}), 403
+    
+    data = request.get_json(silent=True) or {}
+    status = data.get('status')
+    
+    if status not in ContainerPointStatus.all():
+        return jsonify({'error': 'Invalid status'}), 400
+    
+    if status == ContainerPointStatus.OVERFLOW.value:
+        point.mark_overflow()
+    else:
+        point.mark_normal()
+    
+    db.session.commit()
+    
+    return jsonify({
+        'id': point.id,
+        'status': point.status,
+        'last_overflow_report': point.last_overflow_report.isoformat() if point.last_overflow_report else None,
+    })
+
+
+@bp.route('/api/container-points/<int:point_id>/overflow-report', methods=['POST'])
+@login_required
+@csrf.exempt
+def report_container_point_overflow(point_id):
+    """Registrar que un punt de contenidors està desbordat (usuari normal).
+    
+    Lògica:
+    - Un usuari només pot reportar una vegada per punt.
+    - S'incrementa overflow_reports_count.
+    - Si passa un llindar, es marca el punt com OVERFLOW.
+    """
+    point = ContainerPoint.query.get_or_404(point_id)
+    
+    # Només usuaris autenticats poden reportar (decorador login_required)
+    user = current_user
+    
+    # Comprovar si ja ha reportat abans aquest punt
+    existing = ContainerOverflowReport.query.filter_by(
+        container_point_id=point.id,
+        user_id=user.id
+    ).first()
+    if existing:
+        return jsonify({'error': _('Ja has reportat que aquest punt està desbordat')}), 400
+    
+    auto_overflow_threshold = current_app.config.get('CONTAINER_POINT_AUTO_OVERFLOW_THRESHOLD', 1)
+    
+    try:
+        report = ContainerOverflowReport(
+            container_point_id=point.id,
+            user_id=user.id,
+            source='user'
+        )
+        db.session.add(report)
+        
+        if point.overflow_reports_count is None:
+            point.overflow_reports_count = 0
+        point.overflow_reports_count += 1
+        point.last_overflow_report = datetime.utcnow()
+        
+        auto_overflow = False
+        if point.overflow_reports_count >= auto_overflow_threshold and not point.is_overflow():
+            point.mark_overflow()
+            auto_overflow = True
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'status': point.status,
+            'overflow_reports_count': point.overflow_reports_count,
+            'auto_overflow': auto_overflow,
+            'last_overflow_report': point.last_overflow_report.isoformat() if point.last_overflow_report else None,
+            'message': _('Gràcies! Hem registrat que aquest punt està desbordat.')
+        })
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error reporting container overflow for point {point.id}: {e}", exc_info=True)
+        return jsonify({'error': _('Error en registrar el report. Intenta-ho de nou més tard.')}), 500
+
+
+@bp.route('/api/container-points/<int:point_id>', methods=['DELETE'])
+@login_required
+@section_responsible_required
+@csrf.exempt
+def delete_container_point(point_id):
+    """Eliminar un punto de contenedores."""
+    point = ContainerPoint.query.get_or_404(point_id)
+    
+    # Permisos finos: admin o responsable de la sección del punto
+    if not current_user.has_role('admin'):
+        if not point.section_id or not current_user.is_section_responsible(point.section_id):
+            return jsonify({'error': _('No tienes permisos para gestionar este punto')}), 403
+    
+    db.session.delete(point)
+    db.session.commit()
+    
+    return jsonify({'success': True})
 
 @bp.route('/<int:item_id>')
 def item_detail(item_id):

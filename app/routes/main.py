@@ -3,6 +3,7 @@ from flask_babel import gettext as _
 from app.models import Initiative, Comment, user_initiatives, InventoryItem, InventoryItemStatus
 from app.extensions import db
 from datetime import datetime
+from sqlalchemy import not_
 
 bp = Blueprint('main', __name__)
 
@@ -29,20 +30,30 @@ def index():
     initiatives = query.order_by(Initiative.date.asc()).limit(6).all()  # Limit to 6 for homepage
     
     # Get inventory statistics (for hero section)
+    # Exclude 'escombreries_desbordades' - now handled by Container Points
     total_inventory_items = InventoryItem.query.filter(
         InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
+    ).filter(
+        not_((InventoryItem.category == 'basura') & 
+             (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada'])))
     ).count()
     
     # Get inventory by category
     inventory_by_category = {}
     for item in InventoryItem.query.filter(
         InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
+    ).filter(
+        not_((InventoryItem.category == 'basura') & 
+             (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada'])))
     ).all():
         inventory_by_category[item.category] = inventory_by_category.get(item.category, 0) + 1
     
     # Get recent inventory items (for featured section)
     recent_inventory_items = InventoryItem.query.filter(
         InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
+    ).filter(
+        not_((InventoryItem.category == 'basura') & 
+             (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada'])))
     ).order_by(InventoryItem.created_at.desc()).limit(8).all()
     
     # Get statistics for initiatives (for secondary section)
