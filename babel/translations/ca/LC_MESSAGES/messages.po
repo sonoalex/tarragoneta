@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-12-03 12:23+0100\n"
+"POT-Creation-Date: 2025-12-31 16:20+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ca\n"
@@ -14,483 +14,566 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: app/forms.py:11
-msgid "Nombre de usuario"
-msgstr "Nom d'usuari"
-
-#: app/forms.py:20
+#: app/forms.py:21
 msgid "Este nombre de usuario ya está en uso"
 msgstr "Aquest nom d'usuari ja està en ús"
 
-#: app/forms.py:26
-msgid "Title"
-msgstr "Títol"
-
-#: app/forms.py:27 app/forms.py:86
-msgid "Description"
-msgstr "Descripció"
-
-#: app/forms.py:28
-msgid "Location"
-msgstr "Ubicació"
-
-#: app/forms.py:29 app/forms.py:84
-msgid "Category"
-msgstr "Categoria"
-
-#: app/forms.py:30
-msgid "Date"
-msgstr "Data"
-
-#: app/forms.py:31
-msgid "Time"
-msgstr "Hora"
-
-#: app/forms.py:32
-msgid "Image"
-msgstr "Imatge"
-
-#: app/forms.py:33
-#, fuzzy
-msgid "Status"
-msgstr "Estat"
-
-#: app/forms.py:41 templates/admin/analytics_purchases.html:203
-#: templates/admin/dashboard.html:275 templates/admin/donations.html:108
-#: templates/inventory/admin.html:206 templates/profile.html:227
-#: templates/profile.html:281
+#: app/forms.py:42 templates/admin/analytics_purchases.html:203
+#: templates/admin/dashboard.html:246 templates/admin/donations.html:108
+#: templates/inventory/admin.html:225 templates/inventory/detail.html:193
+#: templates/inventory/section_responsible.html:181 templates/profile.html:218
+#: templates/profile.html:272
 msgid "Pendent"
 msgstr ""
 
-#: app/forms.py:42 templates/admin/dashboard.html:279
-#: templates/profile.html:277
+#: app/forms.py:43 templates/admin/container_point_suggestions.html:181
+#: templates/admin/dashboard.html:250 templates/profile.html:268
 msgid "Aprovada"
 msgstr ""
 
-#: app/forms.py:43 templates/admin/dashboard.html:283
+#: app/forms.py:44 templates/admin/container_point_suggestions.html:189
+#: templates/admin/dashboard.html:254
 msgid "Rebutjada"
 msgstr ""
 
-#: app/forms.py:44 templates/admin/dashboard.html:287
-#: templates/profile.html:279
+#: app/forms.py:45 templates/admin/dashboard.html:258
+#: templates/profile.html:270
 #, fuzzy
 msgid "Activa"
 msgstr "Actua"
 
-#: app/forms.py:45 templates/admin/dashboard.html:291
+#: app/forms.py:46 templates/admin/dashboard.html:262
 #, fuzzy
 msgid "Cancel·lada"
 msgstr "Cancel·lar"
 
-#: app/forms.py:59 app/utils.py:58
+#: app/forms.py:60 app/utils.py:363
 msgid "Cleaning"
 msgstr ""
 
-#: app/forms.py:60 app/utils.py:59
+#: app/forms.py:61 app/utils.py:364
 #, fuzzy
 msgid "Recycling"
 msgstr "Reciclatge"
 
-#: app/forms.py:61 app/utils.py:60
+#: app/forms.py:62 app/utils.py:365
 msgid "Green Spaces"
 msgstr ""
 
-#: app/forms.py:62 app/utils.py:61
+#: app/forms.py:63 app/utils.py:366
 msgid "Sustainable Mobility"
 msgstr ""
 
-#: app/forms.py:63 app/utils.py:62
+#: app/forms.py:64 app/utils.py:367
 msgid "Environmental Education"
 msgstr ""
 
-#: app/forms.py:64 app/utils.py:63
+#: app/forms.py:65 app/utils.py:368
 #, fuzzy
 msgid "Culture and Civics"
 msgstr "Cultura i Civisme"
 
-#: app/forms.py:65 app/utils.py:64
+#: app/forms.py:66 app/utils.py:369
 #, fuzzy
 msgid "Social Action"
 msgstr "Ubicació"
 
-#: app/forms.py:66 app/forms.py:114 app/utils.py:65 app/utils.py:93
-#: app/utils.py:138 templates/inventory/map.html:155
-#: templates/inventory/report.html:250
-msgid "Brossa Desbordada"
+#: app/forms.py:67 app/utils.py:370 app/utils.py:399 app/utils.py:400
+#: app/utils.py:449 app/utils.py:450 templates/inventory/map.html:316
+#, fuzzy
+msgid "Escombreries Desbordades"
 msgstr "Brossa Desbordada"
 
-#: app/forms.py:67 app/utils.py:66
+#: app/forms.py:68 app/utils.py:371
 msgid "Dumping"
 msgstr "Abocaments"
 
-#: app/forms.py:85
-#, fuzzy
-msgid "Subcategory"
-msgstr "Categoria"
-
-#: app/forms.py:87
-#, fuzzy
-msgid "Latitude"
-msgstr "Títol"
-
-#: app/forms.py:88
-msgid "Longitude"
-msgstr ""
-
-#: app/forms.py:89
-#, fuzzy
-msgid "Address"
-msgstr "Altres"
-
-#: app/forms.py:90
-msgid "Photo"
-msgstr ""
-
-#: app/forms.py:97 app/routes/analytics.py:325 app/utils.py:76
+#: app/forms.py:98 app/routes/analytics.py:425 app/utils.py:382
 #: templates/admin/analytics_inventory_by_zone.html:46
 #: templates/admin/analytics_trends.html:35
-#: templates/admin/analytics_trends.html:66 templates/inventory/map.html:97
+#: templates/admin/analytics_trends.html:66 templates/index.html:742
+#: templates/inventory/map.html:210
 #, fuzzy
 msgid "Coloms"
 msgstr "Coloms"
 
-#: app/forms.py:98 app/routes/analytics.py:326 app/utils.py:77
+#: app/forms.py:99 app/routes/analytics.py:426 app/utils.py:383
 #: templates/admin/analytics_inventory_by_zone.html:47
 #: templates/admin/analytics_trends.html:36
-#: templates/admin/analytics_trends.html:67 templates/inventory/map.html:105
+#: templates/admin/analytics_trends.html:67 templates/index.html:746
+#: templates/inventory/map.html:218
 msgid "Brossa"
 msgstr "Brossa"
 
-#: app/forms.py:99 app/utils.py:78
+#: app/forms.py:100 app/utils.py:384 templates/index.html:750
+#: templates/inventory/map.html:226
 msgid "Gossos"
 msgstr "Gossos"
 
-#: app/forms.py:100 app/utils.py:79
+#: app/forms.py:101 app/utils.py:385 templates/index.html:754
+#: templates/inventory/map.html:234
 msgid "Material Deteriorat"
 msgstr "Material Deteriorat"
 
-#: app/forms.py:101 app/utils.py:80
+#: app/forms.py:102 app/utils.py:386 templates/index.html:758
+#: templates/inventory/map.html:242
 msgid "Brutícia"
 msgstr "Brutícia"
 
-#: app/forms.py:102 app/utils.py:81
+#: app/forms.py:103 app/utils.py:387 templates/index.html:762
+#: templates/inventory/map.html:250
 msgid "Mobiliari Urbà"
 msgstr "Mobiliari Urbà"
 
-#: app/forms.py:103 app/utils.py:82
+#: app/forms.py:104 app/utils.py:388 templates/inventory/map.html:258
 msgid "Vegetació"
 msgstr "Vegetació"
 
-#: app/forms.py:104 app/utils.py:83
+#: app/forms.py:105 app/utils.py:389 templates/inventory/map.html:266
 msgid "Infraestructura"
 msgstr "Infraestructura"
 
-#: app/forms.py:110 app/utils.py:90 app/utils.py:135
-#: templates/inventory/map.html:123
+#: app/forms.py:111 app/utils.py:396 app/utils.py:446
+#: templates/inventory/map.html:284 templates/inventory/report.html:462
 msgid "Niu"
 msgstr ""
 
-#: app/forms.py:111 app/utils.py:89 app/utils.py:134
-#: templates/inventory/map.html:131
+#: app/forms.py:112 app/utils.py:395 app/utils.py:445
+#: templates/inventory/map.html:292 templates/inventory/report.html:463
 #, fuzzy
 msgid "Excrement"
 msgstr "Excrement"
 
-#: app/forms.py:112 app/utils.py:91 app/utils.py:136
-#: templates/inventory/map.html:139
+#: app/forms.py:113 app/utils.py:397 app/utils.py:447
+#: templates/inventory/map.html:300 templates/inventory/report.html:464
 #, fuzzy
 msgid "Plomes"
 msgstr "Coloms"
 
-#: app/forms.py:115 app/utils.py:94 app/utils.py:139
-#: templates/inventory/map.html:163
+#: app/forms.py:116 app/utils.py:401 app/utils.py:451
+#: templates/inventory/map.html:324 templates/inventory/report.html:468
 msgid "Abocaments"
 msgstr "Abocaments"
 
-#: app/forms.py:117 app/utils.py:96 app/utils.py:141
+#: app/forms.py:118 app/utils.py:403 app/utils.py:453
+#: templates/inventory/map.html:340 templates/inventory/report.html:471
 #, fuzzy
 msgid "Excrements"
 msgstr "Excrements"
 
-#: app/forms.py:118 app/utils.py:97 app/utils.py:142
+#: app/forms.py:119 app/utils.py:404 app/utils.py:454
+#: templates/inventory/map.html:348 templates/inventory/report.html:472
 #, fuzzy
 msgid "Pixades"
 msgstr "Pixades"
 
-#: app/forms.py:120 app/utils.py:99 app/utils.py:144
+#: app/forms.py:121 app/utils.py:406 app/utils.py:456
+#: templates/inventory/map.html:364 templates/inventory/report.html:475
 #, fuzzy
 msgid "Faroles"
 msgstr "Faroles"
 
-#: app/forms.py:121 app/utils.py:100 app/utils.py:145
+#: app/forms.py:122 app/utils.py:407 app/utils.py:457
+#: templates/inventory/map.html:372 templates/inventory/map.html:452
+#: templates/inventory/report.html:476 templates/inventory/report.html:488
 msgid "Bancs"
 msgstr "Bancs"
 
-#: app/forms.py:122 app/utils.py:101 app/utils.py:146
+#: app/forms.py:123 app/utils.py:408 app/utils.py:458
+#: templates/inventory/map.html:380 templates/inventory/report.html:477
 msgid "Senyals"
 msgstr "Senyals"
 
-#: app/forms.py:123 app/utils.py:102 app/utils.py:147
+#: app/forms.py:124 app/utils.py:409 app/utils.py:459
+#: templates/inventory/map.html:388 templates/inventory/report.html:478
 msgid "Paviment"
 msgstr "Paviment"
 
-#: app/forms.py:125 app/utils.py:104 app/utils.py:149
+#: app/forms.py:126 app/utils.py:411 app/utils.py:461
+#: templates/inventory/map.html:404 templates/inventory/report.html:481
 #, fuzzy
 msgid "Terra"
 msgstr "Terra"
 
-#: app/forms.py:126 app/utils.py:105 app/utils.py:150
+#: app/forms.py:127 app/utils.py:412 app/utils.py:462
+#: templates/inventory/map.html:412 templates/inventory/report.html:482
 msgid "Fulles"
 msgstr "Fulles"
 
-#: app/forms.py:127 app/utils.py:106 app/utils.py:151
+#: app/forms.py:128 app/utils.py:413 app/utils.py:463
+#: templates/inventory/map.html:420 templates/inventory/report.html:483
 msgid "Grafit"
 msgstr "Grafit"
 
-#: app/forms.py:129 app/utils.py:108 app/utils.py:153
+#: app/forms.py:130 app/utils.py:415 app/utils.py:465
+#: templates/inventory/map.html:436 templates/inventory/report.html:486
 msgid "Papereres"
 msgstr "Papereres"
 
-#: app/forms.py:130 app/utils.py:109 app/utils.py:154
+#: app/forms.py:131 app/utils.py:416 app/utils.py:466
+#: templates/inventory/map.html:444 templates/inventory/report.html:487
 #, fuzzy
 msgid "Parades"
 msgstr "Parades"
 
-#: app/forms.py:132 app/utils.py:111 app/utils.py:156
+#: app/forms.py:133 app/utils.py:418 app/utils.py:468
+#: templates/inventory/map.html:468 templates/inventory/report.html:491
 #, fuzzy
 msgid "Arbres"
 msgstr "Arbres"
 
-#: app/forms.py:133 app/utils.py:112 app/utils.py:157
+#: app/forms.py:134 app/utils.py:419 app/utils.py:469
+#: templates/inventory/map.html:476 templates/inventory/report.html:492
 #, fuzzy
 msgid "Arbustos"
 msgstr "Arbustos"
 
-#: app/forms.py:134 app/utils.py:113 app/utils.py:158
+#: app/forms.py:135 app/utils.py:420 app/utils.py:470
+#: templates/inventory/map.html:484 templates/inventory/report.html:493
 #, fuzzy
 msgid "Gespa"
 msgstr "Gespa"
 
-#: app/forms.py:136 app/utils.py:115 app/utils.py:160
+#: app/forms.py:137 app/utils.py:422 app/utils.py:472
+#: templates/inventory/map.html:500 templates/inventory/report.html:496
 #, fuzzy
 msgid "Carreteres"
 msgstr "Carreteres"
 
-#: app/forms.py:137 app/utils.py:116 app/utils.py:161
+#: app/forms.py:138 app/utils.py:423 app/utils.py:473
+#: templates/inventory/map.html:508 templates/inventory/report.html:497
 #, fuzzy
 msgid "Voreres"
 msgstr "Voreres"
 
-#: app/forms.py:138 app/utils.py:117 app/utils.py:162
+#: app/forms.py:139 app/utils.py:424 app/utils.py:474
+#: templates/inventory/map.html:516 templates/inventory/report.html:498
 msgid "Enllumenat"
 msgstr "Enllumenat"
 
-#: app/forms.py:204
+#: app/forms.py:205
 #, fuzzy
 msgid "Categoría no válida"
 msgstr "Categoria"
 
-#: app/forms.py:207
+#: app/forms.py:208
 msgid "Subcategoría no válida para esta categoría"
 msgstr ""
 
-#: app/routes/analytics.py:327 app/utils.py:119 app/utils.py:164
+#: app/models.py:590
+msgid "Este item no puede ser aprobado"
+msgstr ""
+
+#: app/models.py:618 app/routes/admin.py:487
+msgid "Item aprobado correctamente"
+msgstr ""
+
+#: app/models.py:623
+msgid "Este item no puede ser rechazado"
+msgstr ""
+
+#: app/models.py:634 app/routes/admin.py:521
+msgid "Item rechazado"
+msgstr ""
+
+#: app/models.py:639
+msgid "Este item no puede ser resuelto"
+msgstr ""
+
+#: app/models.py:650 app/routes/inventory.py:1032
+msgid "Item marcado como resuelto"
+msgstr ""
+
+#: app/models.py:663 app/routes/inventory.py:1056
+#, fuzzy
+msgid "Item eliminado"
+msgstr "Eliminar"
+
+#: app/models.py:672
+#, fuzzy
+msgid "Ya has reportado que este item ya no está"
+msgstr "Ja has reportat que no hi és"
+
+#: app/models.py:675
+msgid "Este item ya está marcado como resuelto"
+msgstr ""
+
+#: app/models.py:698
+msgid "Item marcado como resuelto automáticamente"
+msgstr ""
+
+#: app/models.py:698
+msgid "Reporte registrado correctamente"
+msgstr ""
+
+#: app/routes/analytics.py:427 app/utils.py:426 app/utils.py:476
 #: templates/admin/analytics_trends.html:68 templates/contact.html:70
 msgid "Altres"
 msgstr "Altres"
 
-#: app/routes/admin.py:221
+#: app/routes/admin.py:280
 msgid "No puedes desactivar tu propia cuenta"
 msgstr ""
 
-#: app/routes/admin.py:227
+#: app/routes/admin.py:286
 #, fuzzy
 msgid "activado"
 msgstr "Actua"
 
-#: app/routes/admin.py:227
+#: app/routes/admin.py:286
 #, fuzzy
 msgid "desactivado"
 msgstr "Descripció"
 
-#: app/routes/admin.py:229
+#: app/routes/admin.py:288
 #, python-brace-format
 msgid "Usuario {} correctamente"
 msgstr ""
 
-#: app/routes/admin.py:241
+#: app/routes/admin.py:300
 #, fuzzy
 msgid "Este usuario ya está confirmado"
 msgstr "Aquest nom d'usuari ja està en ús"
 
-#: app/routes/admin.py:248
+#: app/routes/admin.py:307
 msgid "Usuario confirmado correctamente"
 msgstr ""
 
-#: app/routes/admin.py:290 app/routes/admin.py:315
+#: app/routes/admin.py:349 app/routes/admin.py:374
 #, fuzzy
 msgid "Esta iniciativa ya ha sido procesada"
 msgstr "Aquesta iniciativa ja ha finalitzat"
 
-#: app/routes/admin.py:304
+#: app/routes/admin.py:363
 msgid "Iniciativa aprobada correctamente"
 msgstr ""
 
-#: app/routes/admin.py:330
+#: app/routes/admin.py:389
 #, fuzzy
 msgid "Iniciativa rechazada"
 msgstr "Iniciatives relacionades"
 
-#: app/routes/admin.py:345
+#: app/routes/admin.py:403
 #, fuzzy
 msgid "Debes seleccionar un rol"
 msgstr "Selecciona un assumpte"
 
-#: app/routes/admin.py:350
+#: app/routes/admin.py:408
 msgid "No puedes cambiar tu propio rol de administrador"
 msgstr ""
 
-#: app/routes/admin.py:355
+#: app/routes/admin.py:413
 msgid "Rol no válido"
 msgstr ""
 
-#: app/routes/admin.py:364
+#: app/routes/admin.py:425
 msgid "Rol actualizado correctamente"
 msgstr ""
 
-#: app/routes/admin.py:414 app/routes/admin.py:444
-msgid "Este item no está pendiente de aprobación"
+#: app/routes/admin.py:561
+#, fuzzy
+msgid "Debes seleccionar un usuario y una sección"
+msgstr "Selecciona un assumpte"
+
+#: app/routes/admin.py:574
+msgid "Este usuario ya es responsable de esta sección"
 msgstr ""
 
-#: app/routes/admin.py:430
-msgid "Item aprobado correctamente"
+#: app/routes/admin.py:585
+msgid "El rol section_responsible no existe. Ejecuta flask init-db"
 msgstr ""
 
-#: app/routes/admin.py:461
-msgid "Item rechazado"
+#: app/routes/admin.py:598
+msgid "Responsable asignado correctamente"
 msgstr ""
 
-#: app/routes/analytics.py:146 app/routes/analytics.py:147
-#: app/routes/analytics.py:384 app/routes/analytics.py:658
-#: app/routes/analytics.py:659
+#: app/routes/admin.py:615
+msgid "Responsable removido correctamente"
+msgstr ""
+
+#: app/routes/admin.py:649
+#, fuzzy
+msgid "El nombre no puede estar vacío"
+msgstr "El teu nom d'usuari"
+
+#: app/routes/admin.py:658
+msgid "Nombre del distrito actualizado correctamente"
+msgstr ""
+
+#: app/routes/admin.py:676
+msgid "Nombre de la sección actualizado correctamente"
+msgstr ""
+
+#: app/routes/admin.py:689
+msgid "Selecciona almenys una secció per editar"
+msgstr ""
+
+#: app/routes/admin.py:695
+msgid "No s'han trobat les seccions especificades"
+msgstr ""
+
+#: app/routes/admin.py:917 app/routes/admin.py:945
+#, fuzzy
+msgid "Esta sugerencia ya ha sido procesada"
+msgstr "Aquesta iniciativa ja ha finalitzat"
+
+#: app/routes/admin.py:927
+msgid "Sugerencia aprobada y punto de contenedores creado correctamente"
+msgstr ""
+
+#: app/routes/admin.py:931
+#, fuzzy
+msgid "Error al aprobar la sugerencia"
+msgstr "Error en processar el pagament: {error}"
+
+#: app/routes/admin.py:953
+msgid "Sugerencia rechazada correctamente"
+msgstr ""
+
+#: app/routes/admin.py:957
+#, fuzzy
+msgid "Error al rechazar la sugerencia"
+msgstr "Error en processar el pagament: {error}"
+
+#: app/routes/analytics.py:244 app/routes/analytics.py:245
+#: app/routes/analytics.py:487 app/routes/analytics.py:794
+#: app/routes/analytics.py:795
+#: templates/admin/analytics_container_overflows.html:98
+#: templates/admin/container_point_suggestions.html:140
+#: templates/inventory/section_responsible.html:176
 msgid "Sense secció"
 msgstr ""
 
-#: app/routes/analytics.py:151 app/routes/analytics.py:663
+#: app/routes/analytics.py:249 app/routes/analytics.py:799
 #, python-brace-format
 msgid "Districte {code}"
 msgstr ""
 
-#: app/routes/analytics.py:152 app/routes/analytics.py:664
+#: app/routes/analytics.py:250 app/routes/analytics.py:800
 #, python-brace-format
 msgid "Secció {code}"
 msgstr ""
 
-#: app/routes/analytics.py:214
+#: app/routes/analytics.py:312
 #: templates/admin/analytics_inventory_by_zone.html:32
 #: templates/admin/analytics_top_categories.html:32
+#: templates/admin/sections.html:71
+#: templates/reports/preview_inventory_by_zone.html:68
+#: templates/reports/preview_inventory_by_zone.html:123
 msgid "Districte"
 msgstr ""
 
-#: app/routes/analytics.py:215
+#: app/routes/analytics.py:313
+#: templates/admin/container_point_suggestions.html:97
+#: templates/admin/sections.html:41 templates/inventory/detail.html:73
+#: templates/inventory/section_responsible.html:137
+#: templates/reports/preview_inventory_by_zone.html:122
 #, fuzzy
 msgid "Secció"
 msgstr "Acció"
 
-#: app/routes/analytics.py:216
+#: app/routes/analytics.py:314
 msgid "Codi Secció"
 msgstr ""
 
-#: app/routes/analytics.py:217 app/routes/analytics.py:421
+#: app/routes/analytics.py:315 app/routes/analytics.py:524
 #: templates/admin/analytics_inventory_by_zone.html:43
 #: templates/admin/analytics_inventory_by_zone.html:114
 #: templates/admin/analytics_top_categories.html:62
-#: templates/admin/analytics_trends.html:32 templates/admin/dashboard.html:232
+#: templates/admin/analytics_trends.html:32 templates/admin/dashboard.html:203
 #: templates/admin/pending_initiatives.html:60
-#: templates/emails/inventory_approved.html:11 templates/index.html:193
-#: templates/initiatives/list.html:42 templates/inventory/admin.html:160
-#: templates/inventory/admin.html:413 templates/inventory/report.html:52
-#: templates/profile.html:197
+#: templates/emails/inventory_approved.html:11 templates/index.html:941
+#: templates/initiatives/list.html:42 templates/inventory/admin.html:144
+#: templates/inventory/admin.html:433 templates/inventory/report.html:75
+#: templates/inventory/section_responsible.html:135 templates/profile.html:190
+#: templates/reports/preview_top_categories.html:51
 msgid "Categoria"
 msgstr "Categoria"
 
-#: app/routes/analytics.py:218 app/routes/analytics.py:422
+#: app/routes/analytics.py:316 app/routes/analytics.py:525
 #: templates/admin/analytics_inventory_by_zone.html:115
 #: templates/admin/analytics_top_categories.html:63
-#: templates/inventory/report.html:61
+#: templates/inventory/report.html:84
+#: templates/reports/preview_top_categories.html:52
 #, fuzzy
 msgid "Subcategoria"
 msgstr "Categoria"
 
-#: app/routes/analytics.py:219 templates/emails/inventory_approved.html:16
-#: templates/initiative_detail.html:110 templates/inventory/admin.html:162
-#: templates/inventory/admin.html:415 templates/inventory/report.html:71
+#: app/routes/analytics.py:317 templates/emails/inventory_approved.html:16
+#: templates/initiative_detail.html:117 templates/inventory/admin.html:146
+#: templates/inventory/admin.html:435 templates/inventory/detail.html:128
+#: templates/inventory/report.html:94
+#: templates/inventory/section_responsible.html:136
 msgid "Descripció"
 msgstr "Descripció"
 
-#: app/routes/analytics.py:220
+#: app/routes/analytics.py:318
 #: templates/admin/analytics_inventory_by_zone.html:116
-#: templates/profile.html:198
+#: templates/admin/container_point_suggestions.html:280
+#: templates/profile.html:191
 msgid "Adreça"
 msgstr ""
 
-#: app/routes/analytics.py:221
+#: app/routes/analytics.py:319
 msgid "Latitud"
 msgstr ""
 
-#: app/routes/analytics.py:222
+#: app/routes/analytics.py:320
 msgid "Longitud"
 msgstr ""
 
-#: app/routes/analytics.py:223
+#: app/routes/analytics.py:321
 #: templates/admin/analytics_inventory_by_zone.html:117
-#: templates/inventory/admin.html:164
+#: templates/inventory/admin.html:148
 #, fuzzy
 msgid "Importància"
 msgstr "Participa"
 
-#: app/routes/analytics.py:224
+#: app/routes/analytics.py:322
 #: templates/admin/analytics_inventory_by_zone.html:118
-#: templates/inventory/admin.html:68 templates/inventory/admin.html:126
-#: templates/profile.html:122
+#: templates/inventory/admin.html:60 templates/inventory/admin.html:110
+#: templates/inventory/section_responsible.html:79
+#: templates/inventory/section_responsible.html:117 templates/profile.html:115
 msgid "Resolts"
 msgstr ""
 
-#: app/routes/analytics.py:225
+#: app/routes/analytics.py:323
 msgid "Data Creació"
 msgstr ""
 
-#: app/routes/analytics.py:323
+#: app/routes/analytics.py:423
 #: templates/admin/analytics_inventory_by_zone.html:119
 #: templates/admin/analytics_purchases.html:155
-#: templates/admin/analytics_trends.html:64 templates/admin/dashboard.html:157
-#: templates/admin/dashboard.html:194 templates/admin/dashboard.html:233
+#: templates/admin/analytics_trends.html:64
+#: templates/admin/container_point_suggestions.html:99
+#: templates/admin/dashboard.html:166 templates/admin/dashboard.html:204
 #: templates/admin/donations.html:69
-#: templates/admin/pending_initiatives.html:61 templates/admin/users.html:92
+#: templates/admin/pending_initiatives.html:61 templates/admin/users.html:93
 #: templates/emails/donation_confirmation.html:16
 #: templates/emails/initiative_approved.html:12
 #: templates/emails/initiative_reminder.html:12
 #: templates/emails/participant_confirmation.html:12
-#: templates/initiative_detail.html:55 templates/inventory/admin.html:167
-#: templates/profile.html:200
+#: templates/initiative_detail.html:62 templates/inventory/admin.html:151
+#: templates/inventory/section_responsible.html:139 templates/profile.html:193
 msgid "Data"
 msgstr "Data"
 
-#: app/routes/analytics.py:324 app/routes/analytics.py:423
+#: app/routes/analytics.py:424 app/routes/analytics.py:526
 #: templates/admin/analytics_trends.html:65 templates/inventory/admin.html:36
+#: templates/inventory/section_responsible.html:55
 #, fuzzy
 msgid "Total"
 msgstr "Títol"
 
-#: app/routes/analytics.py:424 templates/admin/analytics_top_categories.html:65
+#: app/routes/analytics.py:527 templates/admin/analytics_top_categories.html:65
 msgid "Zones Afectades"
 msgstr ""
 
-#: app/routes/analytics.py:450
+#: app/routes/analytics.py:553
 msgid "Tipus de report no especificat"
 msgstr ""
 
-#: app/routes/analytics.py:456
+#: app/routes/analytics.py:590
 #, fuzzy
 msgid ""
 "El sistema de pagos no està configurat. Si us plau, contacta amb "
@@ -499,45 +582,45 @@ msgstr ""
 "El sistema de pagaments no està configurat. Si us plau, contacta amb "
 "nosaltres."
 
-#: app/routes/analytics.py:476
+#: app/routes/analytics.py:610
 msgid "Descàrrega de Report - Tarracograf"
 msgstr ""
 
-#: app/routes/analytics.py:477
+#: app/routes/analytics.py:611
 #, python-brace-format
 msgid "Report: {report_type}"
 msgstr ""
 
-#: app/routes/analytics.py:512
+#: app/routes/analytics.py:646
 #, fuzzy, python-brace-format
 msgid "Error al processar el pagament: {error}"
 msgstr "Error en processar el pagament: {error}"
 
-#: app/routes/analytics.py:516
+#: app/routes/analytics.py:650
 msgid "Error inesperat. Si us plau, torna-ho a intentar."
 msgstr ""
 
-#: app/routes/analytics.py:526
+#: app/routes/analytics.py:660
 msgid "Sessió de pagament no vàlida"
 msgstr ""
 
-#: app/routes/analytics.py:533
+#: app/routes/analytics.py:667
 msgid "Compra no trobada"
 msgstr ""
 
-#: app/routes/analytics.py:538
+#: app/routes/analytics.py:672
 msgid "No tens permís per accedir a aquesta compra"
 msgstr ""
 
-#: app/routes/analytics.py:589
+#: app/routes/analytics.py:723
 msgid "No tens permís per descarregar aquest report"
 msgstr ""
 
-#: app/routes/analytics.py:594 app/routes/analytics.py:599
+#: app/routes/analytics.py:728 app/routes/analytics.py:733
 msgid "Aquest report encara no està disponible per descarregar"
 msgstr ""
 
-#: app/routes/analytics.py:774
+#: app/routes/analytics.py:915
 msgid "Tipus de report no vàlid"
 msgstr ""
 
@@ -568,166 +651,194 @@ msgstr "Error en processar el pagament: {error}"
 msgid "Error inesperado. Por favor, inténtalo de nuevo."
 msgstr "Error inesperat. Si us plau, torna-ho a intentar."
 
-#: app/routes/initiatives.py:115
+#: app/routes/initiatives.py:129
 msgid ""
 "Tu iniciativa ha sido creada y está pendiente de aprobación. Te "
 "notificaremos cuando sea revisada."
 msgstr ""
 
-#: app/routes/inventory.py:104
-msgid ""
-"Les coordenades estan fora del límit de Tarragona. Si us plau, selecciona"
-" una ubicació dins de la ciutat."
-msgstr ""
-
-#: app/routes/inventory.py:120
+#: app/routes/inventory.py:129
 msgid "La foto es obligatoria para reportar un item"
 msgstr ""
 
-#: app/routes/inventory.py:125
+#: app/routes/inventory.py:134
 msgid "Por favor, sube una imagen válida (JPG, PNG, GIF)"
 msgstr ""
 
-#: app/routes/inventory.py:143
+#: app/routes/inventory.py:168
+msgid ""
+"No se pudo obtener la ubicación de la foto (no tiene coordenadas GPS). "
+"Por favor, selecciona la ubicación en el mapa o usa el botón \"Usar la "
+"meva ubicació actual\"."
+msgstr ""
+
+#: app/routes/inventory.py:184
+#, python-format
+msgid ""
+"La ubicació seleccionada està a %(m)d m de la ubicació de la foto. Hem "
+"utilitzat la ubicació seleccionada."
+msgstr ""
+
+#: app/routes/inventory.py:201
+msgid ""
+"Les coordenades estan fora del límit de Tarragona. Si us plau, assegura't"
+" que la foto sigui dins de la ciutat o selecciona una ubicació dins del "
+"límit."
+msgstr ""
+
+#: app/routes/inventory.py:234
+msgid ""
+"Els punts de contenidors desbordats ara es gestionen mitjançant el "
+"sistema de punts de contenidors al mapa. Si us plau, utilitza aquesta "
+"funcionalitat per reportar desbordaments."
+msgstr ""
+
+#: app/routes/inventory.py:335
 msgid ""
 "¡Item reportado con éxito! Está pendiente de aprobación por un "
 "administrador."
 msgstr ""
 
-#: app/routes/inventory.py:147
+#: app/routes/inventory.py:339
 msgid "Error: coordenadas inválidas"
 msgstr ""
 
-#: app/routes/inventory.py:150
+#: app/routes/inventory.py:342
 #, fuzzy
 msgid "Error al reportar el item. Por favor, inténtalo de nuevo."
 msgstr "Error inesperat. Si us plau, torna-ho a intentar."
 
-#: app/routes/inventory.py:340
+#: app/routes/inventory.py:668 app/routes/inventory.py:815
+msgid "No tienes permisos para gestionar este punto"
+msgstr ""
+
+#: app/routes/inventory.py:712
+#, fuzzy
+msgid "Ja has reportat que aquest punt està desbordat"
+msgstr "Ja has reportat que no hi és"
+
+#: app/routes/inventory.py:742
+msgid "Gràcies! Hem registrat que aquest punt està desbordat."
+msgstr ""
+
+#: app/routes/inventory.py:747 templates/inventory/map.html:1294
+#, fuzzy
+msgid "Error en registrar el report. Intenta-ho de nou més tard."
+msgstr "Error inesperat. Si us plau, torna-ho a intentar."
+
+#: app/routes/inventory.py:795
+msgid ""
+"Sugerència enviada correctament. Un administrador o responsable la "
+"revisarà."
+msgstr ""
+
+#: app/routes/inventory.py:884
 msgid "Ya has votado este item"
 msgstr ""
 
-#: app/routes/inventory.py:370
+#: app/routes/inventory.py:903
 msgid "Voto registrado correctamente"
 msgstr ""
 
-#: app/routes/inventory.py:384
-#, fuzzy
-msgid "Ya has reportado que este item ya no está"
-msgstr "Ja has reportat que no hi és"
-
-#: app/routes/inventory.py:388
-msgid "Este item ya está marcado como resuelto"
+#: app/routes/inventory.py:1076
+msgid "No tienes secciones asignadas"
 msgstr ""
 
-#: app/routes/inventory.py:427
-msgid "Reporte registrado correctamente"
+#: app/routes/inventory.py:1123 app/routes/inventory.py:1144
+msgid "No tienes permisos para gestionar este item"
 msgstr ""
 
-#: app/routes/inventory.py:427
-msgid "Item marcado como resuelto automáticamente"
-msgstr ""
-
-#: app/routes/inventory.py:526
-msgid "Item marcado como resuelto"
-msgstr ""
-
-#: app/routes/inventory.py:550
-#, fuzzy
-msgid "Item eliminado"
-msgstr "Eliminar"
-
-#: app/routes/main.py:88
+#: app/routes/main.py:98
 msgid "El formulari ja s'ha enviat. Si us plau, espera uns segons."
 msgstr ""
 
-#: app/routes/main.py:106
+#: app/routes/main.py:116
 msgid "Si us plau, omple tots els camps obligatoris"
 msgstr ""
 
-#: app/routes/main.py:144
+#: app/routes/main.py:154
 msgid "Gràcies pel teu missatge. Et respondrem aviat."
 msgstr ""
 
-#: app/routes/main.py:173
+#: app/routes/main.py:183
 #, fuzzy
 msgid "El teu correu electrònic ja està confirmat."
 msgstr "El teu correu electrònic"
 
-#: app/routes/main.py:181
+#: app/routes/main.py:191
 msgid "Correu electrònic confirmat correctament! Ja pots iniciar sessió."
 msgstr ""
 
-#: app/routes/main.py:185
+#: app/routes/main.py:195
 msgid ""
 "El enllaç de confirmació ha expirat. Si us plau, contacta amb "
 "l'administrador o sol·licita un nou enllaç."
 msgstr ""
 
-#: app/routes/main.py:188
+#: app/routes/main.py:198
 msgid ""
 "El enllaç de confirmació no és vàlid. Si us plau, contacta amb "
 "l'administrador."
 msgstr ""
 
-#: app/routes/main.py:192
+#: app/routes/main.py:202
 msgid ""
 "Hi ha hagut un error al confirmar el correu. Si us plau, contacta amb "
 "l'administrador."
 msgstr ""
 
-#: app/services/email_service.py:120
+#: app/services/email_service.py:165
 #, fuzzy
 msgid "Benvingut/da a Tarracograf! 🌱"
 msgstr "Donació a Tarracograf"
 
-#: app/services/email_service.py:138
+#: app/services/email_service.py:183
 #, fuzzy
 msgid "Gràcies per la teva donació! 💚"
 msgstr "Gràcies per la teva donació!"
 
-#: app/services/email_service.py:155
+#: app/services/email_service.py:200
 msgid "La teva iniciativa ha estat aprovada! ✅"
 msgstr ""
 
-#: app/services/email_service.py:170
+#: app/services/email_service.py:215
 #: templates/emails/initiative_rejected.html:4
 #, fuzzy
 msgid "Informació sobre la teva iniciativa"
 msgstr "Informació sobre voluntariat"
 
-#: app/services/email_service.py:187
+#: app/services/email_service.py:232
 msgid "Recordatori: La teva iniciativa és demà! 📅"
 msgstr ""
 
-#: app/services/email_service.py:207
+#: app/services/email_service.py:252
 msgid "Confirmació de participació en iniciativa"
 msgstr ""
 
-#: app/services/email_service.py:233
+#: app/services/email_service.py:278
 msgid "El teu reportatge ha estat aprovat! ✅"
 msgstr ""
 
-#: app/services/email_service.py:248 templates/emails/inventory_rejected.html:4
+#: app/services/email_service.py:293 templates/emails/inventory_rejected.html:4
 #, fuzzy
 msgid "Informació sobre el teu reportatge"
 msgstr "Informació sobre voluntariat"
 
-#: app/services/email_service.py:261 templates/emails/contact_response.html:4
+#: app/services/email_service.py:306 templates/emails/contact_response.html:4
 #, fuzzy
 msgid "Gràcies per contactar amb Tarracograf"
 msgstr "Donació a Tarracograf"
 
-#: templates/about.html:3 templates/base.html:57
+#: templates/about.html:3 templates/base.html:61 templates/base.html:233
 #: templates/includes/footer.html:58
 msgid "Sobre Nosaltres"
 msgstr "Sobre Nosaltres"
 
-#: templates/about.html:10 templates/includes/footer.html:6
+#: templates/about.html:182 templates/includes/footer.html:6
 msgid "Sobre Tarracograf"
 msgstr "Sobre Tarracograf"
 
-#: templates/about.html:14
+#: templates/about.html:186
 msgid ""
 "Som una plataforma ciutadana compromesa amb la transformació de Tarragona"
 " en una ciutat més neta, sostenible i cívica."
@@ -735,11 +846,11 @@ msgstr ""
 "Som una plataforma ciutadana compromesa amb la transformació de Tarragona"
 " en una ciutat més neta, sostenible i cívica."
 
-#: templates/about.html:19
+#: templates/about.html:191
 msgid "La Nostra Missió"
 msgstr "La Nostra Missió"
 
-#: templates/about.html:21
+#: templates/about.html:193
 msgid ""
 "Connectar ciutadans compromesos amb iniciatives que millorin el nostre "
 "entorn urbà, fomentant la participació activa en la construcció d'una "
@@ -749,11 +860,11 @@ msgstr ""
 "entorn urbà, fomentant la participació activa en la construcció d'una "
 "Tarragona més habitable i sostenible per a tothom."
 
-#: templates/about.html:26
+#: templates/about.html:198
 msgid "La Nostra Visió"
 msgstr "La Nostra Visió"
 
-#: templates/about.html:28
+#: templates/about.html:200
 msgid ""
 "Ser el punt de trobada digital on cada tarragoní pugui contribuir "
 "activament al canvi positiu, creant una xarxa ciutadana forta que impulsi"
@@ -763,15 +874,15 @@ msgstr ""
 "activament al canvi positiu, creant una xarxa ciutadana forta que impulsi"
 " la transformació sostenible de la nostra ciutat."
 
-#: templates/about.html:35
+#: templates/about.html:207
 msgid "Els Nostres Valors"
 msgstr "Els Nostres Valors"
 
-#: templates/about.html:43
+#: templates/about.html:215
 msgid "Col·laboració"
 msgstr "Col·laboració"
 
-#: templates/about.html:44
+#: templates/about.html:216
 msgid ""
 "Creiem en el poder de l'acció col·lectiva per generar canvis "
 "significatius."
@@ -779,88 +890,102 @@ msgstr ""
 "Creiem en el poder de l'acció col·lectiva per generar canvis "
 "significatius."
 
-#: templates/about.html:51
+#: templates/about.html:223
 msgid "Sostenibilitat"
 msgstr "Sostenibilitat"
 
-#: templates/about.html:52
+#: templates/about.html:224
 msgid "Promovem accions que respectin i protegeixin el nostre medi ambient urbà."
 msgstr ""
 
-#: templates/about.html:59
+#: templates/about.html:231
 msgid "Compromís"
 msgstr "Compromís"
 
-#: templates/about.html:60
+#: templates/about.html:232
 msgid "Fomentem la responsabilitat individual i col·lectiva amb la nostra ciutat."
 msgstr "Fomentem la responsabilitat individual i col·lectiva amb la nostra ciutat."
 
-#: templates/about.html:67
+#: templates/about.html:239
 msgid "Acció"
 msgstr "Acció"
 
-#: templates/about.html:68
+#: templates/about.html:240
 #, fuzzy
 msgid "Transformem les bones intencions en accions concretes i mesurables."
 msgstr "Transforma les bones intencions en accions concretes i mesurables."
 
-#: templates/about.html:75
+#: templates/about.html:247
 msgid "Civisme"
 msgstr "Civisme"
 
-#: templates/about.html:76
+#: templates/about.html:248
 msgid "Promovem el respecte mutu i la convivència harmònica en espais públics."
 msgstr "Promovem el respecte mutu i la convivència harmònica en espais públics."
 
-#: templates/about.html:83
+#: templates/about.html:255
 msgid "Transparència"
 msgstr "Transparència"
 
-#: templates/about.html:84
+#: templates/about.html:256
 msgid "Operem amb total obertura sobre les nostres activitats i impacte."
 msgstr "Operem amb total obertura sobre les nostres activitats i impacte."
 
-#: templates/about.html:89
+#: templates/about.html:262
 msgid "Com Funciona?"
 msgstr "Com Funciona?"
 
-#: templates/about.html:95
+#: templates/about.html:263
+msgid "Quatre passos simples per començar a transformar Tarragona"
+msgstr ""
+
+#: templates/about.html:275
 msgid "Descobreix"
 msgstr "Descobreix"
 
-#: templates/about.html:96
-msgid "Explora les iniciatives actives a la teva ciutat"
-msgstr "Explora les iniciatives actives a la teva ciutat"
+#: templates/about.html:276
+msgid ""
+"Explora les iniciatives actives i reportatges a la teva ciutat. "
+"Visualitza el mapa interactiu i descobreix què està passant al teu "
+"voltant."
+msgstr ""
 
-#: templates/about.html:103
+#: templates/about.html:288
+#, fuzzy
+msgid "Reporta"
+msgstr "Reportar Problema"
+
+#: templates/about.html:289
+msgid ""
+"Identifica problemes de neteja, coloms o altres incidències. Puja una "
+"foto i indica la ubicació exacta al mapa."
+msgstr ""
+
+#: templates/about.html:301
 msgid "Participa"
 msgstr "Participa"
 
-#: templates/about.html:104
-msgid "Uneix-te a les iniciatives que et motivin"
-msgstr "Uneix-te a les iniciatives que et motivin"
+#: templates/about.html:302
+msgid ""
+"Uneix-te a iniciatives ciutadanes, vota per les problemàtiques més "
+"importants i connecta amb altres ciutadans compromesos."
+msgstr ""
 
-#: templates/about.html:111
-msgid "Actua"
-msgstr "Actua"
-
-#: templates/about.html:112
-msgid "Col·labora amb altres ciutadans compromesos"
-msgstr "Col·labora amb altres ciutadans compromesos"
-
-#: templates/about.html:119
+#: templates/about.html:314
 msgid "Impacta"
 msgstr "Impacta"
 
-#: templates/about.html:120
-msgid "Genera canvis positius a la teva comunitat"
-msgstr "Genera canvis positius a la teva comunitat"
+#: templates/about.html:315
+msgid ""
+"Segueix l'evolució dels reportatges i veu com la teva participació genera"
+" canvis positius a la comunitat."
+msgstr ""
 
-#: templates/about.html:126
+#: templates/about.html:322
 msgid "Uneix-te al Moviment!"
 msgstr "Uneix-te al Moviment!"
 
-#: templates/about.html:128
+#: templates/about.html:324
 msgid ""
 "Cada acció compta. La teva participació pot marcar la diferència en la "
 "construcció d'una Tarragona millor per a tothom."
@@ -868,7 +993,7 @@ msgstr ""
 "Cada acció compta. La teva participació pot marcar la diferència en la "
 "construcció d'una Tarragona millor per a tothom."
 
-#: templates/about.html:131
+#: templates/about.html:327
 msgid "Explorar Iniciatives"
 msgstr "Explorar Iniciatives"
 
@@ -882,76 +1007,101 @@ msgstr "Radiografia de la Ciutat"
 msgid "Tarracograf - Radiografia de la ciutat"
 msgstr "Radiografia de la Ciutat"
 
-#: templates/base.html:46 templates/includes/footer.html:38
+#: templates/base.html:50 templates/base.html:222
+#: templates/includes/footer.html:38
 msgid "Inici"
 msgstr "Inici"
 
-#: templates/base.html:52 templates/index.html:209
+#: templates/base.html:56 templates/base.html:228 templates/index.html:957
 #: templates/initiatives/list.html:56
 msgid "Pròximes"
 msgstr "Pròximes"
 
-#: templates/base.html:62 templates/includes/footer.html:53
+#: templates/admin/analytics_container_overflows.html:90
+#: templates/admin/analytics_container_overflows.html:132
+#: templates/admin/analytics_container_overflows.html:195
+#: templates/base.html:66 templates/base.html:238
+#: templates/includes/footer.html:53
+#: templates/reports/preview_top_categories.html:53
 #: templates/reports/public.html:3
 msgid "Reports"
 msgstr ""
 
-#: templates/base.html:67 templates/contact.html:3
-#: templates/includes/footer.html:70 templates/includes/footer.html:101
+#: templates/base.html:71 templates/base.html:243 templates/base.html:441
+#: templates/contact.html:3 templates/includes/footer.html:70
+#: templates/includes/footer.html:103 templates/security/register.html:154
 msgid "Contacte"
 msgstr "Contacte"
 
-#: templates/base.html:73 templates/includes/footer.html:48
-#: templates/inventory/map.html:3 templates/inventory/map.html:52
+#: templates/base.html:77 templates/base.html:253
+#: templates/includes/footer.html:48 templates/inventory/map.html:3
+#: templates/inventory/map.html:165
 msgid "Inventari"
 msgstr ""
 
-#: templates/base.html:78
+#: templates/base.html:82 templates/base.html:259
 #, fuzzy
 msgid "Veure Mapa"
 msgstr "Veure Més"
 
-#: templates/base.html:84 templates/inventory/report.html:3
+#: templates/base.html:88 templates/base.html:264
+#: templates/inventory/report.html:3
 #, fuzzy
 msgid "Reportar Item"
 msgstr "Reportar Problema"
 
-#: templates/base.html:90
+#: templates/base.html:94 templates/base.html:269
 #, fuzzy
 msgid "Iniciar sessió per reportar"
 msgstr "Uneix-te per Reportar"
 
-#: templates/base.html:98 templates/inventory/map.html:193
+#: templates/base.html:102 templates/base.html:275
+#: templates/inventory/section_responsible.html:3
+#: templates/inventory/section_responsible.html:26
+#, fuzzy
+msgid "La Meva Secció"
+msgstr "Acció"
+
+#: templates/base.html:110 templates/base.html:281
+#: templates/inventory/map.html:560
 #, fuzzy
 msgid "Administrar"
 msgstr "Panel d'Administració"
 
-#: templates/base.html:156 templates/includes/footer.html:81
-#: templates/profile.html:3
+#: templates/base.html:168 templates/base.html:328
+#: templates/includes/footer.html:83 templates/profile.html:3
 msgid "El Meu Perfil"
 msgstr "El Meu Perfil"
 
-#: templates/admin/dashboard.html:3 templates/base.html:164
+#: templates/admin/dashboard.html:3 templates/base.html:176
+#: templates/base.html:334
 msgid "Admin"
 msgstr "Admin"
 
-#: templates/base.html:172
+#: templates/base.html:184 templates/base.html:340
 msgid "Sortir"
 msgstr "Sortir"
 
-#: templates/base.html:180 templates/includes/footer.html:87
+#: templates/base.html:192 templates/base.html:345
+#: templates/includes/footer.html:89
 msgid "Accedir"
 msgstr "Accedir"
 
-#: templates/base.html:185 templates/includes/footer.html:92
+#: templates/base.html:197 templates/base.html:348
+#: templates/includes/footer.html:94
 msgid "Registrar-se"
 msgstr "Registrar-se"
 
-#: templates/base.html:204 templates/donate.html:17
+#: templates/base.html:294
+#, fuzzy
+msgid "Idioma"
+msgstr "Niu"
+
+#: templates/base.html:367 templates/donate.html:17
 msgid "Ajuda'ns a mantenir Tarracograf"
 msgstr "Ajuda'ns a mantenir Tarracograf"
 
-#: templates/base.html:205 templates/donate.html:19
+#: templates/base.html:368 templates/donate.html:19
 msgid ""
 "Les donacions voluntàries ens ajuden a cobrir els costos del servidor i "
 "mantenir la plataforma gratuïta per a tothom."
@@ -959,9 +1109,97 @@ msgstr ""
 "Les donacions voluntàries ens ajuden a cobrir els costos del servidor i "
 "mantenir la plataforma gratuïta per a tothom."
 
-#: templates/base.html:211 templates/donate.html:3
-#: templates/includes/footer.html:75
+#: templates/base.html:374 templates/donate.html:3
+#: templates/includes/footer.html:76
 msgid "Donar"
+msgstr "Donar"
+
+#: templates/base.html:420 templates/security/register.html:133
+msgid "Condicions d'ús, privacitat i cessió de continguts"
+msgstr ""
+
+#: templates/base.html:424 templates/security/register.html:137
+msgid "Resum pràctic"
+msgstr ""
+
+#: templates/base.html:426 templates/security/register.html:139
+msgid ""
+"Respecta la llei: no publiquis contingut il·legal, difamatori o amb dades"
+" personals de tercers sense consentiment."
+msgstr ""
+
+#: templates/base.html:427 templates/security/register.html:140
+msgid ""
+"Imatges: en pujar-les ens concedeixes una llicència no exclusiva per "
+"usar-les a la plataforma, comunicacions i accions de difusió del "
+"projecte. No pengis imatges amb menors o persones identificables sense "
+"permís, ni dades sensibles."
+msgstr ""
+
+#: templates/base.html:428 templates/security/register.html:141
+msgid ""
+"Dades personals: recollim només el necessari per al servei (registre, "
+"comunicacions, moderació). Pots exercir els teus drets de protecció de "
+"dades escrivint a hola@tarracograf.cat."
+msgstr ""
+
+#: templates/base.html:429 templates/security/register.html:142
+msgid ""
+"Donacions: no emmagatzemem dades bancàries; el pagament es processa pel "
+"proveïdor de pagaments."
+msgstr ""
+
+#: templates/base.html:430 templates/security/register.html:143
+msgid ""
+"Moderació: podem editar o eliminar continguts que incompleixin aquestes "
+"condicions o la normativa vigent."
+msgstr ""
+
+#: templates/base.html:432 templates/security/register.html:145
+#, fuzzy
+msgid "Text complet (resum)"
+msgstr "Total Reportatges"
+
+#: templates/base.html:433 templates/security/register.html:146
+msgid "Responsable"
+msgstr ""
+
+#: templates/base.html:434 templates/security/register.html:147
+#, fuzzy
+msgid "Finalitats"
+msgstr "Filtrar"
+
+#: templates/base.html:435 templates/security/register.html:148
+msgid "Base legal"
+msgstr ""
+
+#: templates/base.html:436 templates/security/register.html:149
+#, fuzzy
+msgid "Drets"
+msgstr "Altres"
+
+#: templates/base.html:437 templates/security/register.html:150
+msgid "Imatges i continguts aportats"
+msgstr ""
+
+#: templates/base.html:438 templates/security/register.html:151
+msgid "Conservació"
+msgstr ""
+
+#: templates/base.html:439 templates/security/register.html:152
+#, fuzzy
+msgid "Seguretat"
+msgstr "Veure Tots"
+
+#: templates/base.html:440 templates/security/register.html:153
+#, fuzzy
+msgid "Pagaments i donacions"
+msgstr "Veure Participacions"
+
+#: templates/admin/container_point_suggestions.html:285 templates/base.html:444
+#: templates/security/register.html:157
+#, fuzzy
+msgid "Tancar"
 msgstr "Donar"
 
 #: templates/contact.html:13
@@ -976,11 +1214,11 @@ msgstr ""
 "Tens una idea per millorar la ciutat? Vols organitzar una iniciativa? "
 "Necessites més informació? Estem aquí per escoltar-te!"
 
-#: templates/contact.html:29 templates/initiative_detail.html:229
+#: templates/contact.html:29 templates/initiative_detail.html:228
 msgid "Nom complet"
 msgstr "Nom complet"
 
-#: templates/contact.html:36 templates/initiative_detail.html:231
+#: templates/contact.html:36 templates/initiative_detail.html:230
 msgid "El teu nom"
 msgstr "El teu nom"
 
@@ -1042,7 +1280,7 @@ msgid "Si us plau, escriu un missatge"
 msgstr "Si us plau, escriu un missatge"
 
 #: templates/contact.html:94 templates/emails/admin_notification.html:28
-#: templates/initiative_detail.html:241
+#: templates/initiative_detail.html:240
 msgid "Telèfon"
 msgstr "Telèfon"
 
@@ -1057,20 +1295,22 @@ msgstr "opcional"
 msgid "Enviar Missatge"
 msgstr "Enviar Missatge"
 
-#: templates/admin/dashboard.html:156 templates/admin/donations.html:68
+#: templates/admin/dashboard.html:165 templates/admin/donations.html:68
 #: templates/admin/users.html:89 templates/contact.html:125
 #: templates/donate.html:68 templates/emails/admin_notification.html:18
-#: templates/initiative_detail.html:235
+#: templates/initiative_detail.html:234
 msgid "Email"
 msgstr "Email"
 
+#: templates/admin/container_point_suggestions.html:96
 #: templates/admin/pending_initiatives.html:62 templates/contact.html:140
 #: templates/emails/initiative_approved.html:13
 #: templates/emails/initiative_reminder.html:16
 #: templates/emails/inventory_approved.html:13
 #: templates/emails/participant_confirmation.html:16
-#: templates/initiative_detail.html:46 templates/initiative_detail.html:85
-#: templates/inventory/admin.html:161 templates/inventory/admin.html:418
+#: templates/initiative_detail.html:53 templates/initiative_detail.html:92
+#: templates/inventory/admin.html:145 templates/inventory/admin.html:438
+#: templates/inventory/detail.html:54 templates/inventory/detail.html:117
 msgid "Ubicació"
 msgstr "Ubicació"
 
@@ -1140,7 +1380,7 @@ msgstr ""
 "nostre objectiu és facilitar l'acció ciutadana sense barreres "
 "econòmiques."
 
-#: templates/contact.html:268
+#: templates/contact.html:268 templates/inventory/map.html:1266
 msgid "Enviant..."
 msgstr ""
 
@@ -1204,47 +1444,132 @@ msgstr "Tornar a l'inici"
 msgid "Contactar"
 msgstr "Contacte"
 
-#: templates/index.html:18 templates/index.html:57
-msgid "Reportar Problema"
-msgstr "Reportar Problema"
+#: templates/admin/container_point_suggestions.html:212
+#: templates/admin/container_point_suggestions.html:217
+#: templates/admin/users.html:255 templates/index.html:651
+#, fuzzy
+msgid "Anterior"
+msgstr "Categoria"
 
-#: templates/index.html:21
-msgid "Radiografia Ciutat"
-msgstr "Radiografia Ciutat"
-
-#: templates/index.html:33
-msgid ""
-"La radiografia de la ciutat. Reporta problemes de neteja, visualitza "
-"l'estat de la ciutat i participa en la millora de Tarragona."
+#: templates/admin/container_point_suggestions.html:244
+#: templates/admin/container_point_suggestions.html:249
+#: templates/admin/users.html:254 templates/index.html:655
+msgid "Següent"
 msgstr ""
 
-#: templates/index.html:39
-msgid "Reportatges Actius"
-msgstr "Reportatges Actius"
+#: templates/index.html:671
+#, fuzzy
+msgid "Radiografia Ciutadana de Tarragona"
+msgstr "Radiografia de la Ciutat"
 
-#: templates/index.html:43
-msgid "Problemàtiques"
-msgstr "Problemàtiques"
+#: templates/index.html:675
+msgid "La teva ciutat, la teva veu"
+msgstr ""
+
+#: templates/index.html:679
+msgid ""
+"Reporta problemes, visualitza l'estat de la ciutat i participa en la "
+"millora de Tarragona. Junts construïm una ciutat millor."
+msgstr ""
+
+#: templates/index.html:686
+#, fuzzy
+msgid "Reportatges"
+msgstr "Total Reportatges"
 
 #: templates/admin/analytics.html:51 templates/includes/footer.html:43
-#: templates/index.html:47
+#: templates/index.html:690
 #, fuzzy
 msgid "Iniciatives"
 msgstr "Veure Iniciatives"
 
-#: templates/index.html:53
-msgid "Veure Mapa del Inventari"
-msgstr "Veure Mapa de l'Inventari"
+#: templates/index.html:694
+#, fuzzy
+msgid "Ciutadans"
+msgstr "Ciutadans Actius"
 
-#: templates/index.html:61
-msgid "Uneix-te per Reportar"
+#: templates/index.html:702
+#, fuzzy
+msgid "Com Reportar"
+msgstr "Reportar Problema"
+
+#: templates/index.html:706
+msgid "Fes Visible el que Veus"
+msgstr ""
+
+#: templates/index.html:712
+#, fuzzy
+msgid "Puja una foto del problema"
+msgstr "Reportar un problema"
+
+#: templates/index.html:716
+#, fuzzy
+msgid "Indica la ubicació exacta"
+msgstr "Usar ubicació actual"
+
+#: templates/index.html:720
+#, fuzzy
+msgid "Selecciona la categoria i subcategoria"
+msgstr "Selecciona una subcategoria"
+
+#: templates/index.html:724
+#, fuzzy
+msgid "Envia el reportatge"
+msgstr "Total Reportatges"
+
+#: templates/index.html:732
+msgid "Categories Disponibles"
+msgstr ""
+
+#: templates/index.html:736
+#, fuzzy
+msgid "Què Pots Reportar?"
 msgstr "Uneix-te per Reportar"
 
-#: templates/index.html:75
+#: templates/index.html:770
+#, fuzzy
+msgid "Mapa Interactiu"
+msgstr "Actua"
+
+#: templates/index.html:774
+#, fuzzy
+msgid "Explora la Ciutat"
+msgstr "Radiografia de la Ciutat"
+
+#: templates/index.html:780
+msgid "Visualitza tots els reportatges en temps real"
+msgstr ""
+
+#: templates/index.html:784
+#, fuzzy
+msgid "Filtra per categoria i ubicació"
+msgstr "Categoria"
+
+#: templates/index.html:788
+msgid "Vota pels problemes més importants"
+msgstr ""
+
+#: templates/index.html:792
+msgid "Marca els problemes resolts"
+msgstr ""
+
+#: templates/index.html:800 templates/index.html:868
+msgid "Explorar Mapa"
+msgstr "Explorar Mapa"
+
+#: templates/index.html:804
+msgid "Reportar Problema"
+msgstr "Reportar Problema"
+
+#: templates/index.html:808
+msgid "Uneix-te"
+msgstr ""
+
+#: templates/index.html:823
 msgid "Radiografia de la Ciutat"
 msgstr "Radiografia de la Ciutat"
 
-#: templates/index.html:76
+#: templates/index.html:824
 msgid ""
 "Visualitza i reporta problemes de neteja, coloms i altres incidències a "
 "Tarragona"
@@ -1252,154 +1577,154 @@ msgstr ""
 "Visualitza i reporta problemes de neteja, coloms i altres incidències a "
 "Tarragona"
 
-#: templates/index.html:86
+#: templates/index.html:834
 msgid "Problemes de Brossa"
 msgstr "Problemes de Brossa"
 
-#: templates/index.html:95
-msgid "Problemes de Palomes"
+#: templates/index.html:843
+#, fuzzy
+msgid "Problemes de Coloms"
 msgstr "Problemes de Coloms"
 
-#: templates/index.html:104
+#: templates/index.html:852
 msgid "Total Reportatges"
 msgstr "Total Reportatges"
 
-#: templates/index.html:113
+#: templates/index.html:861
 msgid "Ciutadans Actius"
 msgstr "Ciutadans Actius"
 
-#: templates/index.html:120
-msgid "Explorar Mapa"
-msgstr "Explorar Mapa"
-
-#: templates/index.html:124
+#: templates/index.html:872
 msgid "Reportar Nou Problema"
 msgstr "Reportar Nou Problema"
 
-#: templates/index.html:128
+#: templates/index.html:876
 msgid "Registra't per Reportar"
 msgstr "Registra't per Reportar"
 
-#: templates/index.html:141
+#: templates/index.html:889
 msgid "Reportatges Recents"
 msgstr "Reportatges Recents"
 
-#: templates/index.html:142
+#: templates/index.html:890
 msgid "Últims problemes reportats pels ciutadans"
 msgstr "Últims problemes reportats pels ciutadans"
 
-#: templates/index.html:145 templates/profile.html:189
+#: templates/index.html:893 templates/profile.html:182
 msgid "Veure Tots"
 msgstr "Veure Tots"
 
-#: templates/admin/dashboard.html:303
-#: templates/admin/pending_initiatives.html:118 templates/index.html:165
+#: templates/admin/dashboard.html:274
+#: templates/admin/pending_initiatives.html:126 templates/index.html:913
 msgid "Veure"
 msgstr "Veure"
 
-#: templates/index.html:181 templates/initiatives/list.html:3
+#: templates/index.html:929 templates/initiatives/list.html:3
 #: templates/initiatives/list.html:10
 msgid "Iniciatives Ciutadanes"
 msgstr "Iniciatives Ciutadanes"
 
-#: templates/index.html:182 templates/initiatives/list.html:11
+#: templates/index.html:930 templates/initiatives/list.html:11
 msgid "Descobreix com pots contribuir al canvi positiu a la nostra ciutat"
 msgstr "Descobreix com pots contribuir al canvi positiu a la nostra ciutat"
 
-#: templates/index.html:185 templates/profile.html:261
-#: templates/profile.html:299
+#: templates/index.html:933 templates/profile.html:252
+#: templates/profile.html:290
 #, fuzzy
 msgid "Veure Totes"
 msgstr "Veure Tots"
 
-#: templates/index.html:195 templates/initiatives/list.html:44
+#: templates/index.html:943 templates/initiatives/list.html:44
 msgid "Totes les categories"
 msgstr "Totes les categories"
 
-#: templates/index.html:196
+#: templates/index.html:944
 msgid "Neteja"
 msgstr "Neteja"
 
-#: templates/index.html:197
+#: templates/index.html:945
 msgid "Reciclatge"
 msgstr "Reciclatge"
 
-#: templates/index.html:198
+#: templates/index.html:946
 msgid "Espais Verds"
 msgstr "Espais Verds"
 
-#: templates/index.html:199
+#: templates/index.html:947
 msgid "Mobilitat Sostenible"
 msgstr "Mobilitat Sostenible"
 
-#: templates/index.html:200
+#: templates/index.html:948
 msgid "Educació Ambiental"
 msgstr "Educació Ambiental"
 
-#: templates/index.html:201
+#: templates/index.html:949
 msgid "Cultura i Civisme"
 msgstr "Cultura i Civisme"
 
-#: templates/index.html:202
+#: templates/index.html:950
 msgid "Acció Social"
 msgstr "Acció Social"
 
+#: templates/admin/analytics_container_overflows.html:133
 #: templates/admin/analytics_purchases.html:159
-#: templates/admin/dashboard.html:158 templates/admin/dashboard.html:236
-#: templates/admin/donations.html:70 templates/admin/users.html:91
-#: templates/emails/donation_confirmation.html:19 templates/index.html:206
-#: templates/initiatives/list.html:53 templates/inventory/admin.html:165
-#: templates/profile.html:199
+#: templates/admin/dashboard.html:167 templates/admin/dashboard.html:207
+#: templates/admin/donations.html:70 templates/admin/users.html:92
+#: templates/emails/donation_confirmation.html:19 templates/index.html:954
+#: templates/initiatives/list.html:53 templates/inventory/admin.html:149
+#: templates/inventory/detail.html:189
+#: templates/inventory/section_responsible.html:138 templates/profile.html:192
 msgid "Estat"
 msgstr "Estat"
 
 #: templates/admin/analytics_inventory_by_zone.html:45
-#: templates/admin/analytics_trends.html:34 templates/index.html:208
-#: templates/initiatives/list.html:55 templates/inventory/map.html:92
+#: templates/admin/analytics_trends.html:34
+#: templates/admin/container_point_suggestions.html:81 templates/index.html:956
+#: templates/initiatives/list.html:55 templates/inventory/map.html:205
 msgid "Totes"
 msgstr "Totes"
 
-#: templates/index.html:210 templates/initiatives/list.html:57
+#: templates/index.html:958 templates/initiatives/list.html:57
 msgid "Passades"
 msgstr "Passades"
 
 #: templates/admin/analytics_inventory_by_zone.html:60
 #: templates/admin/analytics_top_categories.html:46
-#: templates/admin/analytics_trends.html:49 templates/index.html:215
+#: templates/admin/analytics_trends.html:49 templates/index.html:963
 #: templates/initiatives/list.html:62
 msgid "Filtrar"
 msgstr "Filtrar"
 
-#: templates/index.html:253 templates/initiative_detail.html:308
-#: templates/initiatives/list.html:102
+#: templates/index.html:1007 templates/initiative_detail.html:313
+#: templates/initiatives/list.html:108 templates/inventory/map.html:1705
 #, fuzzy
 msgid "Veure detalls"
 msgstr "Veure Tots"
 
-#: templates/index.html:263 templates/initiatives/list.html:165
+#: templates/index.html:1017 templates/initiatives/list.html:171
 msgid "No hi ha iniciatives que coincideixin amb la teva cerca"
 msgstr "No hi ha iniciatives que coincideixin amb la teva cerca"
 
-#: templates/index.html:264 templates/initiatives/list.html:166
+#: templates/index.html:1018 templates/initiatives/list.html:172
 msgid "Prova amb altres filtres o crea una nova iniciativa"
 msgstr "Prova amb altres filtres o crea una nova iniciativa"
 
-#: templates/admin/new_initiative.html:15 templates/index.html:267
+#: templates/admin/new_initiative.html:15 templates/index.html:1021
 #: templates/initiatives/create.html:3 templates/initiatives/create.html:13
-#: templates/initiatives/list.html:169
+#: templates/initiatives/list.html:175
 msgid "Crear Nova Iniciativa"
 msgstr "Crear Nova Iniciativa"
 
-#: templates/index.html:271 templates/initiatives/list.html:173
+#: templates/index.html:1025 templates/initiatives/list.html:179
 #, fuzzy
 msgid "Inicia sessió per crear"
 msgstr "Inicia sessió"
 
-#: templates/index.html:286
+#: templates/index.html:1040
 msgid "Tens una idea per millorar Tarragona?"
 msgstr "Tens una idea per millorar Tarragona?"
 
-#: templates/index.html:288
+#: templates/index.html:1042
 msgid ""
 "Si ets una associació, col·lectiu o simplement un ciutadà compromès, "
 "contacta amb nosaltres per llançar la teva pròpia iniciativa."
@@ -1407,95 +1732,95 @@ msgstr ""
 "Si ets una associació, col·lectiu o simplement un ciutadà compromès, "
 "contacta amb nosaltres per llançar la teva pròpia iniciativa."
 
-#: templates/index.html:291
+#: templates/index.html:1045
 msgid "Proposar Iniciativa"
 msgstr "Proposar Iniciativa"
 
-#: templates/admin/dashboard.html:234 templates/initiative_detail.html:64
+#: templates/admin/dashboard.html:205 templates/initiative_detail.html:71
 msgid "Participants"
 msgstr "Participants"
 
-#: templates/initiative_detail.html:65
+#: templates/initiative_detail.html:72
 msgid "persones"
 msgstr "persones"
 
-#: templates/initiative_detail.html:100
+#: templates/initiative_detail.html:107
 msgid "Organitzat per"
 msgstr "Organitzat per"
 
-#: templates/initiative_detail.html:120
+#: templates/initiative_detail.html:127
 msgid "Persones compromeses"
 msgstr "Persones compromeses"
 
-#: templates/initiative_detail.html:141
+#: templates/initiative_detail.html:140
 msgid "Sigues el primer a unir-te a aquesta iniciativa"
 msgstr "Sigues el primer a unir-te a aquesta iniciativa"
 
-#: templates/initiative_detail.html:143
+#: templates/initiative_detail.html:142
 msgid "més persones"
 msgstr "més persones"
 
-#: templates/initiative_detail.html:151
+#: templates/initiative_detail.html:150
 msgid "Comentaris i preguntes"
 msgstr "Comentaris i preguntes"
 
-#: templates/initiative_detail.html:158
+#: templates/initiative_detail.html:157
 msgid "Comparteix la teva opinió o fes una pregunta..."
 msgstr "Comparteix la teva opinió o fes una pregunta..."
 
-#: templates/initiative_detail.html:162
+#: templates/initiative_detail.html:161
 msgid "Publicar comentari"
 msgstr "Publicar comentari"
 
-#: templates/initiative_detail.html:167 templates/initiative_detail.html:254
+#: templates/initiative_detail.html:166 templates/initiative_detail.html:253
 msgid "Inicia sessió"
 msgstr "Inicia sessió"
 
-#: templates/initiative_detail.html:167
+#: templates/initiative_detail.html:166
 msgid "per deixar un comentari"
 msgstr "per deixar un comentari"
 
-#: templates/initiative_detail.html:189
+#: templates/initiative_detail.html:188
 msgid "No hi ha comentaris encara. Sigues el primer a comentar!"
 msgstr "No hi ha comentaris encara. Sigues el primer a comentar!"
 
-#: templates/initiative_detail.html:200
+#: templates/initiative_detail.html:199
 msgid "Participa!"
 msgstr "Participa!"
 
-#: templates/initiative_detail.html:205
+#: templates/initiative_detail.html:204
 msgid "Ja estàs participant"
 msgstr "Ja estàs participant"
 
-#: templates/initiative_detail.html:210
+#: templates/initiative_detail.html:209
 msgid "Cancel·lar participació"
 msgstr "Cancel·lar participació"
 
-#: templates/initiative_detail.html:214
+#: templates/initiative_detail.html:213
 msgid "Uneix-te a aquesta iniciativa i ajuda'ns a millorar la nostra ciutat."
 msgstr "Uneix-te a aquesta iniciativa i ajuda'ns a millorar la nostra ciutat."
 
-#: templates/initiative_detail.html:218 templates/initiative_detail.html:247
+#: templates/initiative_detail.html:217 templates/initiative_detail.html:246
 msgid "Vull participar"
 msgstr "Vull participar"
 
-#: templates/initiative_detail.html:223
+#: templates/initiative_detail.html:222
 msgid "Registra el teu interès a participar. Et contactarem amb més detalls."
 msgstr "Registra el teu interès a participar. Et contactarem amb més detalls."
 
-#: templates/initiative_detail.html:253
+#: templates/initiative_detail.html:252
 msgid "Ja tens compte?"
 msgstr "Ja tens compte?"
 
-#: templates/initiative_detail.html:260
+#: templates/initiative_detail.html:259
 msgid "Aquesta iniciativa ja ha finalitzat"
 msgstr "Aquesta iniciativa ja ha finalitzat"
 
-#: templates/initiative_detail.html:266
+#: templates/initiative_detail.html:265
 msgid "Comparteix aquesta iniciativa:"
 msgstr "Comparteix aquesta iniciativa:"
 
-#: templates/initiative_detail.html:290
+#: templates/initiative_detail.html:289
 msgid "Iniciatives relacionades"
 msgstr "Iniciatives relacionades"
 
@@ -1515,17 +1840,17 @@ msgstr ""
 msgid "Membre des de"
 msgstr ""
 
-#: templates/profile.html:55
+#: templates/profile.html:55 templates/reports/preview_trends.html:51
 #, fuzzy
 msgid "Items Reportats"
 msgstr "Total Reportatges"
 
-#: templates/profile.html:66 templates/profile.html:258
+#: templates/profile.html:66 templates/profile.html:249
 #, fuzzy
 msgid "Iniciatives Creades"
 msgstr "Iniciatives relacionades"
 
-#: templates/profile.html:77 templates/profile.html:296
+#: templates/profile.html:77 templates/profile.html:287
 #, fuzzy
 msgid "Iniciatives Participades"
 msgstr "Iniciatives relacionades"
@@ -1539,79 +1864,75 @@ msgstr "Participacions Totals"
 msgid "Estat dels Items"
 msgstr ""
 
-#: templates/inventory/admin.html:52 templates/inventory/admin.html:110
-#: templates/profile.html:108
+#: templates/inventory/admin.html:52 templates/inventory/admin.html:102
+#: templates/inventory/section_responsible.html:71
+#: templates/inventory/section_responsible.html:109 templates/profile.html:108
 msgid "Aprovats"
 msgstr ""
 
-#: templates/admin/users.html:58 templates/inventory/admin.html:60
-#: templates/inventory/admin.html:118 templates/profile.html:115
-#, fuzzy
-msgid "Actius"
-msgstr "Actua"
-
+#: templates/admin/container_point_suggestions.html:40
+#: templates/admin/container_point_suggestions.html:69
 #: templates/admin/donations.html:43
 #: templates/admin/pending_initiatives.html:27
-#: templates/inventory/admin.html:44 templates/inventory/admin.html:100
-#: templates/profile.html:129
+#: templates/inventory/admin.html:44 templates/inventory/admin.html:92
+#: templates/inventory/section_responsible.html:63
+#: templates/inventory/section_responsible.html:101 templates/profile.html:122
 msgid "Pendents"
 msgstr ""
 
-#: templates/profile.html:142
+#: templates/profile.html:135
 #, fuzzy
 msgid "Activitat Recent"
 msgstr "Participacions Recents"
 
-#: templates/profile.html:153
+#: templates/profile.html:146
 #, fuzzy
 msgid "Item reportat"
 msgstr "Total Reportatges"
 
-#: templates/profile.html:166
+#: templates/profile.html:159
 #, fuzzy
 msgid "Iniciativa creada"
 msgstr "Iniciatives Ciutadanes"
 
-#: templates/profile.html:174
+#: templates/profile.html:167
 msgid "Encara no hi ha activitat recent"
 msgstr ""
 
-#: templates/profile.html:186
+#: templates/profile.html:179
 msgid "Els Meus Items Reportats"
 msgstr ""
 
-#: templates/inventory/admin.html:208 templates/profile.html:221
+#: templates/inventory/admin.html:227 templates/inventory/detail.html:191
+#: templates/inventory/section_responsible.html:183 templates/profile.html:214
 msgid "Aprovat"
 msgstr ""
 
-#: templates/admin/users.html:132 templates/inventory/admin.html:210
-#: templates/profile.html:223
-#, fuzzy
-msgid "Actiu"
-msgstr "Actua"
-
-#: templates/inventory/admin.html:212 templates/profile.html:225
+#: templates/inventory/admin.html:229 templates/inventory/detail.html:195
+#: templates/inventory/section_responsible.html:185 templates/profile.html:216
 msgid "Resolt"
 msgstr ""
 
-#: templates/emails/inventory_approved.html:23 templates/profile.html:237
+#: templates/admin/container_point_suggestions.html:130
+#: templates/admin/districts_sections.html:80
+#: templates/emails/inventory_approved.html:23 templates/profile.html:228
 #, fuzzy
 msgid "Veure al mapa"
 msgstr "Veure Més"
 
-#: templates/profile.html:315
+#: templates/profile.html:306
 msgid "participants"
 msgstr "participants"
 
-#: templates/profile.html:332
+#: templates/profile.html:323
 msgid "Reports Descarregats"
 msgstr ""
 
-#: templates/profile.html:343
+#: templates/profile.html:334
 msgid "Descarregat el"
 msgstr ""
 
-#: templates/profile.html:350
+#: templates/profile.html:341
 msgid "Descarregar de nou"
 msgstr ""
 
@@ -1619,7 +1940,7 @@ msgstr ""
 msgid "Analytics"
 msgstr ""
 
-#: templates/admin/analytics.html:13 templates/admin/dashboard.html:137
+#: templates/admin/analytics.html:13 templates/admin/dashboard.html:140
 msgid "Analytics i Reports"
 msgstr ""
 
@@ -1633,10 +1954,17 @@ msgid "Veure Compres"
 msgstr "Veure Més"
 
 #: templates/admin/analytics.html:22
+#: templates/admin/analytics_container_overflows.html:21
 #: templates/admin/analytics_inventory_by_zone.html:19
 #: templates/admin/analytics_purchases.html:18
 #: templates/admin/analytics_top_categories.html:19
-#: templates/admin/analytics_trends.html:19 templates/admin/users.html:41
+#: templates/admin/analytics_trends.html:19
+#: templates/admin/districts_sections.html:18
+#: templates/admin/edit_section_geometry.html:45
+#: templates/admin/sections.html:18 templates/admin/users.html:41
+#: templates/reports/preview_inventory_by_zone.html:19
+#: templates/reports/preview_top_categories.html:19
+#: templates/reports/preview_trends.html:19
 #, fuzzy
 msgid "Tornar"
 msgstr "Donar"
@@ -1672,11 +2000,11 @@ msgstr ""
 #: templates/admin/analytics_purchases.html:120
 #: templates/admin/analytics_purchases.html:177
 #: templates/admin/analytics_trends.html:3
-#: templates/admin/analytics_trends.html:13 templates/reports/public.html:85
+#: templates/admin/analytics_trends.html:13 templates/reports/public.html:96
 msgid "Tendències Temporals"
 msgstr ""
 
-#: templates/admin/analytics.html:96 templates/reports/public.html:87
+#: templates/admin/analytics.html:96 templates/reports/public.html:98
 msgid ""
 "Evolució dels reports al llarg del temps. Analitza patrons i tendències "
 "per categoria i zona."
@@ -1688,14 +2016,111 @@ msgstr ""
 #: templates/admin/analytics_purchases.html:179
 #: templates/admin/analytics_top_categories.html:3
 #: templates/admin/analytics_top_categories.html:13
-#: templates/reports/public.html:120
+#: templates/reports/public.html:142
 msgid "Categories Més Reportades"
 msgstr ""
 
-#: templates/admin/analytics.html:115 templates/reports/public.html:122
+#: templates/admin/analytics.html:115 templates/reports/public.html:144
 msgid ""
 "Ranking de les categories i subcategories amb més reports, agrupades per "
 "zona."
+msgstr ""
+
+#: templates/admin/analytics.html:132
+#: templates/admin/analytics_container_overflows.html:3
+#: templates/admin/analytics_container_overflows.html:13
+msgid "Desbordaments de Contenidors"
+msgstr ""
+
+#: templates/admin/analytics.html:134
+msgid ""
+"Anàlisi dels punts de contenedors desbordats per secció i tendència "
+"temporal."
+msgstr ""
+
+#: templates/admin/analytics.html:136
+#, fuzzy
+msgid "Veure Analytics"
+msgstr "Reportatges Actius"
+
+#: templates/admin/analytics_container_overflows.html:16
+msgid "Evolució dels punts de contenidors desbordats per zona i en el temps"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:32
+#, fuzzy
+msgid "Reports de desbordament"
+msgstr "Brossa Desbordada"
+
+#: templates/admin/analytics_container_overflows.html:47
+msgid "Punts amb desbordes"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:62
+msgid "Reports últims 30 dies"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:81
+msgid "Seccions amb més desbordes"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:88
+msgid "Districte / Secció"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:89
+msgid "Punts"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:112
+msgid "Encara no hi ha reports de desbordament registrats."
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:124
+msgid "Punts amb més desbordes"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:131
+msgid "Punt"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:134
+msgid "Darrer desbordament"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:153
+#: templates/inventory/map.html:884 templates/inventory/map.html:1162
+#, fuzzy
+msgid "Desbordat"
+msgstr "Brossa Desbordada"
+
+#: templates/admin/analytics_container_overflows.html:155
+#: templates/inventory/map.html:878 templates/inventory/map.html:1162
+#, fuzzy
+msgid "Normal"
+msgstr "Format HH:MM"
+
+#: templates/admin/analytics_container_overflows.html:173
+msgid "Encara no hi ha punts amb desbordes registrats."
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:187
+msgid "Tendència mensual de desbordaments"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:194
+#: templates/reports/preview_trends.html:50
+#, fuzzy
+msgid "Mes"
+msgstr "Coloms"
+
+#: templates/admin/analytics_container_overflows.html:196
+#, fuzzy
+msgid "Punts afectats"
+msgstr "Preguntes Freqüents"
+
+#: templates/admin/analytics_container_overflows.html:215
+msgid "Encara no hi ha dades temporals de desbordaments."
 msgstr ""
 
 #: templates/admin/analytics_inventory_by_zone.html:15
@@ -1710,7 +2135,8 @@ msgstr ""
 
 #: templates/admin/analytics_inventory_by_zone.html:34
 #: templates/admin/analytics_top_categories.html:34
-#: templates/inventory/admin.html:92
+#: templates/inventory/admin.html:84
+#: templates/inventory/section_responsible.html:94
 #, fuzzy
 msgid "Tots"
 msgstr "Totes"
@@ -1735,7 +2161,7 @@ msgid "Codi:"
 msgstr ""
 
 #: templates/admin/analytics_inventory_by_zone.html:92
-#: templates/inventory/admin.html:297
+#: templates/inventory/admin.html:314
 #, fuzzy
 msgid "items"
 msgstr "Vistes"
@@ -1864,12 +2290,12 @@ msgid "Descarregat"
 msgstr ""
 
 #: templates/admin/analytics_purchases.html:187
-#: templates/admin/dashboard.html:165 templates/admin/donations.html:93
+#: templates/admin/dashboard.html:174 templates/admin/donations.html:93
 msgid "Anònim"
 msgstr ""
 
 #: templates/admin/analytics_purchases.html:199
-#: templates/admin/dashboard.html:168 templates/admin/donations.html:106
+#: templates/admin/dashboard.html:177 templates/admin/donations.html:106
 #: templates/emails/donation_confirmation.html:19
 #, fuzzy
 msgid "Completada"
@@ -1886,6 +2312,7 @@ msgid "No hi ha compres encara"
 msgstr "No hi ha iniciatives encara"
 
 #: templates/admin/analytics_top_categories.html:15
+#: templates/reports/preview_top_categories.html:15
 msgid "Ranking de les categories i subcategories amb més reports"
 msgstr ""
 
@@ -1896,6 +2323,126 @@ msgstr "Total Reportatges"
 
 #: templates/admin/analytics_trends.html:15
 msgid "Evolució dels reports al llarg del temps"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:3
+#: templates/admin/container_point_suggestions.html:26
+msgid "Sugerències de Punts de Contenidors"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:28
+msgid ""
+"Revisa i aprueba les sugerències de punts de contenidors creades pels "
+"usuaris"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:31
+#: templates/admin/donations.html:18
+#: templates/admin/pending_initiatives.html:18
+msgid "Tornar al Dashboard"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:48
+#: templates/admin/container_point_suggestions.html:73
+#: templates/admin/pending_initiatives.html:35
+msgid "Aprovades"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:56
+#: templates/admin/container_point_suggestions.html:77
+#: templates/admin/pending_initiatives.html:43
+msgid "Rebutjades"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:95
+#: templates/admin/sections.html:32 templates/admin/users.html:88
+#, fuzzy
+msgid "Usuari"
+msgstr "Buscar"
+
+#: templates/admin/container_point_suggestions.html:98
+#, fuzzy
+msgid "Notes"
+msgstr "Totes"
+
+#: templates/admin/container_point_suggestions.html:100
+#: templates/admin/dashboard.html:208
+#: templates/admin/districts_sections.html:54
+#: templates/admin/pending_initiatives.html:63 templates/admin/sections.html:73
+#: templates/admin/users.html:94 templates/inventory/admin.html:152
+#: templates/inventory/detail.html:140
+#: templates/inventory/section_responsible.html:140
+msgid "Accions"
+msgstr "Accions"
+
+#: templates/admin/container_point_suggestions.html:122
+#: templates/admin/container_point_suggestions.html:129
+#: templates/admin/container_point_suggestions.html:300
+#: templates/admin/container_point_suggestions.html:331
+#: templates/admin/container_point_suggestions.html:337
+#: templates/admin/container_point_suggestions.html:349
+msgid "Sense adreça"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:147
+#, fuzzy
+msgid "Sense notes"
+msgstr "Veure Tots"
+
+#: templates/admin/container_point_suggestions.html:157
+#, fuzzy
+msgid "Revisada"
+msgstr "Registrar-se"
+
+#: templates/admin/container_point_suggestions.html:164
+msgid ""
+"Estàs segur que vols aprovar aquesta sugerència? Es crearà un punt de "
+"contenidors."
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:168
+#: templates/admin/pending_initiatives.html:132
+#: templates/inventory/admin.html:254
+#: templates/inventory/admin_pending_map.html:219
+#: templates/inventory/admin_pending_map.html:329
+#: templates/inventory/admin_pending_map.html:336
+#: templates/inventory/section_responsible.html:198
+#, fuzzy
+msgid "Aprovar"
+msgstr "Proper"
+
+#: templates/admin/container_point_suggestions.html:172
+#, fuzzy
+msgid "Estàs segur que vols rebutjar aquesta sugerència?"
+msgstr "Estàs segur d'eliminar aquesta iniciativa?"
+
+#: templates/admin/container_point_suggestions.html:176
+#: templates/admin/pending_initiatives.html:138
+#: templates/inventory/admin.html:263
+#: templates/inventory/admin_pending_map.html:222
+#: templates/inventory/admin_pending_map.html:387
+#: templates/inventory/admin_pending_map.html:394
+msgid "Rebutjar"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:185
+#: templates/admin/container_point_suggestions.html:193
+#, fuzzy
+msgid "Per"
+msgstr "Pròximes"
+
+#: templates/admin/container_point_suggestions.html:260
+msgid "No hi ha sugerències amb aquest estat."
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:273
+msgid "Ubicació de la Suggerència"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:281
+#: templates/inventory/detail.html:55 templates/inventory/detail.html:118
+#: templates/inventory/detail.html:218
+msgid "Coordenades"
 msgstr ""
 
 #: templates/admin/dashboard.html:13
@@ -1957,77 +2504,105 @@ msgid "Accions Ràpides"
 msgstr "Accions Ràpides"
 
 #: templates/admin/dashboard.html:128
+msgid "Sugerències de Contenidors"
+msgstr ""
+
+#: templates/admin/dashboard.html:134
 msgid "Gestionar Usuaris"
 msgstr "Gestionar Usuaris"
 
-#: templates/admin/dashboard.html:131
-msgid "Veure Participacions"
-msgstr "Veure Participacions"
-
-#: templates/admin/dashboard.html:134
+#: templates/admin/dashboard.html:137
 #, fuzzy
 msgid "Veure Donacions"
 msgstr "Veure Participacions"
 
-#: templates/admin/dashboard.html:149
+#: templates/admin/dashboard.html:143 templates/admin/sections.html:3
+#, fuzzy
+msgid "Gestionar Seccions"
+msgstr "Gestionar Usuaris"
+
+#: templates/admin/dashboard.html:146 templates/admin/districts_sections.html:3
+#: templates/admin/districts_sections.html:13
+msgid "Editar Distritos i Seccions"
+msgstr ""
+
+#: templates/admin/dashboard.html:158
 #, fuzzy
 msgid "Donacions Recents"
 msgstr "Participacions Recents"
 
-#: templates/admin/dashboard.html:155 templates/admin/donations.html:66
+#: templates/admin/dashboard.html:164 templates/admin/donations.html:66
 #: templates/emails/donation_confirmation.html:13
 #, fuzzy
 msgid "Quantitat"
 msgstr "Altres quantitats"
 
-#: templates/admin/dashboard.html:185
-msgid "Participacions Recents"
-msgstr "Participacions Recents"
-
-#: templates/admin/dashboard.html:191
-#: templates/emails/admin_notification.html:15
-msgid "Nom"
-msgstr ""
-
-#: templates/admin/dashboard.html:193
-#, fuzzy
-msgid "Iniciativa"
-msgstr "Nova Iniciativa"
-
-#: templates/admin/dashboard.html:223
+#: templates/admin/dashboard.html:194
 msgid "Totes les Iniciatives"
 msgstr "Totes les Iniciatives"
 
-#: templates/admin/dashboard.html:231
+#: templates/admin/dashboard.html:202
 #: templates/admin/pending_initiatives.html:58
 msgid "Títol"
 msgstr "Títol"
 
-#: templates/admin/dashboard.html:235
+#: templates/admin/dashboard.html:206
 msgid "Vistes"
 msgstr "Vistes"
 
-#: templates/admin/dashboard.html:237
-#: templates/admin/pending_initiatives.html:63 templates/admin/users.html:93
-#: templates/inventory/admin.html:168
-msgid "Accions"
-msgstr "Accions"
-
-#: templates/admin/dashboard.html:309
+#: templates/admin/dashboard.html:280
 msgid "Editar"
 msgstr "Editar"
 
-#: templates/admin/dashboard.html:315
+#: templates/admin/dashboard.html:286
 msgid "Estàs segur d'eliminar aquesta iniciativa?"
 msgstr "Estàs segur d'eliminar aquesta iniciativa?"
 
-#: templates/admin/dashboard.html:319 templates/inventory/admin.html:269
+#: templates/admin/dashboard.html:290 templates/admin/sections.html:96
+#: templates/inventory/admin.html:286
 msgid "Eliminar"
 msgstr "Eliminar"
 
-#: templates/admin/dashboard.html:331
+#: templates/admin/dashboard.html:302
 msgid "No hi ha iniciatives encara"
 msgstr "No hi ha iniciatives encara"
+
+#: templates/admin/districts_sections.html:15
+msgid "Gestiona els noms dels distritos i seccions administratives"
+msgstr ""
+
+#: templates/admin/districts_sections.html:40
+msgid "Guardar"
+msgstr ""
+
+#: templates/admin/districts_sections.html:44
+#: templates/admin/edit_section_geometry.html:516
+#, fuzzy
+msgid "seccions"
+msgstr "Accions"
+
+#: templates/admin/districts_sections.html:52 templates/admin/sections.html:69
+msgid "Codi"
+msgstr ""
+
+#: templates/admin/districts_sections.html:53 templates/admin/sections.html:70
+#: templates/emails/admin_notification.html:15
+msgid "Nom"
+msgstr ""
+
+#: templates/admin/districts_sections.html:70
+#: templates/admin/edit_section_geometry.html:65
+#: templates/admin/sections.html:45 templates/admin/sections.html:83
+#: templates/admin/users.html:133
+#: templates/inventory/section_responsible.html:38
+#, fuzzy
+msgid "Sense nom"
+msgstr "El teu nom"
+
+#: templates/admin/districts_sections.html:85
+#, fuzzy
+msgid "Editar geometria"
+msgstr "per deixar un comentari"
 
 #: templates/admin/donations.html:13
 #, fuzzy
@@ -2036,11 +2611,6 @@ msgstr "Accions Ràpides"
 
 #: templates/admin/donations.html:15
 msgid "Historial de donacions rebudes a través de Stripe"
-msgstr ""
-
-#: templates/admin/donations.html:18
-#: templates/admin/pending_initiatives.html:18
-msgid "Tornar al Dashboard"
 msgstr ""
 
 #: templates/admin/donations.html:27
@@ -2076,6 +2646,110 @@ msgstr "No hi ha iniciatives encara"
 
 #: templates/admin/donations.html:183
 msgid "Les donacions rebudes apareixeran aquí"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:3
+#: templates/admin/edit_section_geometry.html:39
+msgid "Editar Geometria de Seccions"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:41
+msgid "Selecciona i edita múltiples seccions per ajustar les seves geometries"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:48
+msgid "Guardar Canvis"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:57
+msgid "Selecciona Seccions per Editar"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:71
+msgid "Mantén presionat Ctrl (Cmd en Mac) per seleccionar múltiples seccions"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:74
+msgid "Carregar Seccions al Mapa"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:86
+msgid "Mode Edició"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:90
+msgid "Activa el mode edició per moure punts i modificar la geometria"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:95
+msgid "Restaurar Original"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:111
+#, fuzzy
+msgid "Instruccions:"
+msgstr "Accions"
+
+#: templates/admin/edit_section_geometry.html:113
+msgid "Activa el mode edició per començar a editar"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:114
+msgid "Clica i arrossega els punts per moure'ls"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:115
+msgid "Clica sobre una línia per afegir un nou punt"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:116
+msgid "Clica amb el botó dret sobre un punt per eliminar-lo"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:117
+msgid "Guarda els canvis quan estiguis satisfet"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:203
+#: templates/admin/edit_section_geometry.html:357
+#, fuzzy
+msgid "Selecciona almenys una secció"
+msgstr "Selecciona un assumpte"
+
+#: templates/admin/edit_section_geometry.html:225
+msgid "No s'han trobat les seccions seleccionades"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:335
+msgid "No s'han pogut crear els polígons per a les seccions seleccionades"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:340
+msgid "Error carregant les geometries"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:488
+msgid "Error: No s'han pogut obtenir les geometries"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:499
+msgid "Guardant..."
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:516
+msgid "Geometries actualitzades correctament"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:524
+msgid "Error desconegut"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:529
+msgid "Error guardant les geometries"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:538
+msgid "Estàs segur que vols restaurar les geometries originals?"
 msgstr ""
 
 #: templates/admin/new_initiative.html:4 templates/admin/new_initiative.html:15
@@ -2125,12 +2799,12 @@ msgid ""
 "públicament."
 msgstr ""
 
-#: templates/admin/new_initiative.html:170
-#: templates/admin/new_initiative.html:173
+#: templates/admin/new_initiative.html:172
+#: templates/admin/new_initiative.html:175
 msgid "Imatge actual"
 msgstr "Imatge actual"
 
-#: templates/admin/new_initiative.html:188
+#: templates/admin/new_initiative.html:191
 #: templates/initiatives/create.html:151
 msgid ""
 "Formats acceptats: JPG, PNG, GIF, WEBP (Màx. 16MB). La imatge serà "
@@ -2139,17 +2813,17 @@ msgstr ""
 "Formats acceptats: JPG, PNG, GIF, WEBP (Màx. 16MB). La imatge serà "
 "optimitzada automàticament."
 
-#: templates/admin/new_initiative.html:195
-#: templates/initiatives/create.html:166 templates/inventory/report.html:116
-#: templates/inventory/report.html:359
+#: templates/admin/new_initiative.html:198
+#: templates/initiatives/create.html:166 templates/inventory/report.html:131
+#: templates/inventory/report.html:606
 msgid "Cancel·lar"
 msgstr "Cancel·lar"
 
-#: templates/admin/new_initiative.html:199
+#: templates/admin/new_initiative.html:202
 msgid "Actualitzar Iniciativa"
 msgstr "Actualitzar Iniciativa"
 
-#: templates/admin/new_initiative.html:199
+#: templates/admin/new_initiative.html:202
 msgid "Crear Iniciativa"
 msgstr "Crear Iniciativa"
 
@@ -2162,44 +2836,67 @@ msgstr "Iniciatives Totals"
 msgid "Revisa i aprueba les iniciatives creades pels usuaris"
 msgstr ""
 
-#: templates/admin/pending_initiatives.html:35
-msgid "Aprovades"
-msgstr ""
-
-#: templates/admin/pending_initiatives.html:43
-msgid "Rebutjades"
-msgstr ""
-
 #: templates/admin/pending_initiatives.html:59
 msgid "Creador"
 msgstr ""
 
-#: templates/admin/pending_initiatives.html:124
-#: templates/inventory/admin.html:237
-#: templates/inventory/admin_pending_map.html:216
-#: templates/inventory/admin_pending_map.html:326
-#: templates/inventory/admin_pending_map.html:333
-#, fuzzy
-msgid "Aprovar"
-msgstr "Proper"
-
-#: templates/admin/pending_initiatives.html:130
-#: templates/inventory/admin.html:246
-#: templates/inventory/admin_pending_map.html:219
-#: templates/inventory/admin_pending_map.html:384
-#: templates/inventory/admin_pending_map.html:391
-msgid "Rebutjar"
-msgstr ""
-
-#: templates/admin/pending_initiatives.html:196
+#: templates/admin/pending_initiatives.html:204
 #, fuzzy
 msgid "No hi ha iniciatives pendents"
 msgstr "No hi ha iniciatives encara"
 
-#: templates/admin/pending_initiatives.html:197
+#: templates/admin/pending_initiatives.html:205
 #, fuzzy
 msgid "Totes les iniciatives han estat processades"
 msgstr "Totes les Iniciatives"
+
+#: templates/admin/sections.html:13
+msgid "Gestionar Seccions i Responsables"
+msgstr ""
+
+#: templates/admin/sections.html:15
+msgid "Assigna responsables a les seccions administratives"
+msgstr ""
+
+#: templates/admin/sections.html:25
+msgid "Assignar Responsable"
+msgstr ""
+
+#: templates/admin/sections.html:34
+#, fuzzy
+msgid "Selecciona un usuari"
+msgstr "Selecciona una subcategoria"
+
+#: templates/admin/sections.html:43
+#, fuzzy
+msgid "Selecciona una secció"
+msgstr "Selecciona un assumpte"
+
+#: templates/admin/sections.html:51
+msgid "Assignar"
+msgstr ""
+
+#: templates/admin/sections.html:62
+msgid "Seccions i Responsables"
+msgstr ""
+
+#: templates/admin/sections.html:72
+msgid "Responsables"
+msgstr ""
+
+#: templates/admin/sections.html:94
+#, fuzzy
+msgid "Estàs segur que vols eliminar aquest responsable?"
+msgstr "Estàs segur d'eliminar aquesta iniciativa?"
+
+#: templates/admin/sections.html:104
+msgid "Sense responsables"
+msgstr ""
+
+#: templates/admin/sections.html:110
+#, fuzzy
+msgid "Veure items"
+msgstr "Veure Tots"
 
 #: templates/admin/users.html:3 templates/admin/users.html:36
 #, fuzzy
@@ -2216,6 +2913,11 @@ msgstr "Gestiona les iniciatives i supervisa la plataforma"
 msgid "Total Usuaris"
 msgstr "Gestionar Usuaris"
 
+#: templates/admin/users.html:58
+#, fuzzy
+msgid "Actius"
+msgstr "Actua"
+
 #: templates/admin/users.html:66
 #, fuzzy
 msgid "Inactius"
@@ -2225,116 +2927,116 @@ msgstr "Ciutadans Actius"
 msgid "No Confirmats"
 msgstr ""
 
-#: templates/admin/users.html:88
-#, fuzzy
-msgid "Usuari"
-msgstr "Buscar"
-
 #: templates/admin/users.html:90
 msgid "Rol"
 msgstr ""
 
-#: templates/admin/users.html:109
+#: templates/admin/users.html:91 templates/inventory/map.html:850
+#, fuzzy
+msgid "Seccions"
+msgstr "Accions"
+
+#: templates/admin/users.html:110
 msgid "Tu"
 msgstr ""
 
-#: templates/admin/users.html:124
+#: templates/admin/users.html:125
 msgid "Sense rol"
 msgstr ""
 
-#: templates/admin/users.html:136
+#: templates/admin/users.html:139
+msgid "Cap"
+msgstr ""
+
+#: templates/admin/users.html:146
+#, fuzzy
+msgid "Actiu"
+msgstr "Actua"
+
+#: templates/admin/users.html:150
 #, fuzzy
 msgid "Inactiu"
 msgstr "Actua"
 
-#: templates/admin/users.html:141
+#: templates/admin/users.html:155
 #, fuzzy
 msgid "No confirmat"
 msgstr "Nom complet"
 
-#: templates/admin/users.html:158
+#: templates/admin/users.html:172
 msgid "Desactivar"
 msgstr ""
 
-#: templates/admin/users.html:158
+#: templates/admin/users.html:172
 #, fuzzy
 msgid "Activar"
 msgstr "Actua"
 
-#: templates/admin/users.html:168
+#: templates/admin/users.html:182
 #, fuzzy
 msgid "Confirmar"
 msgstr "Filtrar"
 
-#: templates/admin/users.html:177
+#: templates/admin/users.html:191
 msgid "Canviar Rol"
 msgstr ""
 
-#: templates/admin/users.html:211 templates/admin/users.html:243
+#: templates/admin/users.html:225 templates/admin/users.html:257
 #, fuzzy
 msgid "No s'han trobat usuaris"
 msgstr "Gestionar Usuaris"
 
-#: templates/admin/users.html:232
+#: templates/admin/users.html:246
 msgid "Cercar"
 msgstr ""
 
-#: templates/admin/users.html:233
+#: templates/admin/users.html:247
 msgid "Mostrar"
 msgstr ""
 
-#: templates/admin/users.html:233 templates/admin/users.html:234
-#: templates/admin/users.html:235
+#: templates/admin/users.html:247 templates/admin/users.html:248
+#: templates/admin/users.html:249
 #, fuzzy
 msgid "registres"
 msgstr "Registrar-se"
 
-#: templates/admin/users.html:234 templates/admin/users.html:235
-#: templates/inventory/admin.html:295
+#: templates/admin/users.html:248 templates/admin/users.html:249
+#: templates/inventory/admin.html:312
 #, fuzzy
 msgid "Mostrant"
 msgstr "Estat"
 
-#: templates/admin/users.html:234 templates/admin/users.html:235
+#: templates/admin/users.html:248 templates/admin/users.html:249
 msgid "a"
 msgstr ""
 
-#: templates/admin/users.html:234 templates/admin/users.html:235
-#: templates/inventory/admin.html:297
+#: templates/admin/users.html:248 templates/admin/users.html:249
+#: templates/inventory/admin.html:314
 #, fuzzy
 msgid "de"
 msgstr "Data"
 
-#: templates/admin/users.html:236
+#: templates/admin/users.html:250
 #, fuzzy
 msgid "filtrat de"
 msgstr "Filtrar"
 
-#: templates/admin/users.html:236
+#: templates/admin/users.html:250
 #, fuzzy
 msgid "registres totals"
 msgstr "Iniciatives Totals"
 
-#: templates/admin/users.html:238
+#: templates/admin/users.html:252
 #, fuzzy
 msgid "Primer"
 msgstr "Pròximes"
 
-#: templates/admin/users.html:239
+#: templates/admin/users.html:253
 #, fuzzy
 msgid "Últim"
 msgstr "Hora"
 
-#: templates/admin/users.html:240
-msgid "Següent"
-msgstr ""
-
-#: templates/admin/users.html:241
-#, fuzzy
-msgid "Anterior"
-msgstr "Categoria"
-
-#: templates/admin/users.html:244
+#: templates/admin/users.html:258
 msgid "No s'han trobat resultats"
 msgstr ""
 
@@ -2361,36 +3063,37 @@ msgid "Veure panell d'administració"
 msgstr "Panel d'Administració"
 
 #: templates/emails/admin_notification.html:43
+#: templates/inventory/map.html:1289
 msgid "Gràcies!"
 msgstr ""
 
-#: templates/emails/base.html:150
+#: templates/emails/base.html:173
 #, fuzzy
 msgid "Reporta l'estat de la ciutat"
 msgstr "Radiografia de la Ciutat"
 
-#: templates/emails/base.html:150
+#: templates/emails/base.html:173
 #: templates/emails/participant_confirmation.html:22
 #, fuzzy
 msgid "coloms"
 msgstr "Compromís"
 
-#: templates/emails/base.html:150
+#: templates/emails/base.html:173
 #: templates/emails/participant_confirmation.html:22
 msgid "nius, excrements, plomes"
 msgstr ""
 
-#: templates/emails/base.html:150
+#: templates/emails/base.html:173
 #: templates/emails/participant_confirmation.html:22
 msgid "brossa"
 msgstr ""
 
-#: templates/emails/base.html:150
+#: templates/emails/base.html:173
 #: templates/emails/participant_confirmation.html:22
 msgid "contenidors desbordats, abocaments"
 msgstr ""
 
-#: templates/emails/base.html:150
+#: templates/emails/base.html:173
 msgid "i més"
 msgstr ""
 
@@ -2736,16 +3439,16 @@ msgstr "Enllaços Ràpids"
 msgid "Recursos"
 msgstr "persones"
 
-#: templates/includes/footer.html:123
+#: templates/includes/footer.html:125
 msgid "Tots els drets reservats."
 msgstr ""
 
-#: templates/includes/footer.html:129
+#: templates/includes/footer.html:131
 #, fuzzy
 msgid "Política de Privacitat"
 msgstr "Privacitat"
 
-#: templates/includes/footer.html:135
+#: templates/includes/footer.html:137
 #, fuzzy
 msgid "Termes d'Ús"
 msgstr "Termes"
@@ -2787,65 +3490,100 @@ msgstr "Àrees d'Acció"
 msgid "Administrar Inventari"
 msgstr ""
 
-#: templates/inventory/admin.html:76 templates/inventory/admin.html:134
+#: templates/inventory/admin.html:68 templates/inventory/admin.html:118
 msgid "Rebutjats"
 msgstr ""
 
-#: templates/inventory/admin.html:143 templates/inventory/admin.html:382
+#: templates/inventory/admin.html:127 templates/inventory/admin.html:399
 #, fuzzy
 msgid "Veure Mapa de Pendents"
 msgstr "Veure Mapa de l'Inventari"
 
-#: templates/inventory/admin.html:163 templates/inventory/report.html:80
+#: templates/inventory/admin.html:147 templates/inventory/report.html:103
 msgid "Foto"
 msgstr ""
 
-#: templates/inventory/admin.html:166
+#: templates/inventory/admin.html:150
 msgid "Reporter"
 msgstr ""
 
-#: templates/inventory/admin.html:214
+#: templates/inventory/admin.html:169
+msgid "La ubicació final difereix de la GPS de la imatge"
+msgstr ""
+
+#: templates/inventory/admin.html:171
+#, fuzzy
+msgid "GPS imatge"
+msgstr "Imatge"
+
+#: templates/inventory/admin.html:173
+msgid "Diferència"
+msgstr ""
+
+#: templates/inventory/admin.html:176
+msgid "La ubicació final coincideix amb la GPS de la imatge"
+msgstr ""
+
+#: templates/inventory/admin.html:178
+msgid "Coincideix amb GPS imatge"
+msgstr ""
+
+#: templates/inventory/admin.html:186
+msgid "Font: GPS de la imatge"
+msgstr ""
+
+#: templates/inventory/admin.html:188
+msgid "Font: Coordenades del formulari"
+msgstr ""
+
+#: templates/inventory/admin.html:190
+#, fuzzy
+msgid "Font"
+msgstr "Donar"
+
+#: templates/inventory/admin.html:231
 #, fuzzy
 msgid "Rebutjat"
 msgstr "Estat"
 
-#: templates/inventory/admin.html:247
-#: templates/inventory/admin_pending_map.html:345
+#: templates/inventory/admin.html:264
+#: templates/inventory/admin_pending_map.html:348
 #, fuzzy
 msgid "Estàs segur de rebutjar aquest item?"
 msgstr "Estàs segur d'eliminar aquesta iniciativa?"
 
-#: templates/inventory/admin.html:257
+#: templates/inventory/admin.html:274
+#: templates/inventory/section_responsible.html:206
 msgid "Marcar com resolt"
 msgstr ""
 
-#: templates/inventory/admin.html:264
+#: templates/inventory/admin.html:281
 #, fuzzy
 msgid "Estàs segur d'eliminar aquest item?"
 msgstr "Estàs segur d'eliminar aquesta iniciativa?"
 
-#: templates/inventory/admin.html:282
+#: templates/inventory/admin.html:299
 msgid "No hi ha items amb aquest estat"
 msgstr ""
 
-#: templates/inventory/admin.html:356
+#: templates/inventory/admin.html:373
 msgid "Pàgina 1 de 1"
 msgstr ""
 
-#: templates/inventory/admin.html:364
+#: templates/inventory/admin.html:381
 msgid "Per pàgina"
 msgstr ""
 
-#: templates/inventory/admin.html:386
+#: templates/inventory/admin.html:403
 #, fuzzy
 msgid "Tornar al mapa"
 msgstr "Explorar Mapa"
 
-#: templates/inventory/admin.html:400
+#: templates/inventory/admin.html:417
 msgid "Foto de l'Item"
 msgstr ""
 
-#: templates/inventory/admin.html:408
+#: templates/inventory/admin.html:427
 msgid "Foto de l'item"
 msgstr ""
 
@@ -2864,12 +3602,11 @@ msgid "Veure llista"
 msgstr "Veure Més"
 
 #: templates/inventory/admin_pending_map.html:47
-#: templates/inventory/admin_pending_map.html:174
+#: templates/inventory/admin_pending_map.html:177
 msgid "pendents"
 msgstr ""
 
 #: templates/inventory/admin_pending_map.html:57
-#: templates/inventory/report.html:31
 #, fuzzy
 msgid "Instruccions"
 msgstr "Accions"
@@ -2878,123 +3615,344 @@ msgstr "Accions"
 msgid "Fes clic en un marcador per veure els detalls i aprovar o rebutjar l'item."
 msgstr ""
 
-#: templates/inventory/admin_pending_map.html:295
-#: templates/inventory/admin_pending_map.html:353
-#: templates/inventory/map.html:623 templates/inventory/map.html:720
+#: templates/inventory/admin_pending_map.html:298
+#: templates/inventory/admin_pending_map.html:356
+#: templates/inventory/detail.html:228 templates/inventory/detail.html:289
+#: templates/inventory/map.html:1770 templates/inventory/map.html:1867
 msgid "Processant..."
 msgstr ""
 
-#: templates/inventory/admin_pending_map.html:319
+#: templates/inventory/admin_pending_map.html:322
 msgid "Item aprovat correctament"
 msgstr ""
 
-#: templates/inventory/admin_pending_map.html:324
-#: templates/inventory/admin_pending_map.html:331
-#: templates/inventory/admin_pending_map.html:382
-#: templates/inventory/admin_pending_map.html:389
+#: templates/inventory/admin_pending_map.html:327
+#: templates/inventory/admin_pending_map.html:334
+#: templates/inventory/admin_pending_map.html:385
+#: templates/inventory/admin_pending_map.html:392
 #, fuzzy
 msgid "Error al processar la sol·licitud"
 msgstr "Error en processar el pagament: {error}"
 
-#: templates/inventory/admin_pending_map.html:377
+#: templates/inventory/admin_pending_map.html:380
 msgid "Item rebutjat"
 msgstr ""
 
-#: templates/inventory/map.html:53
+#: templates/inventory/detail.html:63
+#, fuzzy
+msgid "Reportat el"
+msgstr "Reportar Problema"
+
+#: templates/inventory/detail.html:88
+#, fuzzy
+msgid "confirmacions"
+msgstr "Confirma la teva contrasenya"
+
+#: templates/inventory/detail.html:96
+#, fuzzy
+msgid "ja no hi és"
+msgstr "Ja no hi és"
+
+#: templates/inventory/detail.html:144 templates/inventory/detail.html:252
+#, fuzzy
+msgid "(Ja has confirmat)"
+msgstr "Nom complet"
+
+#: templates/inventory/detail.html:154 templates/inventory/detail.html:158
+#: templates/inventory/detail.html:313 templates/inventory/detail.html:330
+#: templates/inventory/map.html:1677 templates/inventory/map.html:1974
+#: templates/inventory/map.html:1992
+msgid "Ja no hi és"
+msgstr "Ja no hi és"
+
+#: templates/inventory/detail.html:154 templates/inventory/detail.html:313
+#, fuzzy
+msgid "(Ja has reportat)"
+msgstr "Total Reportatges"
+
+#: templates/inventory/detail.html:178
+#, fuzzy
+msgid "Reportat per"
+msgstr "Reportar Problema"
+
+#: templates/inventory/detail.html:258
+#, fuzzy
+msgid "Vot registrat correctament"
+msgstr "Registra't per Reportar"
+
+#: templates/inventory/detail.html:263 templates/inventory/map.html:1851
+msgid "Error al votar"
+msgstr ""
+
+#: templates/inventory/detail.html:274
+#, fuzzy
+msgid "Error al votar. Torna-ho a intentar."
+msgstr "Error inesperat. Si us plau, torna-ho a intentar."
+
+#: templates/inventory/detail.html:319
+#, fuzzy
+msgid "Report registrat correctament"
+msgstr "Radiografia de la Ciutat"
+
+#: templates/inventory/detail.html:324 templates/inventory/map.html:1962
+#: templates/inventory/map.html:1967
+#, fuzzy
+msgid "Error al reportar"
+msgstr "Total Reportatges"
+
+#: templates/inventory/detail.html:335
+#, fuzzy
+msgid "Error al reportar. Torna-ho a intentar."
+msgstr "Error inesperat. Si us plau, torna-ho a intentar."
+
+#: templates/inventory/map.html:166
 msgid ""
 "Mapa col·laboratiu per reportar i visualitzar problemes de la ciutat de "
 "Tarragona"
 msgstr ""
 
-#: templates/inventory/map.html:62 templates/reports/public.html:23
+#: templates/inventory/map.html:175 templates/reports/public.html:23
 #, fuzzy
 msgid "Items reportats"
 msgstr "Total Reportatges"
 
-#: templates/inventory/map.html:67
+#: templates/inventory/map.html:180
 #, fuzzy
 msgid "Per categoria"
 msgstr "Categoria"
 
-#: templates/inventory/map.html:86
+#: templates/inventory/map.html:199
 #, fuzzy
 msgid "Filtrar per categoria"
 msgstr "Categoria"
 
-#: templates/inventory/map.html:115
+#: templates/inventory/map.html:276
 #, fuzzy
 msgid "Subcategorías de Coloms"
 msgstr "Subcategories de Coloms"
 
-#: templates/inventory/map.html:118 templates/inventory/map.html:150
+#: templates/inventory/map.html:279 templates/inventory/map.html:311
+#: templates/inventory/map.html:335 templates/inventory/map.html:359
+#: templates/inventory/map.html:399 templates/inventory/map.html:431
+#: templates/inventory/map.html:463 templates/inventory/map.html:495
 msgid "Totes les subcategorías"
 msgstr "Totes les subcategories"
 
-#: templates/inventory/map.html:147
+#: templates/inventory/map.html:308
 #, fuzzy
 msgid "Subcategorías de Brossa"
 msgstr "Subcategories de Brossa"
 
-#: templates/inventory/map.html:183
+#: templates/inventory/map.html:332
+#, fuzzy
+msgid "Subcategorías de Gossos"
+msgstr "Subcategories de Coloms"
+
+#: templates/inventory/map.html:356
+#, fuzzy
+msgid "Subcategorías de Material Deteriorat"
+msgstr "Material Deteriorat"
+
+#: templates/inventory/map.html:396
+#, fuzzy
+msgid "Subcategorías de Brutícia"
+msgstr "Subcategories de Brossa"
+
+#: templates/inventory/map.html:428
+#, fuzzy
+msgid "Subcategorías de Mobiliari Urbà"
+msgstr "Subcategories de Coloms"
+
+#: templates/inventory/map.html:460
+#, fuzzy
+msgid "Subcategorías de Vegetació"
+msgstr "Subcategories de Coloms"
+
+#: templates/inventory/map.html:492
+#, fuzzy
+msgid "Subcategorías de Infraestructura"
+msgstr "Subcategories de Brossa"
+
+#: templates/inventory/map.html:536
+#, fuzzy
+msgid "Les zones han estat importades del"
+msgstr "Totes les Iniciatives"
+
+#: templates/inventory/map.html:541
+msgid "Geoportal de Tarragona"
+msgstr ""
+
+#: templates/inventory/map.html:550
 #, fuzzy
 msgid "Reportar nou item"
 msgstr "Reportar Nou Problema"
 
-#: templates/inventory/map.html:188
+#: templates/inventory/map.html:555
 msgid "Has de"
 msgstr ""
 
-#: templates/inventory/map.html:188
+#: templates/inventory/map.html:555
 #, fuzzy
 msgid "iniciar sessió"
 msgstr "Inicia sessió"
 
-#: templates/inventory/map.html:188
+#: templates/inventory/map.html:555
 #, fuzzy
 msgid "per reportar items"
 msgstr "Total Reportatges"
 
-#: templates/inventory/map.html:526 templates/inventory/map.html:533
-#: templates/inventory/map.html:539 templates/inventory/map.html:815
-#: templates/inventory/map.html:822
-msgid "Ja no hi és"
-msgstr "Ja no hi és"
+#: templates/inventory/map.html:566 templates/inventory/map.html:1382
+msgid "Mode punts de contenidors"
+msgstr ""
 
-#: templates/inventory/map.html:555
+#: templates/inventory/map.html:569
+msgid "Crear punt des de la meva ubicació"
+msgstr ""
+
+#: templates/inventory/map.html:573
+msgid "Aquí hi ha contenidors"
+msgstr "Aquí hi ha contenidors"
+
+#: templates/inventory/map.html:843
+msgid "Mapa"
+msgstr ""
+
+#: templates/inventory/map.html:848
 #, fuzzy
-msgid "confirmacions"
-msgstr "Confirma la teva contrasenya"
+msgid "Items d'inventari"
+msgstr "Veure Mapa de l'Inventari"
 
-#: templates/inventory/map.html:563 templates/inventory/map.html:689
-#: templates/inventory/map.html:786
+#: templates/inventory/map.html:849 templates/inventory/map.html:873
+msgid "Punts de contenidors"
+msgstr ""
+
+#: templates/inventory/map.html:851
+#, fuzzy
+msgid "Límits de la ciutat"
+msgstr "Radiografia de la Ciutat"
+
+#: templates/inventory/map.html:1020
+msgid ""
+"Vols indicar que aquí hi ha contenidors? Un administrador o responsable "
+"revisarà la teva suggerència."
+msgstr "Vols indicar que aquí hi ha contenidors? Un administrador o responsable revisarà la teva suggerència."
+
+#: templates/inventory/map.html:1059
+msgid "Crear un punt de contenidors en aquesta ubicació?"
+msgstr ""
+
+#: templates/inventory/map.html:1171
+msgid "Marcar com a normal"
+msgstr ""
+
+#: templates/inventory/map.html:1171
+msgid "Marcar com desbordat"
+msgstr ""
+
+#: templates/inventory/map.html:1183 templates/inventory/map.html:1281
+#: templates/inventory/map.html:1297
+#, fuzzy
+msgid "Estan desbordats"
+msgstr "Brossa Desbordada"
+
+#: templates/inventory/map.html:1191
+msgid "Aquest punt ja està marcat com desbordat"
+msgstr ""
+
+#: templates/inventory/map.html:1197
+#, fuzzy
+msgid "Inicia sessió per reportar que està desbordat"
+msgstr "Uneix-te per Reportar"
+
+#: templates/inventory/map.html:1204
+msgid "Punt de contenidors"
+msgstr ""
+
+#: templates/inventory/map.html:1213
+msgid "Darrer report de desbordament"
+msgstr ""
+
+#: templates/inventory/map.html:1261
+msgid "Confirmes que aquest punt de contenidors està desbordat?"
+msgstr ""
+
+#: templates/inventory/map.html:1325
+msgid "Vols eliminar aquest punt de contenidors?"
+msgstr ""
+
+#: templates/inventory/map.html:1375
+msgid "Fes clic al mapa per afegir un punt"
+msgstr ""
+
+#: templates/inventory/map.html:1395 templates/inventory/map.html:1537
+msgid "La geolocalización no está disponible en tu navegador."
+msgstr ""
+
+#: templates/inventory/map.html:1406 templates/inventory/map.html:1548
+#: templates/inventory/report.html:60
+msgid "Obtenint ubicació..."
+msgstr "Obtenint ubicació..."
+
+#: templates/inventory/map.html:1423 templates/inventory/map.html:1563
+msgid "No s'ha pogut obtenir la teva ubicació."
+msgstr ""
+
+#: templates/inventory/map.html:1427 templates/inventory/map.html:1567
+msgid ""
+"Permís de geolocalització denegat. Si us plau, activa la geolocalització "
+"a la configuració del teu navegador."
+msgstr ""
+
+#: templates/inventory/map.html:1430 templates/inventory/map.html:1570
+msgid ""
+"La ubicació no està disponible. Assegura't que el GPS estigui activat i "
+"intenta-ho de nou."
+msgstr ""
+
+#: templates/inventory/map.html:1433 templates/inventory/map.html:1573
+msgid "Temps d'espera esgotat. Si us plau, intenta-ho de nou."
+msgstr ""
+
+#: templates/inventory/map.html:1436
+msgid ""
+"Error desconegut obtenint la ubicació. Si us plau, utilitza el mode de "
+"clic al mapa."
+msgstr ""
+
+#: templates/inventory/map.html:1469 templates/inventory/map.html:1501
+msgid ""
+"La teva ubicació està fora de l'àrea de Tarragona. Si us plau, utilitza "
+"el mode de clic al mapa."
+msgstr ""
+
+#: templates/inventory/map.html:1479 templates/inventory/map.html:1601
+msgid "Tornant a intentar..."
+msgstr ""
+
+#: templates/inventory/map.html:1595 templates/inventory/map.html:1617
+msgid "La teva ubicació està fora de l'àrea de Tarragona."
+msgstr ""
+
+#: templates/inventory/map.html:1836 templates/inventory/map.html:1933
 msgid "reportat que ja no hi és"
 msgstr "reportat que ja no hi és"
 
-#: templates/inventory/map.html:704
-msgid "Error al votar"
-msgstr ""
-
-#: templates/inventory/map.html:711
+#: templates/inventory/map.html:1858
 #, fuzzy
 msgid "Error al votar. Intenta-ho de nou."
 msgstr "Error inesperat. Si us plau, torna-ho a intentar."
 
-#: templates/inventory/map.html:713
+#: templates/inventory/map.html:1860
 msgid "Confirmar importància"
 msgstr ""
 
-#: templates/inventory/map.html:794
+#: templates/inventory/map.html:1941
 msgid ""
 "Aquest item s'ha tancat automàticament després de múltiples confirmacions"
 " que ja no hi és."
 msgstr ""
 
-#: templates/inventory/map.html:809
-#, fuzzy
-msgid "Error al reportar"
-msgstr "Total Reportatges"
-
-#: templates/inventory/map.html:820
+#: templates/inventory/map.html:1984 templates/inventory/map.html:1989
 #, fuzzy
 msgid "Error al reportar. Intenta-ho de nou."
 msgstr "Error inesperat. Si us plau, torna-ho a intentar."
@@ -3004,36 +3962,47 @@ msgstr "Error inesperat. Si us plau, torna-ho a intentar."
 msgid "Reportar nou item al inventari"
 msgstr "Reportar Nou Problema"
 
-#: templates/inventory/report.html:32
-msgid "Fes clic al mapa o usa la teva ubicació actual"
-msgstr ""
-
-#: templates/inventory/report.html:35
-msgid "Usar ubicació actual"
+#: templates/inventory/report.html:33
+#, fuzzy
+msgid "Ubicació detectada"
 msgstr "Usar ubicació actual"
 
-#: templates/inventory/report.html:66
+#: templates/inventory/report.html:38
+msgid "Corregir"
+msgstr ""
+
+#: templates/inventory/report.html:48
+#, fuzzy
+msgid "Selecciona la ubicació al mapa"
+msgstr "Selecciona una subcategoria"
+
+#: templates/inventory/report.html:51
+#, fuzzy
+msgid "Usar la meva ubicació actual"
+msgstr "Usar ubicació actual"
+
+#: templates/inventory/report.html:89
 #, fuzzy
 msgid "Selecciona primero una categoría"
 msgstr "Selecciona una subcategoria"
 
-#: templates/inventory/report.html:72
+#: templates/inventory/report.html:95
 msgid "Descripció opcional del problema..."
 msgstr ""
 
-#: templates/inventory/report.html:83
+#: templates/inventory/report.html:106
 msgid "Fer foto ara"
 msgstr "Fer foto ara"
 
-#: templates/inventory/report.html:86
+#: templates/inventory/report.html:109
 msgid "Pujar foto"
 msgstr "Pujar foto"
 
-#: templates/inventory/report.html:93
+#: templates/inventory/report.html:116
 msgid "Eliminar foto"
 msgstr "Eliminar foto"
 
-#: templates/inventory/report.html:96
+#: templates/inventory/report.html:119
 #, fuzzy
 msgid ""
 "Formatos aceptados: JPG, PNG, GIF. La imagen será optimizada "
@@ -3042,93 +4011,232 @@ msgstr ""
 "Formats acceptats: JPG, PNG, GIF, WEBP (Màx. 16MB). La imatge serà "
 "optimitzada automàticament."
 
-#: templates/inventory/report.html:106 templates/inventory/report.html:154
-msgid "Ubicació seleccionada"
-msgstr ""
-
-#: templates/inventory/report.html:107
-msgid "Fes clic al mapa per seleccionar la ubicació"
-msgstr ""
-
-#: templates/inventory/report.html:113
+#: templates/inventory/report.html:128
 #, fuzzy
 msgid "Reportar"
 msgstr "Reportar Problema"
 
-#: templates/inventory/report.html:190
-msgid "La geolocalización no está disponible en tu navegador"
+#: templates/inventory/report.html:228 templates/inventory/report.html:272
+msgid "Obtinguda de la foto (GPS)"
 msgstr ""
 
-#: templates/inventory/report.html:197
-msgid "Obtenint ubicació..."
-msgstr "Obtenint ubicació..."
+#: templates/inventory/report.html:230 templates/inventory/report.html:274
+#, fuzzy
+msgid "Obtinguda de la teva ubicació actual"
+msgstr "Usar ubicació actual"
 
-#: templates/inventory/report.html:208
+#: templates/inventory/report.html:232 templates/inventory/report.html:338
+#: templates/inventory/report.html:354
+#, fuzzy
+msgid "Seleccionada manualment"
+msgstr "Selecciona un assumpte"
+
+#: templates/inventory/report.html:376
 msgid ""
-"Tu ubicación está fuera del área de Tarragona. Por favor, marca la "
+"La geolocalización no está disponible en tu navegador. Por favor, "
+"selecciona la ubicación en el mapa."
+msgstr ""
+
+#: templates/inventory/report.html:402
+msgid ""
+"Tu ubicación está fuera del área de Tarragona. Por favor, selecciona la "
 "ubicación en el mapa."
 msgstr ""
 
-#: templates/inventory/report.html:217
-msgid "Error al obtener la ubicación"
+#: templates/inventory/report.html:411
+msgid "No se pudo obtener tu ubicación"
 msgstr ""
 
-#: templates/inventory/report.html:219
-msgid "Permiso de ubicación denegado. Por favor, marca la ubicación en el mapa."
+#: templates/inventory/report.html:413
+msgid ""
+"Permiso de ubicación denegado. Por favor, selecciona la ubicación en el "
+"mapa."
 msgstr ""
 
-#: templates/inventory/report.html:221
-msgid "Ubicación no disponible. Por favor, marca la ubicación en el mapa."
+#: templates/inventory/report.html:416
+msgid "Ubicación no disponible. Por favor, selecciona la ubicación en el mapa."
 msgstr ""
 
-#: templates/inventory/report.html:223
-msgid "Tiempo de espera agotado. Por favor, marca la ubicación en el mapa."
+#: templates/inventory/report.html:418
+msgid "Tiempo de espera agotado. Por favor, selecciona la ubicación en el mapa."
 msgstr ""
 
-#: templates/inventory/report.html:245
-msgid "Nido"
-msgstr "Niu"
-
-#: templates/inventory/report.html:246
-msgid "Excremento"
-msgstr "Excrement"
-
-#: templates/inventory/report.html:247
-msgid "Plumas"
-msgstr "Plomes"
-
-#: templates/inventory/report.html:251
-msgid "Vertidos"
-msgstr "Abocaments"
-
-#: templates/inventory/report.html:257
+#: templates/inventory/report.html:504
 msgid "Selecciona una subcategoría"
 msgstr "Selecciona una subcategoria"
 
-#: templates/inventory/report.html:351
+#: templates/inventory/report.html:598
 #, fuzzy
 msgid "Fer foto"
 msgstr "Fer foto ara"
 
-#: templates/inventory/report.html:428
+#: templates/inventory/report.html:675
 msgid "Por favor, selecciona un archivo de imagen válido"
 msgstr ""
 
-#: templates/inventory/report.html:434
+#: templates/inventory/report.html:681
 msgid "La imagen es demasiado grande. Máximo 10MB"
 msgstr ""
 
-#: templates/inventory/report.html:466
+#: templates/inventory/report.html:723
 #, fuzzy
 msgid "Por favor, selecciona una categoría y subcategoría"
 msgstr "Selecciona una subcategoria"
 
-#: templates/inventory/report.html:473
-msgid "Por favor, selecciona una ubicación en el mapa"
+#: templates/inventory/report.html:735
+msgid "Por favor, sube una foto del item. La foto es obligatoria."
 msgstr ""
 
-#: templates/inventory/report.html:480
-msgid "Por favor, sube una foto del item. La foto es obligatoria."
+#: templates/inventory/section_responsible.html:27
+msgid "Gestiona els items de les teves seccions assignades"
+msgstr ""
+
+#: templates/inventory/section_responsible.html:34
+#, fuzzy
+msgid "Seccions Assignades"
+msgstr "Accions Ràpides"
+
+#: templates/inventory/section_responsible.html:45
+msgid "No tens seccions assignades. Contacta amb un administrador."
+msgstr ""
+
+#: templates/inventory/section_responsible.html:134
+#, fuzzy
+msgid "Imatge"
+msgstr "Imatge"
+
+#: templates/inventory/section_responsible.html:170
+#, fuzzy
+msgid "Sense descripció"
+msgstr "Descripció"
+
+#: templates/inventory/section_responsible.html:221
+#, fuzzy
+msgid "No hi ha items per mostrar"
+msgstr "No hi ha iniciatives encara"
+
+#: templates/reports/preview_inventory_by_zone.html:3
+#: templates/reports/preview_inventory_by_zone.html:13
+msgid "Vista Previa: Inventari per Zona"
+msgstr ""
+
+#: templates/reports/preview_inventory_by_zone.html:15
+msgid "Estadístiques resumides del report d'inventari per zona"
+msgstr ""
+
+#: templates/reports/preview_inventory_by_zone.html:31
+#, fuzzy
+msgid "Items totals"
+msgstr "Total Reportatges"
+
+#: templates/reports/preview_inventory_by_zone.html:40
+#, fuzzy
+msgid "Districtes"
+msgstr "Registrar-se"
+
+#: templates/reports/preview_inventory_by_zone.html:49
+#: templates/reports/preview_inventory_by_zone.html:92
+#, fuzzy
+msgid "Categories"
+msgstr "Categoria"
+
+#: templates/reports/preview_inventory_by_zone.html:60
+msgid "Top 10 Districtes"
+msgstr ""
+
+#: templates/reports/preview_inventory_by_zone.html:69
+#: templates/reports/preview_inventory_by_zone.html:124
+#, fuzzy
+msgid "Items"
+msgstr "Vistes"
+
+#: templates/reports/preview_inventory_by_zone.html:114
+msgid "Top 10 Seccions"
+msgstr ""
+
+#: templates/reports/preview_inventory_by_zone.html:148
+#: templates/reports/preview_top_categories.html:82
+#: templates/reports/preview_trends.html:115
+msgid "Vols el report complet?"
+msgstr ""
+
+#: templates/reports/preview_inventory_by_zone.html:150
+msgid ""
+"Descarrega el CSV complet amb tots els detalls, coordenades i dades per a"
+" anàlisi."
+msgstr ""
+
+#: templates/reports/preview_inventory_by_zone.html:158
+#: templates/reports/preview_top_categories.html:92
+#: templates/reports/preview_trends.html:125 templates/reports/public.html:64
+#: templates/reports/public.html:110 templates/reports/public.html:156
+msgid "Comprar i Descarregar"
+msgstr ""
+
+#: templates/reports/preview_inventory_by_zone.html:162
+#: templates/reports/preview_top_categories.html:96
+#: templates/reports/preview_trends.html:129 templates/reports/public.html:73
+#: templates/reports/public.html:119 templates/reports/public.html:165
+msgid "Descarregar"
+msgstr ""
+
+#: templates/reports/preview_inventory_by_zone.html:168
+#: templates/reports/preview_top_categories.html:102
+#: templates/reports/preview_trends.html:135 templates/reports/public.html:79
+#: templates/reports/public.html:125 templates/reports/public.html:171
+#, fuzzy
+msgid "Inicia sessió per descarregar"
+msgstr "Inicia sessió"
+
+#: templates/reports/preview_top_categories.html:3
+#: templates/reports/preview_top_categories.html:13
+msgid "Vista Previa: Categories Més Reportades"
+msgstr ""
+
+#: templates/reports/preview_top_categories.html:31
+#, fuzzy
+msgid "Items totals reportats"
+msgstr "Total Reportatges"
+
+#: templates/reports/preview_top_categories.html:42
+#, fuzzy
+msgid "Top 20 Categories i Subcategories"
+msgstr "Totes les subcategories"
+
+#: templates/reports/preview_top_categories.html:84
+msgid ""
+"Descarrega el CSV complet amb tots els detalls per zona i dades per a "
+"anàlisi detallada."
+msgstr ""
+
+#: templates/reports/preview_trends.html:3
+#: templates/reports/preview_trends.html:13
+msgid "Vista Previa: Tendències Temporals"
+msgstr ""
+
+#: templates/reports/preview_trends.html:15
+msgid "Evolució dels reports als últims 6 mesos"
+msgstr ""
+
+#: templates/reports/preview_trends.html:31
+#, fuzzy
+msgid "Items reportats als últims 6 mesos"
+msgstr "Total Reportatges"
+
+#: templates/reports/preview_trends.html:42
+#, fuzzy
+msgid "Evolució Mensual"
+msgstr "Educació Ambiental"
+
+#: templates/reports/preview_trends.html:81
+#, fuzzy
+msgid "Tendències per Categoria"
+msgstr "Categoria"
+
+#: templates/reports/preview_trends.html:117
+msgid ""
+"Descarrega el CSV complet amb tots els detalls temporals i dades per a "
+"anàlisi avançada."
 msgstr ""
 
 #: templates/reports/public.html:12
@@ -3145,40 +4253,29 @@ msgstr ""
 msgid "Iniciatives actives"
 msgstr "Iniciatives Actives"
 
-#: templates/reports/public.html:55 templates/reports/public.html:90
-#: templates/reports/public.html:125
+#: templates/reports/public.html:55 templates/reports/public.html:101
+#: templates/reports/public.html:147
 #, fuzzy
 msgid "Veure Detalls"
 msgstr "Veure Tots"
 
-#: templates/reports/public.html:63 templates/reports/public.html:98
-#: templates/reports/public.html:133
-msgid "Comprar i Descarregar"
-msgstr ""
-
-#: templates/reports/public.html:68 templates/reports/public.html:103
-#: templates/reports/public.html:138
-#, fuzzy
-msgid "Inicia sessió per comprar"
-msgstr "Inicia sessió"
-
-#: templates/reports/public.html:154
+#: templates/reports/public.html:187
 #, fuzzy
 msgid "Sobre els Reports"
 msgstr "Sobre Nosaltres"
 
-#: templates/reports/public.html:155
+#: templates/reports/public.html:188
 msgid ""
 "Els reports es generen amb les dades més actualitzades de la plataforma i"
 " inclouen informació detallada sobre l'estat de la ciutat."
 msgstr ""
 
-#: templates/reports/public.html:156
+#: templates/reports/public.html:189
 #, fuzzy
 msgid "Format:"
 msgstr "Format HH:MM"
 
-#: templates/reports/public.html:156
+#: templates/reports/public.html:189
 msgid "CSV (compatible amb Excel i altres eines d'anàlisi)"
 msgstr ""
 
@@ -3193,7 +4290,7 @@ msgstr ""
 "Accedeix al teu compte per participar en iniciatives i gestionar el teu "
 "perfil"
 
-#: templates/security/login.html:25 templates/security/register.html:25
+#: templates/security/login.html:25 templates/security/register.html:42
 msgid "tu@email.com"
 msgstr "tu@email.com"
 
@@ -3214,37 +4311,46 @@ msgstr "Registra't aquí"
 msgid "Registrarse"
 msgstr "Registrar-se"
 
-#: templates/security/register.html:14 templates/security/register.html:75
+#: templates/security/register.html:31 templates/security/register.html:109
 msgid "Crear Cuenta"
 msgstr "Crear Compte"
 
-#: templates/security/register.html:16
+#: templates/security/register.html:33
 msgid "Únete a la comunidad de Tarracograf y participa en iniciativas ciudadanas"
 msgstr ""
 "Uneix-te a la comunitat de Tarracograf i participa en iniciatives "
 "ciutadanes"
 
-#: templates/security/register.html:37
+#: templates/security/register.html:54
 msgid "Tu nombre de usuario"
 msgstr "El teu nom d'usuari"
 
-#: templates/security/register.html:49
+#: templates/security/register.html:66
 msgid "Mínimo 8 caracteres"
 msgstr "Mínim 8 caràcters"
 
-#: templates/security/register.html:57
+#: templates/security/register.html:74
 msgid "La contraseña debe tener al menos 8 caracteres"
 msgstr "La contrasenya ha de tenir almenys 8 caràcters"
 
-#: templates/security/register.html:63
+#: templates/security/register.html:80
 msgid "Confirma tu contraseña"
 msgstr "Confirma la teva contrasenya"
 
-#: templates/security/register.html:81
+#: templates/security/register.html:94
+msgid "Accepto les condicions d'ús i privacitat"
+msgstr ""
+
+#: templates/security/register.html:97
+#, fuzzy
+msgid "Veure condicions"
+msgstr "Veure Participacions"
+
+#: templates/security/register.html:115
 msgid "¿Ya tienes cuenta?"
 msgstr "Ja tens compte?"
 
-#: templates/security/register.html:83
+#: templates/security/register.html:117
 msgid "Inicia sesión aquí"
 msgstr "Inicia sessió aquí"
 
@@ -3347,7 +4453,141 @@ msgstr "Inicia sessió aquí"
 #~ msgstr "Coloms"
 
 #~ msgid "Basura"
-#~ msgstr "Brossa"
-
 #~ msgstr ""
+
+#~ msgid "Nombre de usuario"
+#~ msgstr "Nom d'usuari"
+
+#~ msgid "Title"
+#~ msgstr "Títol"
+
+#~ msgid "Description"
+#~ msgstr "Descripció"
+
+#~ msgid "Location"
+#~ msgstr "Ubicació"
+
+#~ msgid "Category"
+#~ msgstr "Categoria"
+
+#~ msgid "Date"
+#~ msgstr "Data"
+
+#~ msgid "Time"
+#~ msgstr "Hora"
+
+#~ msgid "Status"
+#~ msgstr "Estat"
+
+#~ msgid "Subcategory"
+#~ msgstr "Categoria"
+
+#~ msgid "Latitude"
+#~ msgstr "Títol"
+
+#~ msgid "Longitude"
+#~ msgstr ""
+
+#~ msgid "Photo"
+#~ msgstr ""
+
+#~ msgid "Este item no está pendiente de aprobación"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Les coordenades estan fora del límit "
+#~ "de Tarragona. Si us plau, selecciona "
+#~ "una ubicació dins de la ciutat."
+#~ msgstr ""
+
+#~ msgid "Explora les iniciatives actives a la teva ciutat"
+#~ msgstr "Explora les iniciatives actives a la teva ciutat"
+
+#~ msgid "Uneix-te a les iniciatives que et motivin"
+#~ msgstr "Uneix-te a les iniciatives que et motivin"
+
+#~ msgid "Actua"
+#~ msgstr "Actua"
+
+#~ msgid "Col·labora amb altres ciutadans compromesos"
+#~ msgstr "Col·labora amb altres ciutadans compromesos"
+
+#~ msgid "Genera canvis positius a la teva comunitat"
+#~ msgstr "Genera canvis positius a la teva comunitat"
+
+#~ msgid "Radiografia Ciutat"
+#~ msgstr "Radiografia Ciutat"
+
+#~ msgid ""
+#~ "La radiografia de la ciutat. Reporta "
+#~ "problemes de neteja, visualitza l'estat "
+#~ "de la ciutat i participa en la "
+#~ "millora de Tarragona."
+#~ msgstr ""
+
+#~ msgid "Reportatges Actius"
+#~ msgstr "Reportatges Actius"
+
+#~ msgid "Problemàtiques"
+#~ msgstr "Problemàtiques"
+
+#~ msgid "Veure Mapa del Inventari"
+#~ msgstr "Veure Mapa de l'Inventari"
+
+#~ msgid "Veure Participacions"
+#~ msgstr "Veure Participacions"
+
+#~ msgid "Participacions Recents"
+#~ msgstr "Participacions Recents"
+
+#~ msgid "Iniciativa"
+#~ msgstr "Nova Iniciativa"
+
+#~ msgid "Fes clic al mapa o usa la teva ubicació actual"
+#~ msgstr ""
+
+#~ msgid "Ubicació seleccionada"
+#~ msgstr ""
+
+#~ msgid "Fes clic al mapa per seleccionar la ubicació"
+#~ msgstr ""
+
+#~ msgid "La geolocalización no está disponible en tu navegador"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Tu ubicación está fuera del área "
+#~ "de Tarragona. Por favor, marca la "
+#~ "ubicación en el mapa."
+#~ msgstr ""
+
+#~ msgid "Error al obtener la ubicación"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Permiso de ubicación denegado. Por "
+#~ "favor, marca la ubicación en el "
+#~ "mapa."
+#~ msgstr ""
+
+#~ msgid "Ubicación no disponible. Por favor, marca la ubicación en el mapa."
+#~ msgstr ""
+
+#~ msgid "Tiempo de espera agotado. Por favor, marca la ubicación en el mapa."
+#~ msgstr ""
+
+#~ msgid "Excremento"
+#~ msgstr "Excrement"
+
+#~ msgid "Plumas"
+#~ msgstr "Plomes"
+
+#~ msgid "Vertidos"
+#~ msgstr "Abocaments"
+
+#~ msgid "Por favor, selecciona una ubicación en el mapa"
+#~ msgstr ""
+
+#~ msgid "Inicia sessió per comprar"
+#~ msgstr "Inicia sessió"
 

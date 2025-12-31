@@ -16,6 +16,8 @@ from app.models import (
     ContainerPoint,
     ContainerPointStatus,
     ContainerOverflowReport,
+    ContainerPointSuggestion,
+    RoleEnum,
 )
 from app.extensions import db, csrf
 from sqlalchemy import not_
@@ -623,6 +625,19 @@ def create_container_point():
         except Exception as e:
             current_app.logger.warning(f"Could not assign section to ContainerPoint at ({latitude}, {longitude}): {e}")
         
+        # Validar permisos: si es responsable (no admin), solo puede crear en sus secciones
+        if not current_user.has_role(RoleEnum.ADMIN.value) and current_user.has_role(RoleEnum.SECTION_RESPONSIBLE.value):
+            managed_sections = current_user.get_managed_sections()
+            managed_section_ids = [s.id for s in managed_sections]
+            
+            if point.section_id is None:
+                return jsonify({'error': 'No se pudo determinar la sección del punto. Solo puedes crear puntos en tus secciones gestionadas.'}), 403
+            
+            if point.section_id not in managed_section_ids:
+                return jsonify({
+                    'error': f'No tienes permiso para crear puntos en esta sección. Solo puedes crear en tus secciones gestionadas.'
+                }), 403
+        
         db.session.add(point)
         db.session.commit()
         
@@ -649,7 +664,7 @@ def update_container_point_status(point_id):
     point = ContainerPoint.query.get_or_404(point_id)
     
     # Permisos finos: admin o responsable de la sección del punto
-    if not current_user.has_role('admin'):
+    if not current_user.has_role(RoleEnum.ADMIN.value):
         if not point.section_id or not current_user.is_section_responsible(point.section_id):
             return jsonify({'error': _('No tienes permisos para gestionar este punto')}), 403
     
@@ -733,6 +748,60 @@ def report_container_point_overflow(point_id):
         return jsonify({'error': _('Error en registrar el report. Intenta-ho de nou més tard.')}), 500
 
 
+@bp.route('/api/container-points/suggest', methods=['POST'])
+@login_required
+@csrf.exempt
+def suggest_container_point():
+    """Sugerir un nuevo punto de contenedores (usuarios normales)."""
+    try:
+        data = request.get_json(silent=True) or {}
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
+        address = data.get('address') or None
+        notes = data.get('notes') or None
+        
+        if latitude is None or longitude is None:
+            return jsonify({'error': 'Latitude and longitude are required'}), 400
+        
+        try:
+            latitude = float(latitude)
+            longitude = float(longitude)
+        except (TypeError, ValueError):
+            return jsonify({'error': 'Invalid latitude/longitude'}), 400
+        
+        # Validar que el punto esté dentro del boundary de la ciudad
+        if not CityBoundary.point_is_inside(latitude, longitude):
+            return jsonify({'error': 'Point is outside city boundary'}), 400
+        
+        # Crear sugerencia
+        suggestion = ContainerPointSuggestion(
+            latitude=latitude,
+            longitude=longitude,
+            address=sanitize_html(address) if address else None,
+            notes=sanitize_html(notes) if notes else None,
+            suggested_by_id=current_user.id,
+        )
+        
+        # Asignar sección automáticamente (si es posible)
+        try:
+            suggestion.assign_section()
+        except Exception as e:
+            current_app.logger.warning(f"Could not assign section to ContainerPointSuggestion at ({latitude}, {longitude}): {e}")
+        
+        db.session.add(suggestion)
+        db.session.commit()
+        
+        return jsonify({
+            'id': suggestion.id,
+            'message': _('Sugerència enviada correctament. Un administrador o responsable la revisarà.')
+        }), 201
+        
+    except Exception as e:
+        current_app.logger.error(f"Error creating container point suggestion: {e}", exc_info=True)
+        db.session.rollback()
+        return jsonify({'error': 'Error creating suggestion'}), 500
+
+
 @bp.route('/api/container-points/<int:point_id>', methods=['DELETE'])
 @login_required
 @section_responsible_required
@@ -742,7 +811,7 @@ def delete_container_point(point_id):
     point = ContainerPoint.query.get_or_404(point_id)
     
     # Permisos finos: admin o responsable de la sección del punto
-    if not current_user.has_role('admin'):
+    if not current_user.has_role(RoleEnum.ADMIN.value):
         if not point.section_id or not current_user.is_section_responsible(point.section_id):
             return jsonify({'error': _('No tienes permisos para gestionar este punto')}), 403
     
@@ -764,9 +833,9 @@ def item_detail(item_id):
             abort(404)
         # Check if user is reporter, admin, or section responsible
         is_reporter = item.reporter_id == current_user.id
-        is_admin = current_user.has_role('admin')
+        is_admin = current_user.has_role(RoleEnum.ADMIN.value)
         is_section_responsible = False
-        if item.section and current_user.has_role('section_responsible'):
+        if item.section and current_user.has_role(RoleEnum.SECTION_RESPONSIBLE.value):
             # Check if user is responsible for this section
             from app.models import SectionResponsible
             section_responsible = SectionResponsible.query.filter_by(

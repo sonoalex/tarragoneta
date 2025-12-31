@@ -1,3 +1,4098 @@
-# Este archivo se generará automáticamente con pybabel extract
-# Por ahora lo dejamos vacío
+# Translations template for PROJECT.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-12-31 16:28+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: app/forms.py:21
+msgid "Este nombre de usuario ya está en uso"
+msgstr ""
+
+#: app/forms.py:42 templates/admin/analytics_purchases.html:203
+#: templates/admin/dashboard.html:246 templates/admin/donations.html:108
+#: templates/inventory/admin.html:225 templates/inventory/detail.html:193
+#: templates/inventory/section_responsible.html:181 templates/profile.html:218
+#: templates/profile.html:272
+msgid "Pendent"
+msgstr ""
+
+#: app/forms.py:43 templates/admin/container_point_suggestions.html:181
+#: templates/admin/dashboard.html:250 templates/profile.html:268
+msgid "Aprovada"
+msgstr ""
+
+#: app/forms.py:44 templates/admin/container_point_suggestions.html:189
+#: templates/admin/dashboard.html:254
+msgid "Rebutjada"
+msgstr ""
+
+#: app/forms.py:45 templates/admin/dashboard.html:258
+#: templates/profile.html:270
+msgid "Activa"
+msgstr ""
+
+#: app/forms.py:46 templates/admin/dashboard.html:262
+msgid "Cancel·lada"
+msgstr ""
+
+#: app/forms.py:60 app/utils.py:363
+msgid "Cleaning"
+msgstr ""
+
+#: app/forms.py:61 app/utils.py:364
+msgid "Recycling"
+msgstr ""
+
+#: app/forms.py:62 app/utils.py:365
+msgid "Green Spaces"
+msgstr ""
+
+#: app/forms.py:63 app/utils.py:366
+msgid "Sustainable Mobility"
+msgstr ""
+
+#: app/forms.py:64 app/utils.py:367
+msgid "Environmental Education"
+msgstr ""
+
+#: app/forms.py:65 app/utils.py:368
+msgid "Culture and Civics"
+msgstr ""
+
+#: app/forms.py:66 app/utils.py:369
+msgid "Social Action"
+msgstr ""
+
+#: app/forms.py:67 app/utils.py:370 app/utils.py:399 app/utils.py:400
+#: app/utils.py:449 app/utils.py:450 templates/inventory/map.html:316
+msgid "Escombreries Desbordades"
+msgstr ""
+
+#: app/forms.py:68 app/utils.py:371
+msgid "Dumping"
+msgstr ""
+
+#: app/forms.py:98 app/routes/analytics.py:425 app/utils.py:382
+#: templates/admin/analytics_inventory_by_zone.html:46
+#: templates/admin/analytics_trends.html:35
+#: templates/admin/analytics_trends.html:66 templates/index.html:742
+#: templates/inventory/map.html:210
+msgid "Coloms"
+msgstr ""
+
+#: app/forms.py:99 app/routes/analytics.py:426 app/utils.py:383
+#: templates/admin/analytics_inventory_by_zone.html:47
+#: templates/admin/analytics_trends.html:36
+#: templates/admin/analytics_trends.html:67 templates/index.html:746
+#: templates/inventory/map.html:218
+msgid "Brossa"
+msgstr ""
+
+#: app/forms.py:100 app/utils.py:384 templates/index.html:750
+#: templates/inventory/map.html:226
+msgid "Gossos"
+msgstr ""
+
+#: app/forms.py:101 app/utils.py:385 templates/index.html:754
+#: templates/inventory/map.html:234
+msgid "Material Deteriorat"
+msgstr ""
+
+#: app/forms.py:102 app/utils.py:386 templates/index.html:758
+#: templates/inventory/map.html:242
+msgid "Brutícia"
+msgstr ""
+
+#: app/forms.py:103 app/utils.py:387 templates/index.html:762
+#: templates/inventory/map.html:250
+msgid "Mobiliari Urbà"
+msgstr ""
+
+#: app/forms.py:104 app/utils.py:388 templates/inventory/map.html:258
+msgid "Vegetació"
+msgstr ""
+
+#: app/forms.py:105 app/utils.py:389 templates/inventory/map.html:266
+msgid "Infraestructura"
+msgstr ""
+
+#: app/forms.py:111 app/utils.py:396 app/utils.py:446
+#: templates/inventory/map.html:284 templates/inventory/report.html:462
+msgid "Niu"
+msgstr ""
+
+#: app/forms.py:112 app/utils.py:395 app/utils.py:445
+#: templates/inventory/map.html:292 templates/inventory/report.html:463
+msgid "Excrement"
+msgstr ""
+
+#: app/forms.py:113 app/utils.py:397 app/utils.py:447
+#: templates/inventory/map.html:300 templates/inventory/report.html:464
+msgid "Plomes"
+msgstr ""
+
+#: app/forms.py:116 app/utils.py:401 app/utils.py:451
+#: templates/inventory/map.html:324 templates/inventory/report.html:468
+msgid "Abocaments"
+msgstr ""
+
+#: app/forms.py:118 app/utils.py:403 app/utils.py:453
+#: templates/inventory/map.html:340 templates/inventory/report.html:471
+msgid "Excrements"
+msgstr ""
+
+#: app/forms.py:119 app/utils.py:404 app/utils.py:454
+#: templates/inventory/map.html:348 templates/inventory/report.html:472
+msgid "Pixades"
+msgstr ""
+
+#: app/forms.py:121 app/utils.py:406 app/utils.py:456
+#: templates/inventory/map.html:364 templates/inventory/report.html:475
+msgid "Faroles"
+msgstr ""
+
+#: app/forms.py:122 app/utils.py:407 app/utils.py:457
+#: templates/inventory/map.html:372 templates/inventory/map.html:452
+#: templates/inventory/report.html:476 templates/inventory/report.html:488
+msgid "Bancs"
+msgstr ""
+
+#: app/forms.py:123 app/utils.py:408 app/utils.py:458
+#: templates/inventory/map.html:380 templates/inventory/report.html:477
+msgid "Senyals"
+msgstr ""
+
+#: app/forms.py:124 app/utils.py:409 app/utils.py:459
+#: templates/inventory/map.html:388 templates/inventory/report.html:478
+msgid "Paviment"
+msgstr ""
+
+#: app/forms.py:126 app/utils.py:411 app/utils.py:461
+#: templates/inventory/map.html:404 templates/inventory/report.html:481
+msgid "Terra"
+msgstr ""
+
+#: app/forms.py:127 app/utils.py:412 app/utils.py:462
+#: templates/inventory/map.html:412 templates/inventory/report.html:482
+msgid "Fulles"
+msgstr ""
+
+#: app/forms.py:128 app/utils.py:413 app/utils.py:463
+#: templates/inventory/map.html:420 templates/inventory/report.html:483
+msgid "Grafit"
+msgstr ""
+
+#: app/forms.py:130 app/utils.py:415 app/utils.py:465
+#: templates/inventory/map.html:436 templates/inventory/report.html:486
+msgid "Papereres"
+msgstr ""
+
+#: app/forms.py:131 app/utils.py:416 app/utils.py:466
+#: templates/inventory/map.html:444 templates/inventory/report.html:487
+msgid "Parades"
+msgstr ""
+
+#: app/forms.py:133 app/utils.py:418 app/utils.py:468
+#: templates/inventory/map.html:468 templates/inventory/report.html:491
+msgid "Arbres"
+msgstr ""
+
+#: app/forms.py:134 app/utils.py:419 app/utils.py:469
+#: templates/inventory/map.html:476 templates/inventory/report.html:492
+msgid "Arbustos"
+msgstr ""
+
+#: app/forms.py:135 app/utils.py:420 app/utils.py:470
+#: templates/inventory/map.html:484 templates/inventory/report.html:493
+msgid "Gespa"
+msgstr ""
+
+#: app/forms.py:137 app/utils.py:422 app/utils.py:472
+#: templates/inventory/map.html:500 templates/inventory/report.html:496
+msgid "Carreteres"
+msgstr ""
+
+#: app/forms.py:138 app/utils.py:423 app/utils.py:473
+#: templates/inventory/map.html:508 templates/inventory/report.html:497
+msgid "Voreres"
+msgstr ""
+
+#: app/forms.py:139 app/utils.py:424 app/utils.py:474
+#: templates/inventory/map.html:516 templates/inventory/report.html:498
+msgid "Enllumenat"
+msgstr ""
+
+#: app/forms.py:205
+msgid "Categoría no válida"
+msgstr ""
+
+#: app/forms.py:208
+msgid "Subcategoría no válida para esta categoría"
+msgstr ""
+
+#: app/models.py:590
+msgid "Este item no puede ser aprobado"
+msgstr ""
+
+#: app/models.py:618 app/routes/admin.py:487
+msgid "Item aprobado correctamente"
+msgstr ""
+
+#: app/models.py:623
+msgid "Este item no puede ser rechazado"
+msgstr ""
+
+#: app/models.py:634 app/routes/admin.py:521
+msgid "Item rechazado"
+msgstr ""
+
+#: app/models.py:639
+msgid "Este item no puede ser resuelto"
+msgstr ""
+
+#: app/models.py:650 app/routes/inventory.py:1032
+msgid "Item marcado como resuelto"
+msgstr ""
+
+#: app/models.py:663 app/routes/inventory.py:1056
+msgid "Item eliminado"
+msgstr ""
+
+#: app/models.py:672
+msgid "Ya has reportado que este item ya no está"
+msgstr ""
+
+#: app/models.py:675
+msgid "Este item ya está marcado como resuelto"
+msgstr ""
+
+#: app/models.py:698
+msgid "Item marcado como resuelto automáticamente"
+msgstr ""
+
+#: app/models.py:698
+msgid "Reporte registrado correctamente"
+msgstr ""
+
+#: app/routes/analytics.py:427 app/utils.py:426 app/utils.py:476
+#: templates/admin/analytics_trends.html:68 templates/contact.html:70
+msgid "Altres"
+msgstr ""
+
+#: app/routes/admin.py:280
+msgid "No puedes desactivar tu propia cuenta"
+msgstr ""
+
+#: app/routes/admin.py:286
+msgid "activado"
+msgstr ""
+
+#: app/routes/admin.py:286
+msgid "desactivado"
+msgstr ""
+
+#: app/routes/admin.py:288
+#, python-brace-format
+msgid "Usuario {} correctamente"
+msgstr ""
+
+#: app/routes/admin.py:300
+msgid "Este usuario ya está confirmado"
+msgstr ""
+
+#: app/routes/admin.py:307
+msgid "Usuario confirmado correctamente"
+msgstr ""
+
+#: app/routes/admin.py:349 app/routes/admin.py:374
+msgid "Esta iniciativa ya ha sido procesada"
+msgstr ""
+
+#: app/routes/admin.py:363
+msgid "Iniciativa aprobada correctamente"
+msgstr ""
+
+#: app/routes/admin.py:389
+msgid "Iniciativa rechazada"
+msgstr ""
+
+#: app/routes/admin.py:403
+msgid "Debes seleccionar un rol"
+msgstr ""
+
+#: app/routes/admin.py:408
+msgid "No puedes cambiar tu propio rol de administrador"
+msgstr ""
+
+#: app/routes/admin.py:413
+msgid "Rol no válido"
+msgstr ""
+
+#: app/routes/admin.py:425
+msgid "Rol actualizado correctamente"
+msgstr ""
+
+#: app/routes/admin.py:566
+msgid "Debes seleccionar un usuario"
+msgstr ""
+
+#: app/routes/admin.py:570
+msgid "Debes seleccionar una sección o un distrito"
+msgstr ""
+
+#: app/routes/admin.py:574 templates/admin/sections.html:186
+msgid "Solo puedes seleccionar una sección o un distrito, no ambos"
+msgstr ""
+
+#: app/routes/admin.py:587
+msgid "El rol section_responsible no existe. Ejecuta flask init-db"
+msgstr ""
+
+#: app/routes/admin.py:596
+msgid "Este distrito no tiene secciones"
+msgstr ""
+
+#: app/routes/admin.py:625
+#, python-brace-format
+msgid ""
+"Responsable asignado a {count} secciones del distrito. {skipped} "
+"secciones ya tenían este responsable."
+msgstr ""
+
+#: app/routes/admin.py:627
+#, python-brace-format
+msgid ""
+"Responsable asignado a todas las secciones del distrito ({count} "
+"secciones)"
+msgstr ""
+
+#: app/routes/admin.py:629
+msgid "Este usuario ya es responsable de todas las secciones de este distrito"
+msgstr ""
+
+#: app/routes/admin.py:643
+msgid "Este usuario ya es responsable de esta sección"
+msgstr ""
+
+#: app/routes/admin.py:656
+msgid "Responsable asignado correctamente"
+msgstr ""
+
+#: app/routes/admin.py:673
+msgid "Responsable removido correctamente"
+msgstr ""
+
+#: app/routes/admin.py:707
+msgid "El nombre no puede estar vacío"
+msgstr ""
+
+#: app/routes/admin.py:716
+msgid "Nombre del distrito actualizado correctamente"
+msgstr ""
+
+#: app/routes/admin.py:734
+msgid "Nombre de la sección actualizado correctamente"
+msgstr ""
+
+#: app/routes/admin.py:747
+msgid "Selecciona almenys una secció per editar"
+msgstr ""
+
+#: app/routes/admin.py:753
+msgid "No s'han trobat les seccions especificades"
+msgstr ""
+
+#: app/routes/admin.py:975 app/routes/admin.py:1003
+msgid "Esta sugerencia ya ha sido procesada"
+msgstr ""
+
+#: app/routes/admin.py:985
+msgid "Sugerencia aprobada y punto de contenedores creado correctamente"
+msgstr ""
+
+#: app/routes/admin.py:989
+msgid "Error al aprobar la sugerencia"
+msgstr ""
+
+#: app/routes/admin.py:1011
+msgid "Sugerencia rechazada correctamente"
+msgstr ""
+
+#: app/routes/admin.py:1015
+msgid "Error al rechazar la sugerencia"
+msgstr ""
+
+#: app/routes/analytics.py:244 app/routes/analytics.py:245
+#: app/routes/analytics.py:487 app/routes/analytics.py:794
+#: app/routes/analytics.py:795
+#: templates/admin/analytics_container_overflows.html:98
+#: templates/admin/container_point_suggestions.html:140
+#: templates/inventory/section_responsible.html:176
+msgid "Sense secció"
+msgstr ""
+
+#: app/routes/analytics.py:249 app/routes/analytics.py:799
+#, python-brace-format
+msgid "Districte {code}"
+msgstr ""
+
+#: app/routes/analytics.py:250 app/routes/analytics.py:800
+#, python-brace-format
+msgid "Secció {code}"
+msgstr ""
+
+#: app/routes/analytics.py:312
+#: templates/admin/analytics_inventory_by_zone.html:32
+#: templates/admin/analytics_top_categories.html:32
+#: templates/admin/sections.html:54 templates/admin/sections.html:96
+#: templates/reports/preview_inventory_by_zone.html:68
+#: templates/reports/preview_inventory_by_zone.html:123
+msgid "Districte"
+msgstr ""
+
+#: app/routes/analytics.py:313
+#: templates/admin/container_point_suggestions.html:97
+#: templates/admin/sections.html:42 templates/inventory/detail.html:73
+#: templates/inventory/section_responsible.html:137
+#: templates/reports/preview_inventory_by_zone.html:122
+msgid "Secció"
+msgstr ""
+
+#: app/routes/analytics.py:314
+msgid "Codi Secció"
+msgstr ""
+
+#: app/routes/analytics.py:315 app/routes/analytics.py:524
+#: templates/admin/analytics_inventory_by_zone.html:43
+#: templates/admin/analytics_inventory_by_zone.html:114
+#: templates/admin/analytics_top_categories.html:62
+#: templates/admin/analytics_trends.html:32 templates/admin/dashboard.html:203
+#: templates/admin/pending_initiatives.html:60
+#: templates/emails/inventory_approved.html:11 templates/index.html:941
+#: templates/initiatives/list.html:42 templates/inventory/admin.html:144
+#: templates/inventory/admin.html:433 templates/inventory/report.html:75
+#: templates/inventory/section_responsible.html:135 templates/profile.html:190
+#: templates/reports/preview_top_categories.html:51
+msgid "Categoria"
+msgstr ""
+
+#: app/routes/analytics.py:316 app/routes/analytics.py:525
+#: templates/admin/analytics_inventory_by_zone.html:115
+#: templates/admin/analytics_top_categories.html:63
+#: templates/inventory/report.html:84
+#: templates/reports/preview_top_categories.html:52
+msgid "Subcategoria"
+msgstr ""
+
+#: app/routes/analytics.py:317 templates/emails/inventory_approved.html:16
+#: templates/initiative_detail.html:117 templates/inventory/admin.html:146
+#: templates/inventory/admin.html:435 templates/inventory/detail.html:128
+#: templates/inventory/report.html:94
+#: templates/inventory/section_responsible.html:136
+msgid "Descripció"
+msgstr ""
+
+#: app/routes/analytics.py:318
+#: templates/admin/analytics_inventory_by_zone.html:116
+#: templates/admin/container_point_suggestions.html:280
+#: templates/profile.html:191
+msgid "Adreça"
+msgstr ""
+
+#: app/routes/analytics.py:319
+msgid "Latitud"
+msgstr ""
+
+#: app/routes/analytics.py:320
+msgid "Longitud"
+msgstr ""
+
+#: app/routes/analytics.py:321
+#: templates/admin/analytics_inventory_by_zone.html:117
+#: templates/inventory/admin.html:148
+msgid "Importància"
+msgstr ""
+
+#: app/routes/analytics.py:322
+#: templates/admin/analytics_inventory_by_zone.html:118
+#: templates/inventory/admin.html:60 templates/inventory/admin.html:110
+#: templates/inventory/section_responsible.html:79
+#: templates/inventory/section_responsible.html:117 templates/profile.html:115
+msgid "Resolts"
+msgstr ""
+
+#: app/routes/analytics.py:323
+msgid "Data Creació"
+msgstr ""
+
+#: app/routes/analytics.py:423
+#: templates/admin/analytics_inventory_by_zone.html:119
+#: templates/admin/analytics_purchases.html:155
+#: templates/admin/analytics_trends.html:64
+#: templates/admin/container_point_suggestions.html:99
+#: templates/admin/dashboard.html:166 templates/admin/dashboard.html:204
+#: templates/admin/donations.html:69
+#: templates/admin/pending_initiatives.html:61 templates/admin/users.html:93
+#: templates/emails/donation_confirmation.html:16
+#: templates/emails/initiative_approved.html:12
+#: templates/emails/initiative_reminder.html:12
+#: templates/emails/participant_confirmation.html:12
+#: templates/initiative_detail.html:62 templates/inventory/admin.html:151
+#: templates/inventory/section_responsible.html:139 templates/profile.html:193
+msgid "Data"
+msgstr ""
+
+#: app/routes/analytics.py:424 app/routes/analytics.py:526
+#: templates/admin/analytics_trends.html:65 templates/inventory/admin.html:36
+#: templates/inventory/section_responsible.html:55
+msgid "Total"
+msgstr ""
+
+#: app/routes/analytics.py:527 templates/admin/analytics_top_categories.html:65
+msgid "Zones Afectades"
+msgstr ""
+
+#: app/routes/analytics.py:553
+msgid "Tipus de report no especificat"
+msgstr ""
+
+#: app/routes/analytics.py:590
+msgid ""
+"El sistema de pagos no està configurat. Si us plau, contacta amb "
+"nosaltres."
+msgstr ""
+
+#: app/routes/analytics.py:610
+msgid "Descàrrega de Report - Tarracograf"
+msgstr ""
+
+#: app/routes/analytics.py:611
+#, python-brace-format
+msgid "Report: {report_type}"
+msgstr ""
+
+#: app/routes/analytics.py:646
+#, python-brace-format
+msgid "Error al processar el pagament: {error}"
+msgstr ""
+
+#: app/routes/analytics.py:650
+msgid "Error inesperat. Si us plau, torna-ho a intentar."
+msgstr ""
+
+#: app/routes/analytics.py:660
+msgid "Sessió de pagament no vàlida"
+msgstr ""
+
+#: app/routes/analytics.py:667
+msgid "Compra no trobada"
+msgstr ""
+
+#: app/routes/analytics.py:672
+msgid "No tens permís per accedir a aquesta compra"
+msgstr ""
+
+#: app/routes/analytics.py:723
+msgid "No tens permís per descarregar aquest report"
+msgstr ""
+
+#: app/routes/analytics.py:728 app/routes/analytics.py:733
+msgid "Aquest report encara no està disponible per descarregar"
+msgstr ""
+
+#: app/routes/analytics.py:915
+msgid "Tipus de report no vàlid"
+msgstr ""
+
+#: app/routes/donations.py:21
+msgid "La cantidad mínima es 1€"
+msgstr ""
+
+#: app/routes/donations.py:28
+msgid "El sistema de pagos no está configurado. Por favor, contacta con nosotros."
+msgstr ""
+
+#: app/routes/donations.py:44
+msgid "Donación a Tarracograf"
+msgstr ""
+
+#: app/routes/donations.py:45
+msgid "Donación voluntaria para mantener la plataforma"
+msgstr ""
+
+#: app/routes/donations.py:66
+#, python-brace-format
+msgid "Error al procesar el pago: {error}"
+msgstr ""
+
+#: app/routes/donations.py:70
+msgid "Error inesperado. Por favor, inténtalo de nuevo."
+msgstr ""
+
+#: app/routes/initiatives.py:129
+msgid ""
+"Tu iniciativa ha sido creada y está pendiente de aprobación. Te "
+"notificaremos cuando sea revisada."
+msgstr ""
+
+#: app/routes/inventory.py:129
+msgid "La foto es obligatoria para reportar un item"
+msgstr ""
+
+#: app/routes/inventory.py:134
+msgid "Por favor, sube una imagen válida (JPG, PNG, GIF)"
+msgstr ""
+
+#: app/routes/inventory.py:168
+msgid ""
+"No se pudo obtener la ubicación de la foto (no tiene coordenadas GPS). "
+"Por favor, selecciona la ubicación en el mapa o usa el botón \"Usar la "
+"meva ubicació actual\"."
+msgstr ""
+
+#: app/routes/inventory.py:184
+#, python-format
+msgid ""
+"La ubicació seleccionada està a %(m)d m de la ubicació de la foto. Hem "
+"utilitzat la ubicació seleccionada."
+msgstr ""
+
+#: app/routes/inventory.py:201
+msgid ""
+"Les coordenades estan fora del límit de Tarragona. Si us plau, assegura't"
+" que la foto sigui dins de la ciutat o selecciona una ubicació dins del "
+"límit."
+msgstr ""
+
+#: app/routes/inventory.py:234
+msgid ""
+"Els punts de contenidors desbordats ara es gestionen mitjançant el "
+"sistema de punts de contenidors al mapa. Si us plau, utilitza aquesta "
+"funcionalitat per reportar desbordaments."
+msgstr ""
+
+#: app/routes/inventory.py:335
+msgid ""
+"¡Item reportado con éxito! Está pendiente de aprobación por un "
+"administrador."
+msgstr ""
+
+#: app/routes/inventory.py:339
+msgid "Error: coordenadas inválidas"
+msgstr ""
+
+#: app/routes/inventory.py:342
+msgid "Error al reportar el item. Por favor, inténtalo de nuevo."
+msgstr ""
+
+#: app/routes/inventory.py:668 app/routes/inventory.py:815
+msgid "No tienes permisos para gestionar este punto"
+msgstr ""
+
+#: app/routes/inventory.py:712
+msgid "Ja has reportat que aquest punt està desbordat"
+msgstr ""
+
+#: app/routes/inventory.py:742
+msgid "Gràcies! Hem registrat que aquest punt està desbordat."
+msgstr ""
+
+#: app/routes/inventory.py:747 templates/inventory/map.html:1294
+msgid "Error en registrar el report. Intenta-ho de nou més tard."
+msgstr ""
+
+#: app/routes/inventory.py:795
+msgid ""
+"Sugerència enviada correctament. Un administrador o responsable la "
+"revisarà."
+msgstr ""
+
+#: app/routes/inventory.py:884
+msgid "Ya has votado este item"
+msgstr ""
+
+#: app/routes/inventory.py:903
+msgid "Voto registrado correctamente"
+msgstr ""
+
+#: app/routes/inventory.py:1076
+msgid "No tienes secciones asignadas"
+msgstr ""
+
+#: app/routes/inventory.py:1123 app/routes/inventory.py:1144
+msgid "No tienes permisos para gestionar este item"
+msgstr ""
+
+#: app/routes/main.py:98
+msgid "El formulari ja s'ha enviat. Si us plau, espera uns segons."
+msgstr ""
+
+#: app/routes/main.py:116
+msgid "Si us plau, omple tots els camps obligatoris"
+msgstr ""
+
+#: app/routes/main.py:154
+msgid "Gràcies pel teu missatge. Et respondrem aviat."
+msgstr ""
+
+#: app/routes/main.py:183
+msgid "El teu correu electrònic ja està confirmat."
+msgstr ""
+
+#: app/routes/main.py:191
+msgid "Correu electrònic confirmat correctament! Ja pots iniciar sessió."
+msgstr ""
+
+#: app/routes/main.py:195
+msgid ""
+"El enllaç de confirmació ha expirat. Si us plau, contacta amb "
+"l'administrador o sol·licita un nou enllaç."
+msgstr ""
+
+#: app/routes/main.py:198
+msgid ""
+"El enllaç de confirmació no és vàlid. Si us plau, contacta amb "
+"l'administrador."
+msgstr ""
+
+#: app/routes/main.py:202
+msgid ""
+"Hi ha hagut un error al confirmar el correu. Si us plau, contacta amb "
+"l'administrador."
+msgstr ""
+
+#: app/services/email_service.py:165
+msgid "Benvingut/da a Tarracograf! 🌱"
+msgstr ""
+
+#: app/services/email_service.py:183
+msgid "Gràcies per la teva donació! 💚"
+msgstr ""
+
+#: app/services/email_service.py:200
+msgid "La teva iniciativa ha estat aprovada! ✅"
+msgstr ""
+
+#: app/services/email_service.py:215
+#: templates/emails/initiative_rejected.html:4
+msgid "Informació sobre la teva iniciativa"
+msgstr ""
+
+#: app/services/email_service.py:232
+msgid "Recordatori: La teva iniciativa és demà! 📅"
+msgstr ""
+
+#: app/services/email_service.py:252
+msgid "Confirmació de participació en iniciativa"
+msgstr ""
+
+#: app/services/email_service.py:278
+msgid "El teu reportatge ha estat aprovat! ✅"
+msgstr ""
+
+#: app/services/email_service.py:293 templates/emails/inventory_rejected.html:4
+msgid "Informació sobre el teu reportatge"
+msgstr ""
+
+#: app/services/email_service.py:306 templates/emails/contact_response.html:4
+msgid "Gràcies per contactar amb Tarracograf"
+msgstr ""
+
+#: templates/about.html:3 templates/base.html:61 templates/base.html:233
+#: templates/includes/footer.html:58
+msgid "Sobre Nosaltres"
+msgstr ""
+
+#: templates/about.html:182 templates/includes/footer.html:6
+msgid "Sobre Tarracograf"
+msgstr ""
+
+#: templates/about.html:186
+msgid ""
+"Som una plataforma ciutadana compromesa amb la transformació de Tarragona"
+" en una ciutat més neta, sostenible i cívica."
+msgstr ""
+
+#: templates/about.html:191
+msgid "La Nostra Missió"
+msgstr ""
+
+#: templates/about.html:193
+msgid ""
+"Connectar ciutadans compromesos amb iniciatives que millorin el nostre "
+"entorn urbà, fomentant la participació activa en la construcció d'una "
+"Tarragona més habitable i sostenible per a tothom."
+msgstr ""
+
+#: templates/about.html:198
+msgid "La Nostra Visió"
+msgstr ""
+
+#: templates/about.html:200
+msgid ""
+"Ser el punt de trobada digital on cada tarragoní pugui contribuir "
+"activament al canvi positiu, creant una xarxa ciutadana forta que impulsi"
+" la transformació sostenible de la nostra ciutat."
+msgstr ""
+
+#: templates/about.html:207
+msgid "Els Nostres Valors"
+msgstr ""
+
+#: templates/about.html:215
+msgid "Col·laboració"
+msgstr ""
+
+#: templates/about.html:216
+msgid ""
+"Creiem en el poder de l'acció col·lectiva per generar canvis "
+"significatius."
+msgstr ""
+
+#: templates/about.html:223
+msgid "Sostenibilitat"
+msgstr ""
+
+#: templates/about.html:224
+msgid "Promovem accions que respectin i protegeixin el nostre medi ambient urbà."
+msgstr ""
+
+#: templates/about.html:231
+msgid "Compromís"
+msgstr ""
+
+#: templates/about.html:232
+msgid "Fomentem la responsabilitat individual i col·lectiva amb la nostra ciutat."
+msgstr ""
+
+#: templates/about.html:239
+msgid "Acció"
+msgstr ""
+
+#: templates/about.html:240
+msgid "Transformem les bones intencions en accions concretes i mesurables."
+msgstr ""
+
+#: templates/about.html:247
+msgid "Civisme"
+msgstr ""
+
+#: templates/about.html:248
+msgid "Promovem el respecte mutu i la convivència harmònica en espais públics."
+msgstr ""
+
+#: templates/about.html:255
+msgid "Transparència"
+msgstr ""
+
+#: templates/about.html:256
+msgid "Operem amb total obertura sobre les nostres activitats i impacte."
+msgstr ""
+
+#: templates/about.html:262
+msgid "Com Funciona?"
+msgstr ""
+
+#: templates/about.html:263
+msgid "Quatre passos simples per començar a transformar Tarragona"
+msgstr ""
+
+#: templates/about.html:275
+msgid "Descobreix"
+msgstr ""
+
+#: templates/about.html:276
+msgid ""
+"Explora les iniciatives actives i reportatges a la teva ciutat. "
+"Visualitza el mapa interactiu i descobreix què està passant al teu "
+"voltant."
+msgstr ""
+
+#: templates/about.html:288
+msgid "Reporta"
+msgstr ""
+
+#: templates/about.html:289
+msgid ""
+"Identifica problemes de neteja, coloms o altres incidències. Puja una "
+"foto i indica la ubicació exacta al mapa."
+msgstr ""
+
+#: templates/about.html:301
+msgid "Participa"
+msgstr ""
+
+#: templates/about.html:302
+msgid ""
+"Uneix-te a iniciatives ciutadanes, vota per les problemàtiques més "
+"importants i connecta amb altres ciutadans compromesos."
+msgstr ""
+
+#: templates/about.html:314
+msgid "Impacta"
+msgstr ""
+
+#: templates/about.html:315
+msgid ""
+"Segueix l'evolució dels reportatges i veu com la teva participació genera"
+" canvis positius a la comunitat."
+msgstr ""
+
+#: templates/about.html:322
+msgid "Uneix-te al Moviment!"
+msgstr ""
+
+#: templates/about.html:324
+msgid ""
+"Cada acció compta. La teva participació pot marcar la diferència en la "
+"construcció d'una Tarragona millor per a tothom."
+msgstr ""
+
+#: templates/about.html:327
+msgid "Explorar Iniciatives"
+msgstr ""
+
+#: templates/base.html:7
+msgid "Tarracograf - Radiografia de la ciutat de Tarragona"
+msgstr ""
+
+#: templates/base.html:8
+msgid "Tarracograf - Radiografia de la ciutat"
+msgstr ""
+
+#: templates/base.html:50 templates/base.html:222
+#: templates/includes/footer.html:38
+msgid "Inici"
+msgstr ""
+
+#: templates/base.html:56 templates/base.html:228 templates/index.html:957
+#: templates/initiatives/list.html:56
+msgid "Pròximes"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:90
+#: templates/admin/analytics_container_overflows.html:132
+#: templates/admin/analytics_container_overflows.html:195
+#: templates/base.html:66 templates/base.html:238
+#: templates/includes/footer.html:53
+#: templates/reports/preview_top_categories.html:53
+#: templates/reports/public.html:3
+msgid "Reports"
+msgstr ""
+
+#: templates/base.html:71 templates/base.html:243 templates/base.html:441
+#: templates/contact.html:3 templates/includes/footer.html:70
+#: templates/includes/footer.html:103 templates/security/register.html:154
+msgid "Contacte"
+msgstr ""
+
+#: templates/base.html:77 templates/base.html:253
+#: templates/includes/footer.html:48 templates/inventory/map.html:3
+#: templates/inventory/map.html:165
+msgid "Inventari"
+msgstr ""
+
+#: templates/base.html:82 templates/base.html:259
+msgid "Veure Mapa"
+msgstr ""
+
+#: templates/base.html:88 templates/base.html:264
+#: templates/inventory/report.html:3
+msgid "Reportar Item"
+msgstr ""
+
+#: templates/base.html:94 templates/base.html:269
+msgid "Iniciar sessió per reportar"
+msgstr ""
+
+#: templates/base.html:102 templates/base.html:275
+#: templates/inventory/section_responsible.html:3
+#: templates/inventory/section_responsible.html:26
+msgid "La Meva Secció"
+msgstr ""
+
+#: templates/base.html:110 templates/base.html:281
+#: templates/inventory/map.html:560
+msgid "Administrar"
+msgstr ""
+
+#: templates/base.html:168 templates/base.html:328
+#: templates/includes/footer.html:83 templates/profile.html:3
+msgid "El Meu Perfil"
+msgstr ""
+
+#: templates/admin/dashboard.html:3 templates/base.html:176
+#: templates/base.html:334
+msgid "Admin"
+msgstr ""
+
+#: templates/base.html:184 templates/base.html:340
+msgid "Sortir"
+msgstr ""
+
+#: templates/base.html:192 templates/base.html:345
+#: templates/includes/footer.html:89
+msgid "Accedir"
+msgstr ""
+
+#: templates/base.html:197 templates/base.html:348
+#: templates/includes/footer.html:94
+msgid "Registrar-se"
+msgstr ""
+
+#: templates/base.html:294
+msgid "Idioma"
+msgstr ""
+
+#: templates/base.html:367 templates/donate.html:17
+msgid "Ajuda'ns a mantenir Tarracograf"
+msgstr ""
+
+#: templates/base.html:368 templates/donate.html:19
+msgid ""
+"Les donacions voluntàries ens ajuden a cobrir els costos del servidor i "
+"mantenir la plataforma gratuïta per a tothom."
+msgstr ""
+
+#: templates/base.html:374 templates/donate.html:3
+#: templates/includes/footer.html:76
+msgid "Donar"
+msgstr ""
+
+#: templates/base.html:420 templates/security/register.html:133
+msgid "Condicions d'ús, privacitat i cessió de continguts"
+msgstr ""
+
+#: templates/base.html:424 templates/security/register.html:137
+msgid "Resum pràctic"
+msgstr ""
+
+#: templates/base.html:426 templates/security/register.html:139
+msgid ""
+"Respecta la llei: no publiquis contingut il·legal, difamatori o amb dades"
+" personals de tercers sense consentiment."
+msgstr ""
+
+#: templates/base.html:427 templates/security/register.html:140
+msgid ""
+"Imatges: en pujar-les ens concedeixes una llicència no exclusiva per "
+"usar-les a la plataforma, comunicacions i accions de difusió del "
+"projecte. No pengis imatges amb menors o persones identificables sense "
+"permís, ni dades sensibles."
+msgstr ""
+
+#: templates/base.html:428 templates/security/register.html:141
+msgid ""
+"Dades personals: recollim només el necessari per al servei (registre, "
+"comunicacions, moderació). Pots exercir els teus drets de protecció de "
+"dades escrivint a hola@tarracograf.cat."
+msgstr ""
+
+#: templates/base.html:429 templates/security/register.html:142
+msgid ""
+"Donacions: no emmagatzemem dades bancàries; el pagament es processa pel "
+"proveïdor de pagaments."
+msgstr ""
+
+#: templates/base.html:430 templates/security/register.html:143
+msgid ""
+"Moderació: podem editar o eliminar continguts que incompleixin aquestes "
+"condicions o la normativa vigent."
+msgstr ""
+
+#: templates/base.html:432 templates/security/register.html:145
+msgid "Text complet (resum)"
+msgstr ""
+
+#: templates/base.html:433 templates/security/register.html:146
+msgid "Responsable"
+msgstr ""
+
+#: templates/base.html:434 templates/security/register.html:147
+msgid "Finalitats"
+msgstr ""
+
+#: templates/base.html:435 templates/security/register.html:148
+msgid "Base legal"
+msgstr ""
+
+#: templates/base.html:436 templates/security/register.html:149
+msgid "Drets"
+msgstr ""
+
+#: templates/base.html:437 templates/security/register.html:150
+msgid "Imatges i continguts aportats"
+msgstr ""
+
+#: templates/base.html:438 templates/security/register.html:151
+msgid "Conservació"
+msgstr ""
+
+#: templates/base.html:439 templates/security/register.html:152
+msgid "Seguretat"
+msgstr ""
+
+#: templates/base.html:440 templates/security/register.html:153
+msgid "Pagaments i donacions"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:285 templates/base.html:444
+#: templates/security/register.html:157
+msgid "Tancar"
+msgstr ""
+
+#: templates/contact.html:13
+msgid "Contacta amb Nosaltres"
+msgstr ""
+
+#: templates/contact.html:16
+msgid ""
+"Tens una idea per millorar la ciutat? Vols organitzar una iniciativa? "
+"Necessites més informació? Estem aquí per escoltar-te!"
+msgstr ""
+
+#: templates/contact.html:29 templates/initiative_detail.html:228
+msgid "Nom complet"
+msgstr ""
+
+#: templates/contact.html:36 templates/initiative_detail.html:230
+msgid "El teu nom"
+msgstr ""
+
+#: templates/contact.html:38
+msgid "Si us plau, introdueix el teu nom"
+msgstr ""
+
+#: templates/contact.html:53
+msgid "Si us plau, introdueix un email vàlid"
+msgstr ""
+
+#: templates/contact.html:60 templates/emails/admin_notification.html:21
+#: templates/emails/contact_response.html:12
+msgid "Assumpte"
+msgstr ""
+
+#: templates/contact.html:63
+msgid "Selecciona un assumpte"
+msgstr ""
+
+#: templates/contact.html:64
+msgid "Donació voluntària"
+msgstr ""
+
+#: templates/contact.html:65
+msgid "Proposar una iniciativa"
+msgstr ""
+
+#: templates/contact.html:66
+msgid "Col·laboració amb associació/col·lectiu"
+msgstr ""
+
+#: templates/contact.html:67
+msgid "Informació sobre voluntariat"
+msgstr ""
+
+#: templates/contact.html:68
+msgid "Suggeriments i millores"
+msgstr ""
+
+#: templates/contact.html:69
+msgid "Reportar un problema"
+msgstr ""
+
+#: templates/contact.html:73
+msgid "Si us plau, selecciona un assumpte"
+msgstr ""
+
+#: templates/contact.html:79 templates/emails/admin_notification.html:24
+msgid "Missatge"
+msgstr ""
+
+#: templates/contact.html:86
+msgid "Explica'ns en què podem ajudar-te..."
+msgstr ""
+
+#: templates/contact.html:88
+msgid "Si us plau, escriu un missatge"
+msgstr ""
+
+#: templates/contact.html:94 templates/emails/admin_notification.html:28
+#: templates/initiative_detail.html:240
+msgid "Telèfon"
+msgstr ""
+
+#: templates/admin/new_initiative.html:124
+#: templates/admin/new_initiative.html:164 templates/contact.html:94
+#: templates/donate.html:68 templates/initiatives/create.html:118
+#: templates/initiatives/create.html:138
+msgid "opcional"
+msgstr ""
+
+#: templates/contact.html:105
+msgid "Enviar Missatge"
+msgstr ""
+
+#: templates/admin/dashboard.html:165 templates/admin/donations.html:68
+#: templates/admin/users.html:89 templates/contact.html:125
+#: templates/donate.html:68 templates/emails/admin_notification.html:18
+#: templates/initiative_detail.html:234
+msgid "Email"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:96
+#: templates/admin/pending_initiatives.html:62 templates/contact.html:140
+#: templates/emails/initiative_approved.html:13
+#: templates/emails/initiative_reminder.html:16
+#: templates/emails/inventory_approved.html:13
+#: templates/emails/participant_confirmation.html:16
+#: templates/initiative_detail.html:53 templates/initiative_detail.html:92
+#: templates/inventory/admin.html:145 templates/inventory/admin.html:438
+#: templates/inventory/detail.html:54 templates/inventory/detail.html:117
+msgid "Ubicació"
+msgstr ""
+
+#: templates/contact.html:141
+msgid "Espanya"
+msgstr ""
+
+#: templates/contact.html:155
+msgid "Segueix-nos"
+msgstr ""
+
+#: templates/contact.html:182
+msgid "Preguntes Freqüents"
+msgstr ""
+
+#: templates/contact.html:189
+msgid "Com puc proposar una nova iniciativa?"
+msgstr ""
+
+#: templates/contact.html:194
+msgid ""
+"Pots contactar-nos a través d'aquest formulari seleccionant \"Proposar "
+"una iniciativa\" en l'assumpte. Explica'ns la teva idea i t'ajudarem a "
+"fer-la realitat."
+msgstr ""
+
+#: templates/contact.html:202
+msgid "Necessito registrar-me per participar?"
+msgstr ""
+
+#: templates/contact.html:207
+msgid ""
+"No és obligatori. Pots participar com a usuari anònim deixant el teu nom "
+"i contacte, però registrar-te et permet fer seguiment de les teves "
+"participacions i rebre actualitzacions."
+msgstr ""
+
+#: templates/contact.html:215
+msgid "Com puc col·laborar com a associació o col·lectiu?"
+msgstr ""
+
+#: templates/contact.html:220
+msgid ""
+"Estem oberts a col·laboracions amb associacions i col·lectius locals. "
+"Contacta amb nosaltres i explorarem com podem treballar junts."
+msgstr ""
+
+#: templates/contact.html:228
+msgid "Les iniciatives tenen algun cost?"
+msgstr ""
+
+#: templates/contact.html:233
+msgid ""
+"La participació en totes les iniciatives és completament gratuïta. El "
+"nostre objectiu és facilitar l'acció ciutadana sense barreres "
+"econòmiques."
+msgstr ""
+
+#: templates/contact.html:268 templates/inventory/map.html:1266
+msgid "Enviant..."
+msgstr ""
+
+#: templates/donate.html:29
+msgid "Quantitat de la donació"
+msgstr ""
+
+#: templates/donate.html:60
+msgid "Altres quantitats"
+msgstr ""
+
+#: templates/donate.html:64
+msgid "Quantitat mínima: 1€"
+msgstr ""
+
+#: templates/donate.html:74
+msgid "Per enviar-te el comprovant de donació"
+msgstr ""
+
+#: templates/donate.html:80
+msgid "Segur i segur"
+msgstr ""
+
+#: templates/donate.html:81
+msgid ""
+"Els pagaments es processen de forma segura a través de Stripe. No "
+"emmagatzemem les teves dades de targeta."
+msgstr ""
+
+#: templates/donate.html:87
+msgid "Continuar amb el pagament"
+msgstr ""
+
+#: templates/donate.html:97
+msgid "Pagament segur processat per"
+msgstr ""
+
+#: templates/donate_success.html:3
+msgid "Donació realitzada"
+msgstr ""
+
+#: templates/donate_success.html:18
+#: templates/emails/donation_confirmation.html:4
+msgid "Gràcies per la teva donació!"
+msgstr ""
+
+#: templates/donate_success.html:20
+msgid "La teva donació ens ajuda a mantenir Tarracograf gratuïta per a tothom."
+msgstr ""
+
+#: templates/donate_success.html:24
+msgid "Tornar a l'inici"
+msgstr ""
+
+#: templates/donate_success.html:27
+#: templates/emails/initiative_rejected.html:20
+#: templates/emails/inventory_rejected.html:19
+msgid "Contactar"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:212
+#: templates/admin/container_point_suggestions.html:217
+#: templates/admin/users.html:255 templates/index.html:651
+msgid "Anterior"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:244
+#: templates/admin/container_point_suggestions.html:249
+#: templates/admin/users.html:254 templates/index.html:655
+msgid "Següent"
+msgstr ""
+
+#: templates/index.html:671
+msgid "Radiografia Ciutadana de Tarragona"
+msgstr ""
+
+#: templates/index.html:675
+msgid "La teva ciutat, la teva veu"
+msgstr ""
+
+#: templates/index.html:679
+msgid ""
+"Reporta problemes, visualitza l'estat de la ciutat i participa en la "
+"millora de Tarragona. Junts construïm una ciutat millor."
+msgstr ""
+
+#: templates/index.html:686
+msgid "Reportatges"
+msgstr ""
+
+#: templates/admin/analytics.html:51 templates/includes/footer.html:43
+#: templates/index.html:690
+msgid "Iniciatives"
+msgstr ""
+
+#: templates/index.html:694
+msgid "Ciutadans"
+msgstr ""
+
+#: templates/index.html:702
+msgid "Com Reportar"
+msgstr ""
+
+#: templates/index.html:706
+msgid "Fes Visible el que Veus"
+msgstr ""
+
+#: templates/index.html:712
+msgid "Puja una foto del problema"
+msgstr ""
+
+#: templates/index.html:716
+msgid "Indica la ubicació exacta"
+msgstr ""
+
+#: templates/index.html:720
+msgid "Selecciona la categoria i subcategoria"
+msgstr ""
+
+#: templates/index.html:724
+msgid "Envia el reportatge"
+msgstr ""
+
+#: templates/index.html:732
+msgid "Categories Disponibles"
+msgstr ""
+
+#: templates/index.html:736
+msgid "Què Pots Reportar?"
+msgstr ""
+
+#: templates/index.html:770
+msgid "Mapa Interactiu"
+msgstr ""
+
+#: templates/index.html:774
+msgid "Explora la Ciutat"
+msgstr ""
+
+#: templates/index.html:780
+msgid "Visualitza tots els reportatges en temps real"
+msgstr ""
+
+#: templates/index.html:784
+msgid "Filtra per categoria i ubicació"
+msgstr ""
+
+#: templates/index.html:788
+msgid "Vota pels problemes més importants"
+msgstr ""
+
+#: templates/index.html:792
+msgid "Marca els problemes resolts"
+msgstr ""
+
+#: templates/index.html:800 templates/index.html:868
+msgid "Explorar Mapa"
+msgstr ""
+
+#: templates/index.html:804
+msgid "Reportar Problema"
+msgstr ""
+
+#: templates/index.html:808
+msgid "Uneix-te"
+msgstr ""
+
+#: templates/index.html:823
+msgid "Radiografia de la Ciutat"
+msgstr ""
+
+#: templates/index.html:824
+msgid ""
+"Visualitza i reporta problemes de neteja, coloms i altres incidències a "
+"Tarragona"
+msgstr ""
+
+#: templates/index.html:834
+msgid "Problemes de Brossa"
+msgstr ""
+
+#: templates/index.html:843
+msgid "Problemes de Coloms"
+msgstr ""
+
+#: templates/index.html:852
+msgid "Total Reportatges"
+msgstr ""
+
+#: templates/index.html:861
+msgid "Ciutadans Actius"
+msgstr ""
+
+#: templates/index.html:872
+msgid "Reportar Nou Problema"
+msgstr ""
+
+#: templates/index.html:876
+msgid "Registra't per Reportar"
+msgstr ""
+
+#: templates/index.html:889
+msgid "Reportatges Recents"
+msgstr ""
+
+#: templates/index.html:890
+msgid "Últims problemes reportats pels ciutadans"
+msgstr ""
+
+#: templates/index.html:893 templates/profile.html:182
+msgid "Veure Tots"
+msgstr ""
+
+#: templates/admin/dashboard.html:274
+#: templates/admin/pending_initiatives.html:126 templates/index.html:913
+msgid "Veure"
+msgstr ""
+
+#: templates/index.html:929 templates/initiatives/list.html:3
+#: templates/initiatives/list.html:10
+msgid "Iniciatives Ciutadanes"
+msgstr ""
+
+#: templates/index.html:930 templates/initiatives/list.html:11
+msgid "Descobreix com pots contribuir al canvi positiu a la nostra ciutat"
+msgstr ""
+
+#: templates/index.html:933 templates/profile.html:252
+#: templates/profile.html:290
+msgid "Veure Totes"
+msgstr ""
+
+#: templates/index.html:943 templates/initiatives/list.html:44
+msgid "Totes les categories"
+msgstr ""
+
+#: templates/index.html:944
+msgid "Neteja"
+msgstr ""
+
+#: templates/index.html:945
+msgid "Reciclatge"
+msgstr ""
+
+#: templates/index.html:946
+msgid "Espais Verds"
+msgstr ""
+
+#: templates/index.html:947
+msgid "Mobilitat Sostenible"
+msgstr ""
+
+#: templates/index.html:948
+msgid "Educació Ambiental"
+msgstr ""
+
+#: templates/index.html:949
+msgid "Cultura i Civisme"
+msgstr ""
+
+#: templates/index.html:950
+msgid "Acció Social"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:133
+#: templates/admin/analytics_purchases.html:159
+#: templates/admin/dashboard.html:167 templates/admin/dashboard.html:207
+#: templates/admin/donations.html:70 templates/admin/users.html:92
+#: templates/emails/donation_confirmation.html:19 templates/index.html:954
+#: templates/initiatives/list.html:53 templates/inventory/admin.html:149
+#: templates/inventory/detail.html:189
+#: templates/inventory/section_responsible.html:138 templates/profile.html:192
+msgid "Estat"
+msgstr ""
+
+#: templates/admin/analytics_inventory_by_zone.html:45
+#: templates/admin/analytics_trends.html:34
+#: templates/admin/container_point_suggestions.html:81 templates/index.html:956
+#: templates/initiatives/list.html:55 templates/inventory/map.html:205
+msgid "Totes"
+msgstr ""
+
+#: templates/index.html:958 templates/initiatives/list.html:57
+msgid "Passades"
+msgstr ""
+
+#: templates/admin/analytics_inventory_by_zone.html:60
+#: templates/admin/analytics_top_categories.html:46
+#: templates/admin/analytics_trends.html:49 templates/index.html:963
+#: templates/initiatives/list.html:62
+msgid "Filtrar"
+msgstr ""
+
+#: templates/index.html:1007 templates/initiative_detail.html:313
+#: templates/initiatives/list.html:108 templates/inventory/map.html:1705
+msgid "Veure detalls"
+msgstr ""
+
+#: templates/index.html:1017 templates/initiatives/list.html:171
+msgid "No hi ha iniciatives que coincideixin amb la teva cerca"
+msgstr ""
+
+#: templates/index.html:1018 templates/initiatives/list.html:172
+msgid "Prova amb altres filtres o crea una nova iniciativa"
+msgstr ""
+
+#: templates/admin/new_initiative.html:15 templates/index.html:1021
+#: templates/initiatives/create.html:3 templates/initiatives/create.html:13
+#: templates/initiatives/list.html:175
+msgid "Crear Nova Iniciativa"
+msgstr ""
+
+#: templates/index.html:1025 templates/initiatives/list.html:179
+msgid "Inicia sessió per crear"
+msgstr ""
+
+#: templates/index.html:1040
+msgid "Tens una idea per millorar Tarragona?"
+msgstr ""
+
+#: templates/index.html:1042
+msgid ""
+"Si ets una associació, col·lectiu o simplement un ciutadà compromès, "
+"contacta amb nosaltres per llançar la teva pròpia iniciativa."
+msgstr ""
+
+#: templates/index.html:1045
+msgid "Proposar Iniciativa"
+msgstr ""
+
+#: templates/admin/dashboard.html:205 templates/initiative_detail.html:71
+msgid "Participants"
+msgstr ""
+
+#: templates/initiative_detail.html:72
+msgid "persones"
+msgstr ""
+
+#: templates/initiative_detail.html:107
+msgid "Organitzat per"
+msgstr ""
+
+#: templates/initiative_detail.html:127
+msgid "Persones compromeses"
+msgstr ""
+
+#: templates/initiative_detail.html:140
+msgid "Sigues el primer a unir-te a aquesta iniciativa"
+msgstr ""
+
+#: templates/initiative_detail.html:142
+msgid "més persones"
+msgstr ""
+
+#: templates/initiative_detail.html:150
+msgid "Comentaris i preguntes"
+msgstr ""
+
+#: templates/initiative_detail.html:157
+msgid "Comparteix la teva opinió o fes una pregunta..."
+msgstr ""
+
+#: templates/initiative_detail.html:161
+msgid "Publicar comentari"
+msgstr ""
+
+#: templates/initiative_detail.html:166 templates/initiative_detail.html:253
+msgid "Inicia sessió"
+msgstr ""
+
+#: templates/initiative_detail.html:166
+msgid "per deixar un comentari"
+msgstr ""
+
+#: templates/initiative_detail.html:188
+msgid "No hi ha comentaris encara. Sigues el primer a comentar!"
+msgstr ""
+
+#: templates/initiative_detail.html:199
+msgid "Participa!"
+msgstr ""
+
+#: templates/initiative_detail.html:204
+msgid "Ja estàs participant"
+msgstr ""
+
+#: templates/initiative_detail.html:209
+msgid "Cancel·lar participació"
+msgstr ""
+
+#: templates/initiative_detail.html:213
+msgid "Uneix-te a aquesta iniciativa i ajuda'ns a millorar la nostra ciutat."
+msgstr ""
+
+#: templates/initiative_detail.html:217 templates/initiative_detail.html:246
+msgid "Vull participar"
+msgstr ""
+
+#: templates/initiative_detail.html:222
+msgid "Registra el teu interès a participar. Et contactarem amb més detalls."
+msgstr ""
+
+#: templates/initiative_detail.html:252
+msgid "Ja tens compte?"
+msgstr ""
+
+#: templates/initiative_detail.html:259
+msgid "Aquesta iniciativa ja ha finalitzat"
+msgstr ""
+
+#: templates/initiative_detail.html:265
+msgid "Comparteix aquesta iniciativa:"
+msgstr ""
+
+#: templates/initiative_detail.html:289
+msgid "Iniciatives relacionades"
+msgstr ""
+
+#: templates/profile.html:25
+msgid "Email verificat"
+msgstr ""
+
+#: templates/profile.html:29
+msgid "Email no verificat"
+msgstr ""
+
+#: templates/profile.html:34
+msgid "Administrador"
+msgstr ""
+
+#: templates/profile.html:38
+msgid "Membre des de"
+msgstr ""
+
+#: templates/profile.html:55 templates/reports/preview_trends.html:51
+msgid "Items Reportats"
+msgstr ""
+
+#: templates/profile.html:66 templates/profile.html:249
+msgid "Iniciatives Creades"
+msgstr ""
+
+#: templates/profile.html:77 templates/profile.html:287
+msgid "Iniciatives Participades"
+msgstr ""
+
+#: templates/profile.html:88
+msgid "Contribucions Totals"
+msgstr ""
+
+#: templates/profile.html:101
+msgid "Estat dels Items"
+msgstr ""
+
+#: templates/inventory/admin.html:52 templates/inventory/admin.html:102
+#: templates/inventory/section_responsible.html:71
+#: templates/inventory/section_responsible.html:109 templates/profile.html:108
+msgid "Aprovats"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:40
+#: templates/admin/container_point_suggestions.html:69
+#: templates/admin/donations.html:43
+#: templates/admin/pending_initiatives.html:27
+#: templates/inventory/admin.html:44 templates/inventory/admin.html:92
+#: templates/inventory/section_responsible.html:63
+#: templates/inventory/section_responsible.html:101 templates/profile.html:122
+msgid "Pendents"
+msgstr ""
+
+#: templates/profile.html:135
+msgid "Activitat Recent"
+msgstr ""
+
+#: templates/profile.html:146
+msgid "Item reportat"
+msgstr ""
+
+#: templates/profile.html:159
+msgid "Iniciativa creada"
+msgstr ""
+
+#: templates/profile.html:167
+msgid "Encara no hi ha activitat recent"
+msgstr ""
+
+#: templates/profile.html:179
+msgid "Els Meus Items Reportats"
+msgstr ""
+
+#: templates/inventory/admin.html:227 templates/inventory/detail.html:191
+#: templates/inventory/section_responsible.html:183 templates/profile.html:214
+msgid "Aprovat"
+msgstr ""
+
+#: templates/inventory/admin.html:229 templates/inventory/detail.html:195
+#: templates/inventory/section_responsible.html:185 templates/profile.html:216
+msgid "Resolt"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:130
+#: templates/admin/districts_sections.html:80
+#: templates/emails/inventory_approved.html:23 templates/profile.html:228
+msgid "Veure al mapa"
+msgstr ""
+
+#: templates/profile.html:306
+msgid "participants"
+msgstr ""
+
+#: templates/profile.html:323
+msgid "Reports Descarregats"
+msgstr ""
+
+#: templates/profile.html:334
+msgid "Descarregat el"
+msgstr ""
+
+#: templates/profile.html:341
+msgid "Descarregar de nou"
+msgstr ""
+
+#: templates/admin/analytics.html:3
+msgid "Analytics"
+msgstr ""
+
+#: templates/admin/analytics.html:13 templates/admin/dashboard.html:140
+msgid "Analytics i Reports"
+msgstr ""
+
+#: templates/admin/analytics.html:15
+msgid "Genera i descarrega reports detallats per a l'ajuntament"
+msgstr ""
+
+#: templates/admin/analytics.html:19
+msgid "Veure Compres"
+msgstr ""
+
+#: templates/admin/analytics.html:22
+#: templates/admin/analytics_container_overflows.html:21
+#: templates/admin/analytics_inventory_by_zone.html:19
+#: templates/admin/analytics_purchases.html:18
+#: templates/admin/analytics_top_categories.html:19
+#: templates/admin/analytics_trends.html:19
+#: templates/admin/districts_sections.html:18
+#: templates/admin/edit_section_geometry.html:45
+#: templates/admin/sections.html:18 templates/admin/users.html:41
+#: templates/reports/preview_inventory_by_zone.html:19
+#: templates/reports/preview_top_categories.html:19
+#: templates/reports/preview_trends.html:19
+msgid "Tornar"
+msgstr ""
+
+#: templates/admin/analytics.html:34
+msgid "Items d'Inventari"
+msgstr ""
+
+#: templates/admin/analytics.html:75
+#: templates/admin/analytics_inventory_by_zone.html:3
+#: templates/admin/analytics_inventory_by_zone.html:13
+#: templates/admin/analytics_purchase_success.html:27
+#: templates/admin/analytics_purchases.html:118
+#: templates/admin/analytics_purchases.html:175
+#: templates/reports/public.html:50
+msgid "Inventari per Zona"
+msgstr ""
+
+#: templates/admin/analytics.html:77 templates/reports/public.html:52
+msgid ""
+"Report detallat dels items d'inventari agrupats per districte i secció. "
+"Inclou categories, ubicacions i estadístiques."
+msgstr ""
+
+#: templates/admin/analytics.html:79 templates/admin/analytics.html:98
+#: templates/admin/analytics.html:117
+msgid "Generar Report"
+msgstr ""
+
+#: templates/admin/analytics.html:94
+#: templates/admin/analytics_purchase_success.html:29
+#: templates/admin/analytics_purchases.html:120
+#: templates/admin/analytics_purchases.html:177
+#: templates/admin/analytics_trends.html:3
+#: templates/admin/analytics_trends.html:13 templates/reports/public.html:96
+msgid "Tendències Temporals"
+msgstr ""
+
+#: templates/admin/analytics.html:96 templates/reports/public.html:98
+msgid ""
+"Evolució dels reports al llarg del temps. Analitza patrons i tendències "
+"per categoria i zona."
+msgstr ""
+
+#: templates/admin/analytics.html:113
+#: templates/admin/analytics_purchase_success.html:31
+#: templates/admin/analytics_purchases.html:122
+#: templates/admin/analytics_purchases.html:179
+#: templates/admin/analytics_top_categories.html:3
+#: templates/admin/analytics_top_categories.html:13
+#: templates/reports/public.html:142
+msgid "Categories Més Reportades"
+msgstr ""
+
+#: templates/admin/analytics.html:115 templates/reports/public.html:144
+msgid ""
+"Ranking de les categories i subcategories amb més reports, agrupades per "
+"zona."
+msgstr ""
+
+#: templates/admin/analytics.html:132
+#: templates/admin/analytics_container_overflows.html:3
+#: templates/admin/analytics_container_overflows.html:13
+msgid "Desbordaments de Contenidors"
+msgstr ""
+
+#: templates/admin/analytics.html:134
+msgid ""
+"Anàlisi dels punts de contenedors desbordats per secció i tendència "
+"temporal."
+msgstr ""
+
+#: templates/admin/analytics.html:136
+msgid "Veure Analytics"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:16
+msgid "Evolució dels punts de contenidors desbordats per zona i en el temps"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:32
+msgid "Reports de desbordament"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:47
+msgid "Punts amb desbordes"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:62
+msgid "Reports últims 30 dies"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:81
+msgid "Seccions amb més desbordes"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:88
+msgid "Districte / Secció"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:89
+msgid "Punts"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:112
+msgid "Encara no hi ha reports de desbordament registrats."
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:124
+msgid "Punts amb més desbordes"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:131
+msgid "Punt"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:134
+msgid "Darrer desbordament"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:153
+#: templates/inventory/map.html:884 templates/inventory/map.html:1162
+msgid "Desbordat"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:155
+#: templates/inventory/map.html:878 templates/inventory/map.html:1162
+msgid "Normal"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:173
+msgid "Encara no hi ha punts amb desbordes registrats."
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:187
+msgid "Tendència mensual de desbordaments"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:194
+#: templates/reports/preview_trends.html:50
+msgid "Mes"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:196
+msgid "Punts afectats"
+msgstr ""
+
+#: templates/admin/analytics_container_overflows.html:215
+msgid "Encara no hi ha dades temporals de desbordaments."
+msgstr ""
+
+#: templates/admin/analytics_inventory_by_zone.html:15
+msgid "Report detallat dels items d'inventari agrupats per districte i secció"
+msgstr ""
+
+#: templates/admin/analytics_inventory_by_zone.html:22
+#: templates/admin/analytics_top_categories.html:22
+#: templates/admin/analytics_trends.html:22
+msgid "Descarregar CSV"
+msgstr ""
+
+#: templates/admin/analytics_inventory_by_zone.html:34
+#: templates/admin/analytics_top_categories.html:34
+#: templates/inventory/admin.html:84
+#: templates/inventory/section_responsible.html:94
+msgid "Tots"
+msgstr ""
+
+#: templates/admin/analytics_inventory_by_zone.html:51
+#: templates/admin/analytics_trends.html:40
+msgid "Data des de"
+msgstr ""
+
+#: templates/admin/analytics_inventory_by_zone.html:55
+#: templates/admin/analytics_trends.html:44
+msgid "Data fins"
+msgstr ""
+
+#: templates/admin/analytics_inventory_by_zone.html:70
+msgid "Total items:"
+msgstr ""
+
+#: templates/admin/analytics_inventory_by_zone.html:89
+msgid "Codi:"
+msgstr ""
+
+#: templates/admin/analytics_inventory_by_zone.html:92
+#: templates/inventory/admin.html:314
+msgid "items"
+msgstr ""
+
+#: templates/admin/analytics_inventory_by_zone.html:98
+msgid "Per categoria:"
+msgstr ""
+
+#: templates/admin/analytics_inventory_by_zone.html:144
+#: templates/admin/analytics_top_categories.html:99
+#: templates/admin/analytics_trends.html:97
+msgid "No hi ha dades per mostrar amb els filtres seleccionats"
+msgstr ""
+
+#: templates/admin/analytics_purchase_success.html:3
+msgid "Compra Completada"
+msgstr ""
+
+#: templates/admin/analytics_purchase_success.html:15
+msgid "Compra Completada!"
+msgstr ""
+
+#: templates/admin/analytics_purchase_success.html:17
+msgid "Gràcies per la teva compra. El teu report està llest per descarregar."
+msgstr ""
+
+#: templates/admin/analytics_purchase_success.html:22
+msgid "Detalls de la Compra"
+msgstr ""
+
+#: templates/admin/analytics_purchase_success.html:25
+msgid "Tipus de Report:"
+msgstr ""
+
+#: templates/admin/analytics_purchase_success.html:37
+msgid "Import:"
+msgstr ""
+
+#: templates/admin/analytics_purchase_success.html:40
+msgid "Data:"
+msgstr ""
+
+#: templates/admin/analytics_purchase_success.html:50
+msgid "Descarregar Report"
+msgstr ""
+
+#: templates/admin/analytics_purchase_success.html:53
+msgid ""
+"Aquest enllaç és vàlid per descarregar el report. Guarda'l si vols "
+"descarregar-lo més tard."
+msgstr ""
+
+#: templates/admin/analytics_purchase_success.html:59
+msgid ""
+"El report encara no està disponible. Si us plau, espera uns moments i "
+"actualitza la pàgina."
+msgstr ""
+
+#: templates/admin/analytics_purchase_success.html:65
+msgid "Tornar a Reports"
+msgstr ""
+
+#: templates/admin/analytics_purchases.html:3
+#: templates/admin/analytics_purchases.html:13
+msgid "Compres de Reports"
+msgstr ""
+
+#: templates/admin/analytics_purchases.html:15
+msgid "Ingressos generats per la venda de reports"
+msgstr ""
+
+#: templates/admin/analytics_purchases.html:29
+#: templates/admin/donations.html:35
+msgid "Total Recaudat"
+msgstr ""
+
+#: templates/admin/analytics_purchases.html:46
+msgid "Total Compres"
+msgstr ""
+
+#: templates/admin/analytics_purchases.html:63
+msgid "Mitjana per Compra"
+msgstr ""
+
+#: templates/admin/analytics_purchases.html:86
+msgid "Tipus de Reports"
+msgstr ""
+
+#: templates/admin/analytics_purchases.html:105
+msgid "Ingressos per Tipus de Report"
+msgstr ""
+
+#: templates/admin/analytics_purchases.html:127
+msgid "compres"
+msgstr ""
+
+#: templates/admin/analytics_purchases.html:147
+msgid "Totes les Compres"
+msgstr ""
+
+#: templates/admin/analytics_purchases.html:156
+msgid "Tipus de Report"
+msgstr ""
+
+#: templates/admin/analytics_purchases.html:157
+msgid "Comprador"
+msgstr ""
+
+#: templates/admin/analytics_purchases.html:158
+msgid "Import"
+msgstr ""
+
+#: templates/admin/analytics_purchases.html:160
+msgid "Descarregat"
+msgstr ""
+
+#: templates/admin/analytics_purchases.html:187
+#: templates/admin/dashboard.html:174 templates/admin/donations.html:93
+msgid "Anònim"
+msgstr ""
+
+#: templates/admin/analytics_purchases.html:199
+#: templates/admin/dashboard.html:177 templates/admin/donations.html:106
+#: templates/emails/donation_confirmation.html:19
+msgid "Completada"
+msgstr ""
+
+#: templates/admin/analytics_purchases.html:207
+#: templates/admin/donations.html:112
+msgid "Fallida"
+msgstr ""
+
+#: templates/admin/analytics_purchases.html:229
+msgid "No hi ha compres encara"
+msgstr ""
+
+#: templates/admin/analytics_top_categories.html:15
+#: templates/reports/preview_top_categories.html:15
+msgid "Ranking de les categories i subcategories amb més reports"
+msgstr ""
+
+#: templates/admin/analytics_top_categories.html:64
+msgid "Total Reports"
+msgstr ""
+
+#: templates/admin/analytics_trends.html:15
+msgid "Evolució dels reports al llarg del temps"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:3
+#: templates/admin/container_point_suggestions.html:26
+msgid "Sugerències de Punts de Contenidors"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:28
+msgid ""
+"Revisa i aprueba les sugerències de punts de contenidors creades pels "
+"usuaris"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:31
+#: templates/admin/donations.html:18
+#: templates/admin/pending_initiatives.html:18
+msgid "Tornar al Dashboard"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:48
+#: templates/admin/container_point_suggestions.html:73
+#: templates/admin/pending_initiatives.html:35
+msgid "Aprovades"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:56
+#: templates/admin/container_point_suggestions.html:77
+#: templates/admin/pending_initiatives.html:43
+msgid "Rebutjades"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:95
+#: templates/admin/sections.html:32 templates/admin/users.html:88
+msgid "Usuari"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:98
+msgid "Notes"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:100
+#: templates/admin/dashboard.html:208
+#: templates/admin/districts_sections.html:54
+#: templates/admin/pending_initiatives.html:63 templates/admin/sections.html:98
+#: templates/admin/users.html:94 templates/inventory/admin.html:152
+#: templates/inventory/detail.html:140
+#: templates/inventory/section_responsible.html:140
+msgid "Accions"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:122
+#: templates/admin/container_point_suggestions.html:129
+#: templates/admin/container_point_suggestions.html:300
+#: templates/admin/container_point_suggestions.html:331
+#: templates/admin/container_point_suggestions.html:337
+#: templates/admin/container_point_suggestions.html:349
+msgid "Sense adreça"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:147
+msgid "Sense notes"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:157
+msgid "Revisada"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:164
+msgid ""
+"Estàs segur que vols aprovar aquesta sugerència? Es crearà un punt de "
+"contenidors."
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:168
+#: templates/admin/pending_initiatives.html:132
+#: templates/inventory/admin.html:254
+#: templates/inventory/admin_pending_map.html:219
+#: templates/inventory/admin_pending_map.html:329
+#: templates/inventory/admin_pending_map.html:336
+#: templates/inventory/section_responsible.html:198
+msgid "Aprovar"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:172
+msgid "Estàs segur que vols rebutjar aquesta sugerència?"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:176
+#: templates/admin/pending_initiatives.html:138
+#: templates/inventory/admin.html:263
+#: templates/inventory/admin_pending_map.html:222
+#: templates/inventory/admin_pending_map.html:387
+#: templates/inventory/admin_pending_map.html:394
+msgid "Rebutjar"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:185
+#: templates/admin/container_point_suggestions.html:193
+msgid "Per"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:260
+msgid "No hi ha sugerències amb aquest estat."
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:273
+msgid "Ubicació de la Suggerència"
+msgstr ""
+
+#: templates/admin/container_point_suggestions.html:281
+#: templates/inventory/detail.html:55 templates/inventory/detail.html:118
+#: templates/inventory/detail.html:218
+msgid "Coordenades"
+msgstr ""
+
+#: templates/admin/dashboard.html:13
+msgid "Panel d'Administració"
+msgstr ""
+
+#: templates/admin/dashboard.html:15
+msgid "Gestiona les iniciatives i supervisa la plataforma"
+msgstr ""
+
+#: templates/admin/dashboard.html:18 templates/admin/dashboard.html:119
+#: templates/admin/new_initiative.html:4
+msgid "Nova Iniciativa"
+msgstr ""
+
+#: templates/admin/dashboard.html:29
+msgid "Iniciatives Totals"
+msgstr ""
+
+#: templates/admin/dashboard.html:46
+msgid "Usuaris Registrats"
+msgstr ""
+
+#: templates/admin/dashboard.html:63
+msgid "Participacions Totals"
+msgstr ""
+
+#: templates/admin/dashboard.html:80 templates/admin/donations.html:3
+msgid "Donacions"
+msgstr ""
+
+#: templates/admin/dashboard.html:82
+msgid "Total:"
+msgstr ""
+
+#: templates/admin/dashboard.html:100 templates/admin/dashboard.html:122
+#: templates/admin/pending_initiatives.html:3
+msgid "Iniciatives Pendents"
+msgstr ""
+
+#: templates/admin/dashboard.html:101
+msgid "Hi ha"
+msgstr ""
+
+#: templates/admin/dashboard.html:101
+msgid "iniciatives esperant aprovació"
+msgstr ""
+
+#: templates/admin/dashboard.html:104
+msgid "Revisar"
+msgstr ""
+
+#: templates/admin/dashboard.html:115
+msgid "Accions Ràpides"
+msgstr ""
+
+#: templates/admin/dashboard.html:128
+msgid "Sugerències de Contenidors"
+msgstr ""
+
+#: templates/admin/dashboard.html:134
+msgid "Gestionar Usuaris"
+msgstr ""
+
+#: templates/admin/dashboard.html:137
+msgid "Veure Donacions"
+msgstr ""
+
+#: templates/admin/dashboard.html:143 templates/admin/sections.html:3
+msgid "Gestionar Seccions"
+msgstr ""
+
+#: templates/admin/dashboard.html:146 templates/admin/districts_sections.html:3
+#: templates/admin/districts_sections.html:13
+msgid "Editar Distritos i Seccions"
+msgstr ""
+
+#: templates/admin/dashboard.html:158
+msgid "Donacions Recents"
+msgstr ""
+
+#: templates/admin/dashboard.html:164 templates/admin/donations.html:66
+#: templates/emails/donation_confirmation.html:13
+msgid "Quantitat"
+msgstr ""
+
+#: templates/admin/dashboard.html:194
+msgid "Totes les Iniciatives"
+msgstr ""
+
+#: templates/admin/dashboard.html:202
+#: templates/admin/pending_initiatives.html:58
+msgid "Títol"
+msgstr ""
+
+#: templates/admin/dashboard.html:206
+msgid "Vistes"
+msgstr ""
+
+#: templates/admin/dashboard.html:280
+msgid "Editar"
+msgstr ""
+
+#: templates/admin/dashboard.html:286
+msgid "Estàs segur d'eliminar aquesta iniciativa?"
+msgstr ""
+
+#: templates/admin/dashboard.html:290 templates/admin/sections.html:121
+#: templates/inventory/admin.html:286
+msgid "Eliminar"
+msgstr ""
+
+#: templates/admin/dashboard.html:302
+msgid "No hi ha iniciatives encara"
+msgstr ""
+
+#: templates/admin/districts_sections.html:15
+msgid "Gestiona els noms dels distritos i seccions administratives"
+msgstr ""
+
+#: templates/admin/districts_sections.html:40
+msgid "Guardar"
+msgstr ""
+
+#: templates/admin/districts_sections.html:44
+#: templates/admin/edit_section_geometry.html:516
+msgid "seccions"
+msgstr ""
+
+#: templates/admin/districts_sections.html:52 templates/admin/sections.html:94
+msgid "Codi"
+msgstr ""
+
+#: templates/admin/districts_sections.html:53 templates/admin/sections.html:95
+#: templates/emails/admin_notification.html:15
+msgid "Nom"
+msgstr ""
+
+#: templates/admin/districts_sections.html:70
+#: templates/admin/edit_section_geometry.html:65
+#: templates/admin/sections.html:48 templates/admin/sections.html:108
+#: templates/admin/users.html:133
+#: templates/inventory/section_responsible.html:38
+msgid "Sense nom"
+msgstr ""
+
+#: templates/admin/districts_sections.html:85
+msgid "Editar geometria"
+msgstr ""
+
+#: templates/admin/donations.html:13
+msgid "Donacions Rebudes"
+msgstr ""
+
+#: templates/admin/donations.html:15
+msgid "Historial de donacions rebudes a través de Stripe"
+msgstr ""
+
+#: templates/admin/donations.html:27
+msgid "Total Donacions"
+msgstr ""
+
+#: templates/admin/donations.html:51
+msgid "Reemborsades"
+msgstr ""
+
+#: templates/admin/donations.html:67
+msgid "Donant"
+msgstr ""
+
+#: templates/admin/donations.html:71
+msgid "Stripe ID"
+msgstr ""
+
+#: templates/admin/donations.html:89
+msgid "Usuari registrat"
+msgstr ""
+
+#: templates/admin/donations.html:110
+msgid "Reemborsada"
+msgstr ""
+
+#: templates/admin/donations.html:182
+msgid "No hi ha donacions encara"
+msgstr ""
+
+#: templates/admin/donations.html:183
+msgid "Les donacions rebudes apareixeran aquí"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:3
+#: templates/admin/edit_section_geometry.html:39
+msgid "Editar Geometria de Seccions"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:41
+msgid "Selecciona i edita múltiples seccions per ajustar les seves geometries"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:48
+msgid "Guardar Canvis"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:57
+msgid "Selecciona Seccions per Editar"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:71
+msgid "Mantén presionat Ctrl (Cmd en Mac) per seleccionar múltiples seccions"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:74
+msgid "Carregar Seccions al Mapa"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:86
+msgid "Mode Edició"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:90
+msgid "Activa el mode edició per moure punts i modificar la geometria"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:95
+msgid "Restaurar Original"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:111
+msgid "Instruccions:"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:113
+msgid "Activa el mode edició per començar a editar"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:114
+msgid "Clica i arrossega els punts per moure'ls"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:115
+msgid "Clica sobre una línia per afegir un nou punt"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:116
+msgid "Clica amb el botó dret sobre un punt per eliminar-lo"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:117
+msgid "Guarda els canvis quan estiguis satisfet"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:203
+#: templates/admin/edit_section_geometry.html:357
+msgid "Selecciona almenys una secció"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:225
+msgid "No s'han trobat les seccions seleccionades"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:335
+msgid "No s'han pogut crear els polígons per a les seccions seleccionades"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:340
+msgid "Error carregant les geometries"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:488
+msgid "Error: No s'han pogut obtenir les geometries"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:499
+msgid "Guardant..."
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:516
+msgid "Geometries actualitzades correctament"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:524
+msgid "Error desconegut"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:529
+msgid "Error guardant les geometries"
+msgstr ""
+
+#: templates/admin/edit_section_geometry.html:538
+msgid "Estàs segur que vols restaurar les geometries originals?"
+msgstr ""
+
+#: templates/admin/new_initiative.html:4 templates/admin/new_initiative.html:15
+msgid "Editar Iniciativa"
+msgstr ""
+
+#: templates/admin/new_initiative.html:19
+msgid "Modifica els detalls de la iniciativa ciutadana"
+msgstr ""
+
+#: templates/admin/new_initiative.html:21
+msgid "Crea una nova iniciativa per a la comunitat de Tarragona"
+msgstr ""
+
+#: templates/admin/new_initiative.html:38 templates/initiatives/create.html:32
+msgid "Ex: Gran Neteja de la Platja del Miracle"
+msgstr ""
+
+#: templates/admin/new_initiative.html:47 templates/initiatives/create.html:41
+msgid "Un títol clar i atractiu que motivi a participar"
+msgstr ""
+
+#: templates/admin/new_initiative.html:59 templates/initiatives/create.html:53
+msgid ""
+"Descriu detalladament la iniciativa: objectius, què es necessita, impacte"
+" esperat..."
+msgstr ""
+
+#: templates/admin/new_initiative.html:68 templates/initiatives/create.html:62
+msgid "Sigues específic sobre el que es farà i com els participants poden ajudar"
+msgstr ""
+
+#: templates/admin/new_initiative.html:94 templates/initiatives/create.html:88
+msgid "Ex: Platja del Miracle, Tarragona"
+msgstr ""
+
+#: templates/admin/new_initiative.html:136
+#: templates/initiatives/create.html:130
+msgid "Format HH:MM"
+msgstr ""
+
+#: templates/admin/new_initiative.html:155
+msgid ""
+"Estat de la iniciativa. Només les iniciatives aprovades són visibles "
+"públicament."
+msgstr ""
+
+#: templates/admin/new_initiative.html:172
+#: templates/admin/new_initiative.html:175
+msgid "Imatge actual"
+msgstr ""
+
+#: templates/admin/new_initiative.html:191
+#: templates/initiatives/create.html:151
+msgid ""
+"Formats acceptats: JPG, PNG, GIF, WEBP (Màx. 16MB). La imatge serà "
+"optimitzada automàticament."
+msgstr ""
+
+#: templates/admin/new_initiative.html:198
+#: templates/initiatives/create.html:166 templates/inventory/report.html:131
+#: templates/inventory/report.html:606
+msgid "Cancel·lar"
+msgstr ""
+
+#: templates/admin/new_initiative.html:202
+msgid "Actualitzar Iniciativa"
+msgstr ""
+
+#: templates/admin/new_initiative.html:202
+msgid "Crear Iniciativa"
+msgstr ""
+
+#: templates/admin/pending_initiatives.html:13
+msgid "Iniciatives Pendents d'Aprovació"
+msgstr ""
+
+#: templates/admin/pending_initiatives.html:15
+msgid "Revisa i aprueba les iniciatives creades pels usuaris"
+msgstr ""
+
+#: templates/admin/pending_initiatives.html:59
+msgid "Creador"
+msgstr ""
+
+#: templates/admin/pending_initiatives.html:204
+msgid "No hi ha iniciatives pendents"
+msgstr ""
+
+#: templates/admin/pending_initiatives.html:205
+msgid "Totes les iniciatives han estat processades"
+msgstr ""
+
+#: templates/admin/sections.html:13
+msgid "Gestionar Seccions i Responsables"
+msgstr ""
+
+#: templates/admin/sections.html:15
+msgid "Assigna responsables a les seccions administratives"
+msgstr ""
+
+#: templates/admin/sections.html:25
+msgid "Assignar Responsable"
+msgstr ""
+
+#: templates/admin/sections.html:34
+msgid "Selecciona un usuari"
+msgstr ""
+
+#: templates/admin/sections.html:43
+msgid "o"
+msgstr ""
+
+#: templates/admin/sections.html:46
+msgid "Selecciona una secció"
+msgstr ""
+
+#: templates/admin/sections.html:55
+msgid "totes les seccions"
+msgstr ""
+
+#: templates/admin/sections.html:58
+msgid "Selecciona un districte"
+msgstr ""
+
+#: templates/admin/sections.html:69
+msgid ""
+"Pots assignar a una secció individual o a tot un districte (totes les "
+"seccions del districte). Selecciona només un dels dos."
+msgstr ""
+
+#: templates/admin/sections.html:76
+msgid "Assignar"
+msgstr ""
+
+#: templates/admin/sections.html:87
+msgid "Seccions i Responsables"
+msgstr ""
+
+#: templates/admin/sections.html:97
+msgid "Responsables"
+msgstr ""
+
+#: templates/admin/sections.html:119
+msgid "Estàs segur que vols eliminar aquest responsable?"
+msgstr ""
+
+#: templates/admin/sections.html:129
+msgid "Sense responsables"
+msgstr ""
+
+#: templates/admin/sections.html:135
+msgid "Veure items"
+msgstr ""
+
+#: templates/admin/sections.html:180
+msgid "Has de seleccionar una secció o un districte"
+msgstr ""
+
+#: templates/admin/users.html:3 templates/admin/users.html:36
+msgid "Gestió d'Usuaris"
+msgstr ""
+
+#: templates/admin/users.html:38
+msgid "Gestiona els usuaris de la plataforma"
+msgstr ""
+
+#: templates/admin/users.html:50
+msgid "Total Usuaris"
+msgstr ""
+
+#: templates/admin/users.html:58
+msgid "Actius"
+msgstr ""
+
+#: templates/admin/users.html:66
+msgid "Inactius"
+msgstr ""
+
+#: templates/admin/users.html:74
+msgid "No Confirmats"
+msgstr ""
+
+#: templates/admin/users.html:90
+msgid "Rol"
+msgstr ""
+
+#: templates/admin/users.html:91 templates/inventory/map.html:850
+msgid "Seccions"
+msgstr ""
+
+#: templates/admin/users.html:110
+msgid "Tu"
+msgstr ""
+
+#: templates/admin/users.html:125
+msgid "Sense rol"
+msgstr ""
+
+#: templates/admin/users.html:139
+msgid "Cap"
+msgstr ""
+
+#: templates/admin/users.html:146
+msgid "Actiu"
+msgstr ""
+
+#: templates/admin/users.html:150
+msgid "Inactiu"
+msgstr ""
+
+#: templates/admin/users.html:155
+msgid "No confirmat"
+msgstr ""
+
+#: templates/admin/users.html:172
+msgid "Desactivar"
+msgstr ""
+
+#: templates/admin/users.html:172
+msgid "Activar"
+msgstr ""
+
+#: templates/admin/users.html:182
+msgid "Confirmar"
+msgstr ""
+
+#: templates/admin/users.html:191
+msgid "Canviar Rol"
+msgstr ""
+
+#: templates/admin/users.html:225 templates/admin/users.html:257
+msgid "No s'han trobat usuaris"
+msgstr ""
+
+#: templates/admin/users.html:246
+msgid "Cercar"
+msgstr ""
+
+#: templates/admin/users.html:247
+msgid "Mostrar"
+msgstr ""
+
+#: templates/admin/users.html:247 templates/admin/users.html:248
+#: templates/admin/users.html:249
+msgid "registres"
+msgstr ""
+
+#: templates/admin/users.html:248 templates/admin/users.html:249
+#: templates/inventory/admin.html:312
+msgid "Mostrant"
+msgstr ""
+
+#: templates/admin/users.html:248 templates/admin/users.html:249
+msgid "a"
+msgstr ""
+
+#: templates/admin/users.html:248 templates/admin/users.html:249
+#: templates/inventory/admin.html:314
+msgid "de"
+msgstr ""
+
+#: templates/admin/users.html:250
+msgid "filtrat de"
+msgstr ""
+
+#: templates/admin/users.html:250
+msgid "registres totals"
+msgstr ""
+
+#: templates/admin/users.html:252
+msgid "Primer"
+msgstr ""
+
+#: templates/admin/users.html:253
+msgid "Últim"
+msgstr ""
+
+#: templates/admin/users.html:258
+msgid "No s'han trobat resultats"
+msgstr ""
+
+#: templates/emails/admin_notification.html:4
+msgid "Notificació de Tarracograf"
+msgstr ""
+
+#: templates/emails/admin_notification.html:6
+msgid "Hola administrador/a,"
+msgstr ""
+
+#: templates/emails/admin_notification.html:8
+msgid "Tens una nova notificació a la plataforma:"
+msgstr ""
+
+#: templates/emails/admin_notification.html:11
+msgid "Tipus"
+msgstr ""
+
+#: templates/emails/admin_notification.html:40
+msgid "Veure panell d'administració"
+msgstr ""
+
+#: templates/emails/admin_notification.html:43
+#: templates/inventory/map.html:1289
+msgid "Gràcies!"
+msgstr ""
+
+#: templates/emails/base.html:173
+msgid "Reporta l'estat de la ciutat"
+msgstr ""
+
+#: templates/emails/base.html:173
+#: templates/emails/participant_confirmation.html:22
+msgid "coloms"
+msgstr ""
+
+#: templates/emails/base.html:173
+#: templates/emails/participant_confirmation.html:22
+msgid "nius, excrements, plomes"
+msgstr ""
+
+#: templates/emails/base.html:173
+#: templates/emails/participant_confirmation.html:22
+msgid "brossa"
+msgstr ""
+
+#: templates/emails/base.html:173
+#: templates/emails/participant_confirmation.html:22
+msgid "contenidors desbordats, abocaments"
+msgstr ""
+
+#: templates/emails/base.html:173
+msgid "i més"
+msgstr ""
+
+#: templates/emails/contact_response.html:6
+#: templates/emails/donation_confirmation.html:6
+#: templates/emails/initiative_approved.html:6
+#: templates/emails/initiative_rejected.html:6
+#: templates/emails/initiative_reminder.html:6
+#: templates/emails/inventory_approved.html:6
+#: templates/emails/inventory_rejected.html:6
+#: templates/emails/participant_confirmation.html:6
+#: templates/emails/welcome.html:6
+msgid "Hola"
+msgstr ""
+
+#: templates/emails/contact_response.html:8
+msgid ""
+"Hem rebut el teu missatge i l'hem revisat. Ens posarem en contacte amb tu"
+" aviat."
+msgstr ""
+
+#: templates/emails/contact_response.html:16
+msgid ""
+"Mentrestant, pots explorar la plataforma i les iniciatives disponibles. "
+"També pots reportar l'estat actual de la ciutat al nostre inventari "
+"(coloms, brossa i més coses en el futur)."
+msgstr ""
+
+#: templates/emails/contact_response.html:19
+#: templates/emails/donation_confirmation.html:35
+msgid "Visitar la plataforma"
+msgstr ""
+
+#: templates/emails/contact_response.html:22
+msgid "Gràcies per contactar-nos!"
+msgstr ""
+
+#: templates/emails/donation_confirmation.html:8
+msgid ""
+"Volem agrair-te la teva generosa donació a Tarracograf. El teu suport ens"
+" ajuda a continuar millorant la nostra ciutat."
+msgstr ""
+
+#: templates/emails/donation_confirmation.html:11
+msgid "Detalls de la donació"
+msgstr ""
+
+#: templates/emails/donation_confirmation.html:16
+msgid "Ara mateix"
+msgstr ""
+
+#: templates/emails/donation_confirmation.html:23
+msgid "La teva donació contribueix a:"
+msgstr ""
+
+#: templates/emails/donation_confirmation.html:25
+msgid "Mantenir la plataforma activa"
+msgstr ""
+
+#: templates/emails/donation_confirmation.html:26
+msgid "Organitzar més iniciatives cíviques"
+msgstr ""
+
+#: templates/emails/donation_confirmation.html:27
+msgid "Millorar les funcionalitats de la plataforma"
+msgstr ""
+
+#: templates/emails/donation_confirmation.html:28
+msgid "Fomentar la participació ciutadana"
+msgstr ""
+
+#: templates/emails/donation_confirmation.html:29
+msgid "Mantenir l'inventari actualitzat de l'estat de la ciutat"
+msgstr ""
+
+#: templates/emails/donation_confirmation.html:29
+#: templates/emails/initiative_approved.html:22
+msgid "coloms, brossa i més"
+msgstr ""
+
+#: templates/emails/donation_confirmation.html:32
+msgid "Gràcies per formar part d'aquest projecte."
+msgstr ""
+
+#: templates/emails/donation_confirmation.html:38
+msgid "Un abraç,"
+msgstr ""
+
+#: templates/emails/initiative_approved.html:4
+msgid "La teva iniciativa ha estat aprovada!"
+msgstr ""
+
+#: templates/emails/initiative_approved.html:8
+msgid ""
+"Tenim bones notícies! La teva iniciativa ha estat revisada i aprovada per"
+" l'equip de Tarracograf."
+msgstr ""
+
+#: templates/emails/initiative_approved.html:12
+#: templates/emails/initiative_reminder.html:12
+#: templates/emails/participant_confirmation.html:12
+msgid "Per determinar"
+msgstr ""
+
+#: templates/emails/initiative_approved.html:16
+msgid ""
+"La teva iniciativa ja està visible a la plataforma i altres ciutadans "
+"poden unir-s'hi."
+msgstr ""
+
+#: templates/emails/initiative_approved.html:19
+#: templates/emails/initiative_reminder.html:22
+#: templates/emails/participant_confirmation.html:26
+msgid "Veure la iniciativa"
+msgstr ""
+
+#: templates/emails/initiative_approved.html:22
+msgid ""
+"Recorda que pots gestionar la teva iniciativa des del teu panell "
+"d'usuari. També pots reportar l'estat actual de la ciutat al nostre "
+"inventari"
+msgstr ""
+
+#: templates/emails/initiative_approved.html:24
+msgid "Gràcies per contribuir a millorar Tarragona!"
+msgstr ""
+
+#: templates/emails/initiative_rejected.html:8
+msgid ""
+"Hem revisat la teva iniciativa però, lamentablement, no hem pogut "
+"aprovar-la en aquest moment."
+msgstr ""
+
+#: templates/emails/initiative_rejected.html:13
+#: templates/emails/inventory_rejected.html:12
+msgid "Motiu"
+msgstr ""
+
+#: templates/emails/initiative_rejected.html:17
+msgid ""
+"Si tens preguntes o vols més informació, no dubtis a contactar-nos. Estem"
+" aquí per ajudar-te."
+msgstr ""
+
+#: templates/emails/initiative_rejected.html:23
+#: templates/emails/inventory_rejected.html:22
+msgid "Gràcies per la teva comprensió."
+msgstr ""
+
+#: templates/emails/initiative_reminder.html:4
+msgid "Recordatori: La teva iniciativa és demà!"
+msgstr ""
+
+#: templates/emails/initiative_reminder.html:8
+msgid "Volíem recordar-te que la teva iniciativa té lloc demà."
+msgstr ""
+
+#: templates/emails/initiative_reminder.html:14
+#: templates/emails/participant_confirmation.html:14
+msgid "Hora"
+msgstr ""
+
+#: templates/emails/initiative_reminder.html:19
+msgid ""
+"Assegura't de tenir tot preparat per a l'esdeveniment. Pots revisar els "
+"participants i actualitzar la informació si cal."
+msgstr ""
+
+#: templates/emails/initiative_reminder.html:25
+msgid "Molts ànims amb la iniciativa!"
+msgstr ""
+
+#: templates/emails/inventory_approved.html:4
+msgid "El teu reportatge ha estat aprovat!"
+msgstr ""
+
+#: templates/emails/inventory_approved.html:8
+msgid ""
+"El teu reportatge ha estat revisat i aprovat. Ja està visible al mapa de "
+"Tarracograf."
+msgstr ""
+
+#: templates/emails/inventory_approved.html:20
+msgid ""
+"Gràcies per ajudar a millorar la nostra ciutat! El teu reportatge ajuda a"
+" identificar problemes i trobar solucions."
+msgstr ""
+
+#: templates/emails/inventory_approved.html:26
+msgid "Gràcies per la teva contribució!"
+msgstr ""
+
+#: templates/emails/inventory_rejected.html:8
+msgid ""
+"Hem revisat el teu reportatge però, lamentablement, no hem pogut aprovar-"
+"lo en aquest moment."
+msgstr ""
+
+#: templates/emails/inventory_rejected.html:16
+msgid "Si tens preguntes o vols més informació, no dubtis a contactar-nos."
+msgstr ""
+
+#: templates/emails/participant_confirmation.html:4
+msgid "Confirmació de participació"
+msgstr ""
+
+#: templates/emails/participant_confirmation.html:8
+msgid "Gràcies per unir-te a la iniciativa!"
+msgstr ""
+
+#: templates/emails/participant_confirmation.html:19
+msgid "Ens veiem allà! Si tens alguna pregunta, no dubtis a contactar-nos."
+msgstr ""
+
+#: templates/emails/participant_confirmation.html:22
+msgid "Recorda"
+msgstr ""
+
+#: templates/emails/participant_confirmation.html:22
+msgid "També pots reportar l'estat actual de la ciutat al nostre inventari"
+msgstr ""
+
+#: templates/emails/participant_confirmation.html:22
+msgid "i més coses en el futur"
+msgstr ""
+
+#: templates/emails/participant_confirmation.html:29
+msgid "Gràcies per participar!"
+msgstr ""
+
+#: templates/emails/welcome.html:4
+msgid "Benvingut/da a Tarracograf!"
+msgstr ""
+
+#: templates/emails/welcome.html:8
+msgid ""
+"Estem molt contents de tenir-te a la comunitat de Tarracograf! Ara pots "
+"formar part de les iniciatives que milloren la nostra ciutat."
+msgstr ""
+
+#: templates/emails/welcome.html:12
+msgid "Confirma el teu correu electrònic"
+msgstr ""
+
+#: templates/emails/welcome.html:13
+msgid ""
+"Per completar el registre, si us plau confirma el teu correu electrònic "
+"fent clic al botó de sota:"
+msgstr ""
+
+#: templates/emails/welcome.html:15
+msgid "Confirmar correu electrònic"
+msgstr ""
+
+#: templates/emails/welcome.html:18
+msgid "O copia i enganxa aquest enllaç al teu navegador:"
+msgstr ""
+
+#: templates/emails/welcome.html:24
+msgid "El teu compte està actiu"
+msgstr ""
+
+#: templates/emails/welcome.html:25
+msgid ""
+"Ja pots iniciar sessió i començar a participar en les iniciatives "
+"cíviques de Tarragona."
+msgstr ""
+
+#: templates/emails/welcome.html:29
+msgid "Què pots fer ara?"
+msgstr ""
+
+#: templates/emails/welcome.html:31
+msgid "Explorar les iniciatives actives"
+msgstr ""
+
+#: templates/emails/welcome.html:32
+msgid "Crear la teva pròpia iniciativa"
+msgstr ""
+
+#: templates/emails/welcome.html:33
+msgid "Participar en activitats comunitàries"
+msgstr ""
+
+#: templates/emails/welcome.html:34
+msgid "Reportar l'estat actual de la ciutat al nostre inventari"
+msgstr ""
+
+#: templates/emails/welcome.html:36
+msgid "Coloms: nius, excrements, plomes"
+msgstr ""
+
+#: templates/emails/welcome.html:37
+msgid "Brossa: contenidors desbordats, abocaments"
+msgstr ""
+
+#: templates/emails/welcome.html:38
+msgid "I més coses en el futur"
+msgstr ""
+
+#: templates/emails/welcome.html:44
+msgid "Iniciar sessió"
+msgstr ""
+
+#: templates/emails/welcome.html:47
+msgid "Si tens alguna pregunta, no dubtis a contactar-nos."
+msgstr ""
+
+#: templates/emails/welcome.html:49
+msgid "Benvingut/da a la comunitat!"
+msgstr ""
+
+#: templates/includes/footer.html:8
+msgid ""
+"Radiografia ciutadana de Tarragona. Uneix-te a les iniciatives que estan "
+"transformant la nostra ciutat."
+msgstr ""
+
+#: templates/includes/footer.html:34
+msgid "Enllaços Ràpids"
+msgstr ""
+
+#: templates/includes/footer.html:66
+msgid "Recursos"
+msgstr ""
+
+#: templates/includes/footer.html:125
+msgid "Tots els drets reservats."
+msgstr ""
+
+#: templates/includes/footer.html:131
+msgid "Política de Privacitat"
+msgstr ""
+
+#: templates/includes/footer.html:137
+msgid "Termes d'Ús"
+msgstr ""
+
+#: templates/initiatives/create.html:16
+msgid ""
+"Crea una nova iniciativa per a la comunitat de Tarragona. Després de "
+"crear-la, un moderador la revisarà abans de publicar-la."
+msgstr ""
+
+#: templates/initiatives/create.html:159
+msgid "Recorda:"
+msgstr ""
+
+#: templates/initiatives/create.html:159
+msgid ""
+"La teva iniciativa serà revisada per un moderador abans de ser publicada."
+" T'avisarem quan sigui aprovada."
+msgstr ""
+
+#: templates/initiatives/create.html:169
+msgid "Enviar per Revisió"
+msgstr ""
+
+#: templates/initiatives/list.html:20
+msgid "Iniciatives Actives"
+msgstr ""
+
+#: templates/initiatives/list.html:26
+msgid "Ciutadans Compromesos"
+msgstr ""
+
+#: templates/initiatives/list.html:32
+msgid "Àrees d'Acció"
+msgstr ""
+
+#: templates/inventory/admin.html:3 templates/inventory/admin.html:26
+msgid "Administrar Inventari"
+msgstr ""
+
+#: templates/inventory/admin.html:68 templates/inventory/admin.html:118
+msgid "Rebutjats"
+msgstr ""
+
+#: templates/inventory/admin.html:127 templates/inventory/admin.html:399
+msgid "Veure Mapa de Pendents"
+msgstr ""
+
+#: templates/inventory/admin.html:147 templates/inventory/report.html:103
+msgid "Foto"
+msgstr ""
+
+#: templates/inventory/admin.html:150
+msgid "Reporter"
+msgstr ""
+
+#: templates/inventory/admin.html:169
+msgid "La ubicació final difereix de la GPS de la imatge"
+msgstr ""
+
+#: templates/inventory/admin.html:171
+msgid "GPS imatge"
+msgstr ""
+
+#: templates/inventory/admin.html:173
+msgid "Diferència"
+msgstr ""
+
+#: templates/inventory/admin.html:176
+msgid "La ubicació final coincideix amb la GPS de la imatge"
+msgstr ""
+
+#: templates/inventory/admin.html:178
+msgid "Coincideix amb GPS imatge"
+msgstr ""
+
+#: templates/inventory/admin.html:186
+msgid "Font: GPS de la imatge"
+msgstr ""
+
+#: templates/inventory/admin.html:188
+msgid "Font: Coordenades del formulari"
+msgstr ""
+
+#: templates/inventory/admin.html:190
+msgid "Font"
+msgstr ""
+
+#: templates/inventory/admin.html:231
+msgid "Rebutjat"
+msgstr ""
+
+#: templates/inventory/admin.html:264
+#: templates/inventory/admin_pending_map.html:348
+msgid "Estàs segur de rebutjar aquest item?"
+msgstr ""
+
+#: templates/inventory/admin.html:274
+#: templates/inventory/section_responsible.html:206
+msgid "Marcar com resolt"
+msgstr ""
+
+#: templates/inventory/admin.html:281
+msgid "Estàs segur d'eliminar aquest item?"
+msgstr ""
+
+#: templates/inventory/admin.html:299
+msgid "No hi ha items amb aquest estat"
+msgstr ""
+
+#: templates/inventory/admin.html:373
+msgid "Pàgina 1 de 1"
+msgstr ""
+
+#: templates/inventory/admin.html:381
+msgid "Per pàgina"
+msgstr ""
+
+#: templates/inventory/admin.html:403
+msgid "Tornar al mapa"
+msgstr ""
+
+#: templates/inventory/admin.html:417
+msgid "Foto de l'Item"
+msgstr ""
+
+#: templates/inventory/admin.html:427
+msgid "Foto de l'item"
+msgstr ""
+
+#: templates/inventory/admin_pending_map.html:3
+#: templates/inventory/admin_pending_map.html:31
+msgid "Mapa de Items Pendents"
+msgstr ""
+
+#: templates/inventory/admin_pending_map.html:32
+msgid "Aprova o rebutja items des del mapa"
+msgstr ""
+
+#: templates/inventory/admin_pending_map.html:36
+msgid "Veure llista"
+msgstr ""
+
+#: templates/inventory/admin_pending_map.html:47
+#: templates/inventory/admin_pending_map.html:177
+msgid "pendents"
+msgstr ""
+
+#: templates/inventory/admin_pending_map.html:57
+msgid "Instruccions"
+msgstr ""
+
+#: templates/inventory/admin_pending_map.html:57
+msgid "Fes clic en un marcador per veure els detalls i aprovar o rebutjar l'item."
+msgstr ""
+
+#: templates/inventory/admin_pending_map.html:298
+#: templates/inventory/admin_pending_map.html:356
+#: templates/inventory/detail.html:228 templates/inventory/detail.html:289
+#: templates/inventory/map.html:1770 templates/inventory/map.html:1867
+msgid "Processant..."
+msgstr ""
+
+#: templates/inventory/admin_pending_map.html:322
+msgid "Item aprovat correctament"
+msgstr ""
+
+#: templates/inventory/admin_pending_map.html:327
+#: templates/inventory/admin_pending_map.html:334
+#: templates/inventory/admin_pending_map.html:385
+#: templates/inventory/admin_pending_map.html:392
+msgid "Error al processar la sol·licitud"
+msgstr ""
+
+#: templates/inventory/admin_pending_map.html:380
+msgid "Item rebutjat"
+msgstr ""
+
+#: templates/inventory/detail.html:63
+msgid "Reportat el"
+msgstr ""
+
+#: templates/inventory/detail.html:88
+msgid "confirmacions"
+msgstr ""
+
+#: templates/inventory/detail.html:96
+msgid "ja no hi és"
+msgstr ""
+
+#: templates/inventory/detail.html:144 templates/inventory/detail.html:252
+msgid "(Ja has confirmat)"
+msgstr ""
+
+#: templates/inventory/detail.html:154 templates/inventory/detail.html:158
+#: templates/inventory/detail.html:313 templates/inventory/detail.html:330
+#: templates/inventory/map.html:1677 templates/inventory/map.html:1974
+#: templates/inventory/map.html:1992
+msgid "Ja no hi és"
+msgstr ""
+
+#: templates/inventory/detail.html:154 templates/inventory/detail.html:313
+msgid "(Ja has reportat)"
+msgstr ""
+
+#: templates/inventory/detail.html:178
+msgid "Reportat per"
+msgstr ""
+
+#: templates/inventory/detail.html:258
+msgid "Vot registrat correctament"
+msgstr ""
+
+#: templates/inventory/detail.html:263 templates/inventory/map.html:1851
+msgid "Error al votar"
+msgstr ""
+
+#: templates/inventory/detail.html:274
+msgid "Error al votar. Torna-ho a intentar."
+msgstr ""
+
+#: templates/inventory/detail.html:319
+msgid "Report registrat correctament"
+msgstr ""
+
+#: templates/inventory/detail.html:324 templates/inventory/map.html:1962
+#: templates/inventory/map.html:1967
+msgid "Error al reportar"
+msgstr ""
+
+#: templates/inventory/detail.html:335
+msgid "Error al reportar. Torna-ho a intentar."
+msgstr ""
+
+#: templates/inventory/map.html:166
+msgid ""
+"Mapa col·laboratiu per reportar i visualitzar problemes de la ciutat de "
+"Tarragona"
+msgstr ""
+
+#: templates/inventory/map.html:175 templates/reports/public.html:23
+msgid "Items reportats"
+msgstr ""
+
+#: templates/inventory/map.html:180
+msgid "Per categoria"
+msgstr ""
+
+#: templates/inventory/map.html:199
+msgid "Filtrar per categoria"
+msgstr ""
+
+#: templates/inventory/map.html:276
+msgid "Subcategorías de Coloms"
+msgstr ""
+
+#: templates/inventory/map.html:279 templates/inventory/map.html:311
+#: templates/inventory/map.html:335 templates/inventory/map.html:359
+#: templates/inventory/map.html:399 templates/inventory/map.html:431
+#: templates/inventory/map.html:463 templates/inventory/map.html:495
+msgid "Totes les subcategorías"
+msgstr ""
+
+#: templates/inventory/map.html:308
+msgid "Subcategorías de Brossa"
+msgstr ""
+
+#: templates/inventory/map.html:332
+msgid "Subcategorías de Gossos"
+msgstr ""
+
+#: templates/inventory/map.html:356
+msgid "Subcategorías de Material Deteriorat"
+msgstr ""
+
+#: templates/inventory/map.html:396
+msgid "Subcategorías de Brutícia"
+msgstr ""
+
+#: templates/inventory/map.html:428
+msgid "Subcategorías de Mobiliari Urbà"
+msgstr ""
+
+#: templates/inventory/map.html:460
+msgid "Subcategorías de Vegetació"
+msgstr ""
+
+#: templates/inventory/map.html:492
+msgid "Subcategorías de Infraestructura"
+msgstr ""
+
+#: templates/inventory/map.html:536
+msgid "Les zones han estat importades del"
+msgstr ""
+
+#: templates/inventory/map.html:541
+msgid "Geoportal de Tarragona"
+msgstr ""
+
+#: templates/inventory/map.html:550
+msgid "Reportar nou item"
+msgstr ""
+
+#: templates/inventory/map.html:555
+msgid "Has de"
+msgstr ""
+
+#: templates/inventory/map.html:555
+msgid "iniciar sessió"
+msgstr ""
+
+#: templates/inventory/map.html:555
+msgid "per reportar items"
+msgstr ""
+
+#: templates/inventory/map.html:566 templates/inventory/map.html:1382
+msgid "Mode punts de contenidors"
+msgstr ""
+
+#: templates/inventory/map.html:569
+msgid "Crear punt des de la meva ubicació"
+msgstr ""
+
+#: templates/inventory/map.html:573
+msgid "Aquí hi ha contenidors"
+msgstr ""
+
+#: templates/inventory/map.html:843
+msgid "Mapa"
+msgstr ""
+
+#: templates/inventory/map.html:848
+msgid "Items d'inventari"
+msgstr ""
+
+#: templates/inventory/map.html:849 templates/inventory/map.html:873
+msgid "Punts de contenidors"
+msgstr ""
+
+#: templates/inventory/map.html:851
+msgid "Límits de la ciutat"
+msgstr ""
+
+#: templates/inventory/map.html:1020
+msgid ""
+"Vols indicar que aquí hi ha contenidors? Un administrador o responsable "
+"revisarà la teva suggerència."
+msgstr ""
+
+#: templates/inventory/map.html:1059
+msgid "Crear un punt de contenidors en aquesta ubicació?"
+msgstr ""
+
+#: templates/inventory/map.html:1171
+msgid "Marcar com a normal"
+msgstr ""
+
+#: templates/inventory/map.html:1171
+msgid "Marcar com desbordat"
+msgstr ""
+
+#: templates/inventory/map.html:1183 templates/inventory/map.html:1281
+#: templates/inventory/map.html:1297
+msgid "Estan desbordats"
+msgstr ""
+
+#: templates/inventory/map.html:1191
+msgid "Aquest punt ja està marcat com desbordat"
+msgstr ""
+
+#: templates/inventory/map.html:1197
+msgid "Inicia sessió per reportar que està desbordat"
+msgstr ""
+
+#: templates/inventory/map.html:1204
+msgid "Punt de contenidors"
+msgstr ""
+
+#: templates/inventory/map.html:1213
+msgid "Darrer report de desbordament"
+msgstr ""
+
+#: templates/inventory/map.html:1261
+msgid "Confirmes que aquest punt de contenidors està desbordat?"
+msgstr ""
+
+#: templates/inventory/map.html:1325
+msgid "Vols eliminar aquest punt de contenidors?"
+msgstr ""
+
+#: templates/inventory/map.html:1375
+msgid "Fes clic al mapa per afegir un punt"
+msgstr ""
+
+#: templates/inventory/map.html:1395 templates/inventory/map.html:1537
+msgid "La geolocalización no está disponible en tu navegador."
+msgstr ""
+
+#: templates/inventory/map.html:1406 templates/inventory/map.html:1548
+#: templates/inventory/report.html:60
+msgid "Obtenint ubicació..."
+msgstr ""
+
+#: templates/inventory/map.html:1423 templates/inventory/map.html:1563
+msgid "No s'ha pogut obtenir la teva ubicació."
+msgstr ""
+
+#: templates/inventory/map.html:1427 templates/inventory/map.html:1567
+msgid ""
+"Permís de geolocalització denegat. Si us plau, activa la geolocalització "
+"a la configuració del teu navegador."
+msgstr ""
+
+#: templates/inventory/map.html:1430 templates/inventory/map.html:1570
+msgid ""
+"La ubicació no està disponible. Assegura't que el GPS estigui activat i "
+"intenta-ho de nou."
+msgstr ""
+
+#: templates/inventory/map.html:1433 templates/inventory/map.html:1573
+msgid "Temps d'espera esgotat. Si us plau, intenta-ho de nou."
+msgstr ""
+
+#: templates/inventory/map.html:1436
+msgid ""
+"Error desconegut obtenint la ubicació. Si us plau, utilitza el mode de "
+"clic al mapa."
+msgstr ""
+
+#: templates/inventory/map.html:1469 templates/inventory/map.html:1501
+msgid ""
+"La teva ubicació està fora de l'àrea de Tarragona. Si us plau, utilitza "
+"el mode de clic al mapa."
+msgstr ""
+
+#: templates/inventory/map.html:1479 templates/inventory/map.html:1601
+msgid "Tornant a intentar..."
+msgstr ""
+
+#: templates/inventory/map.html:1595 templates/inventory/map.html:1617
+msgid "La teva ubicació està fora de l'àrea de Tarragona."
+msgstr ""
+
+#: templates/inventory/map.html:1836 templates/inventory/map.html:1933
+msgid "reportat que ja no hi és"
+msgstr ""
+
+#: templates/inventory/map.html:1858
+msgid "Error al votar. Intenta-ho de nou."
+msgstr ""
+
+#: templates/inventory/map.html:1860
+msgid "Confirmar importància"
+msgstr ""
+
+#: templates/inventory/map.html:1941
+msgid ""
+"Aquest item s'ha tancat automàticament després de múltiples confirmacions"
+" que ja no hi és."
+msgstr ""
+
+#: templates/inventory/map.html:1984 templates/inventory/map.html:1989
+msgid "Error al reportar. Intenta-ho de nou."
+msgstr ""
+
+#: templates/inventory/report.html:25
+msgid "Reportar nou item al inventari"
+msgstr ""
+
+#: templates/inventory/report.html:33
+msgid "Ubicació detectada"
+msgstr ""
+
+#: templates/inventory/report.html:38
+msgid "Corregir"
+msgstr ""
+
+#: templates/inventory/report.html:48
+msgid "Selecciona la ubicació al mapa"
+msgstr ""
+
+#: templates/inventory/report.html:51
+msgid "Usar la meva ubicació actual"
+msgstr ""
+
+#: templates/inventory/report.html:89
+msgid "Selecciona primero una categoría"
+msgstr ""
+
+#: templates/inventory/report.html:95
+msgid "Descripció opcional del problema..."
+msgstr ""
+
+#: templates/inventory/report.html:106
+msgid "Fer foto ara"
+msgstr ""
+
+#: templates/inventory/report.html:109
+msgid "Pujar foto"
+msgstr ""
+
+#: templates/inventory/report.html:116
+msgid "Eliminar foto"
+msgstr ""
+
+#: templates/inventory/report.html:119
+msgid ""
+"Formatos aceptados: JPG, PNG, GIF. La imagen será optimizada "
+"automáticamente."
+msgstr ""
+
+#: templates/inventory/report.html:128
+msgid "Reportar"
+msgstr ""
+
+#: templates/inventory/report.html:228 templates/inventory/report.html:272
+msgid "Obtinguda de la foto (GPS)"
+msgstr ""
+
+#: templates/inventory/report.html:230 templates/inventory/report.html:274
+msgid "Obtinguda de la teva ubicació actual"
+msgstr ""
+
+#: templates/inventory/report.html:232 templates/inventory/report.html:338
+#: templates/inventory/report.html:354
+msgid "Seleccionada manualment"
+msgstr ""
+
+#: templates/inventory/report.html:376
+msgid ""
+"La geolocalización no está disponible en tu navegador. Por favor, "
+"selecciona la ubicación en el mapa."
+msgstr ""
+
+#: templates/inventory/report.html:402
+msgid ""
+"Tu ubicación está fuera del área de Tarragona. Por favor, selecciona la "
+"ubicación en el mapa."
+msgstr ""
+
+#: templates/inventory/report.html:411
+msgid "No se pudo obtener tu ubicación"
+msgstr ""
+
+#: templates/inventory/report.html:413
+msgid ""
+"Permiso de ubicación denegado. Por favor, selecciona la ubicación en el "
+"mapa."
+msgstr ""
+
+#: templates/inventory/report.html:416
+msgid "Ubicación no disponible. Por favor, selecciona la ubicación en el mapa."
+msgstr ""
+
+#: templates/inventory/report.html:418
+msgid "Tiempo de espera agotado. Por favor, selecciona la ubicación en el mapa."
+msgstr ""
+
+#: templates/inventory/report.html:504
+msgid "Selecciona una subcategoría"
+msgstr ""
+
+#: templates/inventory/report.html:598
+msgid "Fer foto"
+msgstr ""
+
+#: templates/inventory/report.html:675
+msgid "Por favor, selecciona un archivo de imagen válido"
+msgstr ""
+
+#: templates/inventory/report.html:681
+msgid "La imagen es demasiado grande. Máximo 10MB"
+msgstr ""
+
+#: templates/inventory/report.html:723
+msgid "Por favor, selecciona una categoría y subcategoría"
+msgstr ""
+
+#: templates/inventory/report.html:735
+msgid "Por favor, sube una foto del item. La foto es obligatoria."
+msgstr ""
+
+#: templates/inventory/section_responsible.html:27
+msgid "Gestiona els items de les teves seccions assignades"
+msgstr ""
+
+#: templates/inventory/section_responsible.html:34
+msgid "Seccions Assignades"
+msgstr ""
+
+#: templates/inventory/section_responsible.html:45
+msgid "No tens seccions assignades. Contacta amb un administrador."
+msgstr ""
+
+#: templates/inventory/section_responsible.html:134
+msgid "Imatge"
+msgstr ""
+
+#: templates/inventory/section_responsible.html:170
+msgid "Sense descripció"
+msgstr ""
+
+#: templates/inventory/section_responsible.html:221
+msgid "No hi ha items per mostrar"
+msgstr ""
+
+#: templates/reports/preview_inventory_by_zone.html:3
+#: templates/reports/preview_inventory_by_zone.html:13
+msgid "Vista Previa: Inventari per Zona"
+msgstr ""
+
+#: templates/reports/preview_inventory_by_zone.html:15
+msgid "Estadístiques resumides del report d'inventari per zona"
+msgstr ""
+
+#: templates/reports/preview_inventory_by_zone.html:31
+msgid "Items totals"
+msgstr ""
+
+#: templates/reports/preview_inventory_by_zone.html:40
+msgid "Districtes"
+msgstr ""
+
+#: templates/reports/preview_inventory_by_zone.html:49
+#: templates/reports/preview_inventory_by_zone.html:92
+msgid "Categories"
+msgstr ""
+
+#: templates/reports/preview_inventory_by_zone.html:60
+msgid "Top 10 Districtes"
+msgstr ""
+
+#: templates/reports/preview_inventory_by_zone.html:69
+#: templates/reports/preview_inventory_by_zone.html:124
+msgid "Items"
+msgstr ""
+
+#: templates/reports/preview_inventory_by_zone.html:114
+msgid "Top 10 Seccions"
+msgstr ""
+
+#: templates/reports/preview_inventory_by_zone.html:148
+#: templates/reports/preview_top_categories.html:82
+#: templates/reports/preview_trends.html:115
+msgid "Vols el report complet?"
+msgstr ""
+
+#: templates/reports/preview_inventory_by_zone.html:150
+msgid ""
+"Descarrega el CSV complet amb tots els detalls, coordenades i dades per a"
+" anàlisi."
+msgstr ""
+
+#: templates/reports/preview_inventory_by_zone.html:158
+#: templates/reports/preview_top_categories.html:92
+#: templates/reports/preview_trends.html:125 templates/reports/public.html:64
+#: templates/reports/public.html:110 templates/reports/public.html:156
+msgid "Comprar i Descarregar"
+msgstr ""
+
+#: templates/reports/preview_inventory_by_zone.html:162
+#: templates/reports/preview_top_categories.html:96
+#: templates/reports/preview_trends.html:129 templates/reports/public.html:73
+#: templates/reports/public.html:119 templates/reports/public.html:165
+msgid "Descarregar"
+msgstr ""
+
+#: templates/reports/preview_inventory_by_zone.html:168
+#: templates/reports/preview_top_categories.html:102
+#: templates/reports/preview_trends.html:135 templates/reports/public.html:79
+#: templates/reports/public.html:125 templates/reports/public.html:171
+msgid "Inicia sessió per descarregar"
+msgstr ""
+
+#: templates/reports/preview_top_categories.html:3
+#: templates/reports/preview_top_categories.html:13
+msgid "Vista Previa: Categories Més Reportades"
+msgstr ""
+
+#: templates/reports/preview_top_categories.html:31
+msgid "Items totals reportats"
+msgstr ""
+
+#: templates/reports/preview_top_categories.html:42
+msgid "Top 20 Categories i Subcategories"
+msgstr ""
+
+#: templates/reports/preview_top_categories.html:84
+msgid ""
+"Descarrega el CSV complet amb tots els detalls per zona i dades per a "
+"anàlisi detallada."
+msgstr ""
+
+#: templates/reports/preview_trends.html:3
+#: templates/reports/preview_trends.html:13
+msgid "Vista Previa: Tendències Temporals"
+msgstr ""
+
+#: templates/reports/preview_trends.html:15
+msgid "Evolució dels reports als últims 6 mesos"
+msgstr ""
+
+#: templates/reports/preview_trends.html:31
+msgid "Items reportats als últims 6 mesos"
+msgstr ""
+
+#: templates/reports/preview_trends.html:42
+msgid "Evolució Mensual"
+msgstr ""
+
+#: templates/reports/preview_trends.html:81
+msgid "Tendències per Categoria"
+msgstr ""
+
+#: templates/reports/preview_trends.html:117
+msgid ""
+"Descarrega el CSV complet amb tots els detalls temporals i dades per a "
+"anàlisi avançada."
+msgstr ""
+
+#: templates/reports/public.html:12
+msgid "Reports i Analytics"
+msgstr ""
+
+#: templates/reports/public.html:15
+msgid "Descarrega reports detallats sobre l'estat de la ciutat de Tarragona"
+msgstr ""
+
+#: templates/reports/public.html:32
+msgid "Iniciatives actives"
+msgstr ""
+
+#: templates/reports/public.html:55 templates/reports/public.html:101
+#: templates/reports/public.html:147
+msgid "Veure Detalls"
+msgstr ""
+
+#: templates/reports/public.html:187
+msgid "Sobre els Reports"
+msgstr ""
+
+#: templates/reports/public.html:188
+msgid ""
+"Els reports es generen amb les dades més actualitzades de la plataforma i"
+" inclouen informació detallada sobre l'estat de la ciutat."
+msgstr ""
+
+#: templates/reports/public.html:189
+msgid "Format:"
+msgstr ""
+
+#: templates/reports/public.html:189
+msgid "CSV (compatible amb Excel i altres eines d'anàlisi)"
+msgstr ""
+
+#: templates/security/login.html:3 templates/security/login.html:14
+#: templates/security/login.html:55
+msgid "Iniciar Sesión"
+msgstr ""
+
+#: templates/security/login.html:16
+msgid "Accede a tu cuenta para participar en iniciativas y gestionar tu perfil"
+msgstr ""
+
+#: templates/security/login.html:25 templates/security/register.html:42
+msgid "tu@email.com"
+msgstr ""
+
+#: templates/security/login.html:37
+msgid "Tu contraseña"
+msgstr ""
+
+#: templates/security/login.html:61
+msgid "¿No tienes cuenta?"
+msgstr ""
+
+#: templates/security/login.html:63
+msgid "Regístrate aquí"
+msgstr ""
+
+#: templates/security/register.html:3
+msgid "Registrarse"
+msgstr ""
+
+#: templates/security/register.html:31 templates/security/register.html:109
+msgid "Crear Cuenta"
+msgstr ""
+
+#: templates/security/register.html:33
+msgid "Únete a la comunidad de Tarracograf y participa en iniciativas ciudadanas"
+msgstr ""
+
+#: templates/security/register.html:54
+msgid "Tu nombre de usuario"
+msgstr ""
+
+#: templates/security/register.html:66
+msgid "Mínimo 8 caracteres"
+msgstr ""
+
+#: templates/security/register.html:74
+msgid "La contraseña debe tener al menos 8 caracteres"
+msgstr ""
+
+#: templates/security/register.html:80
+msgid "Confirma tu contraseña"
+msgstr ""
+
+#: templates/security/register.html:94
+msgid "Accepto les condicions d'ús i privacitat"
+msgstr ""
+
+#: templates/security/register.html:97
+msgid "Veure condicions"
+msgstr ""
+
+#: templates/security/register.html:115
+msgid "¿Ya tienes cuenta?"
+msgstr ""
+
+#: templates/security/register.html:117
+msgid "Inicia sesión aquí"
+msgstr ""
 

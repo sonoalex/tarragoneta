@@ -1,0 +1,375 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Sugerències de Punts de Contenidors') }} - Tarracograf{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<style>
+    #suggestion-map-modal .modal-dialog {
+        max-width: 90%;
+    }
+    #suggestion-map {
+        height: 500px;
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="py-5" style="padding-top: 8rem !important;">
+    <div class="container-fluid px-4">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 fw-bold mb-1">
+                    <i class="fas fa-lightbulb text-warning me-2"></i>
+                    {{ _('Sugerències de Punts de Contenidors') }}
+                </h1>
+                <p class="text-muted mb-0">{{ _('Revisa i aprueba les sugerències de punts de contenidors creades pels usuaris') }}</p>
+            </div>
+            <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>{{ _('Tornar al Dashboard') }}
+            </a>
+        </div>
+
+        <!-- Statistics -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 15px; border-left: 4px solid #ffc107 !important;">
+                    <div class="card-body p-3">
+                        <p class="text-muted mb-1 small fw-semibold">{{ _('Pendents') }}</p>
+                        <h3 class="fw-bold mb-0 text-warning">{{ pending_count }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 15px; border-left: 4px solid #28a745 !important;">
+                    <div class="card-body p-3">
+                        <p class="text-muted mb-1 small fw-semibold">{{ _('Aprovades') }}</p>
+                        <h3 class="fw-bold mb-0 text-success">{{ approved_count }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 15px; border-left: 4px solid #dc3545 !important;">
+                    <div class="card-body p-3">
+                        <p class="text-muted mb-1 small fw-semibold">{{ _('Rebutjades') }}</p>
+                        <h3 class="fw-bold mb-0 text-danger">{{ rejected_count }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
+            <div class="card-body p-3">
+                <div class="btn-group" role="group">
+                    <a href="{{ url_for('admin.container_point_suggestions', status='pending') }}" 
+                       class="btn {% if status_filter == 'pending' %}btn-warning{% else %}btn-outline-warning{% endif %}">
+                        {{ _('Pendents') }} ({{ pending_count }})
+                    </a>
+                    <a href="{{ url_for('admin.container_point_suggestions', status='approved') }}" 
+                       class="btn {% if status_filter == 'approved' %}btn-success{% else %}btn-outline-success{% endif %}">
+                        {{ _('Aprovades') }} ({{ approved_count }})
+                    </a>
+                    <a href="{{ url_for('admin.container_point_suggestions', status='rejected') }}" 
+                       class="btn {% if status_filter == 'rejected' %}btn-danger{% else %}btn-outline-danger{% endif %}">
+                        {{ _('Rebutjades') }} ({{ rejected_count }})
+                    </a>
+                    <a href="{{ url_for('admin.container_point_suggestions', status='all') }}" 
+                       class="btn {% if status_filter == 'all' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
+                        {{ _('Totes') }}
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Suggestions List -->
+        {% if suggestions %}
+        <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+            <div class="card-body p-4">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 20%;">{{ _('Usuari') }}</th>
+                                <th style="width: 15%;">{{ _('Ubicació') }}</th>
+                                <th style="width: 15%;">{{ _('Secció') }}</th>
+                                <th style="width: 20%;">{{ _('Notes') }}</th>
+                                <th style="width: 15%;">{{ _('Data') }}</th>
+                                <th style="width: 15%;" class="text-end">{{ _('Accions') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for suggestion in suggestions %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                                             style="width: 35px; height: 35px; font-size: 0.875rem; font-weight: 600;">
+                                            {{ suggestion.suggested_by.username[0].upper() }}
+                                        </div>
+                                        <div>
+                                            <strong class="d-block">{{ suggestion.suggested_by.username }}</strong>
+                                            <small class="text-muted">{{ suggestion.suggested_by.email }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <strong class="d-block">
+                                            <i class="fas fa-map-marker-alt text-danger me-1"></i>
+                                            {{ suggestion.address or _('Sense adreça') }}
+                                        </strong>
+                                        <small class="text-muted">
+                                            {{ "%.5f"|format(suggestion.latitude) }}, {{ "%.5f"|format(suggestion.longitude) }}
+                                        </small>
+                                        <br>
+                                        <button type="button" class="btn btn-sm btn-outline-primary mt-1" 
+                                                onclick="showSuggestionMap({{ suggestion.id }}, {{ suggestion.latitude }}, {{ suggestion.longitude }}, '{{ suggestion.address or _('Sense adreça')|e }}')">
+                                            <i class="fas fa-map me-1"></i>{{ _('Veure al mapa') }}
+                                        </button>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if suggestion.section %}
+                                        <span class="badge bg-info">{{ suggestion.section.full_code }}</span>
+                                        <br>
+                                        <small class="text-muted">{{ suggestion.section.name or '' }}</small>
+                                    {% else %}
+                                        <span class="text-muted">{{ _('Sense secció') }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if suggestion.notes %}
+                                        <small>{{ suggestion.notes[:100] }}{% if suggestion.notes|length > 100 %}...{% endif %}</small>
+                                    {% else %}
+                                        <span class="text-muted">{{ _('Sense notes') }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        {{ suggestion.created_at.strftime('%d/%m/%Y %H:%M') if suggestion.created_at else '' }}
+                                    </small>
+                                    {% if suggestion.reviewed_at %}
+                                        <br>
+                                        <small class="text-muted">
+                                            {{ _('Revisada') }}: {{ suggestion.reviewed_at.strftime('%d/%m/%Y %H:%M') }}
+                                        </small>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if suggestion.status == 'pending' %}
+                                        <form method="POST" action="{{ url_for('admin.approve_container_point_suggestion', id=suggestion.id) }}" 
+                                              style="display: inline;" onsubmit="return confirm('{{ _('Estàs segur que vols aprovar aquesta sugerència? Es crearà un punt de contenidors.') }}');">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <input type="hidden" name="page" value="{{ pagination.page }}">
+                                            <button type="submit" class="btn btn-sm btn-success me-1">
+                                                <i class="fas fa-check me-1"></i>{{ _('Aprovar') }}
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="{{ url_for('admin.reject_container_point_suggestion', id=suggestion.id) }}" 
+                                              style="display: inline;" onsubmit="return confirm('{{ _('Estàs segur que vols rebutjar aquesta sugerència?') }}');">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <input type="hidden" name="page" value="{{ pagination.page }}">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-times me-1"></i>{{ _('Rebutjar') }}
+                                            </button>
+                                        </form>
+                                    {% elif suggestion.status == 'approved' %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>{{ _('Aprovada') }}
+                                        </span>
+                                        {% if suggestion.reviewed_by %}
+                                            <br>
+                                            <small class="text-muted">{{ _('Per') }}: {{ suggestion.reviewed_by.username }}</small>
+                                        {% endif %}
+                                    {% elif suggestion.status == 'rejected' %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times me-1"></i>{{ _('Rebutjada') }}
+                                        </span>
+                                        {% if suggestion.reviewed_by %}
+                                            <br>
+                                            <small class="text-muted">{{ _('Per') }}: {{ suggestion.reviewed_by.username }}</small>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        {% if pagination.pages > 1 %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if pagination.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('admin.container_point_suggestions', page=pagination.prev_num, status=status_filter) }}">
+                        {{ _('Anterior') }}
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">{{ _('Anterior') }}</span>
+                </li>
+                {% endif %}
+
+                {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                    {% if page_num %}
+                        {% if page_num == pagination.page %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                        {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('admin.container_point_suggestions', page=page_num, status=status_filter) }}">
+                                {{ page_num }}
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if pagination.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('admin.container_point_suggestions', page=pagination.next_num, status=status_filter) }}">
+                        {{ _('Següent') }}
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">{{ _('Següent') }}</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+            <div class="card-body p-5 text-center">
+                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                <p class="text-muted mb-0">{{ _('No hi ha sugerències amb aquest estat.') }}</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Modal para mostrar el mapa de la sugerencia -->
+<div class="modal fade" id="suggestion-map-modal" tabindex="-1" aria-labelledby="suggestionMapModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="suggestionMapModalLabel">
+                    <i class="fas fa-map-marker-alt text-danger me-2"></i>{{ _('Ubicació de la Suggerència') }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="suggestion-map"></div>
+                <div class="mt-3">
+                    <p class="mb-1"><strong>{{ _('Adreça') }}:</strong> <span id="suggestion-address"></span></p>
+                    <p class="mb-0"><strong>{{ _('Coordenades') }}:</strong> <span id="suggestion-coords"></span></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Tancar') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+    var suggestionMap = null;
+    var suggestionMarker = null;
+    
+    function showSuggestionMap(suggestionId, lat, lng, address) {
+        // Actualizar información
+        document.getElementById('suggestion-address').textContent = address || '{{ _('Sense adreça') }}';
+        document.getElementById('suggestion-coords').textContent = lat.toFixed(5) + ', ' + lng.toFixed(5);
+        
+        // Mostrar modal
+        var modal = new bootstrap.Modal(document.getElementById('suggestion-map-modal'));
+        modal.show();
+        
+        // Inicializar mapa cuando el modal esté visible
+        var modalElement = document.getElementById('suggestion-map-modal');
+        var handler = function() {
+            if (!suggestionMap) {
+                // Crear mapa
+                suggestionMap = L.map('suggestion-map').setView([lat, lng], 16);
+                
+                // Añadir capa de tiles
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                    maxZoom: 19
+                }).addTo(suggestionMap);
+                
+                // Añadir marcador
+                var icon = L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                });
+                
+                suggestionMarker = L.marker([lat, lng], {icon: icon}).addTo(suggestionMap);
+                suggestionMarker.bindPopup('<strong>' + (address || '{{ _('Sense adreça') }}') + '</strong><br>' + lat.toFixed(5) + ', ' + lng.toFixed(5)).openPopup();
+            } else {
+                // Actualizar posición del mapa y marcador
+                suggestionMap.setView([lat, lng], 16);
+                if (suggestionMarker) {
+                    suggestionMarker.setLatLng([lat, lng]);
+                    suggestionMarker.setPopupContent('<strong>' + (address || '{{ _('Sense adreça') }}') + '</strong><br>' + lat.toFixed(5) + ', ' + lng.toFixed(5));
+                    suggestionMarker.openPopup();
+                } else {
+                    var icon = L.icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34],
+                        shadowSize: [41, 41]
+                    });
+                    suggestionMarker = L.marker([lat, lng], {icon: icon}).addTo(suggestionMap);
+                    suggestionMarker.bindPopup('<strong>' + (address || '{{ _('Sense adreça') }}') + '</strong><br>' + lat.toFixed(5) + ', ' + lng.toFixed(5)).openPopup();
+                }
+            }
+            
+            // Invalidar tamaño del mapa para que se renderice correctamente
+            setTimeout(function() {
+                suggestionMap.invalidateSize();
+            }, 100);
+            
+            // Remover el listener después de usarlo
+            modalElement.removeEventListener('shown.bs.modal', handler);
+        };
+        
+        modalElement.addEventListener('shown.bs.modal', handler);
+    }
+    
+    // Limpiar mapa cuando se cierra el modal
+    document.getElementById('suggestion-map-modal').addEventListener('hidden.bs.modal', function() {
+        if (suggestionMap) {
+            suggestionMap.remove();
+            suggestionMap = null;
+            suggestionMarker = null;
+        }
+    });
+</script>
+{% endblock %}
+

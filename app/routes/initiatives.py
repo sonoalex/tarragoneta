@@ -144,9 +144,10 @@ def initiative_detail(slug):
             from flask import abort
             abort(404)
         # Check if user is creator, admin, or moderator
+        from app.models import RoleEnum
         is_creator = initiative.creator_id == current_user.id
-        is_admin = current_user.has_role('admin')
-        is_moderator = current_user.has_role('moderator')
+        is_admin = current_user.has_role(RoleEnum.ADMIN.value)
+        is_moderator = current_user.has_role(RoleEnum.MODERATOR.value)
         if not (is_creator or is_admin or is_moderator):
             from flask import abort
             abort(404)

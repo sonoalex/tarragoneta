@@ -25,29 +25,54 @@
                 <h5 class="mb-0"><i class="fas fa-user-plus me-2 text-primary"></i>{{ _('Assignar Responsable') }}</h5>
             </div>
             <div class="card-body">
-                <form method="POST" action="{{ url_for('admin.assign_section_responsible') }}">
+                <form method="POST" action="{{ url_for('admin.assign_section_responsible') }}" id="assign-responsible-form">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="row g-3">
-                        <div class="col-md-5">
+                        <div class="col-md-4">
                             <label class="form-label">{{ _('Usuari') }}</label>
-                            <select name="user_id" class="form-select" required>
+                            <select name="user_id" id="user-select" class="form-select" required>
                                 <option value="">{{ _('Selecciona un usuari') }}</option>
                                 {% for user in all_users %}
                                 <option value="{{ user.id }}">{{ user.username }} ({{ user.email }})</option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-md-5">
-                            <label class="form-label">{{ _('Secció') }}</label>
-                            <select name="section_id" class="form-select" required>
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                {{ _('Secció') }} 
+                                <small class="text-muted">({{ _('o') }})</small>
+                            </label>
+                            <select name="section_id" id="section-select" class="form-select">
                                 <option value="">{{ _('Selecciona una secció') }}</option>
                                 {% for section in sections %}
                                 <option value="{{ section.id }}">{{ section.full_code }} - {{ section.name or _('Sense nom') }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-md-2 d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary w-100">
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                {{ _('Districte') }} 
+                                <small class="text-muted">({{ _('totes les seccions') }})</small>
+                            </label>
+                            <select name="district_id" id="district-select" class="form-select">
+                                <option value="">{{ _('Selecciona un districte') }}</option>
+                                {% for district in districts %}
+                                <option value="{{ district.id }}">{{ district.code }} - {{ district.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="alert alert-info mb-0" role="alert">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <small>{{ _('Pots assignar a una secció individual o a tot un districte (totes les seccions del districte). Selecciona només un dels dos.') }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-plus me-2"></i>{{ _('Assignar') }}
                             </button>
                         </div>
@@ -120,5 +145,49 @@
         </div>
     </div>
 </section>
+
+<script>
+// Asegurar que solo se puede seleccionar sección o distrito, no ambos
+document.addEventListener('DOMContentLoaded', function() {
+    const sectionSelect = document.getElementById('section-select');
+    const districtSelect = document.getElementById('district-select');
+    
+    sectionSelect.addEventListener('change', function() {
+        if (this.value) {
+            districtSelect.value = '';
+            districtSelect.disabled = true;
+        } else {
+            districtSelect.disabled = false;
+        }
+    });
+    
+    districtSelect.addEventListener('change', function() {
+        if (this.value) {
+            sectionSelect.value = '';
+            sectionSelect.disabled = true;
+        } else {
+            sectionSelect.disabled = false;
+        }
+    });
+    
+    // Validar formulario antes de enviar
+    document.getElementById('assign-responsible-form').addEventListener('submit', function(e) {
+        const sectionValue = sectionSelect.value;
+        const districtValue = districtSelect.value;
+        
+        if (!sectionValue && !districtValue) {
+            e.preventDefault();
+            alert('{{ _("Has de seleccionar una secció o un districte") }}');
+            return false;
+        }
+        
+        if (sectionValue && districtValue) {
+            e.preventDefault();
+            alert('{{ _("Solo puedes seleccionar una sección o un distrito, no ambos") }}');
+            return false;
+        }
+    });
+});
+</script>
 {% endblock %}
 

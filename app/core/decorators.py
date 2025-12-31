@@ -2,6 +2,7 @@
 from functools import wraps
 from flask import abort
 from flask_security import current_user
+from app.models import RoleEnum
 
 
 def section_responsible_required(f):
@@ -12,11 +13,11 @@ def section_responsible_required(f):
             abort(403)
         
         # Admin tiene acceso total
-        if current_user.has_role('admin'):
+        if current_user.has_role(RoleEnum.ADMIN.value):
             return f(*args, **kwargs)
         
         # Responsable de sección solo si tiene el rol
-        if current_user.has_role('section_responsible'):
+        if current_user.has_role(RoleEnum.SECTION_RESPONSIBLE.value):
             return f(*args, **kwargs)
         
         abort(403)

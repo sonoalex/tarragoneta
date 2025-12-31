@@ -29,6 +29,28 @@ user_initiatives = db.Table('user_initiatives',
 
 # ========== Enums para Estados ==========
 
+class RoleEnum(str, Enum):
+    """Roles del sistema"""
+    ADMIN = 'admin'
+    USER = 'user'
+    MODERATOR = 'moderator'
+    SECTION_RESPONSIBLE = 'section_responsible'
+    
+    @classmethod
+    def all(cls):
+        """Retorna todos los valores como lista"""
+        return [role.value for role in cls]
+    
+    @classmethod
+    def descriptions(cls):
+        """Retorna un diccionario con las descripciones de cada rol"""
+        return {
+            cls.ADMIN.value: 'Administrator',
+            cls.USER.value: 'Regular User',
+            cls.MODERATOR.value: 'Moderator',
+            cls.SECTION_RESPONSIBLE.value: 'Responsable de Sección',
+        }
+
 class InventoryItemStatus(str, Enum):
     """Estados posibles para items del inventario"""
     PENDING = 'pending'
@@ -911,4 +933,85 @@ class ContainerOverflowReport(db.Model):
     
     def __repr__(self):
         return f'<ContainerOverflowReport point:{self.container_point_id} user:{self.user_id}>'
+
+class ContainerPointSuggestion(db.Model):
+    """Sugerencias de usuarios normales para crear puntos de contenedores"""
+    __tablename__ = 'container_point_suggestion'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    
+    # Posición sugerida
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
+    
+    # Información adicional
+    address = db.Column(db.String(200))  # Dirección legible (opcional)
+    notes = db.Column(db.Text)  # Notas del usuario (opcional)
+    
+    # Estado
+    status = db.Column(db.String(20), default='pending', nullable=False, index=True)  # 'pending', 'approved', 'rejected'
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime(), default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
+    reviewed_at = db.Column(db.DateTime())  # Cuando fue revisada
+    reviewed_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # Admin/responsable que la revisó
+    
+    # Relaciones
+    suggested_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    section_id = db.Column(db.Integer, db.ForeignKey('section.id'), nullable=True, index=True)
+    
+    suggested_by = db.relationship('User', foreign_keys=[suggested_by_id], backref='container_point_suggestions')
+    reviewed_by = db.relationship('User', foreign_keys=[reviewed_by_id])
+    section = db.relationship('Section', backref='container_point_suggestions')
+    
+    def assign_section(self) -> bool:
+        """Asignar sección automáticamente basándose en coordenadas"""
+        try:
+            section = Section.find_section_for_point(self.latitude, self.longitude)
+            if section:
+                self.section_id = section.id
+                return True
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(f"Error assigning section to ContainerPointSuggestion: {e}")
+        return False
+    
+    def approve(self, reviewed_by_user):
+        """Aprobar la sugerencia y crear un ContainerPoint"""
+        from app.models import ContainerPoint
+        from app.extensions import db
+        
+        # Crear polígono
+        polygon_wkt = ContainerPoint.create_square_polygon(self.latitude, self.longitude, radius_meters=10.0)
+        
+        # Crear ContainerPoint
+        point = ContainerPoint(
+            latitude=self.latitude,
+            longitude=self.longitude,
+            polygon=polygon_wkt,
+            address=self.address,
+            notes=self.notes,
+            created_by_id=reviewed_by_user.id,  # El admin/responsable que aprueba es el creador
+            section_id=self.section_id
+        )
+        
+        # Añadir punto a la sesión (será commiteado en la ruta)
+        db.session.add(point)
+        
+        # Actualizar estado de la sugerencia
+        self.status = 'approved'
+        self.reviewed_at = datetime.utcnow()
+        self.reviewed_by_id = reviewed_by_user.id
+        
+        return point
+    
+    def reject(self, reviewed_by_user):
+        """Rechazar la sugerencia"""
+        self.status = 'rejected'
+        self.reviewed_at = datetime.utcnow()
+        self.reviewed_by_id = reviewed_by_user.id
+    
+    def __repr__(self):
+        return f'<ContainerPointSuggestion {self.id} at ({self.latitude}, {self.longitude}) - {self.status}>'
 

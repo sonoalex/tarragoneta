@@ -124,6 +124,12 @@
                         <span class="badge bg-light text-dark ms-1">{{ pending_initiatives_count }}</span>
                         {% endif %}
                     </a>
+                    <a href="{{ url_for('admin.container_point_suggestions', status='pending') }}" class="btn btn-outline-warning px-4" style="border-radius: 50px;">
+                        <i class="fas fa-lightbulb me-2"></i>{{ _('Sugerències de Contenidors') }}
+                        {% if pending_suggestions_count > 0 %}
+                        <span class="badge bg-warning text-dark ms-1">{{ pending_suggestions_count }}</span>
+                        {% endif %}
+                    </a>
                     <a href="{{ url_for('admin.admin_users') }}" class="btn btn-outline-secondary px-4" style="border-radius: 50px;">
                         <i class="fas fa-users me-2"></i>{{ _('Gestionar Usuaris') }}
                     </a>

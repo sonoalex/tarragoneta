@@ -35,7 +35,8 @@ def register_context_processors(app):
         pending_count = 0
         try:
             from flask_security import current_user
-            if current_user.is_authenticated and (current_user.has_role('admin') or current_user.has_role('moderator')):
+            from app.models import RoleEnum
+            if current_user.is_authenticated and (current_user.has_role(RoleEnum.ADMIN.value) or current_user.has_role(RoleEnum.MODERATOR.value)):
                 from app.models import Initiative
                 pending_count = Initiative.query.filter(Initiative.status == 'pending').count()
         except Exception:

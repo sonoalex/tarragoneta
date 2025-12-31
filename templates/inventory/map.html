@@ -560,10 +560,19 @@
                 <i class="fas fa-cog me-2"></i>{{ _('Administrar') }}
             </a>
             {% endif %}
-            {% if current_user.is_authenticated and (current_user.has_role('admin') or current_user.has_role('section_responsible')) %}
-            <button id="toggle-container-mode" class="btn btn-outline-primary btn-sm ms-2" type="button" style="border-radius: 50px;">
-                <i class="fas fa-trash-alt me-1"></i>{{ _('Mode punts de contenidors') }}
-            </button>
+            {% if current_user.is_authenticated %}
+                {% if current_user.has_role('admin') or current_user.has_role('section_responsible') %}
+                <button id="toggle-container-mode" class="btn btn-outline-primary btn-sm ms-2" type="button" style="border-radius: 50px;">
+                    <i class="fas fa-trash-alt me-1"></i>{{ _('Mode punts de contenidors') }}
+                </button>
+                <button id="create-container-from-location" class="btn btn-outline-success btn-sm ms-2" type="button" style="border-radius: 50px;">
+                    <i class="fas fa-crosshairs me-1"></i>{{ _('Crear punt des de la meva ubicació') }}
+                </button>
+                {% else %}
+                <button id="suggest-container-from-location" class="btn btn-outline-warning btn-sm ms-2" type="button" style="border-radius: 50px;">
+                    <i class="fas fa-lightbulb me-1"></i>{{ _('Aquí hi ha contenidors') }}
+                </button>
+                {% endif %}
             {% endif %}
         </div>
     </div>
@@ -650,6 +659,7 @@
         var containerPointsLayer = L.layerGroup();  // se añadirá/retirará según visibilidad (gestionado por control de capas)
         var isContainerPointMode = false;
         var canManageContainers = {{ 'true' if current_user.is_authenticated and (current_user.has_role('admin') or current_user.has_role('section_responsible')) else 'false' }};
+        var canSuggestContainers = {{ 'true' if current_user.is_authenticated else 'false' }};
         
         // Cargar y dibujar secciones
         var sectionsLayer = L.layerGroup();
@@ -1000,9 +1010,48 @@
             });
         }
         
-        // Función auxiliar para crear un punt de contenidors desde una lat/lng
-        function handleContainerPointCreation(latlng) {
-            if (!isContainerPointMode || !canManageContainers) return;
+        // Función auxiliar para sugerir un punt de contenidors (usuarios normales)
+        function handleContainerPointSuggestion(latlng) {
+            if (!canSuggestContainers) return;
+            
+            var lat = latlng.lat;
+            var lng = latlng.lng;
+            
+            if (!confirm('{{ _("Vols indicar que aquí hi ha contenidors? Un administrador o responsable revisarà la teva suggerència.") }}')) {
+                return;
+            }
+            
+            fetch('{{ url_for("inventory.suggest_container_point") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    latitude: lat,
+                    longitude: lng,
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                if (data.message) {
+                    alert(data.message);
+                }
+            })
+            .catch(err => {
+                console.error('Error suggesting container point:', err);
+                alert('Error suggerint el punt de contenidors');
+            });
+        }
+        
+        // Función auxiliar para crear un punt de contenidors desde una lat/lng (admin/responsables)
+        function handleContainerPointCreation(latlng, skipModeCheck) {
+            // skipModeCheck permite crear desde geolocalización sin activar el modo
+            if (!skipModeCheck && (!isContainerPointMode || !canManageContainers)) return;
+            if (!canManageContainers) return;
             
             var lat = latlng.lat;
             var lng = latlng.lng;
@@ -1314,6 +1363,7 @@
         // Modo creación de puntos de contenedores (solo admin / responsables)
         if (canManageContainers) {
             var toggleModeBtn = document.getElementById('toggle-container-mode');
+            var createFromLocationBtn = document.getElementById('create-container-from-location');
             
             if (toggleModeBtn) {
                 toggleModeBtn.addEventListener('click', function(e) {
@@ -1337,10 +1387,253 @@
                 });
             }
             
+            if (createFromLocationBtn) {
+                createFromLocationBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    if (!navigator.geolocation) {
+                        alert('{{ _("La geolocalización no está disponible en tu navegador.") }}');
+                        return;
+                    }
+                    
+                    // Guardar referencia al botón y texto original
+                    var btn = createFromLocationBtn;
+                    var originalHTML = btn.innerHTML;
+                    var originalDisabled = btn.disabled;
+                    
+                    // Mostrar indicador de carga inmediatamente
+                    btn.disabled = true;
+                    var loadingHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ _("Obtenint ubicació...") }}';
+                    btn.innerHTML = loadingHTML;
+                    
+                    // Forzar actualización del DOM
+                    btn.offsetHeight; // Trigger reflow
+                    
+                    // Función para restaurar el botón
+                    function restoreButton() {
+                        setTimeout(function() {
+                            btn.disabled = originalDisabled;
+                            btn.innerHTML = originalHTML;
+                        }, 100);
+                    }
+                    
+                    // Función para manejar errores con mensajes más específicos
+                    function handleGeolocationError(error) {
+                        console.error('Geolocation error:', error);
+                        var errorMessage = '{{ _("No s\'ha pogut obtenir la teva ubicació.") }}';
+                        
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage = '{{ _("Permís de geolocalització denegat. Si us plau, activa la geolocalització a la configuració del teu navegador.") }}';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage = '{{ _("La ubicació no està disponible. Assegura\'t que el GPS estigui activat i intenta-ho de nou.") }}';
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage = '{{ _("Temps d\'espera esgotat. Si us plau, intenta-ho de nou.") }}';
+                                break;
+                            default:
+                                errorMessage = '{{ _("Error desconegut obtenint la ubicació. Si us plau, utilitza el mode de clic al mapa.") }}';
+                                break;
+                        }
+                        
+                        alert(errorMessage);
+                        restoreButton();
+                    }
+                    
+                    // Intentar primero con configuración más permisiva
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            var lat = position.coords.latitude;
+                            var lng = position.coords.longitude;
+                            
+                            console.log('Location obtained:', lat, lng);
+                            
+                            // Validar que esté en el área de Tarragona (aproximado)
+                            if (lat >= 40.5 && lat <= 41.5 && lng >= 0.5 && lng <= 2.0) {
+                                // Crear punto de contenedor en la ubicación actual
+                                // skipModeCheck = true porque viene de geolocalización, no del modo de clic
+                                var latlng = L.latLng(lat, lng);
+                                if (canManageContainers) {
+                                    handleContainerPointCreation(latlng, true);
+                                } else if (canSuggestContainers) {
+                                    handleContainerPointSuggestion(latlng);
+                                }
+                                
+                                // Restaurar botón
+                                restoreButton();
+                                
+                                // Centrar mapa en la ubicación
+                                map.setView([lat, lng], 18);
+                            } else {
+                                alert('{{ _("La teva ubicació està fora de l\'àrea de Tarragona. Si us plau, utilitza el mode de clic al mapa.") }}');
+                                restoreButton();
+                            }
+                        },
+                        function(error) {
+                            console.error('First geolocation attempt failed:', error);
+                            // Si falla, intentar con configuración alternativa
+                            console.log('Retrying geolocation with different settings...');
+                            
+                            // Actualizar el mensaje del botón
+                            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ _("Tornant a intentar...") }}';
+                            btn.offsetHeight; // Trigger reflow
+                            
+                            navigator.geolocation.getCurrentPosition(
+                                function(position) {
+                                    var lat = position.coords.latitude;
+                                    var lng = position.coords.longitude;
+                                    
+                                    console.log('Location obtained on retry:', lat, lng);
+                                    
+                                        if (lat >= 40.5 && lat <= 41.5 && lng >= 0.5 && lng <= 2.0) {
+                                            var latlng = L.latLng(lat, lng);
+                                            if (canManageContainers) {
+                                                // Admin/responsable: crear directamente
+                                                handleContainerPointCreation(latlng, true);
+                                            } else if (canSuggestContainers) {
+                                                // Usuario normal: sugerir
+                                                handleContainerPointSuggestion(latlng);
+                                            }
+                                            restoreButton();
+                                            map.setView([lat, lng], 18);
+                                        } else {
+                                            alert('{{ _("La teva ubicació està fora de l\'àrea de Tarragona. Si us plau, utilitza el mode de clic al mapa.") }}');
+                                            restoreButton();
+                                        }
+                                },
+                                handleGeolocationError,
+                                {
+                                    enableHighAccuracy: false,
+                                    timeout: 15000,
+                                    maximumAge: 60000  // Aceptar ubicación de hasta 1 minuto
+                                }
+                            );
+                        },
+                        {
+                            enableHighAccuracy: false,  // Empezar sin alta precisión para localhost
+                            timeout: 15000,
+                            maximumAge: 60000  // Aceptar ubicación de hasta 1 minuto
+                        }
+                    );
+                });
+            }
+            
             // Crear punto al hacer clic en el mapa cuando el modo está activo
             map.on('click', function(e) {
                 handleContainerPointCreation(e.latlng);
             });
+        }
+        
+        // Botón para sugerir puntos desde ubicación (usuarios normales)
+        if (canSuggestContainers && !canManageContainers) {
+            var suggestFromLocationBtn = document.getElementById('suggest-container-from-location');
+            
+            if (suggestFromLocationBtn) {
+                suggestFromLocationBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    if (!navigator.geolocation) {
+                        alert('{{ _("La geolocalización no está disponible en tu navegador.") }}');
+                        return;
+                    }
+                    
+                    // Guardar referencia al botón y texto original
+                    var btn = suggestFromLocationBtn;
+                    var originalHTML = btn.innerHTML;
+                    var originalDisabled = btn.disabled;
+                    
+                    // Mostrar indicador de carga inmediatamente
+                    btn.disabled = true;
+                    var loadingHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ _("Obtenint ubicació...") }}';
+                    btn.innerHTML = loadingHTML;
+                    btn.offsetHeight; // Trigger reflow
+                    
+                    // Función para restaurar el botón
+                    function restoreButton() {
+                        setTimeout(function() {
+                            btn.disabled = originalDisabled;
+                            btn.innerHTML = originalHTML;
+                        }, 100);
+                    }
+                    
+                    // Función para manejar errores
+                    function handleGeolocationError(error) {
+                        console.error('Geolocation error:', error);
+                        var errorMessage = '{{ _("No s\'ha pogut obtenir la teva ubicació.") }}';
+                        
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage = '{{ _("Permís de geolocalització denegat. Si us plau, activa la geolocalització a la configuració del teu navegador.") }}';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage = '{{ _("La ubicació no està disponible. Assegura\'t que el GPS estigui activat i intenta-ho de nou.") }}';
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage = '{{ _("Temps d\'espera esgotat. Si us plau, intenta-ho de nou.") }}';
+                                break;
+                        }
+                        
+                        alert(errorMessage);
+                        restoreButton();
+                    }
+                    
+                    // Intentar obtener ubicación
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            var lat = position.coords.latitude;
+                            var lng = position.coords.longitude;
+                            
+                            console.log('Location obtained:', lat, lng);
+                            
+                            if (lat >= 40.5 && lat <= 41.5 && lng >= 0.5 && lng <= 2.0) {
+                                var latlng = L.latLng(lat, lng);
+                                handleContainerPointSuggestion(latlng);
+                                restoreButton();
+                                map.setView([lat, lng], 18);
+                            } else {
+                                alert('{{ _("La teva ubicació està fora de l\'àrea de Tarragona.") }}');
+                                restoreButton();
+                            }
+                        },
+                        function(error) {
+                            console.error('First geolocation attempt failed:', error);
+                            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ _("Tornant a intentar...") }}';
+                            btn.offsetHeight;
+                            
+                            navigator.geolocation.getCurrentPosition(
+                                function(position) {
+                                    var lat = position.coords.latitude;
+                                    var lng = position.coords.longitude;
+                                    
+                                    console.log('Location obtained on retry:', lat, lng);
+                                    
+                                    if (lat >= 40.5 && lat <= 41.5 && lng >= 0.5 && lng <= 2.0) {
+                                        var latlng = L.latLng(lat, lng);
+                                        handleContainerPointSuggestion(latlng);
+                                        restoreButton();
+                                        map.setView([lat, lng], 18);
+                                    } else {
+                                        alert('{{ _("La teva ubicació està fora de l\'àrea de Tarragona.") }}');
+                                        restoreButton();
+                                    }
+                                },
+                                handleGeolocationError,
+                                {
+                                    enableHighAccuracy: false,
+                                    timeout: 15000,
+                                    maximumAge: 60000
+                                }
+                            );
+                        },
+                        {
+                            enableHighAccuracy: false,
+                            timeout: 15000,
+                            maximumAge: 60000
+                        }
+                    );
+                });
+            }
         }
         
         // Load items from API (usar valores de URL en catalán)

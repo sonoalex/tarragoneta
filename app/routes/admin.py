@@ -4,7 +4,7 @@ from flask_security.decorators import roles_required
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import os
-from app.models import Initiative, User, user_initiatives, InventoryItem, Donation, Section, SectionResponsible, Role, District
+from app.models import Initiative, User, user_initiatives, InventoryItem, Donation, Section, SectionResponsible, Role, District, ContainerPointSuggestion, RoleEnum
 from app.extensions import db
 from app.forms import InitiativeForm
 from app.utils import sanitize_html, allowed_file, optimize_image
@@ -56,6 +56,7 @@ def admin_dashboard():
     users_count = User.query.count()
     participations_count = db.session.query(db.func.count(user_initiatives.c.user_id)).scalar() or 0
     pending_initiatives_count = Initiative.query.filter(Initiative.status == 'pending').count()
+    pending_suggestions_count = ContainerPointSuggestion.query.filter(ContainerPointSuggestion.status == 'pending').count()
     
     # Donation statistics
     total_donations = Donation.query.filter(Donation.status == 'completed').count()
@@ -69,6 +70,7 @@ def admin_dashboard():
                          users_count=users_count,
                          participations_count=participations_count,
                          pending_initiatives_count=pending_initiatives_count,
+                         pending_suggestions_count=pending_suggestions_count,
                          total_donations=total_donations,
                          total_donated_euros=total_donated_euros,
                          recent_donations=recent_donations)
@@ -542,24 +544,100 @@ def admin_sections():
     # Todos los usuarios que pueden ser responsables
     all_users = User.query.order_by(User.username).all()
     
+    # Obtener todos los distritos
+    districts = District.query.order_by(District.code).all()
+    
     return render_template('admin/sections.html',
                          sections=sections,
                          section_responsibles=section_responsibles,
-                         all_users=all_users)
+                         all_users=all_users,
+                         districts=districts)
 
 @bp.route('/sections/assign-responsible', methods=['POST'])
 @login_required
 @roles_required('admin')
 def assign_section_responsible():
-    """Asignar responsable a una sección"""
+    """Asignar responsable a una sección o a un distrito completo"""
     user_id = request.form.get('user_id')
     section_id = request.form.get('section_id')
+    district_id = request.form.get('district_id')
     
-    if not user_id or not section_id:
-        flash(_('Debes seleccionar un usuario y una sección'), 'error')
+    if not user_id:
+        flash(_('Debes seleccionar un usuario'), 'error')
+        return redirect(url_for('admin.admin_sections'))
+    
+    if not section_id and not district_id:
+        flash(_('Debes seleccionar una sección o un distrito'), 'error')
+        return redirect(url_for('admin.admin_sections'))
+    
+    if section_id and district_id:
+        flash(_('Solo puedes seleccionar una sección o un distrito, no ambos'), 'error')
         return redirect(url_for('admin.admin_sections'))
     
     user = User.query.get_or_404(user_id)
+    
+    # Asignar rol si no lo tiene
+    if not user.has_role(RoleEnum.SECTION_RESPONSIBLE.value):
+        role = Role.query.filter_by(name=RoleEnum.SECTION_RESPONSIBLE.value).first()
+        if not role:
+            # Crear el rol si no existe (por si acaso no se creó en init_db)
+            current_app.logger.warning(f'Rol {RoleEnum.SECTION_RESPONSIBLE.value} no existe, creándolo automáticamente...')
+            role = Role(
+                name=RoleEnum.SECTION_RESPONSIBLE.value, 
+                description=RoleEnum.descriptions()[RoleEnum.SECTION_RESPONSIBLE.value]
+            )
+            db.session.add(role)
+            db.session.commit()
+            current_app.logger.info(f'Rol {RoleEnum.SECTION_RESPONSIBLE.value} creado automáticamente')
+        
+        user_datastore = get_user_datastore()
+        user_datastore.add_role_to_user(user, role)
+        db.session.commit()
+    
+    # Asignar a nivel de distrito (todas las secciones)
+    if district_id:
+        district = District.query.get_or_404(district_id)
+        sections = Section.query.filter_by(district_code=district.code).all()
+        
+        if not sections:
+            flash(_('Este distrito no tiene secciones'), 'warning')
+            return redirect(url_for('admin.admin_sections'))
+        
+        assigned_count = 0
+        skipped_count = 0
+        
+        for section in sections:
+            # Verificar si ya existe la relación
+            existing = SectionResponsible.query.filter_by(
+                user_id=user.id,
+                section_id=section.id
+            ).first()
+            
+            if not existing:
+                sr = SectionResponsible(
+                    user_id=user.id,
+                    section_id=section.id,
+                    assigned_by=current_user.id
+                )
+                db.session.add(sr)
+                assigned_count += 1
+            else:
+                skipped_count += 1
+        
+        db.session.commit()
+        
+        if assigned_count > 0:
+            current_app.logger.info(f'Admin {current_user.id} assigned user {user.id} as responsible for district {district.code} ({assigned_count} sections)')
+            if skipped_count > 0:
+                flash(_('Responsable asignado a {count} secciones del distrito. {skipped} secciones ya tenían este responsable.').format(count=assigned_count, skipped=skipped_count), 'success')
+            else:
+                flash(_('Responsable asignado a todas las secciones del distrito ({count} secciones)').format(count=assigned_count), 'success')
+        else:
+            flash(_('Este usuario ya es responsable de todas las secciones de este distrito'), 'warning')
+        
+        return redirect(url_for('admin.admin_sections'))
+    
+    # Asignar a una sección individual
     section = Section.query.get_or_404(section_id)
     
     # Verificar si ya existe la relación
@@ -571,17 +649,6 @@ def assign_section_responsible():
     if existing:
         flash(_('Este usuario ya es responsable de esta sección'), 'warning')
         return redirect(url_for('admin.admin_sections'))
-    
-    # Asignar rol si no lo tiene
-    if not user.has_role('section_responsible'):
-        role = Role.query.filter_by(name='section_responsible').first()
-        if role:
-            user_datastore = get_user_datastore()
-            user_datastore.add_role_to_user(user, role)
-            db.session.commit()
-        else:
-            flash(_('El rol section_responsible no existe. Ejecuta flask init-db'), 'error')
-            return redirect(url_for('admin.admin_sections'))
     
     # Crear relación
     sr = SectionResponsible(
@@ -861,3 +928,98 @@ def update_section_geometry(section_id):
         db.session.rollback()
         current_app.logger.error(f'Error updating section geometry: {str(e)}', exc_info=True)
         return jsonify({'error': str(e)}), 500
+
+
+# ========== Gestión de Sugerencias de Container Points ==========
+
+@bp.route('/container-point-suggestions')
+@login_required
+@roles_required('admin')
+def container_point_suggestions():
+    """Lista de sugerencias de puntos de contenedores pendientes"""
+    from flask import request
+    
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 20, type=int)
+    status_filter = request.args.get('status', 'pending')  # 'pending', 'approved', 'rejected', 'all'
+    
+    # Build query
+    query = ContainerPointSuggestion.query
+    
+    if status_filter != 'all':
+        query = query.filter(ContainerPointSuggestion.status == status_filter)
+    
+    # Pagination
+    pagination = query.order_by(ContainerPointSuggestion.created_at.desc()).paginate(
+        page=page,
+        per_page=per_page,
+        error_out=False
+    )
+    suggestions = pagination.items
+    
+    # Statistics
+    pending_count = ContainerPointSuggestion.query.filter(ContainerPointSuggestion.status == 'pending').count()
+    approved_count = ContainerPointSuggestion.query.filter(ContainerPointSuggestion.status == 'approved').count()
+    rejected_count = ContainerPointSuggestion.query.filter(ContainerPointSuggestion.status == 'rejected').count()
+    
+    return render_template('admin/container_point_suggestions.html',
+                         suggestions=suggestions,
+                         pagination=pagination,
+                         status_filter=status_filter,
+                         pending_count=pending_count,
+                         approved_count=approved_count,
+                         rejected_count=rejected_count)
+
+
+@bp.route('/container-point-suggestions/<int:id>/approve', methods=['POST'])
+@login_required
+@roles_required('admin')
+def approve_container_point_suggestion(id):
+    """Aprobar una sugerencia de punto de contenedores"""
+    suggestion = ContainerPointSuggestion.query.get_or_404(id)
+    
+    if suggestion.status != 'pending':
+        flash(_('Esta sugerencia ya ha sido procesada'), 'warning')
+        return redirect(url_for('admin.container_point_suggestions'))
+    
+    try:
+        # Aprobar la sugerencia (esto crea el ContainerPoint)
+        point = suggestion.approve(reviewed_by_user=current_user)
+        db.session.add(point)
+        db.session.commit()
+        
+        current_app.logger.info(f'Admin {current_user.id} approved container point suggestion {suggestion.id}, created ContainerPoint {point.id}')
+        flash(_('Sugerencia aprobada y punto de contenedores creado correctamente'), 'success')
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f'Error approving container point suggestion {id}: {str(e)}', exc_info=True)
+        flash(_('Error al aprobar la sugerencia'), 'error')
+    
+    page = request.form.get('page', request.args.get('page', 1, type=int), type=int)
+    return redirect(url_for('admin.container_point_suggestions', status='pending', page=page))
+
+
+@bp.route('/container-point-suggestions/<int:id>/reject', methods=['POST'])
+@login_required
+@roles_required('admin')
+def reject_container_point_suggestion(id):
+    """Rechazar una sugerencia de punto de contenedores"""
+    suggestion = ContainerPointSuggestion.query.get_or_404(id)
+    
+    if suggestion.status != 'pending':
+        flash(_('Esta sugerencia ya ha sido procesada'), 'warning')
+        return redirect(url_for('admin.container_point_suggestions'))
+    
+    try:
+        suggestion.reject(reviewed_by_user=current_user)
+        db.session.commit()
+        
+        current_app.logger.info(f'Admin {current_user.id} rejected container point suggestion {suggestion.id}')
+        flash(_('Sugerencia rechazada correctamente'), 'success')
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f'Error rejecting container point suggestion {id}: {str(e)}', exc_info=True)
+        flash(_('Error al rechazar la sugerencia'), 'error')
+    
+    page = request.form.get('page', request.args.get('page', 1, type=int), type=int)
+    return redirect(url_for('admin.container_point_suggestions', status='pending', page=page))

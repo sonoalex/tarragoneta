@@ -59,14 +59,33 @@ def init_database():
             db.session.rollback()
         
         # Crear roles si no existen
+        # NOTA: Los roles ahora se crean mediante migraciones, no aquí
+        # Este código solo se ejecuta como fallback si init_db.py se usa directamente
+        from app.models import RoleEnum
+        role_descriptions = RoleEnum.descriptions()
+        
         if not Role.query.first():
             print("👥 Creando roles...")
-            admin_role = Role(name='admin', description='Administrator')
-            user_role = Role(name='user', description='Regular User')
-            moderator_role = Role(name='moderator', description='Moderator')
-            db.session.add_all([admin_role, user_role, moderator_role])
+            admin_role = Role(name=RoleEnum.ADMIN.value, description=role_descriptions[RoleEnum.ADMIN.value])
+            user_role = Role(name=RoleEnum.USER.value, description=role_descriptions[RoleEnum.USER.value])
+            moderator_role = Role(name=RoleEnum.MODERATOR.value, description=role_descriptions[RoleEnum.MODERATOR.value])
+            section_responsible_role = Role(name=RoleEnum.SECTION_RESPONSIBLE.value, description=role_descriptions[RoleEnum.SECTION_RESPONSIBLE.value])
+            db.session.add_all([admin_role, user_role, moderator_role, section_responsible_role])
             db.session.commit()
             print("✓ Roles creados")
+        else:
+            # Verificar si falta el rol section_responsible y crearlo si no existe
+            # (fallback por si la migración no se ha ejecutado)
+            section_responsible_role = Role.query.filter_by(name=RoleEnum.SECTION_RESPONSIBLE.value).first()
+            if not section_responsible_role:
+                print(f"👥 Creando rol {RoleEnum.SECTION_RESPONSIBLE.value} (fallback)...")
+                section_responsible_role = Role(
+                    name=RoleEnum.SECTION_RESPONSIBLE.value, 
+                    description=role_descriptions[RoleEnum.SECTION_RESPONSIBLE.value]
+                )
+                db.session.add(section_responsible_role)
+                db.session.commit()
+                print(f"✓ Rol {RoleEnum.SECTION_RESPONSIBLE.value} creado")
         
         # Crear usuario admin si no existe
         admin_email = app.config.get('ADMIN_USER_EMAIL', 'hola@tarracograf.cat')
