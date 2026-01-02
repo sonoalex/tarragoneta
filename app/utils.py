@@ -49,67 +49,225 @@ def calculate_distance_km(lat1, lon1, lat2, lon2):
     
     return R * c
 
-def extract_gps_from_image(file_path):
+def _convert_to_degrees(value):
     """
-    Extract GPS coordinates from image EXIF data.
-    Returns (latitude, longitude) tuple or (None, None) if not found.
+    Convierte coordenadas GPS (degrees, minutes, seconds) a decimal.
+    Maneja tanto tuplas como objetos Rational de Pillow.
     """
+    import logging
+    logger = logging.getLogger(__name__)
+    
     try:
-        from PIL.ExifTags import TAGS, GPSTAGS
+        def to_float(v):
+            if hasattr(v, 'numerator') and hasattr(v, 'denominator'):
+                return float(v.numerator) / float(v.denominator)
+            return float(v)
         
-        img = Image.open(file_path)
-        exif_data = img._getexif()
+        # Asegurar que tenemos una tupla/lista de 3 elementos
+        if not isinstance(value, (tuple, list)) or len(value) < 1:
+            raise ValueError(f"Invalid GPS coordinate format: {value}")
         
-        if exif_data is None:
-            return None, None
+        degrees = to_float(value[0])
+        minutes = to_float(value[1]) if len(value) > 1 else 0.0
+        seconds = to_float(value[2]) if len(value) > 2 else 0.0
         
-        # Find GPS info in EXIF
-        gps_info = None
-        for tag_id, value in exif_data.items():
-            tag = TAGS.get(tag_id, tag_id)
-            if tag == 'GPSInfo':
-                gps_info = value
-                break
+        return degrees + (minutes / 60.0) + (seconds / 3600.0)
         
-        if gps_info is None:
-            return None, None
+    except (ValueError, TypeError, IndexError, AttributeError) as e:
+        logger.error(f"Error converting GPS value {value}: {e}")
+        raise
+
+
+def _extract_gps_from_dict(gps_info, method):
+    """
+    Extrae coordenadas GPS de un diccionario GPS info.
+    
+    Args:
+        gps_info: Diccionario con datos GPS
+        method: Nombre del método usado (para logging)
+    
+    Returns:
+        Tupla (latitud, longitud) o None si faltan datos
+    """
+    import logging
+    from PIL.ExifTags import GPSTAGS
+    
+    logger = logging.getLogger(__name__)
+    
+    # Normalizar el diccionario usando GPSTAGS
+    gps_data = {}
+    for key, value in gps_info.items():
+        decoded_key = GPSTAGS.get(key, key)
+        gps_data[decoded_key] = value
+    
+    logger.debug(f"GPS data keys from {method}: {list(gps_data.keys())}")
+    
+    # Extraer componentes
+    lat = gps_data.get('GPSLatitude')
+    lat_ref = gps_data.get('GPSLatitudeRef', 'N')
+    lon = gps_data.get('GPSLongitude')
+    lon_ref = gps_data.get('GPSLongitudeRef', 'E')
         
-        # Extract GPS coordinates
-        gps_data = {}
-        for key, value in gps_info.items():
-            tag = GPSTAGS.get(key, key)
-            gps_data[tag] = value
+    if lat is None or lon is None:
+        logger.warning(f"Missing GPS coordinates in {method}: lat={lat}, lon={lon}")
+        return None
+    
+    try:
+        # Convertir a decimal
+        latitude = _convert_to_degrees(lat)
+        longitude = _convert_to_degrees(lon)
         
-        # Get latitude
-        lat_ref = gps_data.get('GPSLatitudeRef', 'N')
-        lat = gps_data.get('GPSLatitude')
-        
-        # Get longitude
-        lon_ref = gps_data.get('GPSLongitudeRef', 'E')
-        lon = gps_data.get('GPSLongitude')
-        
-        if lat is None or lon is None:
-            return None, None
-        
-        # Convert to decimal degrees
-        # lat/lon are tuples: (degrees, minutes, seconds)
-        latitude = float(lat[0]) + (float(lat[1]) / 60.0) + (float(lat[2]) / 3600.0)
+        # Aplicar hemisferios
         if lat_ref == 'S':
             latitude = -latitude
-        
-        longitude = float(lon[0]) + (float(lon[1]) / 60.0) + (float(lon[2]) / 3600.0)
         if lon_ref == 'W':
             longitude = -longitude
         
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.info(f"✅ GPS extraído de imagen: lat={latitude}, lng={longitude}")
+        logger.info(f"✅ GPS extracted via {method}: ({latitude}, {longitude})")
         return latitude, longitude
         
     except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.warning(f"❌ Error extrayendo GPS de imagen: {e}")
+        logger.error(f"Error converting GPS coordinates from {method}: {e}")
+        return None
+
+
+def extract_gps_from_image(file_path):
+    """
+    Extrae coordenadas GPS de una imagen usando exifread (robusto para iOS).
+    Si exifread falla, intenta con _getexif() de Pillow como fallback.
+    
+    Args:
+        file_path: Ruta a la imagen
+    
+    Returns:
+        Tupla (latitud, longitud) o (None, None) si no se encuentra
+    """
+    import logging
+    from pathlib import Path
+    
+    logger = logging.getLogger(__name__)
+    
+    # Validar archivo
+    path = Path(file_path)
+    if not path.exists():
+        logger.error(f"File not found: {file_path}")
+        return None, None
+    
+    logger.debug(f"Extracting GPS from image: {path.name}")
+    
+    # === MÉTODO 1: Usar exifread (robusto para iOS) ===
+    try:
+        import exifread
+        
+        # Abrir imagen en modo binario y procesar EXIF
+        with open(file_path, 'rb') as img_file:
+            tags = exifread.process_file(img_file, details=False)
+            
+            logger.debug(f"exifread returned {len(tags)} tags")
+            
+            # Extraer información GPS
+            gps_latitude = tags.get("GPS GPSLatitude")
+            gps_latitude_ref = tags.get("GPS GPSLatitudeRef")
+            gps_longitude = tags.get("GPS GPSLongitude")
+            gps_longitude_ref = tags.get("GPS GPSLongitudeRef")
+            
+            logger.debug(f"exifread GPS: lat={gps_latitude is not None}, lat_ref={gps_latitude_ref is not None}, lon={gps_longitude is not None}, lon_ref={gps_longitude_ref is not None}")
+            
+            # Verificar si tenemos toda la información GPS necesaria
+            if gps_latitude and gps_latitude_ref and gps_longitude and gps_longitude_ref:
+                # Convertir coordenadas GPS a grados decimales
+                def convert_to_degrees(value):
+                    """Convierte un valor de exifread (Ratio) a grados decimales"""
+                    # exifread devuelve objetos Ratio con .values que es una lista de Ratio
+                    # Cada Ratio tiene .num (numerador) y .den (denominador)
+                    d = float(value.values[0].num) / float(value.values[0].den)  # Degrees
+                    m = float(value.values[1].num) / float(value.values[1].den)  # Minutes
+                    s = float(value.values[2].num) / float(value.values[2].den)  # Seconds
+                    
+                    # Calcular grados decimales
+                    return d + (m / 60.0) + (s / 3600.0)
+                
+                lat = convert_to_degrees(gps_latitude)
+                lon = convert_to_degrees(gps_longitude)
+                
+                # Ajustar latitud y longitud según los valores de referencia
+                # exifread devuelve objetos Ratio, necesitamos acceder a .values[0]
+                if gps_latitude_ref.values[0] != 'N':
+                    lat = -lat
+                if gps_longitude_ref.values[0] != 'E':
+                    lon = -lon
+                
+                logger.info(f"✅ GPS extracted via exifread: ({lat:.6f}, {lon:.6f})")
+                return lat, lon
+            else:
+                # Log qué tags GPS están disponibles para debugging
+                gps_tags = {k: v for k, v in tags.items() if k.startswith('GPS')}
+                logger.debug(f"exifread: GPS data incomplete. Available GPS tags: {list(gps_tags.keys())}")
+                
+    except ImportError:
+        logger.debug("exifread not available, trying Pillow _getexif()")
+    except Exception as e:
+        logger.debug(f"exifread failed: {e}, trying Pillow _getexif()")
+    
+    # === MÉTODO 2: Usar _getexif() de Pillow como fallback ===
+    try:
+        from PIL import Image
+        from PIL.ExifTags import TAGS, GPSTAGS
+        
+        image = Image.open(file_path)
+        logger.debug(f"Image opened: {path.name}, format={image.format}, size={image.size}")
+        
+        # Verificar si hay datos EXIF
+        exif_data = image._getexif()
+        if exif_data is None:
+            logger.warning(f"❌ {path.name} contains no exif data")
+            return None, None
+        
+        logger.debug(f"Pillow _getexif() returned {len(exif_data)} tags")
+        
+        # Buscar GPSInfo en los tags EXIF
+        gps_coords = {}
+        for tag, value in exif_data.items():
+            tag_name = TAGS.get(tag)
+            if tag_name == "GPSInfo":
+                logger.debug(f"✅ GPSInfo found at tag {tag}")
+                # Extraer datos GPS del diccionario GPSInfo
+                for key, val in value.items():
+                    gps_tag_name = GPSTAGS.get(key)
+                    logger.debug(f"GPS tag: {gps_tag_name} = {val}")
+                    
+                    if gps_tag_name == "GPSLatitude":
+                        gps_coords["lat"] = val
+                    elif gps_tag_name == "GPSLongitude":
+                        gps_coords["lon"] = val
+                    elif gps_tag_name == "GPSLatitudeRef":
+                        gps_coords["lat_ref"] = val
+                    elif gps_tag_name == "GPSLongitudeRef":
+                        gps_coords["lon_ref"] = val
+        
+        # Verificar si tenemos todos los datos GPS necesarios
+        if "lat" in gps_coords and "lon" in gps_coords and "lat_ref" in gps_coords and "lon_ref" in gps_coords:
+            # Convertir coordenadas a grados decimales
+            lat = _convert_to_degrees(gps_coords["lat"])
+            lon = _convert_to_degrees(gps_coords["lon"])
+            
+            # Ajustar según referencia
+            if gps_coords["lat_ref"] == 'S':
+                lat = -lat
+            if gps_coords["lon_ref"] == 'W':
+                lon = -lon
+            
+            logger.info(f"✅ GPS extracted via Pillow _getexif(): ({lat:.6f}, {lon:.6f})")
+            return lat, lon
+        else:
+            logger.warning(f"❌ GPS data incomplete via _getexif(). Found: {list(gps_coords.keys())}")
+            return None, None
+            
+    except FileNotFoundError:
+        logger.error(f"File not found: {file_path}")
+        return None, None
+    except Exception as e:
+        logger.error(f"Error extracting GPS from {file_path}: {e}", exc_info=True)
         return None, None
 
 def optimize_image(file_path):
