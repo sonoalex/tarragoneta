@@ -29,13 +29,18 @@ class Config:
     SECURITY_PASSWORD_SALT = os.environ.get('SECURITY_PASSWORD_SALT', 'tarracograf-salt-2024')
     SECURITY_PASSWORD_HASH = 'bcrypt'
     SECURITY_REGISTERABLE = True
+    SECURITY_RECOVERABLE = True  # Enable password recovery
     SECURITY_SEND_REGISTER_EMAIL = False
+    SECURITY_SEND_PASSWORD_RESET_EMAIL = False  # We handle this manually with our email service
     SECURITY_POST_LOGIN_VIEW = 'main.index'    
     SECURITY_POST_LOGOUT_VIEW = 'main.index'
     SECURITY_POST_REGISTER_VIEW = 'main.index'
+    SECURITY_POST_RESET_VIEW = 'security.login'  # Redirect to login after password reset
     SECURITY_UNAUTHORIZED_VIEW = 'main.index'
     SECURITY_LOGIN_USER_TEMPLATE = 'security/login.html'
     SECURITY_REGISTER_USER_TEMPLATE = 'security/register.html'
+    SECURITY_FORGOT_PASSWORD_TEMPLATE = 'security/forgot_password.html'
+    SECURITY_RESET_PASSWORD_TEMPLATE = 'security/reset_password.html'
     
     # Session configuration
     SESSION_PERMANENT = True

@@ -619,6 +619,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
             <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
             <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="3" aria-label="Slide 4"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="4" aria-label="Slide 5"></button>
         </div>
         <div class="carousel-inner">
             <div class="carousel-item active" data-content="0">
@@ -643,6 +644,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 <img src="{{ url_for('static', filename='images/vista-tgn.jpg') }}" 
                      class="d-block w-100" 
                      alt="Tarragona - Vista de la Ciutat"
+                     loading="lazy">
+            </div>
+            <div class="carousel-item" data-content="4">
+                <img src="{{ url_for('static', filename='images/anfiteatre-tgn.jpg') }}" 
+                     class="d-block w-100" 
+                     alt="Tarragona - Responsables de Secció"
                      loading="lazy">
             </div>
         </div>
@@ -790,6 +797,32 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div class="hero-feature-item">
                                     <i class="fas fa-check-double"></i>
                                     <span>{{ _('Marca els problemes resolts') }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Content for slide 4 - Responsables de Secció -->
+                        <div class="hero-content-slide" data-slide="4" style="display: none;">
+                            <div class="hero-badge-tarragona">
+                                <i class="fas fa-users me-2"></i>{{ _('Responsables de Secció') }}
+                            </div>
+                            
+                            <h1 class="hero-title-tarragona">
+                                {{ _('Busquem Responsables de Secció') }}
+                            </h1>
+                            
+                            <div class="hero-features-list">
+                                <div class="hero-feature-item">
+                                    <i class="fas fa-heart"></i>
+                                    <span>{{ _('Ciutadans compromesos amb la seva ciutat') }}</span>
+                                </div>
+                                <div class="hero-feature-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>{{ _('Reporta, aprova i resol els items reportats de les seves seccions') }}</span>
+                                </div>
+                                <div class="hero-feature-item">
+                                    <i class="fas fa-handshake"></i>
+                                    <span>{{ _('Participa activament en la millora del teu barri') }}</span>
                                 </div>
                             </div>
                         </div>

@@ -1,11 +1,11 @@
 from datetime import timezone
 import os
-from flask import Flask
+from flask import Flask, request, abort, flash
 from app.config import config
 from app.extensions import init_extensions
 from app.routes import main, initiatives, admin, donations, inventory
 from app.forms import ExtendedRegisterForm
-from flask_security.signals import user_registered
+from flask_security.signals import user_registered, reset_password_instructions_sent, password_changed
 from app.core import register_cli_commands, register_context_processors, register_error_handlers, setup_logging
 
 def create_app(config_name=None):
@@ -67,8 +67,12 @@ def create_app(config_name=None):
         app.logger.warning('⚠️ resize_image_task NOT found in Celery tasks!')
     
     # Setup Flask-Security with custom form
-    from app.extensions import user_datastore, security
+    from app.extensions import user_datastore, security, limiter
     security.init_app(app, user_datastore, register_form=ExtendedRegisterForm)
+    
+    # Apply rate limits to Flask-Security-Too endpoints
+    from app.core.rate_limiting import apply_security_rate_limits
+    apply_security_rate_limits(app, limiter)
     
     # Hook to save username on registration
     @user_registered.connect_via(app)
@@ -98,6 +102,61 @@ def create_app(config_name=None):
             EmailService.send_welcome_email(user)
         except Exception as e:
             app.logger.error(f'Error sending welcome email: {str(e)}', exc_info=True)
+    
+    # Hook to send password reset email using Celery task
+    @reset_password_instructions_sent.connect_via(app)
+    def on_reset_password_instructions_sent(sender, user, token, **kwargs):
+        """Send password reset email using Celery task"""
+        try:
+            from flask import url_for
+            from flask_babel import gettext as _
+            
+            # Generate reset link
+            reset_link = url_for('security.reset_password', token=token, _external=True)
+            
+            # Get Celery task from app
+            send_email_task = getattr(app, 'send_email_task', None)
+            if send_email_task:
+                # Enqueue email task
+                task = send_email_task.delay(
+                    to=user.email,
+                    subject=_('Restablecer tu contraseña en Tarracograf'),
+                    template='password_reset',
+                    username=user.username or user.email,
+                    user_email=user.email,
+                    reset_link=reset_link,
+                    recipient_email=user.email
+                )
+                app.logger.info(f'Password reset email task enqueued to {user.email} (task_id: {task.id})')
+            else:
+                app.logger.warning('Celery task not available, password reset email not sent')
+        except Exception as e:
+            app.logger.error(f'Error enqueueing password reset email: {str(e)}', exc_info=True)
+    
+    # Hook to send password changed confirmation email using Celery task
+    @password_changed.connect_via(app)
+    def on_password_changed(sender, user, **kwargs):
+        """Send password changed confirmation email using Celery task"""
+        try:
+            from flask_babel import gettext as _
+            
+            # Get Celery task from app
+            send_email_task = getattr(app, 'send_email_task', None)
+            if send_email_task:
+                # Enqueue email task
+                task = send_email_task.delay(
+                    to=user.email,
+                    subject=_('Tu contraseña ha sido cambiada'),
+                    template='password_changed',
+                    username=user.username or user.email,
+                    user_email=user.email,
+                    recipient_email=user.email
+                )
+                app.logger.info(f'Password changed confirmation email task enqueued to {user.email} (task_id: {task.id})')
+            else:
+                app.logger.warning('Celery task not available, password changed email not sent')
+        except Exception as e:
+            app.logger.error(f'Error enqueueing password changed email: {str(e)}', exc_info=True)
     
     # Register blueprints
     app.register_blueprint(main.bp)

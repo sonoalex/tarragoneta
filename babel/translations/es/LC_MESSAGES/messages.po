@@ -1410,7 +1410,11 @@ msgstr ""
 
 #: templates/contact.html:268 templates/inventory/map.html:1266
 msgid "Enviant..."
-msgstr ""
+msgstr "Enviando..."
+
+#: templates/security/forgot_password.html:76
+msgid "Enviando..."
+msgstr "Enviando..."
 
 #: templates/donate.html:29
 msgid "Quantitat de la donació"
@@ -4648,4 +4652,144 @@ msgstr "Inicia sesión aquí"
 
 #~ msgid "Debes seleccionar un usuario y una sección"
 #~ msgstr "Selecciona un asunto"
+
+#: templates/security/forgot_password.html:3 templates/security/forgot_password.html:14
+msgid "Recuperar Contraseña"
+msgstr "Recuperar Contraseña"
+
+#: templates/security/forgot_password.html:16
+msgid "Introduce tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña"
+msgstr "Introduce tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña"
+
+#: templates/security/forgot_password.html:24
+msgid "Correo Electrónico"
+msgstr "Correo Electrónico"
+
+#: templates/security/forgot_password.html:36
+msgid "Enviar Enlace de Recuperación"
+msgstr "Enviar Enlace de Recuperación"
+
+#: templates/security/forgot_password.html:42
+msgid "¿Recordaste tu contraseña?"
+msgstr "¿Recordaste tu contraseña?"
+
+#: templates/security/login.html:56
+msgid "¿Olvidaste tu contraseña?"
+msgstr "¿Olvidaste tu contraseña?"
+
+#: templates/security/reset_password.html:3 templates/security/reset_password.html:14 templates/security/reset_password.html:51
+msgid "Restablecer Contraseña"
+msgstr "Restablecer Contraseña"
+
+#: templates/security/reset_password.html:16
+msgid "Introduce tu nueva contraseña"
+msgstr "Introduce tu nueva contraseña"
+
+#: templates/security/reset_password.html:24
+msgid "Nueva Contraseña"
+msgstr "Nueva Contraseña"
+
+#: templates/security/reset_password.html:25
+msgid "Nueva contraseña"
+msgstr "Nueva contraseña"
+
+#: templates/security/reset_password.html:33
+msgid "La contraseña debe tener al menos 8 caracteres"
+msgstr "La contraseña debe tener al menos 8 caracteres"
+
+#: templates/security/reset_password.html:38
+msgid "Confirmar Nueva Contraseña"
+msgstr "Confirmar Nueva Contraseña"
+
+#: templates/security/reset_password.html:39
+msgid "Confirma tu nueva contraseña"
+msgstr "Confirma tu nueva contraseña"
+
+#: templates/security/reset_password.html:58
+msgid "Volver al inicio de sesión"
+msgstr "Volver al inicio de sesión"
+
+#: templates/emails/password_reset.html:8
+msgid "Has solicitado restablecer tu contraseña en Tarracograf. Haz clic en el botón de abajo para crear una nueva contraseña:"
+msgstr "Has solicitado restablecer tu contraseña en Tarracograf. Haz clic en el botón de abajo para crear una nueva contraseña:"
+
+#: templates/emails/password_reset.html:15
+msgid "O copia y pega este enlace en tu navegador:"
+msgstr "O copia y pega este enlace en tu navegador:"
+
+#: templates/emails/password_reset.html:21
+msgid "Importante"
+msgstr "Importante"
+
+#: templates/emails/password_reset.html:23
+msgid "Este enlace expirará en 24 horas"
+msgstr "Este enlace expirará en 24 horas"
+
+#: templates/emails/password_reset.html:24
+msgid "Si no solicitaste este cambio, puedes ignorar este correo"
+msgstr "Si no solicitaste este cambio, puedes ignorar este correo"
+
+#: templates/emails/password_reset.html:25
+msgid "Tu contraseña actual seguirá siendo válida hasta que la cambies"
+msgstr "Tu contraseña actual seguirá siendo válida hasta que la cambies"
+
+#: templates/emails/password_reset.html:29
+msgid "Si tienes problemas, no dudes en contactarnos."
+msgstr "Si tienes problemas, no dudes en contactarnos."
+
+#: templates/emails/password_reset.html:31
+msgid "Saludos"
+msgstr "Saludos"
+
+#: templates/emails/password_reset.html:32
+msgid "El equipo de Tarracograf"
+msgstr "El equipo de Tarracograf"
+
+#: templates/emails/password_changed.html:3
+msgid "Contraseña Cambiada Exitosamente"
+msgstr "Contraseña Cambiada Exitosamente"
+
+#: templates/emails/password_changed.html:7
+msgid "Te confirmamos que tu contraseña ha sido cambiada exitosamente en tu cuenta de Tarracograf."
+msgstr "Te confirmamos que tu contraseña ha sido cambiada exitosamente en tu cuenta de Tarracograf."
+
+#: templates/emails/password_changed.html:11
+msgid "Información de seguridad"
+msgstr "Información de seguridad"
+
+#: templates/emails/password_changed.html:13
+msgid "Tu nueva contraseña ya está activa"
+msgstr "Tu nueva contraseña ya está activa"
+
+#: templates/emails/password_changed.html:14
+msgid "Si no realizaste este cambio, contacta con nosotros inmediatamente"
+msgstr "Si no realizaste este cambio, contacta con nosotros inmediatamente"
+
+#: templates/emails/password_changed.html:15
+msgid "Para mayor seguridad, te recomendamos usar una contraseña única y segura"
+msgstr "Para mayor seguridad, te recomendamos usar una contraseña única y segura"
+
+#: templates/emails/password_changed.html:21
+msgid "Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos."
+msgstr "Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos."
+
+#: templates/index.html:770
+msgid "Responsables de Sección"
+msgstr "Responsables de Sección"
+
+#: templates/index.html:774
+msgid "Busquem Responsables de Sección"
+msgstr "Buscamos Responsables de Sección"
+
+#: templates/index.html:778
+msgid "Ciutadans compromesos amb la seva ciutat"
+msgstr "Ciudadanos comprometidos con su ciudad"
+
+#: templates/index.html:821
+msgid "Reporta, aprova i resol els items reportats de les seves seccions"
+msgstr "Reporta, aprueba y resuelve los items reportados de sus secciones"
+
+#: templates/index.html:786
+msgid "Participa activament en la millora del teu barri"
+msgstr "Participa activamente en la mejora de tu barrio"
 

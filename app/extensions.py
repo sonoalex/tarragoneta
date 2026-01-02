@@ -4,6 +4,8 @@ from flask_wtf.csrf import CSRFProtect
 from flask_babel import Babel
 from flask_security import Security, SQLAlchemyUserDatastore
 from flask_mail import Mail
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 # Initialize extensions (will be initialized in app factory)
 db = SQLAlchemy()
@@ -12,6 +14,8 @@ csrf = CSRFProtect()
 babel = Babel()
 security = Security()
 mail = Mail()
+# Limiter will be initialized in init_extensions with app context
+limiter = None
 
 # Email providers are initialized on-demand via app/providers/__init__.py
 
@@ -100,4 +104,27 @@ def init_extensions(app):
     user_datastore = SQLAlchemyUserDatastore(db, User, Role)
     # Security will be initialized in create_app with custom form
     # Don't init here, let create_app do it with the custom form
+    
+    # Initialize Flask-Limiter
+    # Use Redis if available (same as Celery), otherwise use memory storage
+    import os
+    global limiter
+    
+    redis_url = os.environ.get('REDIS_PUBLIC_URL') or os.environ.get('REDIS_URL')
+    if redis_url:
+        # Use Redis for rate limiting (use a different database number than Celery)
+        storage_uri = f"{redis_url}/1"  # Use database 1 for rate limiting
+        app.logger.info(f'Flask-Limiter using Redis storage: {storage_uri}')
+    else:
+        # Fallback to memory storage (only for development)
+        storage_uri = "memory://"
+        app.logger.warning('Flask-Limiter using memory storage (not suitable for production)')
+    
+    limiter = Limiter(
+        key_func=get_remote_address,
+        app=app,
+        storage_uri=storage_uri,
+        default_limits=["200 per day", "50 per hour"]
+    )
+    app.logger.info('Flask-Limiter initialized')
 

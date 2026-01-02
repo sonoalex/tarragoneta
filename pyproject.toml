@@ -25,6 +25,7 @@ dependencies = [
     "psycopg2-binary>=2.9.9",
     "setuptools>=65.0.0",
     "stripe>=12.0.0",
+    "Flask-Limiter>=3.5.0",
 ]
 
 [project.optional-dependencies]

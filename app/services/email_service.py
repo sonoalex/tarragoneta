@@ -331,4 +331,17 @@ class EmailService:
         else:
             current_app.logger.warning(f'Admin notification failed to send to {admin_email}')
         return result
+    
+    @staticmethod
+    def send_password_reset_email(user, reset_link):
+        """Send password reset email"""
+        return EmailService.send_email(
+            to=user.email,
+            subject=_('Restablecer tu contraseña en Tarracograf'),
+            template='password_reset',
+            username=user.username or user.email,
+            user_email=user.email,
+            reset_link=reset_link,
+            recipient_email=user.email
+        )
 
