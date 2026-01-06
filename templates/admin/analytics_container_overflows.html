@@ -3,7 +3,7 @@
 {% block title %}{{ _('Desbordaments de Contenidors') }} - Tarracograf{% endblock %}
 
 {% block content %}
-<section class="py-5" style="padding-top: 8rem !important;">
+<section class="py-5">
     <div class="container-fluid px-4">
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -44,7 +44,7 @@
                 <div class="card border-0 shadow-sm h-100" style="border-radius: 20px;">
                     <div class="card-body p-4 d-flex align-items-center justify-content-between">
                         <div>
-                            <p class="text-muted mb-2 small fw-semibold text-uppercase">{{ _('Punts amb desbordes') }}</p>
+                            <p class="text-muted mb-2 small fw-semibold text-uppercase">{{ _('Punts amb desbordaments') }}</p>
                             <h2 class="fw-bold mb-0">{{ total_points_with_overflow }}</h2>
                         </div>
                         <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10" 
@@ -78,7 +78,7 @@
                     <div class="card-body p-4">
                         <h4 class="fw-bold mb-3">
                             <i class="fas fa-map-marker-alt text-primary me-2"></i>
-                            {{ _('Seccions amb més desbordes') }}
+                            {{ _('Seccions amb més desbordaments') }}
                         </h4>
                         {% if by_section %}
                         <div class="table-responsive">
@@ -121,7 +121,7 @@
                     <div class="card-body p-4">
                         <h4 class="fw-bold mb-3">
                             <i class="fas fa-dumpster text-danger me-2"></i>
-                            {{ _('Punts amb més desbordes') }}
+                            {{ _('Punts amb més desbordaments') }}
                         </h4>
                         {% if top_points %}
                         <div class="table-responsive">
@@ -170,12 +170,47 @@
                             </table>
                         </div>
                         {% else %}
-                        <p class="text-muted mb-0">{{ _('Encara no hi ha punts amb desbordes registrats.') }}</p>
+                        <p class="text-muted mb-0">{{ _('Encara no hi ha punts amb desbordaments registrats.') }}</p>
                         {% endif %}
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Charts -->
+        {% if by_month or top_points %}
+        <div class="row g-4 mt-4">
+            {% if by_month %}
+            <!-- Line Chart: Monthly Trend -->
+            <div class="col-12">
+                <div class="card border-0 shadow-sm" style="border-radius: 20px;">
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold mb-3">
+                            <i class="fas fa-chart-line text-primary me-2"></i>
+                            {{ _('Tendència mensual de desbordaments') }}
+                        </h4>
+                        <canvas id="monthlyTrendChart" height="80"></canvas>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if top_points %}
+            <!-- Bar Chart: Top Points -->
+            <div class="col-12">
+                <div class="card border-0 shadow-sm" style="border-radius: 20px;">
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold mb-3">
+                            <i class="fas fa-chart-bar text-danger me-2"></i>
+                            {{ _('Punts amb més desbordaments') }}
+                        </h4>
+                        <canvas id="topPointsChart" height="80"></canvas>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
 
         <!-- Monthly trend -->
         <div class="row g-4 mt-4">
@@ -220,6 +255,118 @@
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+{% if by_month %}
+// Monthly Trend Line Chart
+const monthlyCtx = document.getElementById('monthlyTrendChart');
+if (monthlyCtx) {
+    const monthlyData = {
+        months: [{% for m in by_month %}'{{ m.month }}'{% if not loop.last %},{% endif %}{% endfor %}],
+        reports: [{% for m in by_month %}{{ m.reports_count }}{% if not loop.last %},{% endif %}{% endfor %}],
+        points: [{% for m in by_month %}{{ m.points_count }}{% if not loop.last %},{% endif %}{% endfor %}]
+    };
+    
+    new Chart(monthlyCtx, {
+        type: 'line',
+        data: {
+            labels: monthlyData.months,
+            datasets: [
+                {
+                    label: '{{ _("Reports") }}',
+                    data: monthlyData.reports,
+                    borderColor: 'rgb(220, 53, 69)',
+                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: '{{ _("Punts afectats") }}',
+                    data: monthlyData.points,
+                    borderColor: 'rgb(13, 110, 253)',
+                    backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+}
+{% endif %}
+
+{% if top_points %}
+// Top Points Bar Chart
+const topPointsCtx = document.getElementById('topPointsChart');
+if (topPointsCtx) {
+    const topPointsData = {
+        labels: [
+            {% for p in top_points[:10] %}
+            '{{ (p.address or "Punt " + loop.index|string)[:30] }}'{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ],
+        reports: [
+            {% for p in top_points[:10] %}
+            {{ p.overflow_reports_count }}{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ]
+    };
+    
+    new Chart(topPointsCtx, {
+        type: 'bar',
+        data: {
+            labels: topPointsData.labels,
+            datasets: [{
+                label: '{{ _("Reports de desbordament") }}',
+                data: topPointsData.reports,
+                backgroundColor: 'rgba(220, 53, 69, 0.8)',
+                borderColor: 'rgba(220, 53, 69, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+}
+{% endif %}
+</script>
 {% endblock %}
 
 

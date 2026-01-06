@@ -27,6 +27,14 @@ user_initiatives = db.Table('user_initiatives',
     db.Column('joined_at', db.DateTime(), default=datetime.utcnow)
 )
 
+# Association table for many-to-many relationship between inventory items and categories
+inventory_item_categories = db.Table('inventory_item_categories',
+    db.Column('item_id', db.Integer(), db.ForeignKey('inventory_item.id'), primary_key=True),
+    db.Column('category_id', db.Integer(), db.ForeignKey('inventory_category.id'), primary_key=True),
+    db.Column('is_primary', db.Boolean(), default=False, nullable=False),
+    db.Column('created_at', db.DateTime(), default=datetime.utcnow, nullable=False)
+)
+
 # ========== Enums para Estados ==========
 
 class RoleEnum(str, Enum):
@@ -497,6 +505,55 @@ class CityBoundary(db.Model):
     
     def __repr__(self):
         return f'<CityBoundary {self.name} - calculated: {self.calculated_at}>'
+
+class InventoryCategory(db.Model):
+    """Categorías y subcategorías del inventario"""
+    __tablename__ = 'inventory_category'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(50), unique=True, nullable=False, index=True)  # 'palomas', 'nido', etc.
+    icon = db.Column(db.String(100))  # Emoji o clase Font Awesome
+    parent_id = db.Column(db.Integer, db.ForeignKey('inventory_category.id'), nullable=True, index=True)
+    is_active = db.Column(db.Boolean, default=True, nullable=False)
+    sort_order = db.Column(db.Integer, default=0, nullable=False)
+    
+    # Metadata
+    created_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    created_at = db.Column(db.DateTime(), default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    updated_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    
+    # Relationships
+    parent = db.relationship('InventoryCategory', remote_side=[id], backref='children')
+    created_by = db.relationship('User', foreign_keys=[created_by_id], backref='created_categories')
+    updated_by = db.relationship('User', foreign_keys=[updated_by_id], backref='updated_categories')
+    
+    # Many-to-many relationship with InventoryItem (defined via backref)
+    items = db.relationship(
+        'InventoryItem',
+        secondary=inventory_item_categories,
+        backref='categories',
+        lazy='dynamic'
+    )
+    
+    @property
+    def is_main_category(self):
+        """Verifica si es una categoría principal (sin parent)"""
+        return self.parent_id is None
+    
+    @property
+    def is_subcategory(self):
+        """Verifica si es una subcategoría"""
+        return self.parent_id is not None
+    
+    def get_name(self):
+        """Obtiene el nombre traducido usando Babel"""
+        from flask_babel import gettext as _
+        # Usar el code como clave de traducción
+        return _(self.code)
+    
+    def __repr__(self):
+        return f'<InventoryCategory {self.code}>'
 
 class InventoryItem(db.Model):
     """Items del inventario (palomas, basura, etc.)"""
