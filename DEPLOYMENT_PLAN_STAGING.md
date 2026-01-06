@@ -13,9 +13,9 @@ Este plan detalla los pasos necesarios para completar la migración del sistema 
 
 ---
 
-## 🔄 Paso 1: Ejecutar Script de Seed de Categorías
+## 🔄 Paso 1: Ejecutar Migraciones de Base de Datos
 
-Este script crea las categorías y subcategorías en la base de datos con los nuevos códigos en catalán y los iconos de Font Awesome.
+**IMPORTANTE**: Las migraciones deben ejecutarse ANTES de los scripts de seed, ya que crean las tablas necesarias.
 
 ```bash
 # Conectar a staging
@@ -25,7 +25,35 @@ ssh usuario@staging-server
 cd /ruta/a/tarragoneta
 source .venv/bin/activate  # o el comando equivalente para tu entorno
 
-# Ejecutar script de seed
+# Verificar estado de migraciones
+flask db current
+
+# Ver migraciones pendientes
+flask db heads
+
+# Ejecutar migraciones pendientes
+flask db upgrade
+```
+
+**Verificación esperada:**
+- ✅ Migración `16ba43ca206c` aplicada (Add InventoryCategory model)
+- ✅ Tabla `inventory_category` creada
+- ✅ Tabla `inventory_item_categories` creada
+- ✅ Índices creados correctamente
+
+**Si hay errores:**
+- Verificar que la migración anterior (`bc198fdcdbb3`) está aplicada
+- Verificar permisos de escritura en la BD
+- Revisar logs de Flask-Migrate
+
+---
+
+## 🔄 Paso 2: Ejecutar Script de Seed de Categorías
+
+Este script crea las categorías y subcategorías en la base de datos con los nuevos códigos en catalán y los iconos de Font Awesome.
+
+```bash
+# En el mismo entorno
 python scripts/seed_categories.py
 ```
 
@@ -41,7 +69,7 @@ python scripts/seed_categories.py
 
 ---
 
-## 🔄 Paso 2: Ejecutar Script de Migración de Items
+## 🔄 Paso 3: Ejecutar Script de Migración de Items
 
 Este script crea las relaciones many-to-many entre `InventoryItem` y `InventoryCategory`.
 
@@ -63,7 +91,7 @@ python scripts/migrate_items_to_categories.py
 
 ---
 
-## ✅ Paso 3: Verificaciones Funcionales
+## ✅ Paso 4: Verificaciones Funcionales
 
 ### 3.1 Mapa de Inventario Principal
 - [ ] Acceder a `/inventory`
@@ -110,7 +138,7 @@ python scripts/migrate_items_to_categories.py
 
 ---
 
-## 🧹 Paso 4: Limpieza y Verificación Final
+## 🧹 Paso 5: Limpieza y Verificación Final
 
 ### 4.1 Verificar Consistencia de Datos
 ```sql
@@ -144,7 +172,7 @@ SELECT code, icon FROM inventory_category WHERE parent_id IS NULL;
 
 ---
 
-## 📝 Paso 5: Documentación y Notas
+## 📝 Paso 6: Documentación y Notas
 
 ### Notas Importantes:
 1. **Código Legacy**: El código actual mantiene compatibilidad con códigos legacy (`palomas`, `basura`, etc.) para que funcione hasta que se ejecuten los scripts. Una vez ejecutados, el código seguirá funcionando pero ya no será necesario.
@@ -179,6 +207,7 @@ SELECT code, icon FROM inventory_category WHERE parent_id IS NULL;
 
 ## ✅ Checklist Final
 
+- [ ] Migraciones de Flask-Migrate ejecutadas (`flask db upgrade`)
 - [ ] Script de seed ejecutado exitosamente
 - [ ] Script de migración ejecutado exitosamente
 - [ ] Todos los items tienen relaciones many-to-many
