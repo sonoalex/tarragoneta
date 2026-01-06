@@ -531,188 +531,369 @@ def get_category_name(category_key):
     return category_names.get(category_key, category_key)
 
 def get_inventory_category_name(category, subcategory=None):
-    """Get translated inventory category and subcategory names"""
+    """Get translated inventory category and subcategory names from BD (with fallback)"""
+    from flask_babel import gettext as _
+    from flask import current_app
+    from app.models import InventoryCategory
+    
+    try:
+        # Intentar cargar desde BD
+        main_cat = InventoryCategory.query.filter_by(
+            code=category,
+            parent_id=None,
+            is_active=True
+        ).first()
+        
+        if main_cat:
+            main_name = main_cat.get_name()
+            
+            if subcategory:
+                sub_cat = InventoryCategory.query.filter_by(
+                    code=subcategory,
+                    parent_id=main_cat.id,
+                    is_active=True
+                ).first()
+                
+                if sub_cat:
+                    sub_name = sub_cat.get_name()
+                    return f"{main_name} → {sub_name}"
+                else:
+                    # Subcategoría no encontrada en BD, usar fallback
+                    return f"{main_name} → {_get_inventory_subcategory_name_fallback(subcategory)}"
+            
+            return main_name
+        else:
+            # Categoría no encontrada en BD, usar fallback
+            return _get_inventory_category_name_fallback(category, subcategory)
+    except Exception as e:
+        # Si hay error accediendo a BD, usar fallback
+        if current_app:
+            current_app.logger.warning(f"Error loading category name from DB, using fallback: {e}")
+        return _get_inventory_category_name_fallback(category, subcategory)
+
+def _get_inventory_category_name_fallback(category, subcategory=None):
+    """Fallback: obtener nombres hardcoded (para compatibilidad)"""
     from flask_babel import gettext as _
     
-    # Main categories (en catalán por defecto)
-    # Las traducciones se evalúan en el momento de la llamada, no en la definición
-    main_categories = {
-        'palomas': lambda: _('Coloms'),
-        'basura': lambda: _('Brossa'),
-        'perros': lambda: _('Gossos'),
-        'material_deteriorat': lambda: _('Material Deteriorat'),
-        'bruticia': lambda: _('Brutícia'),
-        'mobiliari_urba': lambda: _('Mobiliari Urbà'),
-        'vegetacio': lambda: _('Vegetació'),
-        'infraestructura': lambda: _('Infraestructura')
+    # Mapeo de códigos antiguos a nuevos (para compatibilidad)
+    category_map = {
+        'palomas': 'coloms',
+        'basura': 'contenidors',
+        'perros': 'canis',
+        'material_deteriorat': 'mobiliari_deteriorat',
+        'mobiliari_urba': 'mobiliari_deteriorat',
     }
     
-    # Subcategories (en catalán por defecto)
-    subcategories = {
-        # Palomas
-        'excremento': lambda: _('Excrement'),
-        'nido': lambda: _('Niu'),
-        'plumas': lambda: _('Plomes'),
-        # Basura
-        'escombreries_desbordades': lambda: _('Escombreries Desbordades'),
-        'basura_desbordada': lambda: _('Escombreries Desbordades'),  # Alias para compatibilidad con datos antiguos
-        'vertidos': lambda: _('Abocaments'),
-        # Perros
-        'excrements': lambda: _('Excrements'),
-        'pixades': lambda: _('Pixades'),
-        # Material Deteriorat
-        'faroles': lambda: _('Faroles'),
-        'bancs': lambda: _('Bancs'),
-        'senyals': lambda: _('Senyals'),
-        'paviment': lambda: _('Paviment'),
-        # Brutícia
-        'terra': lambda: _('Terra'),
-        'fulles': lambda: _('Fulles'),
-        'grafit': lambda: _('Grafit'),
-        # Mobiliari Urbà
-        'papereres': lambda: _('Papereres'),
-        'parades': lambda: _('Parades'),
-        # Vegetació
-        'arbres': lambda: _('Arbres'),
-        'arbustos': lambda: _('Arbustos'),
-        'gespa': lambda: _('Gespa'),
-        # Infraestructura
-        'carreteres': lambda: _('Carreteres'),
-        'voreres': lambda: _('Voreres'),
-        'enllumenat': lambda: _('Enllumenat'),
-        # General
-        'otro': lambda: _('Altres')
+    # Normalizar código de categoría
+    normalized_category = category_map.get(category, category)
+    
+    # Mapeo de subcategorías antiguas a nuevas
+    subcategory_map = {
+        'excremento': 'excrement',
+        'nido': 'niu',
+        'vertidos': 'abocaments',
     }
     
-    # Obtener el nombre traducido llamando a la función lambda
-    get_main_name = main_categories.get(category)
-    main_name = get_main_name() if get_main_name else category
+    normalized_subcategory = subcategory_map.get(subcategory, subcategory) if subcategory else None
     
-    if subcategory:
-        get_sub_name = subcategories.get(subcategory)
-        sub_name = get_sub_name() if get_sub_name else subcategory
+    # Intentar obtener traducción usando el código normalizado
+    main_name = _(normalized_category) if normalized_category else category
+    
+    if normalized_subcategory:
+        sub_name = _(normalized_subcategory)
         return f"{main_name} → {sub_name}"
+    
     return main_name
 
 def get_inventory_subcategory_name(subcategory):
-    """Get translated subcategory name only"""
+    """Get translated subcategory name only from BD (with fallback)"""
+    from flask_babel import gettext as _
+    from flask import current_app
+    from app.models import InventoryCategory
+    
+    try:
+        # Intentar cargar desde BD
+        sub_cat = InventoryCategory.query.filter_by(
+            code=subcategory,
+            parent_id__isnot=None,  # Debe ser una subcategoría
+            is_active=True
+        ).first()
+        
+        if sub_cat:
+            return sub_cat.get_name()
+        else:
+            # Subcategoría no encontrada en BD, usar fallback
+            return _get_inventory_subcategory_name_fallback(subcategory)
+    except Exception as e:
+        # Si hay error accediendo a BD, usar fallback
+        if current_app:
+            current_app.logger.warning(f"Error loading subcategory name from DB, using fallback: {e}")
+        return _get_inventory_subcategory_name_fallback(subcategory)
+
+def _get_inventory_subcategory_name_fallback(subcategory):
+    """Fallback: obtener nombre de subcategoría hardcoded (para compatibilidad)"""
     from flask_babel import gettext as _
     
-    subcategories = {
-        # Palomas
-        'excremento': lambda: _('Excrement'),
-        'nido': lambda: _('Niu'),
-        'plumas': lambda: _('Plomes'),
-        # Basura
-        'escombreries_desbordades': lambda: _('Escombreries Desbordades'),
-        'basura_desbordada': lambda: _('Escombreries Desbordades'),  # Alias para compatibilidad con datos antiguos
-        'vertidos': lambda: _('Abocaments'),
-        # Perros
-        'excrements': lambda: _('Excrements'),
-        'pixades': lambda: _('Pixades'),
-        # Material Deteriorat
-        'faroles': lambda: _('Faroles'),
-        'bancs': lambda: _('Bancs'),
-        'senyals': lambda: _('Senyals'),
-        'paviment': lambda: _('Paviment'),
-        # Brutícia
-        'terra': lambda: _('Terra'),
-        'fulles': lambda: _('Fulles'),
-        'grafit': lambda: _('Grafit'),
-        # Mobiliari Urbà
-        'papereres': lambda: _('Papereres'),
-        'parades': lambda: _('Parades'),
-        # Vegetació
-        'arbres': lambda: _('Arbres'),
-        'arbustos': lambda: _('Arbustos'),
-        'gespa': lambda: _('Gespa'),
-        # Infraestructura
-        'carreteres': lambda: _('Carreteres'),
-        'voreres': lambda: _('Voreres'),
-        'enllumenat': lambda: _('Enllumenat'),
-        # General
-        'otro': lambda: _('Altres')
+    # Mapeo de subcategorías antiguas a nuevas
+    subcategory_map = {
+        'excremento': 'excrement',
+        'nido': 'niu',
+        'vertidos': 'abocaments',
+        'escombreries_desbordades': 'deixadesa',
+        'basura_desbordada': 'deixadesa',
     }
     
-    get_sub_name = subcategories.get(subcategory)
-    return get_sub_name() if get_sub_name else subcategory
+    normalized_subcategory = subcategory_map.get(subcategory, subcategory)
+    return _(normalized_subcategory) if normalized_subcategory else subcategory
+
+def get_inventory_emoji(category, subcategory=None):
+    """
+    Get emoji or icon string for inventory category/subcategory from BD.
+    Returns the raw icon/emoji string from the database, or None if not found.
+    
+    Args:
+        category: Main category code (e.g., 'coloms', 'contenidors')
+        subcategory: Optional subcategory code (e.g., 'niu', 'excrement', 'ploma')
+    
+    Returns:
+        str: Emoji or icon string (e.g., '🪺', '💩', 'fa-dove') or None
+    """
+    from flask import current_app
+    from app.models import InventoryCategory
+    
+    try:
+        if subcategory:
+            # Buscar subcategoría específica
+            main_cat = InventoryCategory.query.filter_by(
+                code=category,
+                parent_id=None,
+                is_active=True
+            ).first()
+            
+            if main_cat:
+                sub_cat = InventoryCategory.query.filter_by(
+                    code=subcategory,
+                    parent_id=main_cat.id,
+                    is_active=True
+                ).first()
+                
+                if sub_cat and sub_cat.icon:
+                    return sub_cat.icon
+        else:
+            # Buscar categoría principal
+            main_cat = InventoryCategory.query.filter_by(
+                code=category,
+                parent_id=None,
+                is_active=True
+            ).first()
+            
+            if main_cat and main_cat.icon:
+                return main_cat.icon
+    except Exception as e:
+        if current_app:
+            current_app.logger.warning(f"Error loading emoji from DB: {e}")
+    
+    # Fallback: mapeo hardcoded de emojis
+    emoji_map = {
+        ('coloms', 'niu'): '🪺',
+        ('coloms', 'excrement'): '💩',
+        ('coloms', 'ploma'): '🪶',
+        ('coloms', None): '🕊️',
+        ('contenidors', 'abocaments'): '💧',
+        ('contenidors', 'deixadesa'): '🧹',
+        ('contenidors', None): '🗑️',
+        ('canis', 'excrements'): '💩',
+        ('canis', 'pixades'): '💧',
+        ('canis', None): '🐕',
+        # Compatibilidad con códigos antiguos
+        ('palomas', 'nido'): '🪺',
+        ('palomas', 'excremento'): '💩',
+        ('palomas', 'plumas'): '🪶',
+        ('basura', 'escombreries_desbordades'): '🗑️',
+        ('basura', 'basura_desbordada'): '🗑️',
+        ('basura', 'vertidos'): '💧',
+    }
+    
+    # Normalizar códigos para compatibilidad
+    category_map = {
+        'palomas': 'coloms',
+        'basura': 'contenidors',
+        'perros': 'canis',
+    }
+    
+    subcategory_map = {
+        'excremento': 'excrement',
+        'nido': 'niu',
+        'plumas': 'ploma',
+        'vertidos': 'abocaments',
+    }
+    
+    normalized_category = category_map.get(category, category)
+    normalized_subcategory = subcategory_map.get(subcategory, subcategory) if subcategory else None
+    
+    return emoji_map.get((normalized_category, normalized_subcategory), '📌')
 
 def get_inventory_icon(category, subcategory=None):
     """
     Get Font Awesome icon class for inventory category/subcategory.
     Returns a tuple of (icon_class, color_class) for use in templates.
+    Tries to get icon from BD first, falls back to hardcoded mapping.
     
     Args:
-        category: Main category (e.g., 'palomas', 'basura')
-        subcategory: Optional subcategory (e.g., 'nido', 'excremento', 'plumas', 'basura_desbordada', 'vertidos')
+        category: Main category code (e.g., 'coloms', 'contenidors')
+        subcategory: Optional subcategory code (e.g., 'niu', 'excrement', 'ploma')
     
     Returns:
         tuple: (icon_class, color_class) e.g., ('fa-dove', 'text-primary')
     """
+    from flask import current_app
+    from app.models import InventoryCategory
+    
+    try:
+        # Intentar obtener icono desde BD
+        if subcategory:
+            # Buscar subcategoría específica
+            main_cat = InventoryCategory.query.filter_by(
+                code=category,
+                parent_id=None,
+                is_active=True
+            ).first()
+            
+            if main_cat:
+                sub_cat = InventoryCategory.query.filter_by(
+                    code=subcategory,
+                    parent_id=main_cat.id,
+                    is_active=True
+                ).first()
+                
+                if sub_cat and sub_cat.icon:
+                    # Si el icono es una clase Font Awesome (empieza con 'fa-'), usarla
+                    if sub_cat.icon.startswith('fa-'):
+                        return (sub_cat.icon, 'text-secondary')
+                    # Si es un emoji, usar fallback
+        else:
+            # Buscar categoría principal
+            main_cat = InventoryCategory.query.filter_by(
+                code=category,
+                parent_id=None,
+                is_active=True
+            ).first()
+            
+            if main_cat and main_cat.icon:
+                if main_cat.icon.startswith('fa-'):
+                    return (main_cat.icon, 'text-secondary')
+    except Exception as e:
+        if current_app:
+            current_app.logger.warning(f"Error loading icon from DB, using fallback: {e}")
+    
+    # Fallback: usar mapeo hardcoded (con compatibilidad para códigos antiguos)
+    # Mapeo de códigos antiguos a nuevos
+    category_map = {
+        'palomas': 'coloms',
+        'basura': 'contenidors',
+        'perros': 'canis',
+        'material_deteriorat': 'mobiliari_deteriorat',
+        'mobiliari_urba': 'mobiliari_deteriorat',
+    }
+    
+    subcategory_map = {
+        'excremento': 'excrement',
+        'nido': 'niu',
+        'vertidos': 'abocaments',
+    }
+    
+    normalized_category = category_map.get(category, category)
+    normalized_subcategory = subcategory_map.get(subcategory, subcategory) if subcategory else None
+    
     # Mapping: (category, subcategory) -> (icon_class, color_class)
     icon_mapping = {
-        # Palomas
+        # Coloms (nuevo código)
+        ('coloms', 'niu'): ('fa-home', 'text-primary'),
+        ('coloms', 'excrement'): ('fa-biohazard', 'text-danger'),
+        ('coloms', 'ploma'): ('fa-feather', 'text-info'),
+        ('coloms', None): ('fa-dove', 'text-primary'),
+        # Palomas (código antiguo - compatibilidad)
         ('palomas', 'nido'): ('fa-home', 'text-primary'),
         ('palomas', 'excremento'): ('fa-biohazard', 'text-danger'),
-        ('palomas', 'plumas'): ('fa-feather', 'text-info'),
+        ('palomas', 'plumas'): ('fa-feather', 'text-info'),  # Legacy - maps to 'ploma'
         ('palomas', None): ('fa-dove', 'text-primary'),
-        ('palomas', 'otro'): ('fa-dove', 'text-primary'),
         
-        # Basura
-        ('basura', 'escombreries_desbordades'): ('fa-trash-alt', 'text-warning'),
+        # Contenidors (nuevo código)
+        ('contenidors', 'abocaments'): ('fa-tint', 'text-danger'),
+        ('contenidors', 'deixadesa'): ('fa-trash-alt', 'text-warning'),
+        ('contenidors', None): ('fa-trash', 'text-secondary'),
+        # Basura (código antiguo - compatibilidad)
         ('basura', 'vertidos'): ('fa-tint', 'text-danger'),
+        ('basura', 'escombreries_desbordades'): ('fa-trash-alt', 'text-warning'),
         ('basura', None): ('fa-trash', 'text-secondary'),
-        ('basura', 'otro'): ('fa-trash', 'text-secondary'),
         
-        # Perros
+        # Canis (nuevo código)
+        ('canis', 'excrements'): ('fa-poop', 'text-danger'),
+        ('canis', 'pixades'): ('fa-tint', 'text-warning'),
+        ('canis', None): ('fa-dog', 'text-secondary'),
+        # Perros (código antiguo - compatibilidad)
         ('perros', 'excrements'): ('fa-poop', 'text-danger'),
         ('perros', 'pixades'): ('fa-tint', 'text-warning'),
         ('perros', None): ('fa-dog', 'text-secondary'),
-        ('perros', 'otro'): ('fa-dog', 'text-secondary'),
         
-        # Material Deteriorat
+        # Mobiliari Deteriorat (nuevo código - mergeado)
+        ('mobiliari_deteriorat', 'faroles'): ('fa-lightbulb', 'text-warning'),
+        ('mobiliari_deteriorat', 'bancs'): ('fa-chair', 'text-info'),
+        ('mobiliari_deteriorat', 'senyals'): ('fa-sign', 'text-warning'),
+        ('mobiliari_deteriorat', 'paviment'): ('fa-road', 'text-danger'),
+        ('mobiliari_deteriorat', 'papereres'): ('fa-trash', 'text-info'),
+        ('mobiliari_deteriorat', 'parades'): ('fa-bus', 'text-primary'),
+        ('mobiliari_deteriorat', None): ('fa-tools', 'text-secondary'),
+        # Material Deteriorat / Mobiliari Urbà (códigos antiguos - compatibilidad)
         ('material_deteriorat', 'faroles'): ('fa-lightbulb', 'text-warning'),
         ('material_deteriorat', 'bancs'): ('fa-chair', 'text-info'),
         ('material_deteriorat', 'senyals'): ('fa-sign', 'text-warning'),
         ('material_deteriorat', 'paviment'): ('fa-road', 'text-danger'),
         ('material_deteriorat', None): ('fa-tools', 'text-secondary'),
-        ('material_deteriorat', 'otro'): ('fa-tools', 'text-secondary'),
+        ('mobiliari_urba', 'papereres'): ('fa-trash', 'text-info'),
+        ('mobiliari_urba', 'parades'): ('fa-bus', 'text-primary'),
+        ('mobiliari_urba', 'bancs'): ('fa-chair', 'text-info'),
+        ('mobiliari_urba', None): ('fa-city', 'text-secondary'),
         
         # Brutícia
         ('bruticia', 'terra'): ('fa-mountain', 'text-warning'),
         ('bruticia', 'fulles'): ('fa-leaf', 'text-success'),
         ('bruticia', 'grafit'): ('fa-spray-can', 'text-danger'),
         ('bruticia', None): ('fa-broom', 'text-secondary'),
-        ('bruticia', 'otro'): ('fa-broom', 'text-secondary'),
         
-        # Mobiliari Urbà
-        ('mobiliari_urba', 'papereres'): ('fa-trash', 'text-info'),
-        ('mobiliari_urba', 'parades'): ('fa-bus', 'text-primary'),
-        ('mobiliari_urba', 'bancs'): ('fa-chair', 'text-info'),
-        ('mobiliari_urba', None): ('fa-city', 'text-secondary'),
-        ('mobiliari_urba', 'otro'): ('fa-city', 'text-secondary'),
+        # Vandalisme (nuevo)
+        ('vandalisme', 'pintades'): ('fa-spray-can', 'text-danger'),
+        ('vandalisme', None): ('fa-spray-can', 'text-danger'),
         
         # Vegetació
         ('vegetacio', 'arbres'): ('fa-tree', 'text-success'),
         ('vegetacio', 'arbustos'): ('fa-seedling', 'text-success'),
         ('vegetacio', 'gespa'): ('fa-grass', 'text-success'),
         ('vegetacio', None): ('fa-tree', 'text-success'),
-        ('vegetacio', 'otro'): ('fa-tree', 'text-success'),
         
         # Infraestructura
         ('infraestructura', 'carreteres'): ('fa-road', 'text-danger'),
         ('infraestructura', 'voreres'): ('fa-walking', 'text-info'),
         ('infraestructura', 'enllumenat'): ('fa-lightbulb', 'text-warning'),
         ('infraestructura', None): ('fa-building', 'text-secondary'),
-        ('infraestructura', 'otro'): ('fa-building', 'text-secondary'),
     }
     
-    # Try to get icon for specific category+subcategory combination
+    # Try to get icon for specific category+subcategory combination (normalizado primero)
+    key = (normalized_category, normalized_subcategory)
+    if key in icon_mapping:
+        return icon_mapping[key]
+    
+    # Fallback: intentar con códigos originales
     key = (category, subcategory)
     if key in icon_mapping:
         return icon_mapping[key]
     
-    # Fallback to category only
+    # Fallback to category only (normalizado)
+    key = (normalized_category, None)
+    if key in icon_mapping:
+        return icon_mapping[key]
+    
+    # Fallback to category only (original)
     key = (category, None)
     if key in icon_mapping:
         return icon_mapping[key]
@@ -738,42 +919,65 @@ def generate_slug(title):
     return slug
 
 # Mapeo entre valores en catalán (URLs) y valores técnicos (BD)
+# Updated to use new category codes (URL and DB now use same codes in Catalan)
 CATEGORY_URL_TO_DB = {
-    'coloms': 'palomas',
-    'brossa': 'basura',
-    'gossos': 'perros',
-    'material_deteriorat': 'material_deteriorat',
+    'coloms': 'coloms',  # Updated from 'palomas'
+    'contenidors': 'contenidors',  # Updated from 'basura'
+    'canis': 'canis',  # Updated from 'perros'
+    'mobiliari_deteriorat': 'mobiliari_deteriorat',  # Merged from 'material_deteriorat' and 'mobiliari_urba'
     'bruticia': 'bruticia',
-    'mobiliari_urba': 'mobiliari_urba',
+    'vandalisme': 'vandalisme',  # New category
     'vegetacio': 'vegetacio',
     'infraestructura': 'infraestructura',
+    # Legacy codes for backward compatibility
+    'palomas': 'coloms',
+    'basura': 'contenidors',
+    'perros': 'canis',
+    'material_deteriorat': 'mobiliari_deteriorat',
+    'mobiliari_urba': 'mobiliari_deteriorat',
 }
 
-CATEGORY_DB_TO_URL = {v: k for k, v in CATEGORY_URL_TO_DB.items()}
+CATEGORY_DB_TO_URL = {
+    'coloms': 'coloms',
+    'contenidors': 'contenidors',
+    'canis': 'canis',
+    'mobiliari_deteriorat': 'mobiliari_deteriorat',
+    'bruticia': 'bruticia',
+    'vandalisme': 'vandalisme',
+    'vegetacio': 'vegetacio',
+    'infraestructura': 'infraestructura',
+    # Legacy codes for backward compatibility
+    'palomas': 'coloms',
+    'basura': 'contenidors',
+    'perros': 'canis',
+    'material_deteriorat': 'mobiliari_deteriorat',
+    'mobiliari_urba': 'mobiliari_deteriorat',
+}
 
 SUBCATEGORY_URL_TO_DB = {
-    # Palomas
-    'niu': 'nido',
-    'excrement': 'excremento',
-    'plomes': 'plumas',
-    # Basura
-    'escombreries_desbordades': 'escombreries_desbordades',
-    'abocaments': 'vertidos',
-    # Perros
+    # Coloms (updated from Palomas)
+    'niu': 'niu',  # Updated from 'nido'
+    'excrement': 'excrement',  # Updated from 'excremento'
+    'ploma': 'ploma',  # Updated from 'plumas'/'plomes'
+    # Contenidors (updated from Basura)
+    'abocaments': 'abocaments',  # Updated from 'vertidos'
+    'deixadesa': 'deixadesa',  # New subcategory
+    # Canis (updated from Perros)
     'excrements': 'excrements',
     'pixades': 'pixades',
-    # Material Deteriorat
+    # Mobiliari Deteriorat (merged from Material Deteriorat and Mobiliari Urbà)
     'faroles': 'faroles',
     'bancs': 'bancs',
     'senyals': 'senyals',
     'paviment': 'paviment',
+    'papereres': 'papereres',
+    'parades': 'parades',
     # Brutícia
     'terra': 'terra',
     'fulles': 'fulles',
     'grafit': 'grafit',
-    # Mobiliari Urbà
-    'papereres': 'papereres',
-    'parades': 'parades',
+    # Vandalisme (new category)
+    'pintades': 'pintades',
     # Vegetació
     'arbres': 'arbres',
     'arbustos': 'arbustos',
@@ -782,11 +986,51 @@ SUBCATEGORY_URL_TO_DB = {
     'carreteres': 'carreteres',
     'voreres': 'voreres',
     'enllumenat': 'enllumenat',
-    # General
-    'altres': 'otro',
+    # Legacy codes for backward compatibility
+    'nido': 'niu',
+    'excremento': 'excrement',
+        'plumas': 'ploma',  # Legacy mapping
+        'plomes': 'ploma',  # Legacy mapping
+    'vertidos': 'abocaments',
+    'escombreries_desbordades': 'deixadesa',
+    'basura_desbordada': 'deixadesa',
 }
 
-SUBCATEGORY_DB_TO_URL = {v: k for k, v in SUBCATEGORY_URL_TO_DB.items()}
+SUBCATEGORY_DB_TO_URL = {
+    # New codes
+    'niu': 'niu',
+    'excrement': 'excrement',
+    'ploma': 'ploma',
+    'abocaments': 'abocaments',
+    'deixadesa': 'deixadesa',
+    'excrements': 'excrements',
+    'pixades': 'pixades',
+    'faroles': 'faroles',
+    'bancs': 'bancs',
+    'senyals': 'senyals',
+    'paviment': 'paviment',
+    'papereres': 'papereres',
+    'parades': 'parades',
+    'terra': 'terra',
+    'fulles': 'fulles',
+    'grafit': 'grafit',
+    'pintades': 'pintades',
+    'arbres': 'arbres',
+    'arbustos': 'arbustos',
+    'gespa': 'gespa',
+    'carreteres': 'carreteres',
+    'voreres': 'voreres',
+    'enllumenat': 'enllumenat',
+    # Legacy codes for backward compatibility
+    'nido': 'niu',
+    'excremento': 'excrement',
+        'plumas': 'ploma',  # Legacy mapping
+        'plomes': 'ploma',  # Legacy mapping
+    'vertidos': 'abocaments',
+    'escombreries_desbordades': 'deixadesa',
+    'basura_desbordada': 'deixadesa',
+    'otro': 'altres',
+}
 
 def normalize_category_from_url(category_url):
     """Convierte el valor de categoría de la URL (catalán) al valor técnico de BD"""

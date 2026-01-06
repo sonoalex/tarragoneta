@@ -18,9 +18,10 @@ from app.models import (
     ContainerOverflowReport,
     ContainerPointSuggestion,
     RoleEnum,
+    InventoryCategory,
 )
 from app.extensions import db, csrf
-from sqlalchemy import not_
+from sqlalchemy import not_, or_
 from app.forms import InventoryForm
 from app.utils import (
     sanitize_html,
@@ -36,6 +37,7 @@ from app.utils import (
     subcategory_to_url,
     get_image_path,
     get_image_url,
+    get_inventory_emoji,
 )
 from app.core.decorators import section_responsible_required
 # Config.UPLOAD_FOLDER removed - using current_app.config['UPLOAD_FOLDER'] instead
@@ -54,30 +56,76 @@ def inventory_map():
     subcategory = normalize_subcategory_from_url(subcategory_url)
     
     # Build query - only show approved items (visible in map)
-    query = InventoryItem.query.filter(
-        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
+    # Exclude container overflow items - now handled by Container Points
+    container_overflow_filter = not_(
+        ((InventoryItem.category == 'contenidors') | (InventoryItem.category == 'basura')) & 
+        (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada', 'deixadesa']))
     )
     
+    query = InventoryItem.query.filter(
+        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
+    ).filter(container_overflow_filter)
+    
     if category:
-        query = query.filter(InventoryItem.category == category)
+        # Buscar tanto el código nuevo como el antiguo para compatibilidad
+        # (hasta que se ejecute el script de migración)
+        legacy_map = {
+            'coloms': 'palomas', 
+            'contenidors': 'basura', 
+            'canis': 'perros',
+            'mobiliari_deteriorat': ['material_deteriorat', 'mobiliari_urba']
+        }
+        legacy_category = legacy_map.get(category)
+        if legacy_category:
+            if isinstance(legacy_category, list):
+                # Múltiples códigos legacy
+                conditions = [InventoryItem.category == category]
+                conditions.extend([InventoryItem.category == leg_cat for leg_cat in legacy_category])
+                query = query.filter(or_(*conditions))
+            else:
+                # Un solo código legacy
+                query = query.filter(
+                    (InventoryItem.category == category) | 
+                    (InventoryItem.category == legacy_category)
+                )
+        else:
+            query = query.filter(InventoryItem.category == category)
     if subcategory:
-        query = query.filter(InventoryItem.subcategory == subcategory)
+        # También buscar códigos antiguos de subcategorías
+        subcategory_legacy_map = {
+            'niu': 'nido',
+            'excrement': 'excremento',
+            'ploma': 'plumas',
+            'abocaments': 'vertidos',
+        }
+        legacy_subcategory = subcategory_legacy_map.get(subcategory)
+        if legacy_subcategory:
+            query = query.filter(
+                (InventoryItem.subcategory == subcategory) | 
+                (InventoryItem.subcategory == legacy_subcategory)
+            )
+        else:
+            query = query.filter(InventoryItem.subcategory == subcategory)
     
     items = query.order_by(InventoryItem.created_at.desc()).all()
     
     # Get statistics - only count approved items
     # Exclude 'escombreries_desbordades' - now handled by Container Points
-    container_overflow_filter = not_((InventoryItem.category == 'basura') & 
-                                      (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada'])))
     
     total_items = InventoryItem.query.filter(
         InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     ).filter(container_overflow_filter).count()
+    
+    # Statistics by category
     by_category = {}
     for item in InventoryItem.query.filter(
         InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     ).filter(container_overflow_filter).all():
-        cat_key = f"{item.category}->{item.subcategory}"
+        # El filtro container_overflow_filter ya excluye estos items, pero por seguridad:
+        if ((item.category == 'contenidors') or (item.category == 'basura')) and item.subcategory in ['escombreries_desbordades', 'basura_desbordada', 'deixadesa']:
+            continue
+        
+        cat_key = f"{item.category}->{item.subcategory}" if item.subcategory else item.category
         by_category[cat_key] = by_category.get(cat_key, 0) + 1
     
     # Ensure all items have importance_count set (fix for existing items)
@@ -94,16 +142,49 @@ def inventory_map():
         db.session.commit()
     
     # Group statistics by main category and subcategory
+    # Normalize legacy category codes to new codes for consistent statistics
+    from app.utils import CATEGORY_DB_TO_URL, SUBCATEGORY_DB_TO_URL
+    
     by_main_category = {}
     by_subcategory = {}
+    
     for item in InventoryItem.query.filter(
         InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     ).filter(container_overflow_filter).all():
-        # Count by main category
-        by_main_category[item.category] = by_main_category.get(item.category, 0) + 1
+        # Normalize category code (legacy -> new)
+        normalized_cat = CATEGORY_DB_TO_URL.get(item.category, item.category)
+        by_main_category[normalized_cat] = by_main_category.get(normalized_cat, 0) + 1
         # Count by subcategory (only if category is selected)
-        if category and item.category == category:
-            by_subcategory[item.subcategory] = by_subcategory.get(item.subcategory, 0) + 1
+        if category and normalized_cat == category and item.subcategory:
+            # Normalize subcategory code (legacy -> new)
+            normalized_sub = SUBCATEGORY_DB_TO_URL.get(item.subcategory, item.subcategory)
+            by_subcategory[normalized_sub] = by_subcategory.get(normalized_sub, 0) + 1
+    
+    # Cargar categorías desde BD para los filtros del frontend
+    try:
+        db_categories = InventoryCategory.query.filter_by(
+            parent_id=None,
+            is_active=True
+        ).order_by(InventoryCategory.sort_order).all()
+        
+        db_subcategories = InventoryCategory.query.filter(
+            InventoryCategory.parent_id.isnot(None),
+            InventoryCategory.is_active == True
+        ).order_by(InventoryCategory.sort_order).all()
+        
+        # Crear diccionario de subcategorías agrupadas por categoría padre (por código)
+        subcategories_by_parent = {}
+        for subcat in db_subcategories:
+            parent_cat = InventoryCategory.query.get(subcat.parent_id)
+            if parent_cat:
+                if parent_cat.code not in subcategories_by_parent:
+                    subcategories_by_parent[parent_cat.code] = []
+                subcategories_by_parent[parent_cat.code].append(subcat)
+    except Exception as e:
+        current_app.logger.warning(f"Error loading categories from DB: {e}")
+        db_categories = []
+        db_subcategories = []
+        subcategories_by_parent = {}
     
     return render_template('inventory/map.html',
                          items=items,
@@ -112,16 +193,20 @@ def inventory_map():
                          by_main_category=by_main_category,
                          by_subcategory=by_subcategory,
                          selected_category=category_url,  # Usar valor de URL para los templates
-                         selected_subcategory=subcategory_url)  # Usar valor de URL para los templates
+                         selected_subcategory=subcategory_url,  # Usar valor de URL para los templates
+                         db_categories=db_categories,  # Categorías desde BD
+                         db_subcategories=db_subcategories,  # Subcategorías desde BD
+                         subcategories_by_parent=subcategories_by_parent)  # Subcategorías agrupadas por categoría
 
 @bp.route('/report', methods=['GET', 'POST'])
 @login_required
 def report_item():
     """Formulario para reportar un item del inventario"""
     form = InventoryForm()
-    # Set default category to 'palomas' if form is new (GET request)
+    # Set default category to 'coloms' if form is new (GET request)
+    # Updated to use new category code 'coloms' (was 'palomas')
     if request.method == 'GET' and not form.category.data:
-        form.category.data = 'palomas'
+        form.category.data = 'coloms'
     
     if form.validate_on_submit():
         try:
@@ -363,9 +448,45 @@ def api_items():
     )
     
     if category:
-        query = query.filter(InventoryItem.category == category)
+        # Buscar tanto el código nuevo como el antiguo para compatibilidad
+        # (hasta que se ejecute el script de migración)
+        legacy_map = {
+            'coloms': 'palomas', 
+            'contenidors': 'basura', 
+            'canis': 'perros',
+            'mobiliari_deteriorat': ['material_deteriorat', 'mobiliari_urba']
+        }
+        legacy_category = legacy_map.get(category)
+        if legacy_category:
+            if isinstance(legacy_category, list):
+                # Múltiples códigos legacy
+                conditions = [InventoryItem.category == category]
+                conditions.extend([InventoryItem.category == leg_cat for leg_cat in legacy_category])
+                query = query.filter(or_(*conditions))
+            else:
+                # Un solo código legacy
+                query = query.filter(
+                    (InventoryItem.category == category) | 
+                    (InventoryItem.category == legacy_category)
+                )
+        else:
+            query = query.filter(InventoryItem.category == category)
     if subcategory:
-        query = query.filter(InventoryItem.subcategory == subcategory)
+        # También buscar códigos antiguos de subcategorías
+        subcategory_legacy_map = {
+            'niu': 'nido',
+            'excrement': 'excremento',
+            'ploma': 'plumas',
+            'abocaments': 'vertidos',
+        }
+        legacy_subcategory = subcategory_legacy_map.get(subcategory)
+        if legacy_subcategory:
+            query = query.filter(
+                (InventoryItem.subcategory == subcategory) | 
+                (InventoryItem.subcategory == legacy_subcategory)
+            )
+        else:
+            query = query.filter(InventoryItem.subcategory == subcategory)
     
     items = query.all()
     
@@ -385,6 +506,7 @@ def api_items():
             'category': item.category,
             'subcategory': item.subcategory,
             'full_category': get_inventory_category_name(item.category, item.subcategory),
+            'emoji': get_inventory_emoji(item.category, item.subcategory),
             'description': item.description,
             'latitude': item.latitude,
             'longitude': item.longitude,
@@ -955,6 +1077,7 @@ def api_pending_items():
             'category': item.category,
             'subcategory': item.subcategory,
             'full_category': get_inventory_category_name(item.category, item.subcategory),
+            'emoji': get_inventory_emoji(item.category, item.subcategory),
             'description': item.description,
             'latitude': item.latitude,
             'longitude': item.longitude,

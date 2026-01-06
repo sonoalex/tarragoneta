@@ -59,7 +59,7 @@ def upgrade():
             """
         ).bindparams(name=role_name, description=role_description))
     
-    conn.commit()
+    # NO hacer commit aquí - Alembic maneja las transacciones automáticamente
 
 
 def downgrade():

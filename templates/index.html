@@ -744,30 +744,54 @@ document.addEventListener('DOMContentLoaded', function() {
                             </h1>
                             
                             <div class="hero-categories-grid">
-                                <div class="hero-category-item">
-                                    <i class="fas fa-dove"></i>
-                                    <span>{{ _('Coloms') }}</span>
-                                </div>
-                                <div class="hero-category-item">
-                                    <i class="fas fa-trash-alt"></i>
-                                    <span>{{ _('Brossa') }}</span>
-                                </div>
-                                <div class="hero-category-item">
-                                    <i class="fas fa-dog"></i>
-                                    <span>{{ _('Gossos') }}</span>
-                                </div>
-                                <div class="hero-category-item">
-                                    <i class="fas fa-tools"></i>
-                                    <span>{{ _('Material Deteriorat') }}</span>
-                                </div>
-                                <div class="hero-category-item">
-                                    <i class="fas fa-broom"></i>
-                                    <span>{{ _('Brutícia') }}</span>
-                                </div>
-                                <div class="hero-category-item">
-                                    <i class="fas fa-city"></i>
-                                    <span>{{ _('Mobiliari Urbà') }}</span>
-                                </div>
+                                {% if db_categories %}
+                                    {% for cat in db_categories %}
+                                    <div class="hero-category-item">
+                                        {% if cat.icon %}
+                                            {# Verificar si es una clase Font Awesome (empieza con 'fa-') o un emoji #}
+                                            {% set icon_str = cat.icon|string %}
+                                            {% if icon_str.startswith('fa-') %}
+                                                {# Es una clase Font Awesome #}
+                                                <i class="fas {{ cat.icon }}"></i>
+                                            {% else %}
+                                                {# Es un emoji - mostrarlo directamente #}
+                                                <span style="font-size: 1.5rem; line-height: 1; display: block;">{{ cat.icon }}</span>
+                                            {% endif %}
+                                        {% else %}
+                                            {# Fallback: usar función get_inventory_icon #}
+                                            {% set icon_class, color_class = get_inventory_icon(cat.code) %}
+                                            <i class="fas {{ icon_class }}"></i>
+                                        {% endif %}
+                                        <span>{{ get_inventory_category_name(cat.code) }}</span>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    {# Fallback a categorías hardcoded si no hay BD #}
+                                    <div class="hero-category-item">
+                                        <i class="fas fa-dove"></i>
+                                        <span>{{ _('Coloms') }}</span>
+                                    </div>
+                                    <div class="hero-category-item">
+                                        <i class="fas fa-trash-alt"></i>
+                                        <span>{{ _('Brossa') }}</span>
+                                    </div>
+                                    <div class="hero-category-item">
+                                        <i class="fas fa-dog"></i>
+                                        <span>{{ _('Gossos') }}</span>
+                                    </div>
+                                    <div class="hero-category-item">
+                                        <i class="fas fa-tools"></i>
+                                        <span>{{ _('Material Deteriorat') }}</span>
+                                    </div>
+                                    <div class="hero-category-item">
+                                        <i class="fas fa-broom"></i>
+                                        <span>{{ _('Brutícia') }}</span>
+                                    </div>
+                                    <div class="hero-category-item">
+                                        <i class="fas fa-city"></i>
+                                        <span>{{ _('Mobiliari Urbà') }}</span>
+                                    </div>
+                                {% endif %}
                             </div>
                         </div>
                         
@@ -863,7 +887,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="mb-3" style="font-size: 3.5rem;">
                         <i class="fas fa-trash-alt" style="color: var(--primary-green);"></i>
                     </div>
-                    <h4 class="fw-bold mb-2" style="color: var(--primary-green);">{{ inventory_by_category.get('basura', 0) }}</h4>
+                    <h4 class="fw-bold mb-2" style="color: var(--primary-green);">{{ inventory_by_category.get('contenidors', 0) + inventory_by_category.get('basura', 0) }}</h4>
                     <p class="text-muted mb-0">{{ _('Problemes de Brossa') }}</p>
                 </div>
             </div>
@@ -872,7 +896,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="mb-3" style="font-size: 3.5rem;">
                         <i class="fas fa-dove" style="color: var(--primary-green);"></i>
                     </div>
-                    <h4 class="fw-bold mb-2" style="color: var(--primary-green);">{{ inventory_by_category.get('palomas', 0) }}</h4>
+                    <h4 class="fw-bold mb-2" style="color: var(--primary-green);">{{ inventory_by_category.get('coloms', 0) + inventory_by_category.get('palomas', 0) }}</h4>
                     <p class="text-muted mb-0">{{ _('Problemes de Coloms') }}</p>
                 </div>
             </div>

@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Gestió de Categories') }} - Tarracograf{% endblock %}
+
+{% block content %}
+<section class="py-5" style="padding-top: 4rem !important;">
+    <div class="container-fluid px-4">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="display-5 fw-bold mb-2">
+                    <i class="fas fa-tags text-primary me-2"></i>
+                    {{ _('Gestió de Categories') }}
+                </h1>
+                <p class="text-muted mb-0">{{ _('Gestiona les categories i subcategories del inventari') }}</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-outline-secondary" style="border-radius: 50px;">
+                    <i class="fas fa-arrow-left me-2"></i>{{ _('Tornar') }}
+                </a>
+                <a href="{{ url_for('admin.new_category') }}" class="btn btn-primary" style="border-radius: 50px;">
+                    <i class="fas fa-plus me-2"></i>{{ _('Nova Categoria') }}
+                </a>
+            </div>
+        </div>
+
+        <!-- Categories List -->
+        {% if categories_data %}
+        <div class="row g-4">
+            {% for item in categories_data %}
+            {% set cat = item.category %}
+            <div class="col-12">
+                <div class="card border-0 shadow-sm" style="border-radius: 20px;">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="d-flex align-items-center">
+                                {% if cat.icon %}
+                                    {% set icon_str = cat.icon|string %}
+                                    {% if icon_str.startswith('fa-') %}
+                                        <i class="fas {{ cat.icon }} fs-2 me-3 text-primary"></i>
+                                    {% else %}
+                                        <span class="fs-2 me-3">{{ cat.icon }}</span>
+                                    {% endif %}
+                                {% else %}
+                                    {% set icon_class, color_class = get_inventory_icon(cat.code) %}
+                                    <i class="fas {{ icon_class }} {{ color_class }} fs-2 me-3"></i>
+                                {% endif %}
+                                <div>
+                                    <h4 class="mb-1">
+                                        {{ cat.get_name() }}
+                                        {% if not cat.is_active %}
+                                        <span class="badge bg-secondary ms-2">{{ _('Inactiva') }}</span>
+                                        {% endif %}
+                                    </h4>
+                                    <p class="text-muted mb-0 small">
+                                        <code>{{ cat.code }}</code>
+                                        {% if cat.created_by %}
+                                        <span class="ms-2">
+                                            <i class="fas fa-user me-1"></i>{{ _('Creada per') }} {{ cat.created_by.username }}
+                                        </span>
+                                        {% endif %}
+                                        <span class="ms-2">
+                                            <i class="fas fa-calendar me-1"></i>{{ cat.created_at.strftime('%d/%m/%Y') }}
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="{{ url_for('admin.new_category', parent_id=cat.id) }}" class="btn btn-sm btn-success" style="border-radius: 50px;">
+                                    <i class="fas fa-plus me-1"></i>{{ _('Afegir Subcategoria') }}
+                                </a>
+                                <a href="{{ url_for('admin.edit_category', id=cat.id) }}" class="btn btn-sm btn-warning" style="border-radius: 50px;">
+                                    <i class="fas fa-edit me-1"></i>{{ _('Editar') }}
+                                </a>
+                                <form method="POST" action="{{ url_for('admin.delete_category', id=cat.id) }}" class="d-inline" onsubmit="return confirm('{{ _('Estàs segur que vols eliminar aquesta categoria?') }}');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-sm btn-danger" style="border-radius: 50px;">
+                                        <i class="fas fa-trash me-1"></i>{{ _('Eliminar') }}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Subcategories -->
+                        {% if item.subcategories %}
+                        <div class="mt-3 pt-3 border-top">
+                            <h6 class="mb-3 text-muted">
+                                <i class="fas fa-list me-2"></i>{{ _('Subcategories') }} ({{ item.subcategories|length }})
+                            </h6>
+                            <div class="row g-3">
+                                {% for subcat in item.subcategories %}
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="card border" style="border-radius: 15px;">
+                                        <div class="card-body p-3">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div class="flex-grow-1">
+                                                    <div class="d-flex align-items-center mb-2">
+                                                        {% if subcat.icon %}
+                                                            {% set icon_str = subcat.icon|string %}
+                                                            {% if icon_str.startswith('fa-') %}
+                                                                <i class="fas {{ subcat.icon }} fs-5 me-2 text-primary"></i>
+                                                            {% else %}
+                                                                <span class="fs-5 me-2">{{ subcat.icon }}</span>
+                                                            {% endif %}
+                                                        {% else %}
+                                                            {% set icon_class, color_class = get_inventory_icon(cat.code, subcat.code) %}
+                                                            <i class="fas {{ icon_class }} {{ color_class }} fs-5 me-2"></i>
+                                                        {% endif %}
+                                                        <strong>{{ subcat.get_name() }}</strong>
+                                                        {% if not subcat.is_active %}
+                                                        <span class="badge bg-secondary ms-2">{{ _('Inactiva') }}</span>
+                                                        {% endif %}
+                                                    </div>
+                                                    <p class="text-muted mb-0 small">
+                                                        <code>{{ subcat.code }}</code>
+                                                        <span class="ms-2">
+                                                            <i class="fas fa-sort-numeric-down me-1"></i>{{ _('Ordre') }}: {{ subcat.sort_order }}
+                                                        </span>
+                                                    </p>
+                                                </div>
+                                                <div class="d-flex gap-1">
+                                                    <a href="{{ url_for('admin.edit_category', id=subcat.id) }}" class="btn btn-sm btn-outline-warning" style="border-radius: 50px;" title="{{ _('Editar') }}">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <form method="POST" action="{{ url_for('admin.delete_category', id=subcat.id) }}" class="d-inline" onsubmit="return confirm('{{ _('Estàs segur que vols eliminar aquesta subcategoria?') }}');">
+                                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger" style="border-radius: 50px;" title="{{ _('Eliminar') }}">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="mt-3 pt-3 border-top">
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-info-circle me-2"></i>{{ _('No hi ha subcategories.') }}
+                                <a href="{{ url_for('admin.new_category', parent_id=cat.id) }}" class="text-primary">{{ _('Afegir-ne una') }}</a>
+                            </p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="card border-0 shadow-sm" style="border-radius: 20px;">
+            <div class="card-body p-5 text-center">
+                <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted mb-3">{{ _('No hi ha categories') }}</h4>
+                <p class="text-muted mb-4">{{ _('Crea la primera categoria per començar') }}</p>
+                <a href="{{ url_for('admin.new_category') }}" class="btn btn-primary" style="border-radius: 50px;">
+                    <i class="fas fa-plus me-2"></i>{{ _('Crear Categoria') }}
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+

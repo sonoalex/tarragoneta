@@ -3,7 +3,7 @@
 {% block title %}{{ _('Admin') }} - Tarracograf{% endblock %}
 
 {% block content %}
-<section class="py-5" style="padding-top: 8rem !important;">
+<section class="py-5" style="padding-top: 4rem !important;">
     <div class="container-fluid px-4">
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-5">
@@ -114,37 +114,85 @@
                     <i class="fas fa-bolt text-primary me-2"></i>
                     {{ _('Accions Ràpides') }}
                 </h3>
-                <div class="d-flex gap-3 flex-wrap">
-                    <a href="{{ url_for('admin.new_initiative') }}" class="btn btn-primary px-4" style="border-radius: 50px;">
-                        <i class="fas fa-plus me-2"></i>{{ _('Nova Iniciativa') }}
-                    </a>
-                    <a href="{{ url_for('admin.pending_initiatives') }}" class="btn btn-warning px-4" style="border-radius: 50px;">
-                        <i class="fas fa-clock me-2"></i>{{ _('Iniciatives Pendents') }}
-                        {% if pending_initiatives_count > 0 %}
-                        <span class="badge bg-light text-dark ms-1">{{ pending_initiatives_count }}</span>
-                        {% endif %}
-                    </a>
-                    <a href="{{ url_for('admin.container_point_suggestions', status='pending') }}" class="btn btn-outline-warning px-4" style="border-radius: 50px;">
-                        <i class="fas fa-lightbulb me-2"></i>{{ _('Sugerències de Contenidors') }}
-                        {% if pending_suggestions_count > 0 %}
-                        <span class="badge bg-warning text-dark ms-1">{{ pending_suggestions_count }}</span>
-                        {% endif %}
-                    </a>
-                    <a href="{{ url_for('admin.admin_users') }}" class="btn btn-outline-secondary px-4" style="border-radius: 50px;">
-                        <i class="fas fa-users me-2"></i>{{ _('Gestionar Usuaris') }}
-                    </a>
-                    <a href="{{ url_for('admin.admin_donations') }}" class="btn btn-outline-success px-4" style="border-radius: 50px;">
-                        <i class="fas fa-heart me-2"></i>{{ _('Veure Donacions') }}
-                    </a>
-                    <a href="{{ url_for('analytics.analytics_dashboard') }}" class="btn btn-outline-info px-4" style="border-radius: 50px;">
-                        <i class="fas fa-chart-bar me-2"></i>{{ _('Analytics i Reports') }}
-                    </a>
-                    <a href="{{ url_for('admin.admin_sections') }}" class="btn btn-outline-primary px-4" style="border-radius: 50px;">
-                        <i class="fas fa-map-marked-alt me-2"></i>{{ _('Gestionar Seccions') }}
-                    </a>
-                    <a href="{{ url_for('admin.admin_districts_sections') }}" class="btn btn-outline-secondary px-4" style="border-radius: 50px;">
-                        <i class="fas fa-edit me-2"></i>{{ _('Editar Distritos i Seccions') }}
-                    </a>
+                <div class="row g-3">
+                    <div class="col-md-6 col-lg-4">
+                        <a href="{{ url_for('admin.new_initiative') }}" 
+                           class="btn btn-primary w-100 d-flex align-items-center justify-content-center py-3" 
+                           style="border-radius: 12px; font-weight: 500;">
+                            <i class="fas fa-plus me-2"></i>
+                            <span>{{ _('Nova Iniciativa') }}</span>
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <a href="{{ url_for('admin.pending_initiatives') }}" 
+                           class="btn btn-warning w-100 d-flex align-items-center justify-content-center py-3" 
+                           style="border-radius: 12px; font-weight: 500;">
+                            <i class="fas fa-clock me-2"></i>
+                            <span>{{ _('Iniciatives Pendents') }}</span>
+                            {% if pending_initiatives_count > 0 %}
+                            <span class="badge bg-light text-dark ms-2">{{ pending_initiatives_count }}</span>
+                            {% endif %}
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <a href="{{ url_for('admin.container_point_suggestions', status='pending') }}" 
+                           class="btn btn-warning w-100 d-flex align-items-center justify-content-center py-3" 
+                           style="border-radius: 12px; font-weight: 500;">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            <span>{{ _('Sugerències de Contenidors') }}</span>
+                            {% if pending_suggestions_count > 0 %}
+                            <span class="badge bg-light text-dark ms-2">{{ pending_suggestions_count }}</span>
+                            {% endif %}
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <a href="{{ url_for('admin.admin_users') }}" 
+                           class="btn btn-primary w-100 d-flex align-items-center justify-content-center py-3" 
+                           style="border-radius: 12px; font-weight: 500;">
+                            <i class="fas fa-users me-2"></i>
+                            <span>{{ _('Gestionar Usuaris') }}</span>
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <a href="{{ url_for('admin.admin_donations') }}" 
+                           class="btn btn-success w-100 d-flex align-items-center justify-content-center py-3" 
+                           style="border-radius: 12px; font-weight: 500;">
+                            <i class="fas fa-heart me-2"></i>
+                            <span>{{ _('Veure Donacions') }}</span>
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <a href="{{ url_for('analytics.analytics_dashboard') }}" 
+                           class="btn btn-info w-100 d-flex align-items-center justify-content-center py-3" 
+                           style="border-radius: 12px; font-weight: 500;">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            <span>{{ _('Analytics i Reports') }}</span>
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <a href="{{ url_for('admin.admin_sections') }}" 
+                           class="btn btn-primary w-100 d-flex align-items-center justify-content-center py-3" 
+                           style="border-radius: 12px; font-weight: 500;">
+                            <i class="fas fa-map-marked-alt me-2"></i>
+                            <span>{{ _('Gestionar Seccions') }}</span>
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <a href="{{ url_for('admin.admin_districts_sections') }}" 
+                           class="btn btn-secondary w-100 d-flex align-items-center justify-content-center py-3" 
+                           style="border-radius: 12px; font-weight: 500;">
+                            <i class="fas fa-edit me-2"></i>
+                            <span>{{ _('Editar Distritos i Seccions') }}</span>
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <a href="{{ url_for('admin.manage_categories') }}" 
+                           class="btn btn-primary w-100 d-flex align-items-center justify-content-center py-3" 
+                           style="border-radius: 12px; font-weight: 500;">
+                            <i class="fas fa-tags me-2"></i>
+                            <span>{{ _('Gestionar Categories') }}</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

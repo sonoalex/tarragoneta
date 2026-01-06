@@ -3,7 +3,7 @@
 {% block title %}{{ _('Tendències Temporals') }} - Tarracograf{% endblock %}
 
 {% block content %}
-<section class="py-5" style="padding-top: 8rem !important;">
+<section class="py-5" style="padding-top: 4rem !important;">
     <div class="container-fluid px-4">
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -32,8 +32,17 @@
                         <label class="form-label">{{ _('Categoria') }}</label>
                         <select name="category" class="form-select">
                             <option value="">{{ _('Totes') }}</option>
+                            {% if db_categories %}
+                            {% for cat in db_categories %}
+                            <option value="{{ cat.code }}" {% if filters.category == cat.code %}selected{% endif %}>
+                                {{ cat.icon }} {{ cat.get_name() }}
+                            </option>
+                            {% endfor %}
+                            {% else %}
+                            {# Fallback to hardcoded if BD is empty #}
                             <option value="coloms" {% if filters.category == 'coloms' %}selected{% endif %}>{{ _('Coloms') }}</option>
-                            <option value="brossa" {% if filters.category == 'brossa' %}selected{% endif %}>{{ _('Brossa') }}</option>
+                            <option value="contenidors" {% if filters.category == 'contenidors' %}selected{% endif %}>{{ _('Contenidors') }}</option>
+                            {% endif %}
                         </select>
                     </div>
                     <div class="col-md-3">
@@ -53,6 +62,39 @@
             </div>
         </div>
 
+        <!-- Charts -->
+        {% if trends_data %}
+        <div class="row g-4 mb-4">
+            <!-- Line Chart: Evolution over time -->
+            <div class="col-12">
+                <div class="card border-0 shadow-sm" style="border-radius: 20px;">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3">
+                            <i class="fas fa-chart-line text-primary me-2"></i>
+                            {{ _('Evolució Temporal') }}
+                        </h5>
+                        <canvas id="trendsLineChart" height="80"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bar Chart: By Category -->
+            {% if categories %}
+            <div class="col-12">
+                <div class="card border-0 shadow-sm" style="border-radius: 20px;">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3">
+                            <i class="fas fa-chart-bar text-success me-2"></i>
+                            {{ _('Distribució per Categoria') }}
+                        </h5>
+                        <canvas id="categoriesBarChart" height="80"></canvas>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
         <!-- Trends Chart Data -->
         <div class="card border-0 shadow-sm" style="border-radius: 20px;">
             <div class="card-body p-4">
@@ -61,11 +103,22 @@
                     <table class="table table-hover">
                         <thead class="table-light">
                             <tr>
-                                <th>{{ _('Data') }}</th>
-                                <th class="text-center">{{ _('Total') }}</th>
-                                <th class="text-center">{{ _('Coloms') }}</th>
-                                <th class="text-center">{{ _('Brossa') }}</th>
+                                <th style="min-width: 120px;">{{ _('Data') }}</th>
+                                <th class="text-center" style="min-width: 80px;">{{ _('Total') }}</th>
+                                {% if categories %}
+                                {% for cat_name in categories %}
+                                <th class="text-center" style="min-width: 100px;">
+                                    {% if cat_name == 'Altres' %}
+                                    <span class="text-muted">{{ cat_name }}</span>
+                                    {% else %}
+                                    {{ cat_name }}
+                                    {% endif %}
+                                </th>
+                                {% endfor %}
+                                {% else %}
+                                {# Fallback if no categories found #}
                                 <th class="text-center">{{ _('Altres') }}</th>
+                                {% endif %}
                             </tr>
                         </thead>
                         <tbody>
@@ -75,21 +128,37 @@
                                 <td class="text-center">
                                     <span class="badge bg-primary fs-6">{{ data.total }}</span>
                                 </td>
+                                {% if categories %}
+                                {% for cat_name in categories %}
                                 <td class="text-center">
-                                    <span class="badge bg-info">{{ data.by_category.get(get_inventory_category_name('palomas'), 0) }}</span>
+                                    {% set count = data.by_category.get(cat_name, 0) %}
+                                    {% if count > 0 %}
+                                        {% if cat_name == 'Altres' %}
+                                        <span class="badge bg-secondary">{{ count }}</span>
+                                        {% else %}
+                                        <span class="badge bg-info">{{ count }}</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
                                 </td>
+                                {% endfor %}
+                                {% else %}
+                                {# Fallback if no categories found #}
                                 <td class="text-center">
-                                    <span class="badge bg-warning">{{ data.by_category.get(get_inventory_category_name('basura'), 0) }}</span>
+                                    <span class="badge bg-secondary">{{ data.total }}</span>
                                 </td>
-                                <td class="text-center">
-                                    <span class="badge bg-secondary">
-                                        {{ data.total - data.by_category.get(get_inventory_category_name('palomas'), 0) - data.by_category.get(get_inventory_category_name('basura'), 0) }}
-                                    </span>
-                                </td>
+                                {% endif %}
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
+                </div>
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        {{ _('Es mostren les 5 categories més freqüents. La resta s\'agrupen en "Altres".') }}
+                    </small>
                 </div>
                 {% else %}
                 <div class="text-center py-5">
@@ -101,5 +170,145 @@
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+{% if trends_data %}
+// Prepare data for charts
+const trendsData = {
+    dates: [{% for date_key, data in trends_data %}'{{ date_key }}'{% if not loop.last %},{% endif %}{% endfor %}],
+    totals: [{% for date_key, data in trends_data %}{{ data.total }}{% if not loop.last %},{% endif %}{% endfor %}],
+    categories: {
+        {% if categories %}
+        {% for cat_name in categories %}
+        '{{ cat_name }}': [{% for date_key, data in trends_data %}{{ data.by_category.get(cat_name, 0) }}{% if not loop.last %},{% endif %}{% endfor %}]{% if not loop.last %},{% endif %}
+        {% endfor %}
+        {% endif %}
+    }
+};
+
+// Line Chart: Trends over time
+const lineCtx = document.getElementById('trendsLineChart');
+if (lineCtx) {
+    const datasets = [{
+        label: '{{ _("Total") }}',
+        data: trendsData.totals,
+        borderColor: 'rgb(13, 110, 253)',
+        backgroundColor: 'rgba(13, 110, 253, 0.1)',
+        tension: 0.4,
+        fill: true
+    }];
+    
+    {% if categories %}
+    {% for cat_name in categories %}
+    {% if cat_name != 'Altres' %}
+    datasets.push({
+        label: '{{ cat_name }}',
+        data: trendsData.categories['{{ cat_name }}'],
+        borderColor: 'rgb({{ loop.index0 * 50 }}, {{ 150 + loop.index0 * 20 }}, {{ 200 - loop.index0 * 30 }})',
+        backgroundColor: 'rgba({{ loop.index0 * 50 }}, {{ 150 + loop.index0 * 20 }}, {{ 200 - loop.index0 * 30 }}, 0.1)',
+        tension: 0.4,
+        fill: false
+    });
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+    
+    new Chart(lineCtx, {
+        type: 'line',
+        data: {
+            labels: trendsData.dates,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Bar Chart: Distribution by category
+{% if categories %}
+const barCtx = document.getElementById('categoriesBarChart');
+if (barCtx) {
+    const categoryTotals = {};
+    {% for date_key, data in trends_data %}
+    {% for cat_name in categories %}
+    {% set count = data.by_category.get(cat_name, 0) %}
+    if (!categoryTotals['{{ cat_name }}']) categoryTotals['{{ cat_name }}'] = 0;
+    categoryTotals['{{ cat_name }}'] += {{ count }};
+    {% endfor %}
+    {% endfor %}
+    
+    const categoryLabels = Object.keys(categoryTotals).filter(k => categoryTotals[k] > 0);
+    const categoryValues = categoryLabels.map(k => categoryTotals[k]);
+    
+    // Generate colors
+    const colors = [
+        'rgba(13, 110, 253, 0.8)',
+        'rgba(25, 135, 84, 0.8)',
+        'rgba(255, 193, 7, 0.8)',
+        'rgba(220, 53, 69, 0.8)',
+        'rgba(13, 202, 240, 0.8)',
+        'rgba(111, 66, 193, 0.8)',
+        'rgba(253, 126, 20, 0.8)',
+        'rgba(32, 201, 151, 0.8)'
+    ];
+    
+    new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: categoryLabels,
+            datasets: [{
+                label: '{{ _("Total Reports") }}',
+                data: categoryValues,
+                backgroundColor: categoryLabels.map((_, i) => colors[i % colors.length]),
+                borderColor: categoryLabels.map((_, i) => colors[i % colors.length].replace('0.8', '1')),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+}
+{% endif %}
+{% endif %}
+</script>
 {% endblock %}
 

@@ -4793,3 +4793,98 @@ msgstr "Reporta, aprueba y resuelve los items reportados de sus secciones"
 msgid "Participa activament en la millora del teu barri"
 msgstr "Participa activamente en la mejora de tu barrio"
 
+# Traducciones para códigos de categorías (usados por InventoryCategory.get_name())
+msgid "coloms"
+msgstr "Palomas"
+
+msgid "contenidors"
+msgstr "Contenedores"
+
+msgid "canis"
+msgstr "Perros"
+
+msgid "mobiliari_deteriorat"
+msgstr "Mobiliario Deteriorado"
+
+msgid "bruticia"
+msgstr "Suciedad"
+
+msgid "vandalisme"
+msgstr "Vandalismo"
+
+msgid "vegetacio"
+msgstr "Vegetación"
+
+msgid "infraestructura"
+msgstr "Infraestructura"
+
+# Traducciones para códigos de subcategorías
+msgid "niu"
+msgstr "Nido"
+
+msgid "excrement"
+msgstr "Excremento"
+
+msgid "ploma"
+msgstr "Pluma"
+
+msgid "abocaments"
+msgstr "Vertidos"
+
+msgid "deixadesa"
+msgstr "Abandono"
+
+msgid "excrements"
+msgstr "Excrementos"
+
+msgid "pixades"
+msgstr "Orines"
+
+msgid "faroles"
+msgstr "Farolas"
+
+msgid "bancs"
+msgstr "Bancos"
+
+msgid "senyals"
+msgstr "Señales"
+
+msgid "paviment"
+msgstr "Pavimento"
+
+msgid "papereres"
+msgstr "Papeleras"
+
+msgid "parades"
+msgstr "Paradas"
+
+msgid "terra"
+msgstr "Tierra"
+
+msgid "fulles"
+msgstr "Hojas"
+
+msgid "grafit"
+msgstr "Grafiti"
+
+msgid "pintades"
+msgstr "Pintadas"
+
+msgid "arbres"
+msgstr "Árboles"
+
+msgid "arbustos"
+msgstr "Arbustos"
+
+msgid "gespa"
+msgstr "Césped"
+
+msgid "carreteres"
+msgstr "Carreteras"
+
+msgid "voreres"
+msgstr "Aceras"
+
+msgid "enllumenat"
+msgstr "Alumbrado"
+

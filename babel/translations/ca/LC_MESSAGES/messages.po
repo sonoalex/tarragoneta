@@ -4735,3 +4735,98 @@ msgstr "Reporta, aprova i resol els items reportats de les seves seccions"
 msgid "Participa activament en la millora del teu barri"
 msgstr "Participa activament en la millora del teu barri"
 
+# Traducciones para códigos de categorías (usados por InventoryCategory.get_name())
+msgid "coloms"
+msgstr "Coloms"
+
+msgid "contenidors"
+msgstr "Contenidors"
+
+msgid "canis"
+msgstr "Canis"
+
+msgid "mobiliari_deteriorat"
+msgstr "Mobiliari Deteriorat"
+
+msgid "bruticia"
+msgstr "Brutícia"
+
+msgid "vandalisme"
+msgstr "Vandalisme"
+
+msgid "vegetacio"
+msgstr "Vegetació"
+
+msgid "infraestructura"
+msgstr "Infraestructura"
+
+# Traducciones para códigos de subcategorías
+msgid "niu"
+msgstr "Niu"
+
+msgid "excrement"
+msgstr "Excrement"
+
+msgid "ploma"
+msgstr "Ploma"
+
+msgid "abocaments"
+msgstr "Abocaments"
+
+msgid "deixadesa"
+msgstr "Deixadesa"
+
+msgid "excrements"
+msgstr "Excrements"
+
+msgid "pixades"
+msgstr "Pixades"
+
+msgid "faroles"
+msgstr "Faroles"
+
+msgid "bancs"
+msgstr "Bancs"
+
+msgid "senyals"
+msgstr "Senyals"
+
+msgid "paviment"
+msgstr "Paviment"
+
+msgid "papereres"
+msgstr "Papereres"
+
+msgid "parades"
+msgstr "Parades"
+
+msgid "terra"
+msgstr "Terra"
+
+msgid "fulles"
+msgstr "Fulles"
+
+msgid "grafit"
+msgstr "Grafit"
+
+msgid "pintades"
+msgstr "Pintades"
+
+msgid "arbres"
+msgstr "Arbres"
+
+msgid "arbustos"
+msgstr "Arbustos"
+
+msgid "gespa"
+msgstr "Gespa"
+
+msgid "carreteres"
+msgstr "Carreteres"
+
+msgid "voreres"
+msgstr "Voreres"
+
+msgid "enllumenat"
+msgstr "Enllumenat"
+

@@ -4,7 +4,7 @@ from flask_security.decorators import roles_required
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import os
-from app.models import Initiative, User, user_initiatives, InventoryItem, Donation, Section, SectionResponsible, Role, District, ContainerPointSuggestion, RoleEnum
+from app.models import Initiative, User, user_initiatives, InventoryItem, Donation, Section, SectionResponsible, Role, District, ContainerPointSuggestion, RoleEnum, InventoryCategory
 from app.extensions import db
 from app.forms import InitiativeForm
 from app.utils import sanitize_html, allowed_file, optimize_image
@@ -1023,3 +1023,192 @@ def reject_container_point_suggestion(id):
     
     page = request.form.get('page', request.args.get('page', 1, type=int), type=int)
     return redirect(url_for('admin.container_point_suggestions', status='pending', page=page))
+
+# ==================== INVENTORY CATEGORIES MANAGEMENT ====================
+
+@bp.route('/inventory/categories')
+@login_required
+@roles_required('admin')
+def manage_categories():
+    """Lista todas las categorías y subcategorías"""
+    main_categories = InventoryCategory.query.filter_by(
+        parent_id=None
+    ).order_by(InventoryCategory.sort_order).all()
+    
+    # Organizar categorías con sus subcategorías
+    categories_data = []
+    for cat in main_categories:
+        subcategories = InventoryCategory.query.filter_by(
+            parent_id=cat.id
+        ).order_by(InventoryCategory.sort_order).all()
+        categories_data.append({
+            'category': cat,
+            'subcategories': subcategories
+        })
+    
+    return render_template('admin/categories.html', categories_data=categories_data)
+
+@bp.route('/inventory/categories/new', methods=['GET', 'POST'])
+@login_required
+@roles_required('admin')
+def new_category():
+    """Crear nueva categoría o subcategoría"""
+    parent_id = request.args.get('parent_id', type=int)
+    parent_category = None
+    
+    if parent_id:
+        parent_category = InventoryCategory.query.get_or_404(parent_id)
+    
+    if request.method == 'POST':
+        code = request.form.get('code', '').strip().lower()
+        icon = request.form.get('icon', '').strip()
+        sort_order = request.form.get('sort_order', type=int) or 0
+        is_active = request.form.get('is_active') == 'on'
+        
+        # Validar código único
+        existing = InventoryCategory.query.filter_by(code=code).first()
+        if existing:
+            flash(_('El código ya existe. Debe ser único.'), 'error')
+            return render_template('admin/category_form.html', 
+                                 parent_category=parent_category,
+                                 category=None)
+        
+        # Crear categoría
+        category = InventoryCategory(
+            code=code,
+            icon=icon,
+            parent_id=parent_id,
+            sort_order=sort_order,
+            is_active=is_active,
+            created_by_id=current_user.id
+        )
+        
+        try:
+            db.session.add(category)
+            db.session.commit()
+            flash(_('Categoría creada correctamente'), 'success')
+            return redirect(url_for('admin.manage_categories'))
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f'Error creating category: {str(e)}', exc_info=True)
+            flash(_('Error al crear la categoría'), 'error')
+    
+    return render_template('admin/category_form.html', 
+                         parent_category=parent_category,
+                         category=None)
+
+@bp.route('/inventory/categories/<int:id>/edit', methods=['GET', 'POST'])
+@login_required
+@roles_required('admin')
+def edit_category(id):
+    """Editar categoría o subcategoría"""
+    category = InventoryCategory.query.get_or_404(id)
+    parent_category = category.parent
+    
+    if request.method == 'POST':
+        code = request.form.get('code', '').strip().lower()
+        icon = request.form.get('icon', '').strip()
+        sort_order = request.form.get('sort_order', type=int) or 0
+        is_active = request.form.get('is_active') == 'on'
+        
+        # Validar código único (excepto si es el mismo)
+        if code != category.code:
+            existing = InventoryCategory.query.filter_by(code=code).first()
+            if existing:
+                flash(_('El código ya existe. Debe ser único.'), 'error')
+                return render_template('admin/category_form.html', 
+                                     parent_category=parent_category,
+                                     category=category)
+        
+        # Actualizar
+        category.code = code
+        category.icon = icon
+        category.sort_order = sort_order
+        category.is_active = is_active
+        category.updated_by_id = current_user.id
+        category.updated_at = datetime.utcnow()
+        
+        try:
+            db.session.commit()
+            flash(_('Categoría actualizada correctamente'), 'success')
+            return redirect(url_for('admin.manage_categories'))
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f'Error updating category: {str(e)}', exc_info=True)
+            flash(_('Error al actualizar la categoría'), 'error')
+    
+    return render_template('admin/category_form.html', 
+                         parent_category=parent_category,
+                         category=category)
+
+@bp.route('/inventory/categories/<int:id>/delete', methods=['POST'])
+@login_required
+@roles_required('admin')
+def delete_category(id):
+    """Eliminar o desactivar categoría"""
+    category = InventoryCategory.query.get_or_404(id)
+    
+    # Verificar si tiene items asociados directamente
+    items_count = category.items.count()
+    
+    # Si es categoría principal, verificar también items en subcategorías
+    subcategories_with_items = 0
+    total_items_in_subcategories = 0
+    if category.is_main_category:
+        subcategories = InventoryCategory.query.filter_by(parent_id=category.id).all()
+        for subcat in subcategories:
+            subcat_items = subcat.items.count()
+            if subcat_items > 0:
+                subcategories_with_items += 1
+                total_items_in_subcategories += subcat_items
+    
+    total_items = items_count + total_items_in_subcategories
+    
+    if total_items > 0:
+        # No eliminar, solo desactivar
+        category.is_active = False
+        category.updated_by_id = current_user.id
+        category.updated_at = datetime.utcnow()
+        db.session.commit()
+        
+        # Mensaje detallado
+        if category.is_main_category:
+            if items_count > 0 and subcategories_with_items > 0:
+                flash(_('Categoría desactivada: tiene %(items)s items directamente y %(subcat_items)s items en subcategorías', 
+                       items=items_count, subcat_items=total_items_in_subcategories), 'warning')
+            elif items_count > 0:
+                flash(_('Categoría desactivada: tiene %(items)s items asociados', items=items_count), 'warning')
+            elif subcategories_with_items > 0:
+                flash(_('Categoría desactivada: tiene %(items)s items en %(subcats)s subcategorías', 
+                       items=total_items_in_subcategories, subcats=subcategories_with_items), 'warning')
+        else:
+            flash(_('Subcategoría desactivada: tiene %(items)s items asociados', items=items_count), 'warning')
+    else:
+        # Verificar si tiene subcategorías (solo para categorías principales)
+        if category.is_main_category:
+            subcategories_count = InventoryCategory.query.filter_by(parent_id=category.id).count()
+            if subcategories_count > 0:
+                flash(_('No se puede eliminar: tiene %(count)s subcategorías asociadas. Elimina primero las subcategorías.', 
+                       count=subcategories_count), 'error')
+            else:
+                # Puede eliminar
+                try:
+                    db.session.delete(category)
+                    db.session.commit()
+                    flash(_('Categoría eliminada correctamente'), 'success')
+                except Exception as e:
+                    db.session.rollback()
+                    current_app.logger.error(f'Error deleting category: {str(e)}', exc_info=True)
+                    flash(_('Error al eliminar la categoría'), 'error')
+        else:
+            # Es subcategoría sin items, puede eliminar
+            try:
+                db.session.delete(category)
+                db.session.commit()
+                flash(_('Subcategoría eliminada correctamente'), 'success')
+            except Exception as e:
+                db.session.rollback()
+                current_app.logger.error(f'Error deleting subcategory: {str(e)}', exc_info=True)
+                flash(_('Error al eliminar la subcategoría'), 'error')
+    
+    return redirect(url_for('admin.manage_categories'))

@@ -22,9 +22,10 @@ from app.models import (
     InventoryItemStatus,
     ContainerPoint,
     ContainerOverflowReport,
+    InventoryCategory,
 )
 from app.extensions import db
-from sqlalchemy import func, and_
+from sqlalchemy import func, and_, or_
 
 bp = Blueprint('analytics', __name__, url_prefix='/admin/analytics')
 bp_public = Blueprint('reports', __name__, url_prefix='/reports')
@@ -33,10 +34,14 @@ def _exclude_container_overflow_items(query):
     """
     Helper function to exclude 'escombreries_desbordades' and 'basura_desbordada' 
     from inventory item queries, as these are now handled by Container Points.
+    Updated to use new category code 'contenidors' (was 'basura').
     """
+    # Support both new code ('contenidors') and legacy code ('basura') for compatibility
     return query.filter(
-        ~((InventoryItem.category == 'basura') & 
-          (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada'])))
+        ~(
+            ((InventoryItem.category == 'contenidors') | (InventoryItem.category == 'basura')) & 
+            (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada', 'deixadesa']))
+        )
     )
 
 @bp_public.route('/')
@@ -214,21 +219,44 @@ def inventory_by_zone():
     date_to = request.args.get('date_to')
     format = request.args.get('format', 'html')  # 'html' or 'csv'
     
-    # Build query
-    query = InventoryItem.query.filter(
-        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
+    # Build query - exclude container overflow items (now handled by Container Points)
+    query = _exclude_container_overflow_items(
+        InventoryItem.query.filter(
+            InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
+        )
     )
     
     # Apply filters
+    from app.utils import normalize_category_from_url, normalize_subcategory_from_url
+    
     if district_id:
         query = query.join(Section).filter(Section.district_code == 
             District.query.filter_by(id=district_id).first().code)
     if section_id:
         query = query.filter(InventoryItem.section_id == section_id)
     if category:
-        query = query.filter(InventoryItem.category == category)
+        # Normalize category from URL and search for both new and legacy codes
+        category_db = normalize_category_from_url(category)
+        legacy_map = {
+            'coloms': ['coloms', 'palomas'],
+            'contenidors': ['contenidors', 'basura'],
+            'canis': ['canis', 'perros'],
+            'mobiliari_deteriorat': ['mobiliari_deteriorat', 'material_deteriorat', 'mobiliari_urba'],
+        }
+        category_codes = legacy_map.get(category_db, [category_db])
+        query = query.filter(InventoryItem.category.in_(category_codes))
     if subcategory:
-        query = query.filter(InventoryItem.subcategory == subcategory)
+        # Normalize subcategory from URL and search for both new and legacy codes
+        subcategory_db = normalize_subcategory_from_url(subcategory)
+        legacy_sub_map = {
+            'niu': ['niu', 'nido'],
+            'excrement': ['excrement', 'excremento'],
+            'ploma': ['ploma', 'plomes', 'plumas'],  # Updated: plomes -> ploma
+            'abocaments': ['abocaments', 'vertidos'],
+            'deixadesa': ['deixadesa', 'escombreries_desbordades', 'basura_desbordada'],
+        }
+        subcategory_codes = legacy_sub_map.get(subcategory_db, [subcategory_db])
+        query = query.filter(InventoryItem.subcategory.in_(subcategory_codes))
     if date_from:
         query = query.filter(InventoryItem.created_at >= datetime.strptime(date_from, '%Y-%m-%d'))
     if date_to:
@@ -286,6 +314,25 @@ def inventory_by_zone():
     districts = District.query.order_by(District.code).all()
     sections = Section.query.order_by(Section.district_code, Section.code).all()
     
+    # Load categories from BD for filter dropdown
+    try:
+        db_categories = InventoryCategory.query.filter_by(
+            parent_id=None,
+            is_active=True
+        ).order_by(InventoryCategory.sort_order).all()
+        
+        db_subcategories = InventoryCategory.query.filter(
+            InventoryCategory.parent_id.isnot(None),
+            InventoryCategory.is_active == True
+        ).order_by(InventoryCategory.sort_order).all()
+    except Exception as e:
+        current_app.logger.warning(f"Error loading categories from DB: {e}")
+        db_categories = []
+        db_subcategories = []
+    
+    # Import utility functions for template
+    from app.utils import get_inventory_category_name, get_inventory_subcategory_name
+    
     return render_template('admin/analytics_inventory_by_zone.html',
                          report_data=report_data_list,
                          total_items=len(items),
@@ -294,11 +341,15 @@ def inventory_by_zone():
                          filters={
                              'district_id': district_id,
                              'section_id': section_id,
-                             'category': category,
-                             'subcategory': subcategory,
+                             'category': category,  # URL value
+                             'subcategory': subcategory,  # URL value
                              'date_from': date_from,
                              'date_to': date_to
-                         })
+                         },
+                         get_inventory_category_name=get_inventory_category_name,
+                         get_inventory_subcategory_name=get_inventory_subcategory_name,
+                         db_categories=db_categories,  # Categories from BD
+                         db_subcategories=db_subcategories)  # Subcategories from BD
 
 def _export_inventory_csv(report_data, items):
     """Export inventory report to CSV"""
@@ -353,11 +404,16 @@ def _export_inventory_csv(report_data, items):
 @roles_required('admin')
 def trends():
     """Generate trends report showing inventory items over time"""
+    from app.utils import normalize_category_from_url
+    
     date_from = request.args.get('date_from')
     date_to = request.args.get('date_to')
-    category = request.args.get('category')
+    category_url = request.args.get('category')
     district_id = request.args.get('district_id', type=int)
     format = request.args.get('format', 'html')
+    
+    # Normalize category from URL to DB code (handles both new and legacy codes)
+    category = normalize_category_from_url(category_url) if category_url else None
     
     # Build query
     query = _exclude_container_overflow_items(
@@ -371,7 +427,17 @@ def trends():
     if date_to:
         query = query.filter(InventoryItem.created_at <= datetime.strptime(date_to, '%Y-%m-%d'))
     if category:
-        query = query.filter(InventoryItem.category == category)
+        # Search for both new code and legacy code for compatibility
+        from sqlalchemy import or_
+        # Map new codes to legacy codes for filtering
+        legacy_map = {
+            'coloms': ['coloms', 'palomas'],
+            'contenidors': ['contenidors', 'basura'],
+            'canis': ['canis', 'perros'],
+            'mobiliari_deteriorat': ['mobiliari_deteriorat', 'material_deteriorat', 'mobiliari_urba'],
+        }
+        category_codes = legacy_map.get(category, [category])
+        query = query.filter(InventoryItem.category.in_(category_codes))
     if district_id:
         district = District.query.get(district_id)
         if district:
@@ -381,7 +447,10 @@ def trends():
     
     # Group by date
     from app.utils import get_inventory_category_name
+    from collections import Counter
     trends_data = {}
+    category_totals = Counter()  # Track total count per category across all dates
+    
     for item in items:
         date_key = item.created_at.date().isoformat() if item.created_at else 'unknown'
         if date_key not in trends_data:
@@ -395,6 +464,33 @@ def trends():
         cat_key = get_inventory_category_name(item.category)
         trends_data[date_key]['by_category'][cat_key] = \
             trends_data[date_key]['by_category'].get(cat_key, 0) + 1
+        category_totals[cat_key] += 1  # Track total per category
+    
+    # Get top N categories (e.g., top 5) and group the rest as "Altres"
+    MAX_CATEGORIES_TO_SHOW = 5
+    top_categories = [cat for cat, count in category_totals.most_common(MAX_CATEGORIES_TO_SHOW)]
+    sorted_categories = sorted(top_categories)  # Sort alphabetically for consistent order
+    
+    # Process data to group non-top categories into "Altres"
+    for date_key, data in trends_data.items():
+        others_count = 0
+        categories_to_remove = []
+        
+        for cat_name, count in data['by_category'].items():
+            if cat_name not in top_categories:
+                others_count += count
+                categories_to_remove.append(cat_name)
+        
+        # Remove non-top categories and add to "Altres"
+        for cat_name in categories_to_remove:
+            del data['by_category'][cat_name]
+        
+        if others_count > 0:
+            data['by_category']['Altres'] = others_count
+    
+    # Add "Altres" to categories list if it exists in any date
+    if any('Altres' in data['by_category'] for _, data in trends_data.items()):
+        sorted_categories.append('Altres')
     
     # Sort by date
     sorted_trends = sorted(trends_data.items())
@@ -402,14 +498,28 @@ def trends():
     if format == 'csv':
         return _export_trends_csv(sorted_trends)
     
+    # Load categories from BD for filter dropdown
+    try:
+        db_categories = InventoryCategory.query.filter_by(
+            parent_id=None,
+            is_active=True
+        ).order_by(InventoryCategory.sort_order).all()
+    except Exception as e:
+        current_app.logger.warning(f"Error loading categories from DB: {e}")
+        db_categories = []
+    
     return render_template('admin/analytics_trends.html',
                          trends_data=sorted_trends,
+                         categories=sorted_categories,  # All unique categories for dynamic columns
                          filters={
                              'date_from': date_from,
                              'date_to': date_to,
-                             'category': category,
+                             'category': category_url,  # Use URL value for template
                              'district_id': district_id
-                         })
+                         },
+                         districts=District.query.all(),
+                         db_categories=db_categories,  # Categories from BD
+                         get_inventory_category_name=get_inventory_category_name)  # Function for template
 
 def _export_trends_csv(trends_data):
     """Export trends report to CSV"""
@@ -429,8 +539,11 @@ def _export_trends_csv(trends_data):
     
     # Write data
     for date_key, data in trends_data:
-        coloms_count = data['by_category'].get(get_inventory_category_name('palomas'), 0)
-        brossa_count = data['by_category'].get(get_inventory_category_name('basura'), 0)
+        # Use new category codes (with fallback to legacy for compatibility)
+        coloms_count = data['by_category'].get(get_inventory_category_name('coloms'), 0) or \
+                       data['by_category'].get(get_inventory_category_name('palomas'), 0)
+        brossa_count = data['by_category'].get(get_inventory_category_name('contenidors'), 0) or \
+                       data['by_category'].get(get_inventory_category_name('basura'), 0)
         writer.writerow([
             date_key,
             data['total'],
@@ -464,8 +577,10 @@ def top_categories():
     ).filter(
         InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     ).filter(
-        ~((InventoryItem.category == 'basura') & 
-          (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada'])))
+        ~(
+            ((InventoryItem.category == 'contenidors') | (InventoryItem.category == 'basura')) & 
+            (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada', 'deixadesa']))
+        )
     ).group_by(
         InventoryItem.category,
         InventoryItem.subcategory,
@@ -1014,8 +1129,10 @@ def view_top_categories():
     ).filter(
         InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     ).filter(
-        ~((InventoryItem.category == 'basura') & 
-          (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada'])))
+        ~(
+            ((InventoryItem.category == 'contenidors') | (InventoryItem.category == 'basura')) & 
+            (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada', 'deixadesa']))
+        )
     ).group_by(
         InventoryItem.category,
         InventoryItem.subcategory
