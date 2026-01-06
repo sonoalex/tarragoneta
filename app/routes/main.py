@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
 from flask_babel import gettext as _
-from app.models import Initiative, Comment, user_initiatives, InventoryItem, InventoryItemStatus
+from app.models import Initiative, Comment, user_initiatives, InventoryItem, InventoryItemStatus, InventoryCategory
 from app.extensions import db
 from datetime import datetime
 from sqlalchemy import not_
@@ -31,35 +31,63 @@ def index():
     
     # Get inventory statistics (for hero section)
     # Exclude 'escombreries_desbordades' - now handled by Container Points
+    # Updated to use new category code 'contenidors' (was 'basura')
     total_inventory_items = InventoryItem.query.filter(
         InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     ).filter(
-        not_((InventoryItem.category == 'basura') & 
-             (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada'])))
+        not_(
+            ((InventoryItem.category == 'contenidors') | (InventoryItem.category == 'basura')) & 
+            (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada', 'deixadesa']))
+        )
     ).count()
     
-    # Get inventory by category
+    # Get inventory by category (normalize old codes to new ones)
+    from app.utils import CATEGORY_DB_TO_URL
+    category_normalization = {
+        'palomas': 'coloms',
+        'basura': 'contenidors',
+        'perros': 'canis',
+        'material_deteriorat': 'mobiliari_deteriorat',
+        'mobiliari_urba': 'mobiliari_deteriorat',
+    }
+    
     inventory_by_category = {}
     for item in InventoryItem.query.filter(
         InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     ).filter(
-        not_((InventoryItem.category == 'basura') & 
-             (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada'])))
+        not_(
+            ((InventoryItem.category == 'contenidors') | (InventoryItem.category == 'basura')) & 
+            (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada', 'deixadesa']))
+        )
     ).all():
-        inventory_by_category[item.category] = inventory_by_category.get(item.category, 0) + 1
+        # Normalize category code (old -> new)
+        normalized_category = category_normalization.get(item.category, item.category)
+        inventory_by_category[normalized_category] = inventory_by_category.get(normalized_category, 0) + 1
     
     # Get recent inventory items (for featured section)
     recent_inventory_items = InventoryItem.query.filter(
         InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     ).filter(
-        not_((InventoryItem.category == 'basura') & 
-             (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada'])))
+        not_(
+            ((InventoryItem.category == 'contenidors') | (InventoryItem.category == 'basura')) & 
+            (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada', 'deixadesa']))
+        )
     ).order_by(InventoryItem.created_at.desc()).limit(8).all()
     
     # Get statistics for initiatives (for secondary section)
     total_initiatives = Initiative.query.filter(Initiative.status == 'approved').count()
     total_participants = db.session.query(db.func.count(user_initiatives.c.user_id)).scalar() or 0
     active_categories = db.session.query(Initiative.category).distinct().count()
+    
+    # Load inventory categories from DB for hero section
+    try:
+        db_categories = InventoryCategory.query.filter_by(
+            parent_id=None,
+            is_active=True
+        ).order_by(InventoryCategory.sort_order).limit(6).all()
+    except Exception as e:
+        current_app.logger.warning(f"Error loading categories from DB: {e}")
+        db_categories = []
     
     return render_template('index.html',
                          initiatives=initiatives,
@@ -70,7 +98,8 @@ def index():
                          selected_status=status,
                          total_inventory_items=total_inventory_items,
                          inventory_by_category=inventory_by_category,
-                         recent_inventory_items=recent_inventory_items)
+                         recent_inventory_items=recent_inventory_items,
+                         db_categories=db_categories)
 
 @bp.route('/about')
 def about():

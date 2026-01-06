@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 <style>
-    #map { height: 600px; border-radius: 16px; z-index: 0; }
+    #map { height: 70vh; min-height: 500px; border-radius: 16px; z-index: 0; }
     
     /* Improved Leaflet popup styles */
     .leaflet-popup-content-wrapper {
@@ -101,10 +101,74 @@
     
     .category-filter {
         background: white;
-        padding: 1rem;
+        padding: 1.5rem;
         border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        max-height: calc(100vh - 120px);
+        overflow-y: auto;
+        /* Mejorar la UX del scroll */
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+    }
+    
+    /* Estilos del scrollbar para mejor visibilidad */
+    .category-filter::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .category-filter::-webkit-scrollbar-track {
+        background: transparent;
+        border-radius: 10px;
+    }
+    
+    .category-filter::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+    }
+    
+    .category-filter::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Indicador visual cuando hay scroll disponible */
+    .category-filter::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 20px;
+        background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.8));
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    
+    .category-filter.scrollable::after {
+        opacity: 1;
+    }
+    
+    /* Asegurar que el navbar siempre esté por encima del sidebar */
+    #mainNavbar {
+        z-index: 1030 !important;
+    }
+    
+    .stats-summary {
+        padding-bottom: 0.75rem;
+    }
+    
+    .category-stat-item {
+        border: 1px solid transparent;
+    }
+    
+    .category-stat-item:hover {
+        background: rgba(13, 110, 253, 0.08) !important;
+        border-color: rgba(13, 110, 253, 0.2);
+        transform: translateX(2px);
+    }
+    
+    .category-stat-item.active {
+        border-color: rgba(13, 110, 253, 0.3);
     }
     .category-badge {
         display: inline-block;
@@ -167,413 +231,176 @@
             </div>
         </div>
 
-        <!-- Statistics -->
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="stats-card text-center">
-                    <h3 class="display-6 fw-bold text-primary">{{ total_items }}</h3>
-                    <p class="text-muted mb-0">{{ _('Items reportats') }}</p>
+        <!-- Layout principal: Sidebar izquierdo + Mapa derecho -->
+        <div class="row">
+            <!-- Sidebar de filtros (col-3) -->
+            <div class="col-lg-3 col-md-4 mb-4" style="position: relative;">
+                <div class="category-filter" style="position: sticky; top: 120px; z-index: 1020;">
+                    <!-- Statistics Summary -->
+                    <div class="stats-summary mb-3 pb-3 border-bottom">
+                        <div class="d-flex align-items-center justify-content-between p-2 rounded" style="background: #f8f9fa; border: 1px solid #e9ecef;">
+                            <div class="d-flex align-items-center">
+                                <div class="d-inline-flex align-items-center justify-content-center rounded-circle me-2" style="width: 40px; height: 40px; background: #198754;">
+                                    <i class="fas fa-list text-white" style="font-size: 0.9rem;"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark" style="font-size: 1.1rem; line-height: 1.2;">{{ total_items }}</div>
+                                    <div class="text-muted" style="font-size: 0.7rem; line-height: 1;">{{ _('Items reportats') }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Top Categories -->
+                        {% if by_main_category and db_categories %}
+                            {# Mostrar categorías con items, ordenadas por count (simplificado) #}
+                            {% set shown_count = 0 %}
+                            {% set max_show = 5 %}
+                            <div class="mt-2">
+                                <small class="text-muted text-uppercase fw-bold d-block mb-1" style="font-size: 0.65rem; letter-spacing: 0.5px;">{{ _('Top categories') }}</small>
+                                {# Iterar sobre todas las categorías y mostrar las que tienen más items #}
+                                {% for cat in db_categories %}
+                                    {% if shown_count < max_show %}
+                                        {% set count = by_main_category.get(cat.code, 0) %}
+                                        {% if count > 0 %}
+                                            {% set shown_count = shown_count + 1 %}
+                                            {% set cat_code = cat.code %}
+                                            {% set cat_obj = cat %}
+                                            <a href="{{ url_for('inventory.inventory_map', category=cat_code) }}" 
+                                               class="d-flex align-items-center justify-content-between p-1.5 mb-1 rounded text-decoration-none category-stat-item {% if selected_category == cat_code %}active{% endif %}"
+                                               style="background: {% if selected_category == cat_code %}rgba(13, 110, 253, 0.1){% else %}rgba(0, 0, 0, 0.03){% endif %}; transition: all 0.2s; padding: 0.4rem 0.75rem;">
+                                                <div class="d-flex align-items-center">
+                                                    {% if cat_obj.icon and not cat_obj.icon.startswith('fa-') %}
+                                                        <span style="font-size: 1rem; margin-right: 0.4rem;">{{ cat_obj.icon }}</span>
+                                                    {% else %}
+                                                        {% set icon_class, color_class = get_inventory_icon(cat_code) %}
+                                                        <i class="fas {{ icon_class }} {{ color_class }}" style="font-size: 0.9rem; margin-right: 0.4rem;"></i>
+                                                    {% endif %}
+                                                    <span class="small fw-medium" style="color: {% if selected_category == cat_code %}#0d6efd{% else %}inherit{% endif %}; font-size: 0.8rem;">{{ get_inventory_category_name(cat_code) }}</span>
+                                                </div>
+                                                <span class="badge {% if selected_category == cat_code %}bg-primary{% else %}bg-secondary{% endif %} rounded-pill" style="font-size: 0.7rem; padding: 0.2rem 0.5rem;">{{ count }}</span>
+                                            </a>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <h5 class="fw-bold mb-3">{{ _('Filtrar per categoria') }}</h5>
+                    
+                    <!-- Main Categories -->
+                    <div class="mb-3">
+                        <a href="{{ url_for('inventory.inventory_map') }}" 
+                           class="category-badge {% if not selected_category %}active{% endif %}">
+                            {{ _('Totes') }}
+                        </a>
+                        {% if db_categories %}
+                            {% for cat in db_categories %}
+                            <a href="{{ url_for('inventory.inventory_map', category=cat.code) }}" 
+                               class="category-badge {% if selected_category == cat.code %}active{% endif %}">
+                                {% if cat.icon and not cat.icon.startswith('fa-') %}
+                                    {# Es un emoji #}
+                                    <span style="font-size: 1rem;">{{ cat.icon }}</span>
+                                {% else %}
+                                    {% set icon_class, color_class = get_inventory_icon(cat.code) %}
+                                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>
+                                {% endif %}
+                                {{ get_inventory_category_name(cat.code) }}
+                                {% if selected_category == cat.code %}
+                                    <span class="badge bg-light text-dark ms-1">{{ by_main_category.get(cat.code, 0) }}</span>
+                                {% endif %}
+                            </a>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Subcategories (only show if a main category is selected) -->
+                    {% if selected_category and subcategories_by_parent %}
+                        {% if subcategories_by_parent.get(selected_category) %}
+                            <div class="mt-3 pt-3 border-top">
+                                <small class="text-muted d-block mb-2">{{ _('Subcategorías de') }} {{ get_inventory_category_name(selected_category) }}:</small>
+                                <a href="{{ url_for('inventory.inventory_map', category=selected_category) }}" 
+                                   class="category-badge {% if not selected_subcategory %}active{% endif %}">
+                                    {{ _('Totes les subcategorías') }}
+                                </a>
+                                {% for subcat in subcategories_by_parent.get(selected_category, []) %}
+                                <a href="{{ url_for('inventory.inventory_map', category=selected_category, subcategory=subcat.code) }}" 
+                                   class="category-badge {% if selected_subcategory == subcat.code %}active{% endif %}">
+                                    {% if subcat.icon and not subcat.icon.startswith('fa-') %}
+                                        {# Es un emoji #}
+                                        <span style="font-size: 1rem;">{{ subcat.icon }}</span>
+                                    {% else %}
+                                        {% set icon_class, color_class = get_inventory_icon(selected_category, subcat.code) %}
+                                        <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>
+                                    {% endif %}
+                                    {{ subcat.get_name() }}
+                                    {% if selected_subcategory == subcat.code and by_subcategory.get(subcat.code) %}
+                                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get(subcat.code, 0) }}</span>
+                                    {% endif %}
+                                </a>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endif %}
                 </div>
             </div>
-            <div class="col-md-8">
-                <div class="stats-card">
-                    <h5 class="fw-bold mb-3">{{ _('Per categoria') }}</h5>
-                    <div>
-                        {% for cat_key, count in by_category.items() %}
-                        {% set parts = cat_key.split('->') %}
-                        {% set main_cat = parts[0] if parts|length > 0 else cat_key %}
-                        {% set sub_cat = parts[1] if parts|length > 1 else '' %}
-                        <span class="badge bg-secondary me-2 mb-2" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
-                            {% set icon_class, color_class = get_inventory_icon(main_cat, sub_cat) %}
-                            <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>
-                            {{ get_inventory_category_name(main_cat, sub_cat) }}: {{ count }}
-                        </span>
-                        {% endfor %}
+
+            <!-- Mapa y contenido principal (col-9) -->
+            <div class="col-lg-9 col-md-8">
+                <!-- Map -->
+                <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; overflow: hidden;">
+                    <div class="card-body p-0">
+                        <div id="map"></div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Category Filter -->
-        <div class="category-filter">
-            <h5 class="fw-bold mb-3">{{ _('Filtrar per categoria') }}</h5>
-            
-            <!-- Main Categories -->
-            <div class="mb-3">
-                <a href="{{ url_for('inventory.inventory_map') }}" 
-                   class="category-badge {% if not selected_category %}active{% endif %}">
-                    {{ _('Totes') }}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='coloms') }}" 
-                   class="category-badge {% if selected_category == 'coloms' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('palomas') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Coloms') }}
-                    {% if selected_category == 'coloms' and by_main_category.get('palomas') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_main_category.get('palomas', 0) }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='brossa') }}" 
-                   class="category-badge {% if selected_category == 'brossa' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('basura') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Brossa') }}
-                    {% if selected_category == 'brossa' and by_main_category.get('basura') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_main_category.get('basura', 0) }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='gossos') }}" 
-                   class="category-badge {% if selected_category == 'gossos' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('perros') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Gossos') }}
-                    {% if selected_category == 'gossos' and by_main_category.get('perros') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_main_category.get('perros', 0) }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='material_deteriorat') }}" 
-                   class="category-badge {% if selected_category == 'material_deteriorat' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('material_deteriorat') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Material Deteriorat') }}
-                    {% if selected_category == 'material_deteriorat' and by_main_category.get('material_deteriorat') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_main_category.get('material_deteriorat', 0) }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='bruticia') }}" 
-                   class="category-badge {% if selected_category == 'bruticia' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('bruticia') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Brutícia') }}
-                    {% if selected_category == 'bruticia' and by_main_category.get('bruticia') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_main_category.get('bruticia', 0) }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='mobiliari_urba') }}" 
-                   class="category-badge {% if selected_category == 'mobiliari_urba' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('mobiliari_urba') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Mobiliari Urbà') }}
-                    {% if selected_category == 'mobiliari_urba' and by_main_category.get('mobiliari_urba') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_main_category.get('mobiliari_urba', 0) }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='vegetacio') }}" 
-                   class="category-badge {% if selected_category == 'vegetacio' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('vegetacio') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Vegetació') }}
-                    {% if selected_category == 'vegetacio' and by_main_category.get('vegetacio') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_main_category.get('vegetacio', 0) }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='infraestructura') }}" 
-                   class="category-badge {% if selected_category == 'infraestructura' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('infraestructura') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Infraestructura') }}
-                    {% if selected_category == 'infraestructura' and by_main_category.get('infraestructura') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_main_category.get('infraestructura', 0) }}</span>
-                    {% endif %}
-                </a>
-            </div>
-            
-            <!-- Subcategories (only show if a main category is selected) -->
-            {% if selected_category == 'coloms' %}
-            <div class="mt-3 pt-3 border-top">
-                <small class="text-muted d-block mb-2">{{ _('Subcategorías de Coloms') }}:</small>
-                <a href="{{ url_for('inventory.inventory_map', category='coloms') }}" 
-                   class="category-badge {% if not selected_subcategory %}active{% endif %}">
-                    {{ _('Totes les subcategorías') }}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='coloms', subcategory='niu') }}" 
-                   class="category-badge {% if selected_subcategory == 'niu' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('palomas', 'nido') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Niu') }}
-                    {% if by_subcategory.get('nido') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('nido', 0) }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='coloms', subcategory='excrement') }}" 
-                   class="category-badge {% if selected_subcategory == 'excrement' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('palomas', 'excremento') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Excrement') }}
-                    {% if by_subcategory.get('excremento') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('excremento', 0) }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='coloms', subcategory='plomes') }}" 
-                   class="category-badge {% if selected_subcategory == 'plomes' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('palomas', 'plumas') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Plomes') }}
-                    {% if by_subcategory.get('plumas') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('plumas', 0) }}</span>
-                    {% endif %}
-                </a>
-            </div>
-            {% elif selected_category == 'brossa' %}
-            <div class="mt-3 pt-3 border-top">
-                <small class="text-muted d-block mb-2">{{ _('Subcategorías de Brossa') }}:</small>
-                <a href="{{ url_for('inventory.inventory_map', category='brossa') }}" 
-                   class="category-badge {% if not selected_subcategory %}active{% endif %}">
-                    {{ _('Totes les subcategorías') }}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='brossa', subcategory='escombreries_desbordades') }}" 
-                   class="category-badge {% if selected_subcategory == 'escombreries_desbordades' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('basura', 'escombreries_desbordades') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Escombreries Desbordades') }}
-                    {% if by_subcategory.get('escombreries_desbordades') or by_subcategory.get('basura_desbordada') %}
-                        <span class="badge bg-light text-dark ms-1">{{ (by_subcategory.get('escombreries_desbordades', 0) + by_subcategory.get('basura_desbordada', 0)) }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='brossa', subcategory='abocaments') }}" 
-                   class="category-badge {% if selected_subcategory == 'abocaments' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('basura', 'vertidos') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Abocaments') }}
-                    {% if by_subcategory.get('vertidos') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('vertidos', 0) }}</span>
-                    {% endif %}
-                </a>
-            </div>
-            {% elif selected_category == 'gossos' %}
-            <div class="mt-3 pt-3 border-top">
-                <small class="text-muted d-block mb-2">{{ _('Subcategorías de Gossos') }}:</small>
-                <a href="{{ url_for('inventory.inventory_map', category='gossos') }}" 
-                   class="category-badge {% if not selected_subcategory %}active{% endif %}">
-                    {{ _('Totes les subcategorías') }}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='gossos', subcategory='excrements') }}" 
-                   class="category-badge {% if selected_subcategory == 'excrements' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('perros', 'excrements') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Excrements') }}
-                    {% if by_subcategory.get('excrements') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('excrements', 0) }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='gossos', subcategory='pixades') }}" 
-                   class="category-badge {% if selected_subcategory == 'pixades' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('perros', 'pixades') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Pixades') }}
-                    {% if by_subcategory.get('pixades') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('pixades', 0) }}</span>
-                    {% endif %}
-                </a>
-            </div>
-            {% elif selected_category == 'material_deteriorat' %}
-            <div class="mt-3 pt-3 border-top">
-                <small class="text-muted d-block mb-2">{{ _('Subcategorías de Material Deteriorat') }}:</small>
-                <a href="{{ url_for('inventory.inventory_map', category='material_deteriorat') }}" 
-                   class="category-badge {% if not selected_subcategory %}active{% endif %}">
-                    {{ _('Totes les subcategorías') }}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='material_deteriorat', subcategory='faroles') }}" 
-                   class="category-badge {% if selected_subcategory == 'faroles' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('material_deteriorat', 'faroles') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Faroles') }}
-                    {% if by_subcategory.get('faroles') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('faroles', 0) }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='material_deteriorat', subcategory='bancs') }}" 
-                   class="category-badge {% if selected_subcategory == 'bancs' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('material_deteriorat', 'bancs') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Bancs') }}
-                    {% if by_subcategory.get('bancs') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('bancs', 0) }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='material_deteriorat', subcategory='senyals') }}" 
-                   class="category-badge {% if selected_subcategory == 'senyals' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('material_deteriorat', 'senyals') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Senyals') }}
-                    {% if by_subcategory.get('senyals') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('senyals', 0) }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='material_deteriorat', subcategory='paviment') }}" 
-                   class="category-badge {% if selected_subcategory == 'paviment' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('material_deteriorat', 'paviment') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Paviment') }}
-                    {% if by_subcategory.get('paviment') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('paviment', 0) }}</span>
-                    {% endif %}
-                </a>
-            </div>
-            {% elif selected_category == 'bruticia' %}
-            <div class="mt-3 pt-3 border-top">
-                <small class="text-muted d-block mb-2">{{ _('Subcategorías de Brutícia') }}:</small>
-                <a href="{{ url_for('inventory.inventory_map', category='bruticia') }}" 
-                   class="category-badge {% if not selected_subcategory %}active{% endif %}">
-                    {{ _('Totes les subcategorías') }}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='bruticia', subcategory='terra') }}" 
-                   class="category-badge {% if selected_subcategory == 'terra' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('bruticia', 'terra') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Terra') }}
-                    {% if by_subcategory.get('terra') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('terra', 0) }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='bruticia', subcategory='fulles') }}" 
-                   class="category-badge {% if selected_subcategory == 'fulles' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('bruticia', 'fulles') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Fulles') }}
-                    {% if by_subcategory.get('fulles') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('fulles', 0) }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='bruticia', subcategory='grafit') }}" 
-                   class="category-badge {% if selected_subcategory == 'grafit' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('bruticia', 'grafit') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Grafit') }}
-                    {% if by_subcategory.get('grafit') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('grafit', 0) }}</span>
-                    {% endif %}
-                </a>
-            </div>
-            {% elif selected_category == 'mobiliari_urba' %}
-            <div class="mt-3 pt-3 border-top">
-                <small class="text-muted d-block mb-2">{{ _('Subcategorías de Mobiliari Urbà') }}:</small>
-                <a href="{{ url_for('inventory.inventory_map', category='mobiliari_urba') }}" 
-                   class="category-badge {% if not selected_subcategory %}active{% endif %}">
-                    {{ _('Totes les subcategorías') }}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='mobiliari_urba', subcategory='papereres') }}" 
-                   class="category-badge {% if selected_subcategory == 'papereres' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('mobiliari_urba', 'papereres') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Papereres') }}
-                    {% if by_subcategory.get('papereres') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('papereres', 0) }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='mobiliari_urba', subcategory='parades') }}" 
-                   class="category-badge {% if selected_subcategory == 'parades' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('mobiliari_urba', 'parades') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Parades') }}
-                    {% if by_subcategory.get('parades') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('parades', 0) }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='mobiliari_urba', subcategory='bancs') }}" 
-                   class="category-badge {% if selected_subcategory == 'bancs' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('mobiliari_urba', 'bancs') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Bancs') }}
-                    {% if by_subcategory.get('bancs') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('bancs', 0) }}</span>
-                    {% endif %}
-                </a>
-            </div>
-            {% elif selected_category == 'vegetacio' %}
-            <div class="mt-3 pt-3 border-top">
-                <small class="text-muted d-block mb-2">{{ _('Subcategorías de Vegetació') }}:</small>
-                <a href="{{ url_for('inventory.inventory_map', category='vegetacio') }}" 
-                   class="category-badge {% if not selected_subcategory %}active{% endif %}">
-                    {{ _('Totes les subcategorías') }}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='vegetacio', subcategory='arbres') }}" 
-                   class="category-badge {% if selected_subcategory == 'arbres' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('vegetacio', 'arbres') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Arbres') }}
-                    {% if by_subcategory.get('arbres') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('arbres', 0) }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='vegetacio', subcategory='arbustos') }}" 
-                   class="category-badge {% if selected_subcategory == 'arbustos' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('vegetacio', 'arbustos') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Arbustos') }}
-                    {% if by_subcategory.get('arbustos') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('arbustos', 0) }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='vegetacio', subcategory='gespa') }}" 
-                   class="category-badge {% if selected_subcategory == 'gespa' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('vegetacio', 'gespa') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Gespa') }}
-                    {% if by_subcategory.get('gespa') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('gespa', 0) }}</span>
-                    {% endif %}
-                </a>
-            </div>
-            {% elif selected_category == 'infraestructura' %}
-            <div class="mt-3 pt-3 border-top">
-                <small class="text-muted d-block mb-2">{{ _('Subcategorías de Infraestructura') }}:</small>
-                <a href="{{ url_for('inventory.inventory_map', category='infraestructura') }}" 
-                   class="category-badge {% if not selected_subcategory %}active{% endif %}">
-                    {{ _('Totes les subcategorías') }}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='infraestructura', subcategory='carreteres') }}" 
-                   class="category-badge {% if selected_subcategory == 'carreteres' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('infraestructura', 'carreteres') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Carreteres') }}
-                    {% if by_subcategory.get('carreteres') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('carreteres', 0) }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='infraestructura', subcategory='voreres') }}" 
-                   class="category-badge {% if selected_subcategory == 'voreres' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('infraestructura', 'voreres') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Voreres') }}
-                    {% if by_subcategory.get('voreres') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('voreres', 0) }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('inventory.inventory_map', category='infraestructura', subcategory='enllumenat') }}" 
-                   class="category-badge {% if selected_subcategory == 'enllumenat' %}active{% endif %}">
-                    {% set icon_class, color_class = get_inventory_icon('infraestructura', 'enllumenat') %}
-                    <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>{{ _('Enllumenat') }}
-                    {% if by_subcategory.get('enllumenat') %}
-                        <span class="badge bg-light text-dark ms-1">{{ by_subcategory.get('enllumenat', 0) }}</span>
-                    {% endif %}
-                </a>
-            </div>
-            {% endif %}
-        </div>
+                <!-- Attribution -->
+                <div class="text-center mb-4">
+                    <p class="text-muted small mb-0">
+                        <i class="fas fa-info-circle me-1"></i>
+                        {{ _('Les zones han estat importades del') }} 
+                        <a href="https://geoportal.tarragona.cat/portal/apps/sites/#/geoportal-ajuntament-de-tarragona" 
+                           target="_blank" 
+                           rel="noopener noreferrer" 
+                           class="text-decoration-none">
+                            {{ _('Geoportal de Tarragona') }}
+                        </a>
+                    </p>
+                </div>
 
-        <!-- Map -->
-        <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; overflow: hidden;">
-            <div class="card-body p-0">
-                <div id="map"></div>
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-center align-items-center flex-wrap gap-2 mb-4">
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('inventory.report_item') }}" class="btn btn-primary btn-lg px-4 py-2" style="border-radius: 50px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-plus me-2"></i>{{ _('Reportar nou item') }}
+                    </a>
+                    {% else %}
+                    <div class="alert alert-info d-inline-flex align-items-center" style="border-radius: 50px; padding: 0.75rem 1.5rem; margin: 0;">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <span>{{ _('Has de') }} <a href="{{ url_for('security.login') }}" class="alert-link">{{ _('iniciar sessió') }}</a> {{ _('per reportar items') }}</span>
+                    </div>
+                    {% endif %}
+                    {% if current_user.has_role('admin') %}
+                    <a href="{{ url_for('inventory.admin_inventory') }}" class="btn btn-outline-secondary btn-lg px-4 py-2" style="border-radius: 50px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-cog me-2"></i>{{ _('Administrar') }}
+                    </a>
+                    {% endif %}
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.has_role('admin') or current_user.has_role('section_responsible') %}
+                        <button id="toggle-container-mode" class="btn btn-outline-primary px-3 py-2" type="button" style="border-radius: 50px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-trash-alt me-1"></i>{{ _('Mode punts de contenidors') }}
+                        </button>
+                        <button id="create-container-from-location" class="btn btn-outline-success px-3 py-2" type="button" style="border-radius: 50px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-crosshairs me-1"></i>{{ _('Crear punt des de la meva ubicació') }}
+                        </button>
+                        {% else %}
+                        <button id="suggest-container-from-location" class="btn btn-outline-warning px-3 py-2" type="button" style="border-radius: 50px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-lightbulb me-1"></i>{{ _('Aquí hi ha contenidors') }}
+                        </button>
+                        {% endif %}
+                    {% endif %}
+                </div>
             </div>
-        </div>
-
-        <!-- Attribution -->
-        <div class="text-center mb-4">
-            <p class="text-muted small mb-0">
-                <i class="fas fa-info-circle me-1"></i>
-                {{ _('Les zones han estat importades del') }} 
-                <a href="https://geoportal.tarragona.cat/portal/apps/sites/#/geoportal-ajuntament-de-tarragona" 
-                   target="_blank" 
-                   rel="noopener noreferrer" 
-                   class="text-decoration-none">
-                    {{ _('Geoportal de Tarragona') }}
-                </a>
-            </p>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="text-center mb-4">
-            {% if current_user.is_authenticated %}
-            <a href="{{ url_for('inventory.report_item') }}" class="btn btn-primary btn-lg px-5" style="border-radius: 50px;">
-                <i class="fas fa-plus me-2"></i>{{ _('Reportar nou item') }}
-            </a>
-            {% else %}
-            <div class="alert alert-info d-inline-block" style="border-radius: 50px; padding: 1rem 2rem;">
-                <i class="fas fa-info-circle me-2"></i>
-                {{ _('Has de') }} <a href="{{ url_for('security.login') }}" class="alert-link">{{ _('iniciar sessió') }}</a> {{ _('per reportar items') }}
-            </div>
-            {% endif %}
-            {% if current_user.has_role('admin') %}
-            <a href="{{ url_for('inventory.admin_inventory') }}" class="btn btn-outline-secondary btn-lg px-5 ms-2" style="border-radius: 50px;">
-                <i class="fas fa-cog me-2"></i>{{ _('Administrar') }}
-            </a>
-            {% endif %}
-            {% if current_user.is_authenticated %}
-                {% if current_user.has_role('admin') or current_user.has_role('section_responsible') %}
-                <button id="toggle-container-mode" class="btn btn-outline-primary btn-sm ms-2" type="button" style="border-radius: 50px;">
-                    <i class="fas fa-trash-alt me-1"></i>{{ _('Mode punts de contenidors') }}
-                </button>
-                <button id="create-container-from-location" class="btn btn-outline-success btn-sm ms-2" type="button" style="border-radius: 50px;">
-                    <i class="fas fa-crosshairs me-1"></i>{{ _('Crear punt des de la meva ubicació') }}
-                </button>
-                {% else %}
-                <button id="suggest-container-from-location" class="btn btn-outline-warning btn-sm ms-2" type="button" style="border-radius: 50px;">
-                    <i class="fas fa-lightbulb me-1"></i>{{ _('Aquí hi ha contenidors') }}
-                </button>
-                {% endif %}
-            {% endif %}
         </div>
     </div>
 </section>
@@ -584,6 +411,26 @@
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Detectar si el sidebar tiene scroll y mostrar indicador
+        const categoryFilter = document.querySelector('.category-filter');
+        if (categoryFilter) {
+            function checkScrollable() {
+                if (categoryFilter.scrollHeight > categoryFilter.clientHeight) {
+                    categoryFilter.classList.add('scrollable');
+                } else {
+                    categoryFilter.classList.remove('scrollable');
+                }
+            }
+            
+            // Verificar al cargar y cuando cambie el contenido
+            checkScrollable();
+            categoryFilter.addEventListener('scroll', checkScrollable);
+            
+            // Observar cambios en el contenido (cuando se muestran/ocultan subcategorías)
+            const observer = new MutationObserver(checkScrollable);
+            observer.observe(categoryFilter, { childList: true, subtree: true });
+        }
+        
         // Initialize map centered on Tarragona
         // maxBounds se establecerá después de cargar el boundary
         var map = L.map('map', {
@@ -657,6 +504,7 @@
         
         // Capa para puntos de contenedores
         var containerPointsLayer = L.layerGroup();  // se añadirá/retirará según visibilidad (gestionado por control de capas)
+        var containerPointLayers = {};  // Mapa de pointId -> {polygon, iconMarker} para actualización en tiempo real
         var isContainerPointMode = false;
         var canManageContainers = {{ 'true' if current_user.is_authenticated and (current_user.has_role('admin') or current_user.has_role('section_responsible')) else 'false' }};
         var canSuggestContainers = {{ 'true' if current_user.is_authenticated else 'false' }};
@@ -1091,6 +939,7 @@
                 .then(response => response.json())
                 .then(points => {
                     containerPointsLayer.clearLayers();
+                    containerPointLayers = {};  // Limpiar referencias anteriores
                     
                     points.forEach(function(point) {
                         if (!point.geometry) {
@@ -1246,6 +1095,13 @@
                             interactive: false
                         });
                         containerPointsLayer.addLayer(iconMarker);
+                        
+                        // Guardar referencias para actualización en tiempo real
+                        containerPointLayers[point.id] = {
+                            polygon: polygon,
+                            iconMarker: iconMarker,
+                            point: point
+                        };
                     });
                     
                     // La visibilidad de la capa se gestiona mediante el control de capas
@@ -1254,6 +1110,154 @@
                 .catch(error => {
                     console.error('Error loading container points:', error);
                 });
+        }
+        
+        // Función para actualizar un punto específico en tiempo real
+        function updateContainerPoint(pointId, updatedPoint) {
+            const layers = containerPointLayers[pointId];
+            if (!layers) {
+                // Si no tenemos referencias, recargar todos los puntos
+                loadContainerPoints();
+                return;
+            }
+            
+            const isOverflow = updatedPoint.status === 'overflow';
+            
+            // Actualizar estilo del polígono
+            function styleOverflowLayer(layer) {
+                layer.setStyle({
+                    fillColor: isOverflow ? '#FF3B3B' : '#4A9B5C',
+                    fillOpacity: isOverflow ? 0.7 : 0.15,
+                    color: isOverflow ? '#FF3B3B' : '#4A9B5C',
+                    weight: isOverflow ? 4 : 2,
+                    opacity: 1,
+                });
+            }
+            
+            if (layers.polygon instanceof L.LayerGroup) {
+                layers.polygon.eachLayer(styleOverflowLayer);
+            } else {
+                styleOverflowLayer(layers.polygon);
+            }
+            
+            // Actualizar animación de parpadeo
+            if (layers.polygon instanceof L.LayerGroup) {
+                layers.polygon.eachLayer(function(layer) {
+                    if (layer._containerBlinkInterval) {
+                        clearInterval(layer._containerBlinkInterval);
+                        layer._containerBlinkInterval = null;
+                    }
+                });
+            } else if (layers.polygon._containerBlinkInterval) {
+                clearInterval(layers.polygon._containerBlinkInterval);
+                layers.polygon._containerBlinkInterval = null;
+            }
+            
+            if (isOverflow) {
+                const blinkLayers = [];
+                if (layers.polygon instanceof L.LayerGroup) {
+                    layers.polygon.eachLayer(function(layer) {
+                        blinkLayers.push(layer);
+                    });
+                } else {
+                    blinkLayers.push(layers.polygon);
+                }
+                
+                blinkLayers.forEach(function(layer) {
+                    let on = true;
+                    const interval = setInterval(function() {
+                        on = !on;
+                        if (on) {
+                            layer.setStyle({
+                                fillOpacity: 0.85,
+                                weight: 5,
+                                color: '#FF0000'
+                            });
+                        } else {
+                            layer.setStyle({
+                                fillOpacity: 0.05,
+                                weight: 1,
+                                color: '#FFB3B3'
+                            });
+                        }
+                    }, 350);
+                    layer._containerBlinkInterval = interval;
+                });
+            }
+            
+            // Actualizar icono
+            const iconHtml = `
+                <div class="container-point-icon ${isOverflow ? 'overflow' : 'normal'}">
+                    <i class="fas fa-dumpster"></i>
+                </div>
+            `;
+            const newIcon = L.divIcon({
+                className: 'container-point-icon-wrapper',
+                html: iconHtml,
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            });
+            layers.iconMarker.setIcon(newIcon);
+            
+            // Actualizar popup
+            const statusLabel = isOverflow ? '{{ _("Desbordat") }}' : '{{ _("Normal") }}';
+            const coordsText = updatedPoint.address 
+                ? updatedPoint.address 
+                : `(${updatedPoint.latitude.toFixed(5)}, ${updatedPoint.longitude.toFixed(5)})`;
+            let actionsHtml = '';
+            if (canManageContainers) {
+                actionsHtml = `
+                    <div class="mt-2 d-flex gap-1">
+                        <button class="btn btn-sm ${isOverflow ? 'btn-success' : 'btn-warning'} flex-fill" onclick="window.toggleContainerStatus(${pointId}, '${isOverflow ? 'normal' : 'overflow'}')">
+                            ${isOverflow ? '{{ _("Marcar com a normal") }}' : '{{ _("Marcar com desbordat") }}'}
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="window.deleteContainerPoint(${pointId})">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                `;
+            } else if (isAuthenticated && isOverflow) {
+                actionsHtml = `
+                    <div class="mt-2">
+                        <small class="text-muted">{{ _('Aquest punt ja està marcat com desbordat') }}</small>
+                    </div>
+                `;
+            } else {
+                actionsHtml = `
+                    <div class="mt-2">
+                        <small class="text-muted">{{ _('Inicia sessió per reportar que està desbordat') }}</small>
+                    </div>
+                `;
+            }
+            
+            const popupHtml = `
+                <div style="min-width: 160px;">
+                    <h6 class="fw-bold mb-1">{{ _('Punt de contenidors') }}</h6>
+                    <p class="small mb-1">
+                        <i class="fas fa-map-marker-alt me-1"></i>
+                        ${coordsText}
+                    </p>
+                    <p class="small mb-1">
+                        <span class="badge ${isOverflow ? 'bg-danger' : 'bg-success'}">${statusLabel}</span>
+                    </p>
+                    ${updatedPoint.last_overflow_report ? `
+                        <p class="small text-muted mb-1">{{ _('Darrer report de desbordament') }}:<br>${new Date(updatedPoint.last_overflow_report).toLocaleString()}</p>
+                    ` : ''}
+                    ${updatedPoint.notes ? `<p class="small mb-1">${updatedPoint.notes}</p>` : ''}
+                    ${actionsHtml}
+                </div>
+            `;
+            
+            if (layers.polygon instanceof L.LayerGroup) {
+                layers.polygon.eachLayer(function(layer) {
+                    layer.setPopupContent(popupHtml);
+                });
+            } else {
+                layers.polygon.setPopupContent(popupHtml);
+            }
+            
+            // Actualizar referencia del punto
+            layers.point = updatedPoint;
         }
         
         // Funciones accesibles desde popup (window.*)
@@ -1282,8 +1286,26 @@
                     }
                     return;
                 }
-                // Recarregar punts per actualitzar estat/blinking
-                loadContainerPoints();
+                
+                // Obtener datos actualizados del punto desde el backend
+                fetch('{{ url_for("inventory.api_container_points") }}')
+                    .then(response => response.json())
+                    .then(points => {
+                        const updatedPoint = points.find(p => p.id === pointId);
+                        if (updatedPoint) {
+                            // Actualizar solo este punto en tiempo real
+                            updateContainerPoint(pointId, updatedPoint);
+                        } else {
+                            // Si no encontramos el punto, recargar todos
+                            loadContainerPoints();
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error fetching updated point:', err);
+                        // Fallback: recargar todos los puntos
+                        loadContainerPoints();
+                    });
+                
                 if (button) {
                     button.disabled = true;
                     button.innerHTML = '{{ _("Gràcies!") }}';
@@ -1365,6 +1387,9 @@
             var toggleModeBtn = document.getElementById('toggle-container-mode');
             var createFromLocationBtn = document.getElementById('create-container-from-location');
             
+            // Variable para almacenar el handler del click del mapa
+            var mapClickHandler = null;
+            
             if (toggleModeBtn) {
                 toggleModeBtn.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -1376,6 +1401,16 @@
                         map.getContainer().style.cursor = 'crosshair';
                         // En mode contenidors, els cercles han de poder rebre clics
                         containerPane.style.pointerEvents = 'auto';
+                        
+                        // Añadir handler del click del mapa solo cuando el modo está activo
+                        if (!mapClickHandler) {
+                            mapClickHandler = function(e) {
+                                if (e.latlng && isContainerPointMode) {
+                                    handleContainerPointCreation(e.latlng);
+                                }
+                            };
+                            map.on('click', mapClickHandler);
+                        }
                     } else {
                         this.classList.remove('btn-primary');
                         this.classList.add('btn-outline-primary');
@@ -1383,6 +1418,12 @@
                         map.getContainer().style.cursor = '';
                         // Fora de mode contenidors, deixem passar els clics als markers d'inventari
                         containerPane.style.pointerEvents = 'none';
+                        
+                        // Remover handler del click del mapa cuando se desactiva el modo
+                        if (mapClickHandler) {
+                            map.off('click', mapClickHandler);
+                            mapClickHandler = null;
+                        }
                     }
                 });
             }
@@ -1519,10 +1560,6 @@
                 });
             }
             
-            // Crear punto al hacer clic en el mapa cuando el modo está activo
-            map.on('click', function(e) {
-                handleContainerPointCreation(e.latlng);
-            });
         }
         
         // Botón para sugerir puntos desde ubicación (usuarios normales)

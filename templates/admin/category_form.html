@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if category %}{{ _('Editar Categoria') }}{% else %}{{ _('Nova Categoria') }}{% endif %} - Tarracograf
+{% endblock %}
+
+{% block content %}
+<section class="py-5" style="padding-top: 4rem !important;">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="text-center mb-5">
+                    <h1 class="display-5 fw-bold mb-3">
+                        <i class="fas fa-{% if category %}edit{% else %}plus-circle{% endif %} text-primary me-2"></i>
+                        {% if category %}
+                            {{ _('Editar Categoria') }}
+                        {% elif parent_category %}
+                            {{ _('Nova Subcategoria') }}
+                        {% else %}
+                            {{ _('Nova Categoria') }}
+                        {% endif %}
+                    </h1>
+                    <p class="lead text-muted">
+                        {% if category %}
+                            {{ _('Modifica els detalls de la categoria') }}
+                        {% elif parent_category %}
+                            {{ _('Afegeix una nova subcategoria a') }} <strong>{{ parent_category.get_name() }}</strong>
+                        {% else %}
+                            {{ _('Crea una nova categoria per al inventari') }}
+                        {% endif %}
+                    </p>
+                </div>
+                
+                <div class="card shadow-lg border-0" style="border-radius: 20px;">
+                    <div class="card-body p-5">
+                        <form method="POST" class="needs-validation" novalidate>
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <!-- Code -->
+                            <div class="mb-4">
+                                <label for="code" class="form-label fw-semibold">
+                                    <i class="fas fa-code me-2 text-primary"></i>{{ _('Codi') }} *
+                                </label>
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       id="code" 
+                                       name="code" 
+                                       value="{{ category.code if category else '' }}" 
+                                       placeholder="ex: coloms, niu, etc."
+                                       required
+                                       pattern="[a-z0-9_]+"
+                                       {% if category %}readonly{% endif %}>
+                                <div class="invalid-feedback">
+                                    {{ _('El codi és obligatori i només pot contenir lletres minúscules, números i guions baixos') }}
+                                </div>
+                                <small class="form-text text-muted">
+                                    {{ _('Codi únic en minúscules (s\'utilitza per a les traduccions). Ex: coloms, niu, abocaments') }}
+                                    {% if category %}
+                                    <br><span class="text-warning">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>{{ _('El codi no es pot modificar després de crear la categoria') }}
+                                    </span>
+                                    {% endif %}
+                                </small>
+                            </div>
+
+                            <!-- Icon -->
+                            <div class="mb-4">
+                                <label for="icon" class="form-label fw-semibold">
+                                    <i class="fas fa-smile me-2 text-primary"></i>{{ _('Icona') }}
+                                </label>
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       id="icon" 
+                                       name="icon" 
+                                       value="{{ category.icon if category else '' }}" 
+                                       placeholder="🕊️, 🗑️, 💡, etc."
+                                       maxlength="10">
+                                <small class="form-text text-muted">
+                                    {{ _('Emoji o classe Font Awesome (ex: fa-dove). Deixa en blanc si no vols icona') }}
+                                </small>
+                            </div>
+
+                            <!-- Sort Order -->
+                            <div class="mb-4">
+                                <label for="sort_order" class="form-label fw-semibold">
+                                    <i class="fas fa-sort-numeric-down me-2 text-primary"></i>{{ _('Ordre de Classificació') }}
+                                </label>
+                                <input type="number" 
+                                       class="form-control form-control-lg" 
+                                       id="sort_order" 
+                                       name="sort_order" 
+                                       value="{{ category.sort_order if category else 0 }}" 
+                                       min="0"
+                                       step="1">
+                                <small class="form-text text-muted">
+                                    {{ _('Número per ordenar les categories (0 = primer, números més alts apareixen després)') }}
+                                </small>
+                            </div>
+
+                            <!-- Active Status -->
+                            <div class="mb-4">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" 
+                                           type="checkbox" 
+                                           id="is_active" 
+                                           name="is_active"
+                                           {% if category and category.is_active or not category %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold" for="is_active">
+                                        <i class="fas fa-check-circle me-2 text-success"></i>{{ _('Activa') }}
+                                    </label>
+                                </div>
+                                <small class="form-text text-muted d-block mt-2">
+                                    {{ _('Les categories inactives no apareixeran als filtres ni als formularis') }}
+                                </small>
+                            </div>
+
+                            <!-- Parent Category Info (if subcategory) -->
+                            {% if parent_category %}
+                            <div class="alert alert-info mb-4">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>{{ _('Subcategoria de') }}:</strong> {{ parent_category.icon }} {{ parent_category.get_name() }} (<code>{{ parent_category.code }}</code>)
+                            </div>
+                            {% endif %}
+
+                            <!-- Buttons -->
+                            <div class="d-flex justify-content-between mt-5">
+                                <a href="{{ url_for('admin.manage_categories') }}" class="btn btn-outline-secondary btn-lg" style="border-radius: 50px;">
+                                    <i class="fas fa-times me-2"></i>{{ _('Cancel·lar') }}
+                                </a>
+                                <button type="submit" class="btn btn-primary btn-lg" style="border-radius: 50px;">
+                                    <i class="fas fa-save me-2"></i>
+                                    {% if category %}{{ _('Guardar Canvis') }}{% else %}{{ _('Crear Categoria') }}{% endif %}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Help Card -->
+                <div class="card border-0 shadow-sm mt-4" style="border-radius: 20px; background: #f8f9fa;">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold mb-3">
+                            <i class="fas fa-question-circle text-primary me-2"></i>{{ _('Informació') }}
+                        </h6>
+                        <ul class="mb-0 small text-muted">
+                            <li>{{ _('El codi s\'utilitza com a clau per a les traduccions en els fitxers .po') }}</li>
+                            <li>{{ _('Afegeix la traducció del codi en català i espanyol als fitxers de traducció') }}</li>
+                            <li>{{ _('Les categories principals no tenen categoria pare, les subcategories sí') }}</li>
+                            <li>{{ _('L\'ordre de classificació determina l\'ordre d\'aparició als filtres') }}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+// Bootstrap validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+</script>
+{% endblock %}
+

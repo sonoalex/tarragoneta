@@ -84,7 +84,7 @@
     });
     
     // Category icons with optional image
-    function getCategoryIcon(category, imageUrl) {
+    function getCategoryIcon(category, imageUrl, emoji) {
         var colors = {
             'excremento': '#8B4513',
             'nido': '#D2691E',
@@ -94,6 +94,8 @@
             'vertidos': '#4ECDC4',
             'otro': '#696969'
         };
+        
+        // Fallback de emojis (solo si no viene del backend)
         var emojis = {
             'excremento': '💩',
             'nido': '🪺',
@@ -103,6 +105,9 @@
             'vertidos': '💧',
             'otro': '📌'
         };
+        
+        // Usar emoji del backend directamente, o fallback
+        var emojiToUse = emoji || emojis[category] || '📌';
         
         var size = 40; // Increased size to accommodate images
         var iconSize = [size, size];
@@ -128,7 +133,7 @@
                                         object-fit: cover;
                                         border-radius: 50%;" 
                                  alt="${category}"
-                                 onerror="this.style.display='none'; this.parentElement.innerHTML='${emojis[category] || '📌'}'; this.parentElement.style.fontSize='20px';">
+                                 onerror="this.style.display='none'; this.parentElement.innerHTML='${emojiToUse}'; this.parentElement.style.fontSize='20px';">
                         </div>`,
                 iconSize: iconSize,
                 iconAnchor: iconAnchor
@@ -147,23 +152,10 @@
                               display: flex;
                               align-items: center;
                               justify-content: center;
-                              font-size: 18px;">${emojis[category] || '📌'}</div>`,
+                              font-size: 18px;">${emojiToUse}</div>`,
             iconSize: iconSize,
             iconAnchor: iconAnchor
         });
-    }
-    
-    function getCategoryEmoji(category) {
-        var emojis = {
-            'excremento': '💩',
-            'nido': '🪺',
-            'plumas': '🪶',
-            'escombreries_desbordades': '🗑️',
-            'basura_desbordada': '🗑️',
-            'vertidos': '💧',
-            'otro': '📌'
-        };
-        return emojis[category] || '📌';
     }
     
     // Store reference to all markers for easy removal
@@ -206,7 +198,7 @@
     function createPopupContent(item) {
         return `
             <div style="min-width: 250px;">
-                <h6 class="fw-bold mb-2">${getCategoryEmoji(item.subcategory)} ${item.full_category}</h6>
+                <h6 class="fw-bold mb-2">${item.emoji || '📌'} ${item.full_category}</h6>
                 ${item.description ? `<p class="small mb-2">${item.description}</p>` : ''}
                 ${item.address ? `<p class="small text-muted mb-2"><i class="fas fa-map-marker-alt"></i> ${item.address}</p>` : ''}
                 ${item.reporter ? `<p class="small text-muted mb-2"><i class="fas fa-user"></i> ${item.reporter}</p>` : ''}
@@ -240,7 +232,7 @@
                     var popupContent = createPopupContent(item);
                     
                     var marker = L.marker([item.latitude, item.longitude], {
-                        icon: getCategoryIcon(item.subcategory, item.image_url_thumbnail)
+                        icon: getCategoryIcon(item.subcategory, item.image_url_thumbnail, item.emoji)
                     });
                     
                     marker.bindPopup(popupContent);

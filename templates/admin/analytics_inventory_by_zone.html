@@ -3,7 +3,7 @@
 {% block title %}{{ _('Inventari per Zona') }} - Tarracograf{% endblock %}
 
 {% block content %}
-<section class="py-5" style="padding-top: 8rem !important;">
+<section class="py-5" style="padding-top: 4rem !important;">
     <div class="container-fluid px-4">
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -43,8 +43,17 @@
                         <label class="form-label">{{ _('Categoria') }}</label>
                         <select name="category" class="form-select">
                             <option value="">{{ _('Totes') }}</option>
+                            {% if db_categories %}
+                            {% for cat in db_categories %}
+                            <option value="{{ cat.code }}" {% if filters.category == cat.code %}selected{% endif %}>
+                                {{ cat.icon }} {{ cat.get_name() }}
+                            </option>
+                            {% endfor %}
+                            {% else %}
+                            {# Fallback to hardcoded if BD is empty #}
                             <option value="coloms" {% if filters.category == 'coloms' %}selected{% endif %}>{{ _('Coloms') }}</option>
-                            <option value="brossa" {% if filters.category == 'brossa' %}selected{% endif %}>{{ _('Brossa') }}</option>
+                            <option value="contenidors" {% if filters.category == 'contenidors' %}selected{% endif %}>{{ _('Contenidors') }}</option>
+                            {% endif %}
                         </select>
                     </div>
                     <div class="col-md-2">
@@ -148,5 +157,119 @@
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+{% if report_data and report_data|length > 0 %}
+// Prepare data for charts
+const districtData = {};
+const categoryData = {};
+
+{% for district_name, sections_list in report_data %}
+{% set district_total = 0 %}
+{% for section_code, section_data in sections_list %}
+{% set district_total = district_total + section_data.total %}
+{% for cat_key, count in section_data.by_category %}
+{% set parts = cat_key.split('->') %}
+{% set cat = parts[0] if parts|length > 0 else cat_key %}
+if (!categoryData['{{ cat }}']) categoryData['{{ cat }}'] = 0;
+categoryData['{{ cat }}'] += {{ count }};
+{% endfor %}
+{% endfor %}
+districtData['{{ district_name }}'] = {{ district_total }};
+{% endfor %}
+
+// Bar Chart: By District
+const districtCtx = document.getElementById('districtChart');
+if (districtCtx) {
+    const districtLabels = Object.keys(districtData);
+    const districtValues = Object.values(districtData);
+    
+    new Chart(districtCtx, {
+        type: 'bar',
+        data: {
+            labels: districtLabels,
+            datasets: [{
+                label: '{{ _("Total Items") }}',
+                data: districtValues,
+                backgroundColor: 'rgba(13, 110, 253, 0.8)',
+                borderColor: 'rgba(13, 110, 253, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Pie Chart: By Category
+const categoryCtx = document.getElementById('categoryChart');
+if (categoryCtx) {
+    const categoryLabels = Object.keys(categoryData);
+    const categoryValues = Object.values(categoryData);
+    
+    const colors = [
+        'rgba(13, 110, 253, 0.8)',
+        'rgba(25, 135, 84, 0.8)',
+        'rgba(255, 193, 7, 0.8)',
+        'rgba(220, 53, 69, 0.8)',
+        'rgba(13, 202, 240, 0.8)',
+        'rgba(111, 66, 193, 0.8)',
+        'rgba(253, 126, 20, 0.8)',
+        'rgba(32, 201, 151, 0.8)'
+    ];
+    
+    new Chart(categoryCtx, {
+        type: 'pie',
+        data: {
+            labels: categoryLabels,
+            datasets: [{
+                data: categoryValues,
+                backgroundColor: categoryLabels.map((_, i) => colors[i % colors.length]),
+                borderColor: categoryLabels.map((_, i) => colors[i % colors.length].replace('0.8', '1')),
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'right'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((context.parsed / total) * 100).toFixed(1);
+                            return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+{% endif %}
+</script>
 {% endblock %}
 
