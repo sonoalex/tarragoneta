@@ -264,9 +264,9 @@ class InventoryForm(FlaskForm):
         }
         
         if category_code not in valid_subcategories:
-            from wtforms.validators import ValidationError
-            raise ValidationError(_('Categoría no válida'))
+                from wtforms.validators import ValidationError
+                raise ValidationError(_('Categoría no válida'))
         if subcategory_code not in valid_subcategories.get(category_code, []):
-            from wtforms.validators import ValidationError
-            raise ValidationError(_('Subcategoría no válida para esta categoría'))
+                from wtforms.validators import ValidationError
+                raise ValidationError(_('Subcategoría no válida para esta categoría'))
 

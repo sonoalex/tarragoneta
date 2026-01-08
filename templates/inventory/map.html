@@ -1739,9 +1739,15 @@
                                     <strong>${item.importance_count || 0}</strong>
                                 </span>
                                 ${item.resolved_count > 0 ? `<span class="text-warning"><i class="fas fa-times-circle" style="font-size: 0.65rem;"></i> <strong>${item.resolved_count}</strong></span>` : ''}
-                                <a href="/inventory/${item.id}" class="text-primary" style="font-size: 0.7rem;" title="{{ _('Veure detalls') }}">
-                                    <i class="fas fa-eye"></i>
-                                </a>
+                                ${item.share_count > 0 ? `<span class="text-info"><i class="fas fa-share-alt" style="font-size: 0.65rem;"></i> <strong>${item.share_count || 0}</strong></span>` : ''}
+                                <div class="d-flex gap-1 align-items-center">
+                                    <a href="/inventory/${item.id}" class="text-primary" style="font-size: 0.7rem;" title="{{ _('Veure detalls') }}">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="/inventory/${item.id}" class="text-info share-btn" data-url="${window.location.origin}/inventory/${item.id}" data-title="${item.full_category}" data-item-id="${item.id}" style="font-size: 0.7rem; cursor: pointer;" title="{{ _('Compartir') }}">
+                                        <i class="fas fa-share-alt"></i>
+                                    </a>
+                                </div>
                             </div>
                             ${voteButton || resolveButton ? `
                                 <div class="mt-1 pt-1 border-top d-flex gap-1 justify-content-center" style="padding-top: 0.25rem !important; margin-top: 0.25rem !important;">
@@ -1792,6 +1798,18 @@
                                 e.stopPropagation();
                                 var itemId = this.getAttribute('data-item-id');
                                 resolveItem(itemId, this);
+                            });
+                        });
+                        
+                        // Re-bind share buttons after popup opens
+                        document.querySelectorAll('.share-btn').forEach(function(btn) {
+                            btn.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                var url = this.getAttribute('data-url');
+                                var title = this.getAttribute('data-title');
+                                var itemId = this.getAttribute('data-item-id');
+                                shareItem(url, title, itemId);
                             });
                         });
                     }, 100);
@@ -2027,6 +2045,165 @@
                 }
                 button.disabled = false;
                 button.innerHTML = '<i class="fas fa-times-circle me-1"></i>{{ _("Ja no hi és") }}';
+            });
+        }
+        
+        // Share function - always show modal (no native share)
+        function shareItem(url, title, itemId) {
+            openShareModal(url, title, itemId);
+        }
+        
+        // Function to increment share count
+        function incrementShareCount(itemId) {
+            console.log('Incrementing share count for item:', itemId);
+            if (!itemId) {
+                console.error('No itemId provided');
+                return;
+            }
+            fetch(`/inventory/api/items/${itemId}/share`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Share count response:', data);
+                if (data.success) {
+                    // Update share count in popup if visible
+                    var shareCountSpan = document.querySelector(`[data-item-id="${itemId}"]`)?.closest('.leaflet-popup-content')?.querySelector('.text-info strong');
+                    if (shareCountSpan && shareCountSpan.textContent) {
+                        shareCountSpan.textContent = data.share_count;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error incrementing share count:', error);
+            });
+        }
+        
+        // Open share modal
+        function openShareModal(url, title, itemId) {
+            // Create a temporary element with share modal
+            var shareDiv = document.createElement('div');
+            var shareText = title + ' ' + url;
+            shareDiv.innerHTML = `
+                <div class="modal fade" id="shareModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">{{ _('Compartir') }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body text-center">
+                                <p class="mb-3">{{ _('Comparteix aquest item a les xarxes socials') }}</p>
+                                <div class="d-flex justify-content-center gap-3">
+                                <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}" 
+                                   target="_blank" 
+                                   class="btn btn-lg rounded-circle d-flex align-items-center justify-content-center share-facebook-btn" 
+                                   data-item-id="${itemId}"
+                                   style="width: 50px; height: 50px; background-color: #1877F2; border: none; padding: 0;">
+                                    <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+                                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                                    </svg>
+                                </a>
+                                <a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}" 
+                                   target="_blank" 
+                                   class="btn btn-lg rounded-circle d-flex align-items-center justify-content-center share-twitter-btn" 
+                                   data-item-id="${itemId}"
+                                   style="width: 50px; height: 50px; background-color: #1DA1F2; border: none; padding: 0;">
+                                    <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+                                        <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                                    </svg>
+                                </a>
+                                <a href="https://wa.me/?text=${encodeURIComponent('¡Epp! ¡Mira què hi ha aquí! 📸\n\n' + title + '\n\n' + url)}" 
+                                   target="_blank" 
+                                   class="btn btn-lg rounded-circle d-flex align-items-center justify-content-center share-whatsapp-btn" 
+                                   data-item-id="${itemId}"
+                                   style="width: 50px; height: 50px; background-color: #25D366; border: none; padding: 0;">
+                                    <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+                                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                                    </svg>
+                                </a>
+                                <button id="share-link-btn" 
+                                        class="btn btn-secondary btn-lg rounded-circle d-flex align-items-center justify-content-center" 
+                                        data-item-id="${itemId}"
+                                        style="width: 50px; height: 50px; padding: 0;">
+                                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                        <path d="M4.715 6.542 3.343 7.914a3.201 3.201 0 0 0 4.486 4.486l1.828-1.829a3.2 3.2 0 0 0 0-4.486l-1.829-1.828-1.414 1.414z"/>
+                                        <path d="M6.586 4.672V3.39a1.5 1.5 0 0 1 1.5-1.5h5.976a1.5 1.5 0 0 1 1.5 1.5v5.976a1.5 1.5 0 0 1-1.5 1.5h-2.282l-1.414-1.414h2.282V3.39H8.086v1.282H6.586z"/>
+                                        <path d="M11.314 4.672V3.39a1.5 1.5 0 0 0-1.5-1.5H3.928a1.5 1.5 0 0 0-1.5 1.5v5.976a1.5 1.5 0 0 0 1.5 1.5h2.282v1.282H3.928a2.5 2.5 0 0 1-2.5-2.5V3.39a2.5 2.5 0 0 1 2.5-2.5h5.886a2.5 2.5 0 0 1 2.5 2.5v1.282z"/>
+                                    </svg>
+                                </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(shareDiv);
+            
+            // Wait for modal to be in DOM before adding event listeners
+            setTimeout(function() {
+                var modalItemId = itemId;
+                console.log('Setting up share buttons for item:', modalItemId);
+                var shareButtons = document.querySelectorAll('.share-facebook-btn, .share-twitter-btn, .share-whatsapp-btn');
+                console.log('Found share buttons:', shareButtons.length);
+                shareButtons.forEach(function(btn) {
+                    btn.addEventListener('click', function(e) {
+                        console.log('Share button clicked, itemId:', modalItemId);
+                        incrementShareCount(modalItemId);
+                    });
+                });
+                
+                var linkBtn = document.getElementById('share-link-btn');
+                if (linkBtn) {
+                    linkBtn.addEventListener('click', function() {
+                        navigator.clipboard.writeText(url).then(function() {
+                            incrementShareCount(modalItemId);
+                            showToast('Enllaç copiat! 🔗', 'URL copiada al portapapers', 'success');
+                            document.getElementById('shareModal').querySelector('[data-bs-dismiss]').click();
+                        });
+                    });
+                }
+            }, 100);
+            
+            // Toast function
+            function showToast(title, message, type) {
+                var toastDiv = document.createElement('div');
+                toastDiv.className = 'toast align-items-center text-white bg-' + (type === 'success' ? 'success' : 'info') + ' border-0';
+                toastDiv.setAttribute('role', 'alert');
+                toastDiv.setAttribute('aria-live', 'assertive');
+                toastDiv.setAttribute('aria-atomic', 'true');
+                toastDiv.style.position = 'fixed';
+                toastDiv.style.top = '20px';
+                toastDiv.style.right = '20px';
+                toastDiv.style.zIndex = '9999';
+                toastDiv.innerHTML = `
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <strong>${title}</strong><br>
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                `;
+                document.body.appendChild(toastDiv);
+                var toast = new bootstrap.Toast(toastDiv, { delay: 3000 });
+                toast.show();
+                toastDiv.addEventListener('hidden.bs.toast', function() {
+                    toastDiv.remove();
+                });
+            }
+            
+            var shareModal = new bootstrap.Modal(document.getElementById('shareModal'));
+            shareModal.show();
+            // Remove modal from DOM after it's hidden
+            document.getElementById('shareModal').addEventListener('hidden.bs.modal', function() {
+                shareDiv.remove();
             });
         }
     });

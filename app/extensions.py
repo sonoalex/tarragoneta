@@ -6,6 +6,7 @@ from flask_security import Security, SQLAlchemyUserDatastore
 from flask_mail import Mail
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_share import Share
 
 # Initialize extensions (will be initialized in app factory)
 db = SQLAlchemy()
@@ -14,6 +15,7 @@ csrf = CSRFProtect()
 babel = Babel()
 security = Security()
 mail = Mail()
+share = Share()
 # Limiter will be initialized in init_extensions with app context
 limiter = None
 
@@ -51,6 +53,9 @@ def init_extensions(app):
     # Flask-Mail handles SMTP connections internally
     # Timeout is handled at the thread level in SMTPEmailProvider
     mail.init_app(app)
+    
+    # Initialize Flask-Share for social media sharing
+    share.init_app(app)
     
     # Initialize Dependency Injection Container
     from app.container import get_container
