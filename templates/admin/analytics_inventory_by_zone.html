@@ -128,11 +128,18 @@
                                     <tbody>
                                         {% for item in section_data['items'] %}
                                         <tr>
-                                            {% set main_cats = item.categories|selectattr('parent_id', 'none')|list %}
-                                            {% set sub_cats = item.categories|rejectattr('parent_id', 'none')|list %}
+                                            {% set main_cats = [] %}
+                                            {% set sub_cats = [] %}
+                                            {% for cat in item.categories %}
+                                                {% if cat.parent_id is none %}
+                                                    {% set _ = main_cats.append(cat) %}
+                                                {% else %}
+                                                    {% set _ = sub_cats.append(cat) %}
+                                                {% endif %}
+                                            {% endfor %}
                                             {% set item_category = main_cats[0].code if main_cats else None %}
                                             {% set item_subcategory = sub_cats[0].code if sub_cats else None %}
-                                            <td>{{ get_inventory_category_name(item_category, item_subcategory) }}</td>
+                                            <td>{{ get_inventory_category_name(item_category) }}</td>
                                             <td>{{ get_inventory_subcategory_name(item_subcategory) }}</td>
                                             <td>{{ item.address or '-' }}</td>
                                             <td><span class="badge bg-info">{{ item.importance_count }}</span></td>
