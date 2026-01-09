@@ -139,7 +139,7 @@
                                             {% endfor %}
                                             {% set item_category = main_cats[0].code if main_cats else None %}
                                             {% set item_subcategory = sub_cats[0].code if sub_cats else None %}
-                                            <td>{{ get_inventory_category_name(item_category) }}</td>
+                                            <td>{{ get_inventory_category_name(item_category, item_subcategory) }}</td>
                                             <td>{{ get_inventory_subcategory_name(item_subcategory) }}</td>
                                             <td>{{ item.address or '-' }}</td>
                                             <td><span class="badge bg-info">{{ item.importance_count }}</span></td>
