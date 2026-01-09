@@ -34,15 +34,23 @@ def _exclude_container_overflow_items(query):
     """
     Helper function to exclude 'escombreries_desbordades' and 'basura_desbordada' 
     from inventory item queries, as these are now handled by Container Points.
-    Updated to use new category code 'contenidors' (was 'basura').
+    Updated to use many-to-many relationship with InventoryCategory.
     """
-    # Support both new code ('contenidors') and legacy code ('basura') for compatibility
-    return query.filter(
-        ~(
-            ((InventoryItem.category == 'contenidors') | (InventoryItem.category == 'basura')) & 
-            (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada', 'deixadesa']))
+    # Buscar categorías de overflow
+    contenidors_cat = InventoryCategory.query.filter_by(code='contenidors', parent_id=None).first()
+    overflow_subcats = InventoryCategory.query.filter(
+        InventoryCategory.parent_id == contenidors_cat.id if contenidors_cat else None,
+        InventoryCategory.code.in_(['escombreries_desbordades', 'basura_desbordada', 'deixadesa'])
+    ).all() if contenidors_cat else []
+    
+    # Excluir items con categorías de overflow
+    if overflow_subcats:
+        overflow_category_ids = [cat.id for cat in overflow_subcats]
+        query = query.filter(
+            ~InventoryItem.categories.any(InventoryCategory.id.in_(overflow_category_ids))
         )
-    )
+    
+    return query
 
 @bp_public.route('/')
 def public_reports():
@@ -235,28 +243,18 @@ def inventory_by_zone():
     if section_id:
         query = query.filter(InventoryItem.section_id == section_id)
     if category:
-        # Normalize category from URL and search for both new and legacy codes
-        category_db = normalize_category_from_url(category)
-        legacy_map = {
-            'coloms': ['coloms', 'palomas'],
-            'contenidors': ['contenidors', 'basura'],
-            'canis': ['canis', 'perros'],
-            'mobiliari_deteriorat': ['mobiliari_deteriorat', 'material_deteriorat', 'mobiliari_urba'],
-        }
-        category_codes = legacy_map.get(category_db, [category_db])
-        query = query.filter(InventoryItem.category.in_(category_codes))
+        # Filtrar por categoría usando la relación many-to-many
+        category_obj = InventoryCategory.query.filter_by(code=normalize_category_from_url(category), parent_id=None).first()
+        if category_obj:
+            query = query.filter(InventoryItem.categories.any(InventoryCategory.id == category_obj.id))
     if subcategory:
-        # Normalize subcategory from URL and search for both new and legacy codes
-        subcategory_db = normalize_subcategory_from_url(subcategory)
-        legacy_sub_map = {
-            'niu': ['niu', 'nido'],
-            'excrement': ['excrement', 'excremento'],
-            'ploma': ['ploma', 'plomes', 'plumas'],  # Updated: plomes -> ploma
-            'abocaments': ['abocaments', 'vertidos'],
-            'deixadesa': ['deixadesa', 'escombreries_desbordades', 'basura_desbordada'],
-        }
-        subcategory_codes = legacy_sub_map.get(subcategory_db, [subcategory_db])
-        query = query.filter(InventoryItem.subcategory.in_(subcategory_codes))
+        # Filtrar por subcategoría usando la relación many-to-many
+        subcategory_obj = InventoryCategory.query.filter(
+            InventoryCategory.code == normalize_subcategory_from_url(subcategory),
+            InventoryCategory.parent_id.isnot(None)
+        ).first()
+        if subcategory_obj:
+            query = query.filter(InventoryItem.categories.any(InventoryCategory.id == subcategory_obj.id))
     if date_from:
         query = query.filter(InventoryItem.created_at >= datetime.strptime(date_from, '%Y-%m-%d'))
     if date_to:
@@ -291,7 +289,15 @@ def inventory_by_zone():
         report_data[district_name][section_code]['items'].append(item)
         report_data[district_name][section_code]['total'] += 1
         
-        cat_key = f"{item.category}->{item.subcategory}"
+        # Obtener categorías del item usando la relación many-to-many
+        main_cats = [cat for cat in item.categories if cat.parent_id is None]
+        sub_cats = [cat for cat in item.categories if cat.parent_id is not None]
+        if main_cats and sub_cats:
+            cat_key = f"{main_cats[0].code}->{sub_cats[0].code}"
+        elif main_cats:
+            cat_key = main_cats[0].code
+        else:
+            cat_key = "no-category"
         report_data[district_name][section_code]['by_category'][cat_key] = \
             report_data[district_name][section_code]['by_category'].get(cat_key, 0) + 1
     
@@ -378,12 +384,18 @@ def _export_inventory_csv(report_data, items):
     for district_name, sections in report_data.items():
         for section_code, section_data in sections.items():
             for item in section_data['items']:
+                # Obtener categorías del item usando la relación many-to-many
+                main_cats = [cat for cat in item.categories if cat.parent_id is None]
+                sub_cats = [cat for cat in item.categories if cat.parent_id is not None]
+                item_category = main_cats[0].code if main_cats else None
+                item_subcategory = sub_cats[0].code if sub_cats else None
+                
                 writer.writerow([
                     district_name,
                     section_data['section_name'],
                     section_code,
-                    get_inventory_category_name(item.category),
-                    get_inventory_subcategory_name(item.subcategory),
+                    get_inventory_category_name(item_category, item_subcategory),
+                    get_inventory_subcategory_name(item_subcategory),
                     item.description or '',
                     item.address or '',
                     item.latitude,
@@ -427,17 +439,10 @@ def trends():
     if date_to:
         query = query.filter(InventoryItem.created_at <= datetime.strptime(date_to, '%Y-%m-%d'))
     if category:
-        # Search for both new code and legacy code for compatibility
-        from sqlalchemy import or_
-        # Map new codes to legacy codes for filtering
-        legacy_map = {
-            'coloms': ['coloms', 'palomas'],
-            'contenidors': ['contenidors', 'basura'],
-            'canis': ['canis', 'perros'],
-            'mobiliari_deteriorat': ['mobiliari_deteriorat', 'material_deteriorat', 'mobiliari_urba'],
-        }
-        category_codes = legacy_map.get(category, [category])
-        query = query.filter(InventoryItem.category.in_(category_codes))
+        # Filtrar por categoría usando la relación many-to-many
+        category_obj = InventoryCategory.query.filter_by(code=category, parent_id=None).first()
+        if category_obj:
+            query = query.filter(InventoryItem.categories.any(InventoryCategory.id == category_obj.id))
     if district_id:
         district = District.query.get(district_id)
         if district:
@@ -460,11 +465,13 @@ def trends():
                 'by_category': {}
             }
         trends_data[date_key]['total'] += 1
-        # Use translated category name for display
-        cat_key = get_inventory_category_name(item.category)
-        trends_data[date_key]['by_category'][cat_key] = \
-            trends_data[date_key]['by_category'].get(cat_key, 0) + 1
-        category_totals[cat_key] += 1  # Track total per category
+        # Obtener categorías del item usando la relación many-to-many
+        main_cats = [cat for cat in item.categories if cat.parent_id is None]
+        if main_cats:
+            cat_key = get_inventory_category_name(main_cats[0].code)
+            trends_data[date_key]['by_category'][cat_key] = \
+                trends_data[date_key]['by_category'].get(cat_key, 0) + 1
+            category_totals[cat_key] += 1  # Track total per category
     
     # Get top N categories (e.g., top 5) and group the rest as "Altres"
     MAX_CATEGORIES_TO_SHOW = 5
@@ -565,40 +572,39 @@ def top_categories():
     district_id = request.args.get('district_id', type=int)
     format = request.args.get('format', 'html')
     
-    # Build query
-    query = db.session.query(
-        InventoryItem.category,
-        InventoryItem.subcategory,
-        Section.district_code,
-        Section.code,
-        func.count(InventoryItem.id).label('count')
-    ).join(
-        Section, InventoryItem.section_id == Section.id, isouter=True
-    ).filter(
-        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
-    ).filter(
-        ~(
-            ((InventoryItem.category == 'contenidors') | (InventoryItem.category == 'basura')) & 
-            (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada', 'deixadesa']))
+    # Build query usando relación many-to-many
+    # Primero obtener items con sus categorías
+    base_query = _exclude_container_overflow_items(
+        InventoryItem.query.filter(
+            InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
         )
-    ).group_by(
-        InventoryItem.category,
-        InventoryItem.subcategory,
-        Section.district_code,
-        Section.code
-    )
+    ).join(Section, InventoryItem.section_id == Section.id, isouter=True)
     
     if district_id:
         district = District.query.get(district_id)
         if district:
-            query = query.filter(Section.district_code == district.code)
+            base_query = base_query.filter(Section.district_code == district.code)
     
-    results = query.all()
+    items = base_query.all()
     
-    # Organize data
+    # Organize data - agrupar por categoría y zona
     report_data = {}
-    for category, subcategory, district_code, section_code, count in results:
-        cat_key = f"{category}->{subcategory}"
+    for item in items:
+        # Obtener categorías del item usando la relación many-to-many
+        main_cats = [cat for cat in item.categories if cat.parent_id is None]
+        sub_cats = [cat for cat in item.categories if cat.parent_id is not None]
+        
+        if not main_cats:
+            continue  # Skip items sin categorías
+        
+        category = main_cats[0].code
+        subcategory = sub_cats[0].code if sub_cats else None
+        
+        section = item.section
+        district_code = section.district_code if section else None
+        section_code = section.code if section else None
+        
+        cat_key = f"{category}->{subcategory}" if subcategory else category
         zone_key = f"{district_code}-{section_code}" if district_code and section_code else _("Sense secció")
         
         if cat_key not in report_data:
@@ -609,9 +615,9 @@ def top_categories():
                 'by_zone': {}
             }
         
-        report_data[cat_key]['total'] += count
+        report_data[cat_key]['total'] += 1
         report_data[cat_key]['by_zone'][zone_key] = \
-            report_data[cat_key]['by_zone'].get(zone_key, 0) + count
+            report_data[cat_key]['by_zone'].get(zone_key, 0) + 1
     
     # Sort by total
     sorted_data = sorted(report_data.items(), key=lambda x: x[1]['total'], reverse=True)
@@ -884,9 +890,16 @@ def download_purchased_report(token):
         if report_params.get('section_id'):
             query = query.filter(InventoryItem.section_id == report_params['section_id'])
         if report_params.get('category'):
-            query = query.filter(InventoryItem.category == report_params['category'])
+            category_obj = InventoryCategory.query.filter_by(code=report_params['category'], parent_id=None).first()
+            if category_obj:
+                query = query.filter(InventoryItem.categories.any(InventoryCategory.id == category_obj.id))
         if report_params.get('subcategory'):
-            query = query.filter(InventoryItem.subcategory == report_params['subcategory'])
+            subcategory_obj = InventoryCategory.query.filter(
+                InventoryCategory.code == report_params['subcategory'],
+                InventoryCategory.parent_id.isnot(None)
+            ).first()
+            if subcategory_obj:
+                query = query.filter(InventoryItem.categories.any(InventoryCategory.id == subcategory_obj.id))
         
         # CRITICAL: Use the exact date range from purchase time
         # This prevents users from downloading reports for different months
@@ -928,7 +941,15 @@ def download_purchased_report(token):
             report_data[district_name][section_code]['items'].append(item)
             report_data[district_name][section_code]['total'] += 1
             
-            cat_key = f"{item.category}->{item.subcategory}"
+            # Obtener categorías del item usando la relación many-to-many
+            main_cats = [cat for cat in item.categories if cat.parent_id is None]
+            sub_cats = [cat for cat in item.categories if cat.parent_id is not None]
+            if main_cats and sub_cats:
+                cat_key = f"{main_cats[0].code}->{sub_cats[0].code}"
+            elif main_cats:
+                cat_key = main_cats[0].code
+            else:
+                cat_key = "no-category"
             report_data[district_name][section_code]['by_category'][cat_key] = \
                 report_data[district_name][section_code]['by_category'].get(cat_key, 0) + 1
         
@@ -952,7 +973,9 @@ def download_purchased_report(token):
             date_to = date_to.replace(hour=23, minute=59, second=59)
             query = query.filter(InventoryItem.created_at <= date_to)
         if report_params.get('category'):
-            query = query.filter(InventoryItem.category == report_params['category'])
+            category_obj = InventoryCategory.query.filter_by(code=report_params['category'], parent_id=None).first()
+            if category_obj:
+                query = query.filter(InventoryItem.categories.any(InventoryCategory.id == category_obj.id))
         if report_params.get('district_id'):
             district = District.query.get(report_params['district_id'])
             if district:
@@ -971,45 +994,48 @@ def download_purchased_report(token):
                     'by_category': {}
                 }
             trends_data[date_key]['total'] += 1
-            cat_key = get_inventory_category_name(item.category)
-            trends_data[date_key]['by_category'][cat_key] = \
-                trends_data[date_key]['by_category'].get(cat_key, 0) + 1
+            # Obtener categorías del item usando la relación many-to-many
+            main_cats = [cat for cat in item.categories if cat.parent_id is None]
+            if main_cats:
+                cat_key = get_inventory_category_name(main_cats[0].code)
+                trends_data[date_key]['by_category'][cat_key] = \
+                    trends_data[date_key]['by_category'].get(cat_key, 0) + 1
         
         sorted_trends = sorted(trends_data.items())
         return _export_trends_csv(sorted_trends)
     
     elif purchase.report_type == 'top_categories':
-        # Similar logic for top_categories
-        query = db.session.query(
-            InventoryItem.category,
-            InventoryItem.subcategory,
-            Section.district_code,
-            Section.code,
-            func.count(InventoryItem.id).label('count')
-        ).join(
-            Section, InventoryItem.section_id == Section.id, isouter=True
-        ).filter(
-            InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
-        ).filter(
-            ~((InventoryItem.category == 'basura') & 
-              (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada'])))
-        ).group_by(
-            InventoryItem.category,
-            InventoryItem.subcategory,
-            Section.district_code,
-            Section.code
-        )
+        # Similar logic for top_categories usando relación many-to-many
+        base_query = _exclude_container_overflow_items(
+            InventoryItem.query.filter(
+                InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
+            )
+        ).join(Section, InventoryItem.section_id == Section.id, isouter=True)
         
         if report_params.get('district_id'):
             district = District.query.get(report_params['district_id'])
             if district:
-                query = query.filter(Section.district_code == district.code)
+                base_query = base_query.filter(Section.district_code == district.code)
         
-        results = query.all()
+        items = base_query.all()
         
         report_data = {}
-        for category, subcategory, district_code, section_code, count in results:
-            cat_key = f"{category}->{subcategory}"
+        for item in items:
+            # Obtener categorías del item usando la relación many-to-many
+            main_cats = [cat for cat in item.categories if cat.parent_id is None]
+            sub_cats = [cat for cat in item.categories if cat.parent_id is not None]
+            
+            if not main_cats:
+                continue  # Skip items sin categorías
+            
+            category = main_cats[0].code
+            subcategory = sub_cats[0].code if sub_cats else None
+            
+            section = item.section
+            district_code = section.district_code if section else None
+            section_code = section.code if section else None
+            
+            cat_key = f"{category}->{subcategory}" if subcategory else category
             zone_key = f"{district_code}-{section_code}" if district_code and section_code else "Sense secció"
             
             if cat_key not in report_data:
@@ -1020,9 +1046,9 @@ def download_purchased_report(token):
                     'by_zone': {}
                 }
             
-            report_data[cat_key]['total'] += count
+            report_data[cat_key]['total'] += 1
             report_data[cat_key]['by_zone'][zone_key] = \
-                report_data[cat_key]['by_zone'].get(zone_key, 0) + count
+                report_data[cat_key]['by_zone'].get(zone_key, 0) + 1
         
         sorted_data = sorted(report_data.items(), key=lambda x: x[1]['total'], reverse=True)
         return _export_top_categories_csv(sorted_data)
@@ -1055,8 +1081,10 @@ def view_inventory_by_zone():
             by_district[district_name] = by_district.get(district_name, 0) + 1
         
         # By category
-        cat_name = get_inventory_category_name(item.category)
-        by_category[cat_name] = by_category.get(cat_name, 0) + 1
+        main_cats = [cat for cat in item.categories if cat.parent_id is None]
+        if main_cats:
+            cat_name = get_inventory_category_name(main_cats[0].code)
+            by_category[cat_name] = by_category.get(cat_name, 0) + 1
         
         # By section (top 10)
         if item.section:
@@ -1102,10 +1130,12 @@ def view_trends():
         month_key = item.created_at.strftime('%Y-%m') if item.created_at else 'unknown'
         by_month[month_key] = by_month.get(month_key, 0) + 1
         
-        cat_name = get_inventory_category_name(item.category)
-        if month_key not in by_category_monthly:
-            by_category_monthly[month_key] = {}
-        by_category_monthly[month_key][cat_name] = by_category_monthly[month_key].get(cat_name, 0) + 1
+        main_cats = [cat for cat in item.categories if cat.parent_id is None]
+        if main_cats:
+            cat_name = get_inventory_category_name(main_cats[0].code)
+            if month_key not in by_category_monthly:
+                by_category_monthly[month_key] = {}
+            by_category_monthly[month_key][cat_name] = by_category_monthly[month_key].get(cat_name, 0) + 1
     
     # Sort by month
     sorted_months = sorted(by_month.items())
@@ -1121,29 +1151,41 @@ def view_top_categories():
     """Public preview of top categories report (statistics only)"""
     from app.utils import get_inventory_category_name, get_inventory_subcategory_name
     
-    # Get aggregated data
-    results = db.session.query(
-        InventoryItem.category,
-        InventoryItem.subcategory,
-        func.count(InventoryItem.id).label('count')
-    ).filter(
-        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
-    ).filter(
-        ~(
-            ((InventoryItem.category == 'contenidors') | (InventoryItem.category == 'basura')) & 
-            (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada', 'deixadesa']))
+    # Get aggregated data usando relación many-to-many
+    items = _exclude_container_overflow_items(
+        InventoryItem.query.filter(
+            InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
         )
-    ).group_by(
-        InventoryItem.category,
-        InventoryItem.subcategory
-    ).order_by(func.count(InventoryItem.id).desc()).all()
+    ).all()
     
-    # Organize data
+    # Organize data - agrupar por categoría y subcategoría
+    category_counts = {}
+    for item in items:
+        main_cats = [cat for cat in item.categories if cat.parent_id is None]
+        sub_cats = [cat for cat in item.categories if cat.parent_id is not None]
+        
+        if not main_cats:
+            continue
+        
+        category = main_cats[0].code
+        subcategory = sub_cats[0].code if sub_cats else None
+        
+        key = f"{category}->{subcategory}" if subcategory else category
+        category_counts[key] = category_counts.get(key, 0) + 1
+    
+    # Sort and get top 20
+    sorted_categories = sorted(category_counts.items(), key=lambda x: x[1], reverse=True)[:20]
+    
     top_categories = []
-    for category, subcategory, count in results[:20]:  # Top 20
+    for key, count in sorted_categories:
+        if '->' in key:
+            category, subcategory = key.split('->', 1)
+        else:
+            category = key
+            subcategory = None
         top_categories.append({
             'category': get_inventory_category_name(category),
-            'subcategory': get_inventory_subcategory_name(subcategory),
+            'subcategory': get_inventory_subcategory_name(subcategory) if subcategory else '',
             'count': count
         })
     
