@@ -175,10 +175,8 @@ const categoryData = {};
 {% for section_code, section_data in sections_list %}
 {% set district_total = district_total + section_data.total %}
 {% for cat_key, count in section_data.by_category %}
-{% set parts = cat_key.split('->') %}
-{% set cat = parts[0] if parts|length > 0 else cat_key %}
-if (!categoryData['{{ cat }}']) categoryData['{{ cat }}'] = 0;
-categoryData['{{ cat }}'] += {{ count }};
+if (!categoryData['{{ cat_key }}']) categoryData['{{ cat_key }}'] = 0;
+categoryData['{{ cat_key }}'] += {{ count }};
 {% endfor %}
 {% endfor %}
 districtData['{{ district_name }}'] = {{ district_total }};
