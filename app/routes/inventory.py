@@ -507,6 +507,7 @@ def api_items():
             'subcategory': item.subcategory,
             'full_category': get_inventory_category_name(item.category, item.subcategory),
             'emoji': get_inventory_emoji(item.category, item.subcategory),
+            'share_count': item.share_count or 0,
             'description': item.description,
             'latitude': item.latitude,
             'longitude': item.longitude,
@@ -517,6 +518,7 @@ def api_items():
             'importance_count': importance_count,
             'has_voted': has_voted,
             'resolved_count': resolved_count,
+            'share_count': item.share_count or 0,
             'has_resolved': has_resolved,
             'created_at': item.created_at.isoformat() if item.created_at else None
         })
@@ -1054,6 +1056,26 @@ def resolve_item(item_id):
         'message': message
     })
 
+@bp.route('/api/items/<int:item_id>/share', methods=['POST'])
+@csrf.exempt
+def share_item(item_id):
+    """Incrementar el contador de comparticiones de un item"""
+    item = InventoryItem.query.get_or_404(item_id)
+    
+    # Incrementar el contador
+    if item.share_count is None:
+        item.share_count = 0
+    item.share_count += 1
+    
+    db.session.commit()
+    
+    current_app.logger.info(f'Item {item.id} shared (count: {item.share_count})')
+    
+    return jsonify({
+        'success': True,
+        'share_count': item.share_count
+    })
+
 @bp.route('/admin/pending-map')
 @login_required
 @roles_required('admin')
@@ -1078,6 +1100,7 @@ def api_pending_items():
             'subcategory': item.subcategory,
             'full_category': get_inventory_category_name(item.category, item.subcategory),
             'emoji': get_inventory_emoji(item.category, item.subcategory),
+            'share_count': item.share_count or 0,
             'description': item.description,
             'latitude': item.latitude,
             'longitude': item.longitude,

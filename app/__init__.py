@@ -1,6 +1,12 @@
 from datetime import timezone
 import os
 from flask import Flask, request, abort, flash
+# Workaround for Flask-Share compatibility with Flask 3.x
+from markupsafe import Markup
+import flask
+if not hasattr(flask, 'Markup'):
+    flask.Markup = Markup
+
 from app.config import config
 from app.extensions import init_extensions
 from app.routes import main, initiatives, admin, donations, inventory

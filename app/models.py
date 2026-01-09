@@ -577,6 +577,7 @@ class InventoryItem(db.Model):
     )
     importance_count = db.Column(db.Integer, default=0)  # Contador de importancia/votos
     resolved_count = db.Column(db.Integer, default=0)  # Contador de "ya no está"
+    share_count = db.Column(db.Integer, default=0)  # Contador de comparticiones
     created_at = db.Column(db.DateTime(), default=datetime.utcnow)
     updated_at = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
     
