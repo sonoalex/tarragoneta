@@ -30,49 +30,38 @@ def index():
     initiatives = query.order_by(Initiative.date.asc()).limit(6).all()  # Limit to 6 for homepage
     
     # Get inventory statistics (for hero section)
-    # Exclude 'escombreries_desbordades' - now handled by Container Points
-    # Updated to use new category code 'contenidors' (was 'basura')
-    total_inventory_items = InventoryItem.query.filter(
+    # Exclude container overflow items - now handled by Container Points
+    # Buscar items que NO tengan la categoría 'contenidors' con subcategorías de overflow
+    contenidors_cat = InventoryCategory.query.filter_by(code='contenidors', parent_id=None).first()
+    overflow_subcats = InventoryCategory.query.filter(
+        InventoryCategory.parent_id == contenidors_cat.id if contenidors_cat else None,
+        InventoryCategory.code.in_(['escombreries_desbordades', 'basura_desbordada', 'deixadesa'])
+    ).all() if contenidors_cat else []
+    
+    base_query = InventoryItem.query.filter(
         InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
-    ).filter(
-        not_(
-            ((InventoryItem.category == 'contenidors') | (InventoryItem.category == 'basura')) & 
-            (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada', 'deixadesa']))
+    )
+    
+    # Excluir items con categorías de overflow
+    if overflow_subcats:
+        overflow_category_ids = [cat.id for cat in overflow_subcats]
+        base_query = base_query.filter(
+            ~InventoryItem.categories.any(InventoryCategory.id.in_(overflow_category_ids))
         )
-    ).count()
     
-    # Get inventory by category (normalize old codes to new ones)
-    from app.utils import CATEGORY_DB_TO_URL
-    category_normalization = {
-        'palomas': 'coloms',
-        'basura': 'contenidors',
-        'perros': 'canis',
-        'material_deteriorat': 'mobiliari_deteriorat',
-        'mobiliari_urba': 'mobiliari_deteriorat',
-    }
+    total_inventory_items = base_query.count()
     
+    # Get inventory by category - usar relación many-to-many
     inventory_by_category = {}
-    for item in InventoryItem.query.filter(
-        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
-    ).filter(
-        not_(
-            ((InventoryItem.category == 'contenidors') | (InventoryItem.category == 'basura')) & 
-            (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada', 'deixadesa']))
-        )
-    ).all():
-        # Normalize category code (old -> new)
-        normalized_category = category_normalization.get(item.category, item.category)
-        inventory_by_category[normalized_category] = inventory_by_category.get(normalized_category, 0) + 1
+    for item in base_query.all():
+        # Obtener categorías del item usando la relación many-to-many
+        main_cats = [cat for cat in item.categories if cat.parent_id is None]
+        if main_cats:
+            category_code = main_cats[0].code
+            inventory_by_category[category_code] = inventory_by_category.get(category_code, 0) + 1
     
     # Get recent inventory items (for featured section)
-    recent_inventory_items = InventoryItem.query.filter(
-        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
-    ).filter(
-        not_(
-            ((InventoryItem.category == 'contenidors') | (InventoryItem.category == 'basura')) & 
-            (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada', 'deixadesa']))
-        )
-    ).order_by(InventoryItem.created_at.desc()).limit(8).all()
+    recent_inventory_items = base_query.order_by(InventoryItem.created_at.desc()).limit(8).all()
     
     # Get statistics for initiatives (for secondary section)
     total_initiatives = Initiative.query.filter(Initiative.status == 'approved').count()
