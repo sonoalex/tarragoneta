@@ -1107,12 +1107,18 @@ def api_pending_items():
     
     items_data = []
     for item in items:
+        # Obtener categorías del item usando la relación many-to-many
+        main_cats = [cat for cat in item.categories if cat.parent_id is None]
+        sub_cats = [cat for cat in item.categories if cat.parent_id is not None]
+        item_category = main_cats[0].code if main_cats else None
+        item_subcategory = sub_cats[0].code if sub_cats else None
+        
         items_data.append({
             'id': item.id,
-            'category': item.category,
-            'subcategory': item.subcategory,
-            'full_category': get_inventory_category_name(item.category, item.subcategory),
-            'emoji': get_inventory_emoji(item.category, item.subcategory),
+            'category': item_category,
+            'subcategory': item_subcategory,
+            'full_category': get_inventory_category_name(item_category, item_subcategory),
+            'emoji': get_inventory_emoji(item_category, item_subcategory),
             'share_count': item.share_count or 0,
             'description': item.description,
             'latitude': item.latitude,
@@ -1161,7 +1167,12 @@ def admin_inventory():
     for item in InventoryItem.query.filter(
         InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
     ).all():
-        cat_key = f"{item.category}->{item.subcategory}"
+        # Obtener categorías del item usando la relación many-to-many
+        main_cats = [cat for cat in item.categories if cat.parent_id is None]
+        if main_cats:
+            cat_key = main_cats[0].code
+        else:
+            cat_key = "no-category"
         by_category[cat_key] = by_category.get(cat_key, 0) + 1
     
     return render_template('inventory/admin.html',

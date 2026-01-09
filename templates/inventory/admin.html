@@ -156,9 +156,20 @@
                             {% for item in items %}
                             <tr>
                                 <td>
-                                    {% set icon_class, color_class = get_inventory_icon(item.category, item.subcategory) %}
+                                    {% set main_cats = [] %}
+                                    {% set sub_cats = [] %}
+                                    {% for cat in item.categories %}
+                                        {% if cat.parent_id is none %}
+                                            {% set _ = main_cats.append(cat) %}
+                                        {% else %}
+                                            {% set _ = sub_cats.append(cat) %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% set item_category = main_cats[0].code if main_cats else None %}
+                                    {% set item_subcategory = sub_cats[0].code if sub_cats else None %}
+                                    {% set icon_class, color_class = get_inventory_icon(item_category, item_subcategory) %}
                                     <i class="fas {{ icon_class }} {{ color_class }} me-1"></i>
-                                    {{ get_inventory_category_name(item.category, item.subcategory) }}
+                                    {{ get_inventory_category_name(item_category, item_subcategory) }}
                                 </td>
                                 <td>
                                     <small>
@@ -430,7 +441,18 @@
             </div>
             <div class="modal-footer">
                 <div class="w-100">
-                    <p class="mb-2"><strong>{{ _('Categoria') }}:</strong> {{ get_inventory_category_name(item.category, item.subcategory) }}</p>
+                    {% set main_cats = [] %}
+                    {% set sub_cats = [] %}
+                    {% for cat in item.categories %}
+                        {% if cat.parent_id is none %}
+                            {% set _ = main_cats.append(cat) %}
+                        {% else %}
+                            {% set _ = sub_cats.append(cat) %}
+                        {% endif %}
+                    {% endfor %}
+                    {% set item_category = main_cats[0].code if main_cats else None %}
+                    {% set item_subcategory = sub_cats[0].code if sub_cats else None %}
+                    <p class="mb-2"><strong>{{ _('Categoria') }}:</strong> {{ get_inventory_category_name(item_category, item_subcategory) }}</p>
                     {% if item.description %}
                     <p class="mb-2"><strong>{{ _('Descripció') }}:</strong> {{ item.description }}</p>
                     {% endif %}
