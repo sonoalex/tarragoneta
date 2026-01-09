@@ -558,8 +558,7 @@ class InventoryCategory(db.Model):
 class InventoryItem(db.Model):
     """Items del inventario (palomas, basura, etc.)"""
     id = db.Column(db.Integer, primary_key=True)
-    category = db.Column(db.String(50), nullable=False)  # 'palomas', 'basura', etc.
-    subcategory = db.Column(db.String(50), nullable=False)  # 'nido', 'excremento', 'escombreries_desbordades', 'vertidos', etc.
+    # category y subcategory eliminados - ahora se usa la relación many-to-many con InventoryCategory
     description = db.Column(db.Text)
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
@@ -599,7 +598,13 @@ class InventoryItem(db.Model):
     @property
     def full_category(self):
         """Return full category path: category->subcategory"""
-        return f"{self.category}->{self.subcategory}"
+        main_cats = [cat for cat in self.categories if cat.parent_id is None]
+        sub_cats = [cat for cat in self.categories if cat.parent_id is not None]
+        if main_cats and sub_cats:
+            return f"{main_cats[0].code}->{sub_cats[0].code}"
+        elif main_cats:
+            return main_cats[0].code
+        return ""
     
     def has_user_voted(self, user_id):
         """Check if a user has already voted for this item"""
@@ -779,7 +784,10 @@ class InventoryItem(db.Model):
         return True, auto_resolved, message
     
     def __repr__(self):
-        return f'<InventoryItem {self.category}->{self.subcategory} at ({self.latitude}, {self.longitude})>'
+        main_cats = [cat for cat in self.categories if cat.parent_id is None]
+        sub_cats = [cat for cat in self.categories if cat.parent_id is not None]
+        cat_str = f"{main_cats[0].code}->{sub_cats[0].code}" if main_cats and sub_cats else (main_cats[0].code if main_cats else "no-category")
+        return f'<InventoryItem {cat_str} at ({self.latitude}, {self.longitude})>'
 
 class InventoryVote(db.Model):
     """Track votes/importance for inventory items"""

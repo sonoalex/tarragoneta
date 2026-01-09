@@ -103,7 +103,7 @@ class InventoryForm(FlaskForm):
                 
                 if main_categories:
                     self.category.choices = [
-                        (cat.code, f"{cat.icon} {cat.get_name()}")
+                        (cat.code, cat.get_name())
                         for cat in main_categories
                     ]
                     
@@ -115,7 +115,7 @@ class InventoryForm(FlaskForm):
                     ).order_by(InventoryCategory.sort_order).all()
                     
                     self.subcategory.choices = [
-                        (subcat.code, f"{subcat.icon} {subcat.get_name()}")
+                        (subcat.code, subcat.get_name())
                         for subcat in all_subcategories
                     ]
                 else:
