@@ -338,17 +338,31 @@ def report_item():
                     os.remove(file_path)
                 return render_template('inventory/report.html', form=form, subcategories_by_parent=_get_subcategories_by_parent())
             
+            # Buscar las categorías en InventoryCategory usando los códigos del formulario
+            main_category = InventoryCategory.query.filter_by(code=form.category.data, parent_id=None).first()
+            if not main_category:
+                flash(_('Categoría no válida'), 'error')
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                return render_template('inventory/report.html', form=form, subcategories_by_parent=_get_subcategories_by_parent())
+            
+            subcategory = InventoryCategory.query.filter_by(code=form.subcategory.data, parent_id=main_category.id).first()
+            if not subcategory:
+                flash(_('Subcategoría no válida para esta categoría'), 'error')
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                return render_template('inventory/report.html', form=form, subcategories_by_parent=_get_subcategories_by_parent())
+            
             # Create item with all data including GPS from image
             current_app.logger.info(
                 f"💾 Guardando item con:\n"
                 f"   - Ubicación final: lat={latitude}, lng={longitude}\n"
                 f"   - GPS de imagen: lat={image_gps_lat}, lng={image_gps_lng}\n"
-                f"   - Fuente: {location_source}"
+                f"   - Fuente: {location_source}\n"
+                f"   - Categoría: {main_category.code}, Subcategoría: {subcategory.code}"
             )
             
             item = InventoryItem(
-                category=form.category.data,
-                subcategory=form.subcategory.data,
                 description=sanitize_html(form.description.data) if form.description.data else None,
                 latitude=latitude,
                 longitude=longitude,
@@ -361,6 +375,10 @@ def report_item():
                 image_gps_longitude=image_gps_lng,
                 location_source=location_source
             )
+            
+            # Asignar categorías usando la relación many-to-many
+            item.categories.append(main_category)
+            item.categories.append(subcategory)
             
             # Asignar sección automáticamente basándose en las coordenadas
             try:
@@ -430,7 +448,7 @@ def report_item():
             )
             
             current_app.logger.info(
-                f'Inventory item reported: {item.category} at ({latitude}, {longitude}) '
+                f'Inventory item reported: {main_category.code}->{subcategory.code} at ({latitude}, {longitude}) '
                 f'from {location_source} - Status: pending'
             )
             flash(_('¡Item reportado con éxito! Está pendiente de aprobación por un administrador.'), 'info')
