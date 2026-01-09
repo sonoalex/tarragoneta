@@ -290,11 +290,9 @@ def inventory_by_zone():
         report_data[district_name][section_code]['total'] += 1
         
         # Obtener categorías del item usando la relación many-to-many
+        # Para "Per categoria" solo mostramos la categoría principal (sin subcategoría)
         main_cats = [cat for cat in item.categories if cat.parent_id is None]
-        sub_cats = [cat for cat in item.categories if cat.parent_id is not None]
-        if main_cats and sub_cats:
-            cat_key = f"{main_cats[0].code}->{sub_cats[0].code}"
-        elif main_cats:
+        if main_cats:
             cat_key = main_cats[0].code
         else:
             cat_key = "no-category"

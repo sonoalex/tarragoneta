@@ -107,10 +107,7 @@
                                 <strong>{{ _('Per categoria:') }}</strong>
                                 <div class="d-flex gap-2 flex-wrap mt-2">
                                     {% for cat_key, count in section_data.by_category %}
-                                    {% set parts = cat_key.split('->') %}
-                                    {% set cat = parts[0] if parts|length > 0 else cat_key %}
-                                    {% set subcat = parts[1] if parts|length > 1 else None %}
-                                    <span class="badge bg-secondary">{{ get_inventory_category_name(cat, subcat) }}: {{ count }}</span>
+                                    <span class="badge bg-secondary">{{ get_inventory_category_name(cat_key) }}: {{ count }}</span>
                                     {% endfor %}
                                 </div>
                             </div>
