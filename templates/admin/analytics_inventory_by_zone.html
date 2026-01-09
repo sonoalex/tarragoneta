@@ -46,7 +46,7 @@
                             {% if db_categories %}
                             {% for cat in db_categories %}
                             <option value="{{ cat.code }}" {% if filters.category == cat.code %}selected{% endif %}>
-                                {{ cat.icon }} {{ cat.get_name() }}
+                                {{ cat.get_name() }}
                             </option>
                             {% endfor %}
                             {% else %}
@@ -107,10 +107,7 @@
                                 <strong>{{ _('Per categoria:') }}</strong>
                                 <div class="d-flex gap-2 flex-wrap mt-2">
                                     {% for cat_key, count in section_data.by_category %}
-                                    {% set parts = cat_key.split('->') %}
-                                    {% set cat = parts[0] if parts|length > 0 else cat_key %}
-                                    {% set subcat = parts[1] if parts|length > 1 else None %}
-                                    <span class="badge bg-secondary">{{ get_inventory_category_name(cat, subcat) }}: {{ count }}</span>
+                                    <span class="badge bg-secondary">{{ get_inventory_category_name(cat_key) }}: {{ count }}</span>
                                     {% endfor %}
                                 </div>
                             </div>
@@ -131,8 +128,19 @@
                                     <tbody>
                                         {% for item in section_data['items'] %}
                                         <tr>
-                                            <td>{{ get_inventory_category_name(item.category) }}</td>
-                                            <td>{{ get_inventory_subcategory_name(item.subcategory) }}</td>
+                                            {% set main_cats = [] %}
+                                            {% set sub_cats = [] %}
+                                            {% for cat in item.categories %}
+                                                {% if cat.parent_id is none %}
+                                                    {% set _ = main_cats.append(cat) %}
+                                                {% else %}
+                                                    {% set _ = sub_cats.append(cat) %}
+                                                {% endif %}
+                                            {% endfor %}
+                                            {% set item_category = main_cats[0].code if main_cats else None %}
+                                            {% set item_subcategory = sub_cats[0].code if sub_cats else None %}
+                                            <td>{{ get_inventory_category_name(item_category, item_subcategory) }}</td>
+                                            <td>{{ get_inventory_subcategory_name(item_subcategory) }}</td>
                                             <td>{{ item.address or '-' }}</td>
                                             <td><span class="badge bg-info">{{ item.importance_count }}</span></td>
                                             <td><span class="badge bg-warning">{{ item.resolved_count }}</span></td>
@@ -174,10 +182,8 @@ const categoryData = {};
 {% for section_code, section_data in sections_list %}
 {% set district_total = district_total + section_data.total %}
 {% for cat_key, count in section_data.by_category %}
-{% set parts = cat_key.split('->') %}
-{% set cat = parts[0] if parts|length > 0 else cat_key %}
-if (!categoryData['{{ cat }}']) categoryData['{{ cat }}'] = 0;
-categoryData['{{ cat }}'] += {{ count }};
+if (!categoryData['{{ cat_key }}']) categoryData['{{ cat_key }}'] = 0;
+categoryData['{{ cat_key }}'] += {{ count }};
 {% endfor %}
 {% endfor %}
 districtData['{{ district_name }}'] = {{ district_total }};

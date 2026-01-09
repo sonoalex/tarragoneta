@@ -457,58 +457,20 @@
         var categorySelect = document.getElementById('category');
         var subcategorySelect = document.getElementById('subcategory');
         
-        var subcategories = {
-            'palomas': [
-                {value: 'nido', label: '🪺 {{ _("Niu") }}'},
-                {value: 'excremento', label: '💩 {{ _("Excrement") }}'},
-                {value: 'plumas', label: '🪶 {{ _("Plomes") }}'}
-            ],
-            'basura': [
-                // 'escombreries_desbordades' removed - now handled by Container Points
-                {value: 'vertidos', label: '💧 {{ _("Abocaments") }}'}
-            ],
-            'perros': [
-                {value: 'excrements', label: '💩 {{ _("Excrements") }}'},
-                {value: 'pixades', label: '💧 {{ _("Pixades") }}'}
-            ],
-            'material_deteriorat': [
-                {value: 'faroles', label: '💡 {{ _("Faroles") }}'},
-                {value: 'bancs', label: '🪑 {{ _("Bancs") }}'},
-                {value: 'senyals', label: '🚦 {{ _("Senyals") }}'},
-                {value: 'paviment', label: '🛣️ {{ _("Paviment") }}'}
-            ],
-            'bruticia': [
-                {value: 'terra', label: '🌍 {{ _("Terra") }}'},
-                {value: 'fulles', label: '🍂 {{ _("Fulles") }}'},
-                {value: 'grafit', label: '🎨 {{ _("Grafit") }}'}
-            ],
-            'mobiliari_urba': [
-                {value: 'papereres', label: '🗑️ {{ _("Papereres") }}'},
-                {value: 'parades', label: '🚏 {{ _("Parades") }}'},
-                {value: 'bancs', label: '🪑 {{ _("Bancs") }}'}
-            ],
-            'vegetacio': [
-                {value: 'arbres', label: '🌳 {{ _("Arbres") }}'},
-                {value: 'arbustos', label: '🌿 {{ _("Arbustos") }}'},
-                {value: 'gespa', label: '🌱 {{ _("Gespa") }}'}
-            ],
-            'infraestructura': [
-                {value: 'carreteres', label: '🛣️ {{ _("Carreteres") }}'},
-                {value: 'voreres', label: '🚶 {{ _("Voreres") }}'},
-                {value: 'enllumenat', label: '💡 {{ _("Enllumenat") }}'}
-            ]
-        };
+        // Subcategorías desde el backend (dinámicas desde BD)
+        var subcategoriesByParent = {{ subcategories_by_parent | tojson }};
         
         // Function to load subcategories for a given category
         function loadSubcategories(category) {
             subcategorySelect.innerHTML = '<option value="">{{ _("Selecciona una subcategoría") }}</option>';
             
-            if (category && subcategories[category]) {
+            if (category && subcategoriesByParent[category]) {
                 subcategorySelect.disabled = false;
-                subcategories[category].forEach(function(sub) {
+                subcategoriesByParent[category].forEach(function(sub) {
                     var option = document.createElement('option');
-                    option.value = sub.value;
-                    option.textContent = sub.label;
+                    option.value = sub.code;
+                    // Mostrar solo el nombre (sin icono) en el dropdown
+                    option.textContent = sub.name;
                     subcategorySelect.appendChild(option);
                 });
             } else {

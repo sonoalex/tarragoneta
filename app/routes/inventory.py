@@ -19,6 +19,7 @@ from app.models import (
     ContainerPointSuggestion,
     RoleEnum,
     InventoryCategory,
+    inventory_item_categories,
 )
 from app.extensions import db, csrf
 from sqlalchemy import not_, or_
@@ -44,6 +45,31 @@ from app.core.decorators import section_responsible_required
 
 bp = Blueprint('inventory', __name__, url_prefix='/inventory')
 
+def _get_subcategories_by_parent():
+    """Función auxiliar para obtener subcategorías agrupadas por categoría padre"""
+    try:
+        db_subcategories = InventoryCategory.query.filter(
+            InventoryCategory.parent_id.isnot(None),
+            InventoryCategory.is_active.is_(True)
+        ).order_by(InventoryCategory.sort_order).all()
+        
+        # Crear diccionario de subcategorías agrupadas por categoría padre (por código)
+        subcategories_by_parent = {}
+        for subcat in db_subcategories:
+            parent_cat = InventoryCategory.query.get(subcat.parent_id)
+            if parent_cat:
+                if parent_cat.code not in subcategories_by_parent:
+                    subcategories_by_parent[parent_cat.code] = []
+                subcategories_by_parent[parent_cat.code].append({
+                    'code': subcat.code,
+                    'name': subcat.get_name(),
+                    'icon': subcat.icon
+                })
+        return subcategories_by_parent
+    except Exception as e:
+        current_app.logger.warning(f"Error loading subcategories from DB: {e}")
+        return {}
+
 @bp.route('')
 def inventory_map():
     """Mapa principal del inventario"""
@@ -57,82 +83,73 @@ def inventory_map():
     
     # Build query - only show approved items (visible in map)
     # Exclude container overflow items - now handled by Container Points
-    container_overflow_filter = not_(
-        ((InventoryItem.category == 'contenidors') | (InventoryItem.category == 'basura')) & 
-        (InventoryItem.subcategory.in_(['escombreries_desbordades', 'basura_desbordada', 'deixadesa']))
-    )
+    # Buscar items que NO tengan la categoría 'contenidors' con subcategorías de overflow
+    contenidors_cat = InventoryCategory.query.filter_by(code='contenidors', parent_id=None).first()
+    overflow_subcats = InventoryCategory.query.filter(
+        InventoryCategory.parent_id == contenidors_cat.id if contenidors_cat else None,
+        InventoryCategory.code.in_(['escombreries_desbordades', 'basura_desbordada', 'deixadesa'])
+    ).all() if contenidors_cat else []
     
     query = InventoryItem.query.filter(
         InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
-    ).filter(container_overflow_filter)
+    )
+    
+    # Excluir items con categorías de overflow
+    if overflow_subcats:
+        overflow_category_ids = [cat.id for cat in overflow_subcats]
+        query = query.filter(
+            ~InventoryItem.categories.any(InventoryCategory.id.in_(overflow_category_ids))
+        )
     
     if category:
-        # Buscar tanto el código nuevo como el antiguo para compatibilidad
-        # (hasta que se ejecute el script de migración)
-        legacy_map = {
-            'coloms': 'palomas', 
-            'contenidors': 'basura', 
-            'canis': 'perros',
-            'mobiliari_deteriorat': ['material_deteriorat', 'mobiliari_urba']
-        }
-        legacy_category = legacy_map.get(category)
-        if legacy_category:
-            if isinstance(legacy_category, list):
-                # Múltiples códigos legacy
-                conditions = [InventoryItem.category == category]
-                conditions.extend([InventoryItem.category == leg_cat for leg_cat in legacy_category])
-                query = query.filter(or_(*conditions))
-            else:
-                # Un solo código legacy
-                query = query.filter(
-                    (InventoryItem.category == category) | 
-                    (InventoryItem.category == legacy_category)
-                )
-        else:
-            query = query.filter(InventoryItem.category == category)
+        # Filtrar por categoría usando la relación many-to-many
+        category_obj = InventoryCategory.query.filter_by(code=category, parent_id=None).first()
+        if category_obj:
+            query = query.filter(InventoryItem.categories.any(InventoryCategory.id == category_obj.id))
+    
     if subcategory:
-        # También buscar códigos antiguos de subcategorías
-        subcategory_legacy_map = {
-            'niu': 'nido',
-            'excrement': 'excremento',
-            'ploma': 'plumas',
-            'abocaments': 'vertidos',
-        }
-        legacy_subcategory = subcategory_legacy_map.get(subcategory)
-        if legacy_subcategory:
-            query = query.filter(
-                (InventoryItem.subcategory == subcategory) | 
-                (InventoryItem.subcategory == legacy_subcategory)
-            )
-        else:
-            query = query.filter(InventoryItem.subcategory == subcategory)
+        # Filtrar por subcategoría usando la relación many-to-many
+        subcategory_obj = InventoryCategory.query.filter(
+            InventoryCategory.code == subcategory,
+            InventoryCategory.parent_id.isnot(None)
+        ).first()
+        if subcategory_obj:
+            query = query.filter(InventoryItem.categories.any(InventoryCategory.id == subcategory_obj.id))
     
     items = query.order_by(InventoryItem.created_at.desc()).all()
     
     # Get statistics - only count approved items
-    # Exclude 'escombreries_desbordades' - now handled by Container Points
-    
-    total_items = InventoryItem.query.filter(
+    # Exclude container overflow items - now handled by Container Points
+    stats_query = InventoryItem.query.filter(
         InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
-    ).filter(container_overflow_filter).count()
+    )
+    if overflow_subcats:
+        overflow_category_ids = [cat.id for cat in overflow_subcats]
+        stats_query = stats_query.filter(
+            ~InventoryItem.categories.any(InventoryCategory.id.in_(overflow_category_ids))
+        )
     
-    # Statistics by category
+    total_items = stats_query.count()
+    
+    # Statistics by category - usar relación many-to-many
     by_category = {}
-    for item in InventoryItem.query.filter(
-        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
-    ).filter(container_overflow_filter).all():
-        # El filtro container_overflow_filter ya excluye estos items, pero por seguridad:
-        if ((item.category == 'contenidors') or (item.category == 'basura')) and item.subcategory in ['escombreries_desbordades', 'basura_desbordada', 'deixadesa']:
-            continue
+    for item in stats_query.all():
+        # Obtener categorías del item usando la relación many-to-many
+        main_cats = [cat for cat in item.categories if cat.parent_id is None]
+        sub_cats = [cat for cat in item.categories if cat.parent_id is not None]
         
-        cat_key = f"{item.category}->{item.subcategory}" if item.subcategory else item.category
+        if main_cats and sub_cats:
+            cat_key = f"{main_cats[0].code}->{sub_cats[0].code}"
+        elif main_cats:
+            cat_key = main_cats[0].code
+        else:
+            continue  # Skip items sin categorías
+        
         by_category[cat_key] = by_category.get(cat_key, 0) + 1
     
     # Ensure all items have importance_count set (fix for existing items)
     # This handles items created before the importance_count field was added
-    items_without_count = InventoryItem.query.filter(
-        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
-    ).filter(container_overflow_filter).all()
+    items_without_count = stats_query.all()
     fixed = False
     for item in items_without_count:
         if item.importance_count is None:
@@ -141,24 +158,23 @@ def inventory_map():
     if fixed:
         db.session.commit()
     
-    # Group statistics by main category and subcategory
-    # Normalize legacy category codes to new codes for consistent statistics
-    from app.utils import CATEGORY_DB_TO_URL, SUBCATEGORY_DB_TO_URL
-    
+    # Group statistics by main category and subcategory - usar relación many-to-many
     by_main_category = {}
     by_subcategory = {}
     
-    for item in InventoryItem.query.filter(
-        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
-    ).filter(container_overflow_filter).all():
-        # Normalize category code (legacy -> new)
-        normalized_cat = CATEGORY_DB_TO_URL.get(item.category, item.category)
-        by_main_category[normalized_cat] = by_main_category.get(normalized_cat, 0) + 1
-        # Count by subcategory (only if category is selected)
-        if category and normalized_cat == category and item.subcategory:
-            # Normalize subcategory code (legacy -> new)
-            normalized_sub = SUBCATEGORY_DB_TO_URL.get(item.subcategory, item.subcategory)
-            by_subcategory[normalized_sub] = by_subcategory.get(normalized_sub, 0) + 1
+    for item in stats_query.all():
+        # Obtener categorías del item usando la relación many-to-many
+        main_cats = [cat for cat in item.categories if cat.parent_id is None]
+        sub_cats = [cat for cat in item.categories if cat.parent_id is not None]
+        
+        if main_cats:
+            main_cat_code = main_cats[0].code
+            by_main_category[main_cat_code] = by_main_category.get(main_cat_code, 0) + 1
+            
+            # Count by subcategory (only if category is selected and matches)
+            if category and main_cat_code == category and sub_cats:
+                sub_cat_code = sub_cats[0].code
+                by_subcategory[sub_cat_code] = by_subcategory.get(sub_cat_code, 0) + 1
     
     # Cargar categorías desde BD para los filtros del frontend
     try:
@@ -204,7 +220,6 @@ def report_item():
     """Formulario para reportar un item del inventario"""
     form = InventoryForm()
     # Set default category to 'coloms' if form is new (GET request)
-    # Updated to use new category code 'coloms' (was 'palomas')
     if request.method == 'GET' and not form.category.data:
         form.category.data = 'coloms'
     
@@ -213,12 +228,12 @@ def report_item():
             # Handle image upload first (required)
             if not form.image.data:
                 flash(_('La foto es obligatoria para reportar un item'), 'error')
-                return render_template('inventory/report.html', form=form)
+                return render_template('inventory/report.html', form=form, subcategories_by_parent=_get_subcategories_by_parent())
             
             file = form.image.data
             if not file or not allowed_file(file.filename):
                 flash(_('Por favor, sube una imagen válida (JPG, PNG, GIF)'), 'error')
-                return render_template('inventory/report.html', form=form)
+                return render_template('inventory/report.html', form=form, subcategories_by_parent=_get_subcategories_by_parent())
             
             # Save image temporarily to extract GPS
             filename = secure_filename(f"{datetime.now().timestamp()}_{file.filename}")
@@ -259,7 +274,7 @@ def report_item():
                 form.category.data = form.category.data
                 form.subcategory.data = form.subcategory.data
                 form.description.data = form.description.data
-                return render_template('inventory/report.html', form=form)
+                return render_template('inventory/report.html', form=form, subcategories_by_parent=_get_subcategories_by_parent())
 
             # If both image GPS and chosen coords differ significantly, warn but keep user choice
             if image_gps_lat is not None and image_gps_lng is not None and latitude is not None and longitude is not None:
@@ -288,7 +303,7 @@ def report_item():
                 # Clean up uploaded file
                 if os.path.exists(file_path):
                     os.remove(file_path)
-                return render_template('inventory/report.html', form=form)
+                return render_template('inventory/report.html', form=form, subcategories_by_parent=_get_subcategories_by_parent())
             
             # Optimize original image (basic optimization, full resize will be done async)
             optimize_image(file_path)  # Basic optimization in place
@@ -321,19 +336,33 @@ def report_item():
                 # Clean up uploaded file
                 if os.path.exists(file_path):
                     os.remove(file_path)
-                return render_template('inventory/report.html', form=form)
+                return render_template('inventory/report.html', form=form, subcategories_by_parent=_get_subcategories_by_parent())
+            
+            # Buscar las categorías en InventoryCategory usando los códigos del formulario
+            main_category = InventoryCategory.query.filter_by(code=form.category.data, parent_id=None).first()
+            if not main_category:
+                flash(_('Categoría no válida'), 'error')
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                return render_template('inventory/report.html', form=form, subcategories_by_parent=_get_subcategories_by_parent())
+            
+            subcategory = InventoryCategory.query.filter_by(code=form.subcategory.data, parent_id=main_category.id).first()
+            if not subcategory:
+                flash(_('Subcategoría no válida para esta categoría'), 'error')
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                return render_template('inventory/report.html', form=form, subcategories_by_parent=_get_subcategories_by_parent())
             
             # Create item with all data including GPS from image
             current_app.logger.info(
                 f"💾 Guardando item con:\n"
                 f"   - Ubicación final: lat={latitude}, lng={longitude}\n"
                 f"   - GPS de imagen: lat={image_gps_lat}, lng={image_gps_lng}\n"
-                f"   - Fuente: {location_source}"
+                f"   - Fuente: {location_source}\n"
+                f"   - Categoría: {main_category.code}, Subcategoría: {subcategory.code}"
             )
             
             item = InventoryItem(
-                category=form.category.data,
-                subcategory=form.subcategory.data,
                 description=sanitize_html(form.description.data) if form.description.data else None,
                 latitude=latitude,
                 longitude=longitude,
@@ -346,6 +375,10 @@ def report_item():
                 image_gps_longitude=image_gps_lng,
                 location_source=location_source
             )
+            
+            # Asignar categorías usando la relación many-to-many
+            item.categories.append(main_category)
+            item.categories.append(subcategory)
             
             # Asignar sección automáticamente basándose en las coordenadas
             try:
@@ -415,7 +448,7 @@ def report_item():
             )
             
             current_app.logger.info(
-                f'Inventory item reported: {item.category} at ({latitude}, {longitude}) '
+                f'Inventory item reported: {main_category.code}->{subcategory.code} at ({latitude}, {longitude}) '
                 f'from {location_source} - Status: pending'
             )
             flash(_('¡Item reportado con éxito! Está pendiente de aprobación por un administrador.'), 'info')
@@ -427,7 +460,7 @@ def report_item():
             current_app.logger.error(f'Error reporting inventory item: {str(e)}', exc_info=True)
             flash(_('Error al reportar el item. Por favor, inténtalo de nuevo.'), 'error')
     
-    return render_template('inventory/report.html', form=form)
+    return render_template('inventory/report.html', form=form, subcategories_by_parent=_get_subcategories_by_parent())
 
 @bp.route('/api/items')
 def api_items():
@@ -448,45 +481,19 @@ def api_items():
     )
     
     if category:
-        # Buscar tanto el código nuevo como el antiguo para compatibilidad
-        # (hasta que se ejecute el script de migración)
-        legacy_map = {
-            'coloms': 'palomas', 
-            'contenidors': 'basura', 
-            'canis': 'perros',
-            'mobiliari_deteriorat': ['material_deteriorat', 'mobiliari_urba']
-        }
-        legacy_category = legacy_map.get(category)
-        if legacy_category:
-            if isinstance(legacy_category, list):
-                # Múltiples códigos legacy
-                conditions = [InventoryItem.category == category]
-                conditions.extend([InventoryItem.category == leg_cat for leg_cat in legacy_category])
-                query = query.filter(or_(*conditions))
-            else:
-                # Un solo código legacy
-                query = query.filter(
-                    (InventoryItem.category == category) | 
-                    (InventoryItem.category == legacy_category)
-                )
-        else:
-            query = query.filter(InventoryItem.category == category)
+        # Filtrar por categoría usando la relación many-to-many
+        category_obj = InventoryCategory.query.filter_by(code=category, parent_id=None).first()
+        if category_obj:
+            query = query.filter(InventoryItem.categories.any(InventoryCategory.id == category_obj.id))
+    
     if subcategory:
-        # También buscar códigos antiguos de subcategorías
-        subcategory_legacy_map = {
-            'niu': 'nido',
-            'excrement': 'excremento',
-            'ploma': 'plumas',
-            'abocaments': 'vertidos',
-        }
-        legacy_subcategory = subcategory_legacy_map.get(subcategory)
-        if legacy_subcategory:
-            query = query.filter(
-                (InventoryItem.subcategory == subcategory) | 
-                (InventoryItem.subcategory == legacy_subcategory)
-            )
-        else:
-            query = query.filter(InventoryItem.subcategory == subcategory)
+        # Filtrar por subcategoría usando la relación many-to-many
+        subcategory_obj = InventoryCategory.query.filter(
+            InventoryCategory.code == subcategory,
+            InventoryCategory.parent_id.isnot(None)
+        ).first()
+        if subcategory_obj:
+            query = query.filter(InventoryItem.categories.any(InventoryCategory.id == subcategory_obj.id))
     
     items = query.all()
     
@@ -501,12 +508,18 @@ def api_items():
         has_resolved = item.has_user_resolved(user_id) if user_id else False
         resolved_count = item.resolved_count if item.resolved_count is not None else 0
         
+        # Obtener categorías del item usando la relación many-to-many
+        main_cats = [cat for cat in item.categories if cat.parent_id is None]
+        sub_cats = [cat for cat in item.categories if cat.parent_id is not None]
+        item_category = main_cats[0].code if main_cats else None
+        item_subcategory = sub_cats[0].code if sub_cats else None
+        
         items_data.append({
             'id': item.id,
-            'category': item.category,
-            'subcategory': item.subcategory,
-            'full_category': get_inventory_category_name(item.category, item.subcategory),
-            'emoji': get_inventory_emoji(item.category, item.subcategory),
+            'category': item_category,
+            'subcategory': item_subcategory,
+            'full_category': get_inventory_category_name(item_category, item_subcategory),
+            'emoji': get_inventory_emoji(item_category, item_subcategory),
             'share_count': item.share_count or 0,
             'description': item.description,
             'latitude': item.latitude,

@@ -35,7 +35,7 @@
                             {% if db_categories %}
                             {% for cat in db_categories %}
                             <option value="{{ cat.code }}" {% if filters.category == cat.code %}selected{% endif %}>
-                                {{ cat.icon }} {{ cat.get_name() }}
+                                {{ cat.get_name() }}
                             </option>
                             {% endfor %}
                             {% else %}
