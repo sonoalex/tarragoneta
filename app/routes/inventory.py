@@ -1089,6 +1089,77 @@ def share_item(item_id):
         'share_count': item.share_count
     })
 
+@bp.route('/api/items/nearby', methods=['GET'])
+def api_nearby_items():
+    """API endpoint para buscar items cercanos a una ubicación"""
+    from app.utils import calculate_distance_km
+    
+    lat = request.args.get('lat', type=float)
+    lng = request.args.get('lng', type=float)
+    category = request.args.get('category')
+    subcategory = request.args.get('subcategory')
+    radius_meters = request.args.get('radius', 50, type=int)  # Default 50m
+    
+    if not lat or not lng or not category or not subcategory:
+        return jsonify({'error': 'Missing required parameters'}), 400
+    
+    # Buscar categorías
+    main_category = InventoryCategory.query.filter_by(code=category, parent_id=None).first()
+    if not main_category:
+        return jsonify({'error': 'Invalid category'}), 400
+    
+    subcategory_obj = InventoryCategory.query.filter_by(
+        code=subcategory, 
+        parent_id=main_category.id
+    ).first()
+    if not subcategory_obj:
+        return jsonify({'error': 'Invalid subcategory'}), 400
+    
+    # Buscar items aprobados con las mismas categorías
+    query = InventoryItem.query.filter(
+        InventoryItem.status.in_(InventoryItemStatus.visible_statuses())
+    ).filter(
+        InventoryItem.categories.any(id=main_category.id)
+    ).filter(
+        InventoryItem.categories.any(id=subcategory_obj.id)
+    )
+    
+    nearby_items = []
+    for item in query.all():
+        if item.latitude and item.longitude:
+            distance_km = calculate_distance_km(lat, lng, item.latitude, item.longitude)
+            distance_m = distance_km * 1000
+            if distance_m <= radius_meters:
+                # Obtener categorías para el response
+                main_cats = [cat for cat in item.categories if cat.parent_id is None]
+                sub_cats = [cat for cat in item.categories if cat.parent_id is not None]
+                item_category = main_cats[0].code if main_cats else None
+                item_subcategory = sub_cats[0].code if sub_cats else None
+                
+                nearby_items.append({
+                    'id': item.id,
+                    'category': item_category,
+                    'subcategory': item_subcategory,
+                    'full_category': get_inventory_category_name(item_category, item_subcategory),
+                    'emoji': get_inventory_emoji(item_category, item_subcategory),
+                    'description': item.description,
+                    'address': item.address,
+                    'latitude': item.latitude,
+                    'longitude': item.longitude,
+                    'distance_m': round(distance_m, 1),
+                    'importance_count': item.importance_count or 0,
+                    'image_url': get_image_url(item.image_path, 'thumbnail') if item.image_path else None,
+                    'created_at': item.created_at.isoformat() if item.created_at else None
+                })
+    
+    # Ordenar por distancia (más cercano primero)
+    nearby_items.sort(key=lambda x: x['distance_m'])
+    
+    return jsonify({
+        'items': nearby_items,
+        'count': len(nearby_items)
+    })
+
 @bp.route('/admin/pending-map')
 @login_required
 @roles_required('admin')
