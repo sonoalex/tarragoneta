@@ -262,23 +262,32 @@ class EmailService:
     @staticmethod
     def send_inventory_item_approved(item, reporter_email):
         """Send email when inventory item is approved"""
+        # Obtener categorías del item usando la relación many-to-many
+        main_cats = [cat for cat in item.categories if cat.parent_id is None]
+        sub_cats = [cat for cat in item.categories if cat.parent_id is not None]
+        item_category = main_cats[0].code if main_cats else None
+        item_subcategory = sub_cats[0].code if sub_cats else None
+        
         try:
-            item_url = url_for('inventory.inventory_map', category=item.category, subcategory=item.subcategory, _external=True)
+            from app.utils import category_to_url, subcategory_to_url
+            category_url = category_to_url(item_category) if item_category else None
+            subcategory_url = subcategory_to_url(item_subcategory) if item_subcategory else None
+            item_url = url_for('inventory.inventory_map', category=category_url, subcategory=subcategory_url, _external=True)
         except Exception:
             item_url = None
         
         # Get full category name for display
         from app.utils import get_inventory_category_name, get_inventory_subcategory_name
-        category_name = get_inventory_category_name(item.category)
-        subcategory_name = get_inventory_subcategory_name(item.subcategory) if item.subcategory else None
-        full_category = f"{category_name}" + (f" - {subcategory_name}" if subcategory_name else "")
+        category_name = get_inventory_category_name(item_category, item_subcategory)
+        subcategory_name = get_inventory_subcategory_name(item_subcategory) if item_subcategory else None
+        full_category = category_name  # Ya incluye categoría y subcategoría si existe
         
         return EmailService.send_email(
             to=reporter_email,
             subject=_('El teu reportatge ha estat aprovat! ✅'),
             template='inventory_approved',
-            item_category=item.category,
-            item_subcategory=item.subcategory,
+            item_category=item_category,
+            item_subcategory=item_subcategory,
             item_full_category=full_category,
             item_address=item.address,
             item_description=item.description,
@@ -288,12 +297,18 @@ class EmailService:
     @staticmethod
     def send_inventory_item_rejected(item, reporter_email, reason=None):
         """Send email when inventory item is rejected"""
+        # Obtener categorías del item usando la relación many-to-many
+        main_cats = [cat for cat in item.categories if cat.parent_id is None]
+        sub_cats = [cat for cat in item.categories if cat.parent_id is not None]
+        item_category = main_cats[0].code if main_cats else None
+        item_subcategory = sub_cats[0].code if sub_cats else None
+        
         return EmailService.send_email(
             to=reporter_email,
             subject=_('Informació sobre el teu reportatge'),
             template='inventory_rejected',
-            item_category=item.category,
-            item_subcategory=item.subcategory,
+            item_category=item_category,
+            item_subcategory=item_subcategory,
             item_description=item.description,
             reason=reason
         )
