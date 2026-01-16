@@ -145,6 +145,153 @@
 <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Función global para mostrar toasts personalizados
+        window.showToast = function(title, message, type = 'info') {
+            // Asegurarse de que Bootstrap esté disponible
+            if (typeof bootstrap === 'undefined') {
+                console.error('Bootstrap no está disponible');
+                // Fallback a alert nativo si Bootstrap no está disponible
+                if (title) {
+                    alert(`${title}: ${message}`);
+                } else {
+                    alert(message);
+                }
+                return;
+            }
+            
+            const typeClasses = {
+                'success': 'bg-success',
+                'error': 'bg-danger',
+                'warning': 'bg-warning text-dark',
+                'info': 'bg-info'
+            };
+            
+            // Crear o obtener contenedor de toasts
+            let toastContainer = document.getElementById('toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toast-container';
+                toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                toastContainer.style.zIndex = '9999';
+                document.body.appendChild(toastContainer);
+            }
+            
+            const toastDiv = document.createElement('div');
+            toastDiv.className = `toast align-items-center text-white ${typeClasses[type] || typeClasses.info} border-0`;
+            toastDiv.setAttribute('role', 'alert');
+            toastDiv.setAttribute('aria-live', 'assertive');
+            toastDiv.setAttribute('aria-atomic', 'true');
+            toastDiv.style.minWidth = '300px';
+            toastDiv.style.maxWidth = '400px';
+            
+            const iconMap = {
+                'success': 'fa-check-circle',
+                'error': 'fa-exclamation-circle',
+                'warning': 'fa-exclamation-triangle',
+                'info': 'fa-info-circle'
+            };
+            
+            const displayText = title ? (message ? `${title}<br>${message}` : title) : message;
+            
+            toastDiv.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas ${iconMap[type] || iconMap.info} me-2"></i>
+                        ${displayText}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toastDiv);
+            
+            // Inicializar y mostrar el toast
+            const toast = new bootstrap.Toast(toastDiv, { 
+                delay: type === 'error' ? 5000 : 3000,
+                autohide: true
+            });
+            
+            toast.show();
+            
+            // Limpiar el toast del DOM cuando se oculte
+            toastDiv.addEventListener('hidden.bs.toast', function() {
+                toastDiv.remove();
+            });
+        };
+        
+        // Función auxiliar para mostrar alertas (wrapper para compatibilidad)
+        window.showAlert = function(message, type = 'info') {
+            window.showToast('', message, type);
+        };
+        
+        // Función global para mostrar confirmaciones personalizadas (reemplaza confirm() nativo)
+        window.showConfirm = function(message, title = '{{ _("Confirmar") }}') {
+            return new Promise((resolve) => {
+                // Asegurarse de que Bootstrap esté disponible
+                if (typeof bootstrap === 'undefined') {
+                    // Fallback a confirm nativo si Bootstrap no está disponible
+                    resolve(confirm(message));
+                    return;
+                }
+                
+                // Crear modal de confirmación
+                const modalDiv = document.createElement('div');
+                modalDiv.className = 'modal fade';
+                modalDiv.id = 'customConfirmModal';
+                modalDiv.setAttribute('tabindex', '-1');
+                modalDiv.setAttribute('aria-labelledby', 'customConfirmModalLabel');
+                modalDiv.setAttribute('aria-hidden', 'true');
+                
+                modalDiv.innerHTML = `
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="customConfirmModalLabel">
+                                    <i class="fas fa-question-circle me-2 text-primary"></i>${title}
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="mb-0">${message}</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="confirmCancelBtn">
+                                    <i class="fas fa-times me-1"></i>{{ _("Cancel·lar") }}
+                                </button>
+                                <button type="button" class="btn btn-primary" id="confirmOkBtn">
+                                    <i class="fas fa-check me-1"></i>{{ _("Confirmar") }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modalDiv);
+                
+                const modal = new bootstrap.Modal(modalDiv);
+                
+                // Manejar confirmación
+                document.getElementById('confirmOkBtn').addEventListener('click', function() {
+                    modal.hide();
+                    resolve(true);
+                });
+                
+                // Manejar cancelación
+                const cancelBtn = document.getElementById('confirmCancelBtn');
+                cancelBtn.addEventListener('click', function() {
+                    modal.hide();
+                    resolve(false);
+                });
+                
+                // Limpiar cuando se cierre el modal
+                modalDiv.addEventListener('hidden.bs.modal', function() {
+                    modalDiv.remove();
+                });
+                
+                // Mostrar modal
+                modal.show();
+            });
+        };
         var map = null;
         var marker = null;
         var locationMode = 'auto'; // 'auto' or 'manual'
@@ -373,7 +520,7 @@
         // Get current location (only when user explicitly requests it)
         function getCurrentLocation() {
             if (!navigator.geolocation) {
-                alert('{{ _("La geolocalización no está disponible en tu navegador. Por favor, selecciona la ubicación en el mapa.") }}');
+                window.showAlert('{{ _("La geolocalización no está disponible en tu navegador. Por favor, selecciona la ubicación en el mapa.") }}', 'warning');
                 return;
             }
             
@@ -399,7 +546,7 @@
                     } else {
                         // Outside Tarragona - show manual option
                         document.getElementById('location-loading').style.display = 'none';
-                        alert('{{ _("Tu ubicación está fuera del área de Tarragona. Por favor, selecciona la ubicación en el mapa.") }}');
+                        window.showAlert('{{ _("Tu ubicación está fuera del área de Tarragona. Por favor, selecciona la ubicación en el mapa.") }}', 'warning');
                         showManualLocationOption();
                     }
                 },
@@ -420,7 +567,7 @@
                     
                     // Only show alert for permission denied or timeout, not for unavailable (which is common)
                     if (error.code === error.PERMISSION_DENIED || error.code === error.TIMEOUT) {
-                        alert(errorMsg);
+                        window.showAlert(errorMsg, 'error');
                     }
                     
                     // Always show manual option as fallback
@@ -634,13 +781,13 @@
         function handleImageSelection(file) {
             // Validate file type
             if (!file.type.match('image.*')) {
-                alert('{{ _("Por favor, selecciona un archivo de imagen válido") }}');
+                window.showAlert('{{ _("Por favor, selecciona un archivo de imagen válido") }}', 'error');
                 return;
             }
             
             // Validate file size (max 10MB)
             if (file.size > 10 * 1024 * 1024) {
-                alert('{{ _("La imagen es demasiado grande. Máximo 10MB") }}');
+                window.showAlert('{{ _("La imagen es demasiado grande. Máximo 10MB") }}', 'error');
                 return;
             }
             
@@ -675,29 +822,332 @@
             previewImg.src = '';
         });
         
-        // Form validation
+        // Form validation and nearby items check
         var form = document.querySelector('form');
-        form.addEventListener('submit', function(e) {
+        var isCheckingNearby = false; // Flag para evitar múltiples submits
+        var shouldSubmitNormally = false; // Flag para permitir submit normal después de check
+        
+        var handleSubmit = function(e) {
+            // Si ya estamos procesando o debemos submit normal, permitir
+            if (shouldSubmitNormally) {
+                return true; // Permitir submit normal
+            }
+            
+            // Si ya estamos procesando, no hacer nada
+            if (isCheckingNearby) {
+                e.preventDefault();
+                return false;
+            }
+            
             // Enable subcategory field before submit (disabled fields are not submitted)
             var subcategoryField = document.getElementById('subcategory');
             if (subcategoryField.disabled) {
                 e.preventDefault();
-                alert('{{ _("Por favor, selecciona una categoría y subcategoría") }}');
+                window.showAlert('{{ _("Por favor, selecciona una categoría y subcategoría") }}', 'error');
                 return false;
             }
             subcategoryField.disabled = false; // Enable before submit
             
-            // Don't validate coordinates here - server will try GPS from image first
-            // If image has no GPS and no coordinates are provided, server will return error
-            // This allows testing GPS extraction from images without requiring location selection
-            
             // Validate image is required
             if (!imageInput.files || imageInput.files.length === 0) {
                 e.preventDefault();
-                alert('{{ _("Por favor, sube una foto del item. La foto es obligatoria.") }}');
+                window.showAlert('{{ _("Por favor, sube una foto del item. La foto es obligatoria.") }}', 'error');
                 return false;
             }
-        });
+            
+            // Validar coordenadas
+            var latStr = document.getElementById('latitude').value;
+            var lngStr = document.getElementById('longitude').value;
+            var category = document.getElementById('category').value;
+            var subcategory = document.getElementById('subcategory').value;
+            
+            // Verificar que los campos no estén vacíos
+            if (!category || category.trim() === '') {
+                e.preventDefault();
+                window.showAlert('{{ _("Por favor, selecciona una categoría") }}', 'error');
+                return false;
+            }
+            
+            if (!subcategory || subcategory.trim() === '') {
+                e.preventDefault();
+                window.showAlert('{{ _("Por favor, selecciona una subcategoría") }}', 'error');
+                return false;
+            }
+            
+            if (!latStr || latStr.trim() === '' || !lngStr || lngStr.trim() === '') {
+                e.preventDefault();
+                window.showAlert('{{ _("Por favor, selecciona una ubicación en el mapa o usa el botón \"Usar la meva ubicació actual\"") }}', 'error');
+                return false;
+            }
+            
+            // Parsear coordenadas y verificar que sean números válidos
+            var lat = parseFloat(latStr);
+            var lng = parseFloat(lngStr);
+            
+            if (isNaN(lat) || isNaN(lng)) {
+                e.preventDefault();
+                window.showAlert('{{ _("Las coordenadas no son válidas. Por favor, selecciona una ubicación en el mapa.") }}', 'error');
+                return false;
+            }
+            
+            // Verificar que las coordenadas estén en un rango razonable (Tarragona está alrededor de 41.1, 1.2)
+            if (lat < 40 || lat > 42 || lng < 0 || lng > 2) {
+                e.preventDefault();
+                window.showAlert('{{ _("Las coordenadas están fuera del área de Tarragona. Por favor, selecciona una ubicación válida.") }}', 'error');
+                return false;
+            }
+            
+            // Prevenir submit para buscar items cercanos primero
+            e.preventDefault();
+            isCheckingNearby = true;
+            
+            // Deshabilitar botón de submit mientras se busca
+            var submitBtn = document.getElementById('submit-btn');
+            var originalBtnText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ _("Comprovant...") }}';
+            
+            // Buscar items cercanos ANTES de hacer el submit
+            checkNearbyItems(lat, lng, category, subcategory, submitBtn, originalBtnText, function(hasNearby) {
+                isCheckingNearby = false;
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+                
+                if (!hasNearby) {
+                    // No hay items cercanos, proceder con el submit normal
+                    shouldSubmitNormally = true;
+                    // Hacer submit directamente (no pasará por el listener porque shouldSubmitNormally = true)
+                    form.submit();
+                }
+                // Si hay items cercanos, el modal se encargará del flujo
+            });
+        };
+        
+        form.addEventListener('submit', handleSubmit);
+        
+        // Función para buscar items cercanos
+        function checkNearbyItems(lat, lng, category, subcategory, submitBtn, originalBtnText, callback) {
+            var radius = 50; // 50 metros
+            
+            fetch(`{{ url_for('inventory.api_nearby_items') }}?lat=${lat}&lng=${lng}&category=${category}&subcategory=${subcategory}&radius=${radius}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.items && data.items.length > 0) {
+                        // Hay items cercanos - mostrar modal
+                        showNearbyItemsModal(data.items, submitBtn, originalBtnText, callback);
+                    } else {
+                        // No hay items cercanos
+                        callback(false);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking nearby items:', error);
+                    // En caso de error, proceder con el submit normal
+                    callback(false);
+                });
+        }
+        
+        // Función para restaurar el botón de submit
+        function restoreSubmitButton(submitBtn, originalBtnText) {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }
+        }
+        
+        // Función para mostrar modal con items cercanos (estilo toast móvil)
+        function showNearbyItemsModal(items, submitBtn, originalBtnText, callback) {
+            // Crear modal estilo toast móvil
+            var modal = document.createElement('div');
+            modal.className = 'nearby-items-modal';
+            modal.style.cssText = `
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: white;
+                border-radius: 20px 20px 0 0;
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+                z-index: 9999;
+                max-height: 70vh;
+                overflow-y: auto;
+                animation: slideUp 0.3s ease-out;
+            `;
+            
+            // Añadir animación CSS
+            if (!document.getElementById('nearby-items-style')) {
+                var style = document.createElement('style');
+                style.id = 'nearby-items-style';
+                style.textContent = `
+                    @keyframes slideUp {
+                        from { transform: translateY(100%); }
+                        to { transform: translateY(0); }
+                    }
+                    .nearby-item-card {
+                        border: 1px solid #e0e0e0;
+                        border-radius: 12px;
+                        padding: 1rem;
+                        margin-bottom: 0.75rem;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                    }
+                    .nearby-item-card:hover {
+                        background: #f5f5f5;
+                        border-color: #007bff;
+                    }
+                    .nearby-item-card.selected {
+                        background: #e7f3ff;
+                        border-color: #007bff;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            modal.innerHTML = `
+                <div style="padding: 1.5rem;">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                            {{ _('Items similars a prop') }}
+                        </h5>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="close-nearby-modal" style="border-radius: 50px;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <p class="text-muted small mb-3">
+                        {{ _('S\'han trobat') }} <strong>${items.length}</strong> {{ _('items similars a prop. Pots votar per confirmar que el problema persiste o crear un nou report.') }}
+                    </p>
+                    <div id="nearby-items-list">
+                        ${items.map((item, index) => `
+                            <div class="nearby-item-card" data-item-id="${item.id}">
+                                <div class="d-flex align-items-start">
+                                    ${item.image_url ? `
+                                        <img src="${item.image_url}" 
+                                             style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin-right: 1rem;"
+                                             alt="Item">
+                                    ` : `
+                                        <div style="width: 60px; height: 60px; background: #f0f0f0; border-radius: 8px; margin-right: 1rem; display: flex; align-items: center; justify-content: center;">
+                                            <span style="font-size: 1.5rem;">${item.emoji || '📍'}</span>
+                                        </div>
+                                    `}
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-start mb-1">
+                                            <strong>${item.full_category}</strong>
+                                            <span class="badge bg-primary">${item.distance_m}m</span>
+                                        </div>
+                                        ${item.description ? `<p class="small text-muted mb-1">${item.description.substring(0, 80)}${item.description.length > 80 ? '...' : ''}</p>` : ''}
+                                        ${item.address ? `<p class="small text-muted mb-0"><i class="fas fa-map-marker-alt me-1"></i>${item.address.substring(0, 60)}${item.address.length > 60 ? '...' : ''}</p>` : ''}
+                                        <div class="mt-2">
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="fas fa-star me-1"></i>${item.importance_count} {{ _('vots') }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="mt-3 pt-3 border-top">
+                        <button type="button" class="btn btn-primary w-100 mb-2" id="vote-nearby-item" style="border-radius: 50px;" disabled>
+                            <i class="fas fa-thumbs-up me-2"></i>{{ _('Votar item seleccionat (+1)') }}
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary w-100" id="create-new-item" style="border-radius: 50px;">
+                            <i class="fas fa-plus me-2"></i>{{ _('Crear nou report de totes maneres') }}
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            var selectedItemId = null;
+            
+            // Seleccionar item al hacer click
+            modal.querySelectorAll('.nearby-item-card').forEach(function(card) {
+                card.addEventListener('click', function() {
+                    // Remover selección anterior
+                    modal.querySelectorAll('.nearby-item-card').forEach(c => c.classList.remove('selected'));
+                    // Añadir selección nueva
+                    this.classList.add('selected');
+                    selectedItemId = parseInt(this.dataset.itemId);
+                    document.getElementById('vote-nearby-item').disabled = false;
+                });
+            });
+            
+            // Votar item seleccionado (usando el endpoint existente)
+            document.getElementById('vote-nearby-item').addEventListener('click', function() {
+                if (!selectedItemId) return;
+                
+                // Deshabilitar botón mientras se procesa
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ _("Processant...") }}';
+                
+                // Obtener CSRF token
+                var csrfToken = document.querySelector('input[name="csrf_token"]').value;
+                
+                // Llamar al endpoint de vote existente
+                fetch(`{{ url_for('inventory.vote_item', item_id=0) }}`.replace('0', selectedItemId), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `csrf_token=${encodeURIComponent(csrfToken)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Mostrar mensaje de éxito
+                        window.showToast('{{ _("Vot registrat") }}', "{{ _('El comptador d\'importància s\'ha incrementat.') }}", 'success');
+                        // Cerrar modal
+                        modal.remove();
+                        // Redirigir al mapa después de un breve delay para que se vea el toast
+                        setTimeout(() => {
+                            window.location.href = '{{ url_for("inventory.inventory_map") }}';
+                        }, 1500);
+                    } else {
+                        window.showAlert(data.error || "{{ _('Error al votar') }}", 'error');
+                        this.disabled = false;
+                        this.innerHTML = '<i class="fas fa-thumbs-up me-2"></i>{{ _("Votar item seleccionat (+1)") }}';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error voting:', error);
+                    window.showAlert("{{ _('Error al votar. Intenta-ho de nou.') }}", 'error');
+                    this.disabled = false;
+                    this.innerHTML = '<i class="fas fa-thumbs-up me-2"></i>{{ _("Votar item seleccionat (+1)") }}';
+                });
+            });
+            
+            // Crear nuevo item de todas formas
+            document.getElementById('create-new-item').addEventListener('click', function() {
+                modal.remove();
+                // Restaurar botón antes de hacer submit
+                restoreSubmitButton(submitBtn, originalBtnText);
+                isCheckingNearby = false;
+                // Proceder con el submit normal
+                shouldSubmitNormally = true;
+                form.submit();
+            });
+            
+            // Función para cerrar el modal y restaurar el botón
+            function closeModal() {
+                modal.remove();
+                restoreSubmitButton(submitBtn, originalBtnText);
+                isCheckingNearby = false;
+            }
+            
+            // Cerrar modal
+            document.getElementById('close-nearby-modal').addEventListener('click', function() {
+                closeModal();
+            });
+            
+            // Cerrar al hacer click fuera (solo en el overlay)
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+        }
     });
 </script>
 {% endblock %}

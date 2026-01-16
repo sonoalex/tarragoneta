@@ -433,7 +433,7 @@
         
         // Initialize map centered on Tarragona
         // maxBounds se establecerá después de cargar el boundary
-        var map = L.map('map', {
+        const map = L.map('map', {
             center: [41.1189, 1.2445],
             zoom: 13,
             maxZoom: 19
@@ -441,13 +441,13 @@
         
         // Pane específic per als punts de contenidors (per estar per sobre de seccions)
         map.createPane('containerPane');
-        var containerPane = map.getPane('containerPane');
+        const containerPane = map.getPane('containerPane');
         containerPane.style.zIndex = 650; // per sobre d'overlay i markers
         // Per defecte, no intercepta clics: així es pot clicar el marker d'inventari que hi ha a sota
         containerPane.style.pointerEvents = 'none';
         
         // Capa base: OpenStreetMap
-        var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors',
             maxZoom: 19
         });
@@ -456,7 +456,7 @@
         osmLayer.addTo(map);
         
         // Colores para cada distrito (9 distritos) - Colores más vibrantes y distintos
-        var districtColors = [
+        const districtColors = [
             '#E74C3C', // Districte 1 - Rojo fuerte
             '#1ABC9C', // Districte 2 - Turquesa fuerte
             '#3498DB', // Districte 3 - Azul fuerte
@@ -470,7 +470,7 @@
         
         // Función para obtener color del distrito
         function getDistrictColor(districtCode) {
-            var districtNum = parseInt(districtCode) - 1;
+            const districtNum = parseInt(districtCode) - 1;
             if (districtNum >= 0 && districtNum < districtColors.length) {
                 return districtColors[districtNum];
             }
@@ -482,15 +482,15 @@
             options = options || {};
             if (geojson.type === 'Polygon') {
                 // Convertir coordenadas de [lng, lat] a [lat, lng] para Leaflet
-                var latlngs = geojson.coordinates[0].map(function(coord) {
+                const latlngs = geojson.coordinates[0].map(function(coord) {
                     return [coord[1], coord[0]]; // [lat, lng]
                 });
                 return L.polygon(latlngs, options);
             } else if (geojson.type === 'MultiPolygon') {
                 // Manejar MultiPolygon: crear un layer group con múltiples polígonos
-                var layerGroup = L.layerGroup();
+                const layerGroup = L.layerGroup();
                 geojson.coordinates.forEach(function(polygonCoords) {
-                    var latlngs = polygonCoords[0].map(function(coord) {
+                    const latlngs = polygonCoords[0].map(function(coord) {
                         return [coord[1], coord[0]]; // [lat, lng]
                     });
                     layerGroup.addLayer(L.polygon(latlngs, options));
@@ -500,25 +500,25 @@
             return null;
         }
         
-        var isAuthenticated = {{ 'true' if current_user.is_authenticated else 'false' }};
+        const isAuthenticated = {{ 'true' if current_user.is_authenticated else 'false' }};
         
         // Capa para puntos de contenedores
-        var containerPointsLayer = L.layerGroup();  // se añadirá/retirará según visibilidad (gestionado por control de capas)
-        var containerPointLayers = {};  // Mapa de pointId -> {polygon, iconMarker} para actualización en tiempo real
-        var isContainerPointMode = false;
-        var canManageContainers = {{ 'true' if current_user.is_authenticated and (current_user.has_role('admin') or current_user.has_role('section_responsible')) else 'false' }};
-        var canSuggestContainers = {{ 'true' if current_user.is_authenticated else 'false' }};
+        const containerPointsLayer = L.layerGroup();  // se añadirá/retirará según visibilidad (gestionado por control de capas)
+        let containerPointLayers = {};  // Mapa de pointId -> {polygon, iconMarker} para actualización en tiempo real
+        let isContainerPointMode = false;
+        const canManageContainers = {{ 'true' if current_user.is_authenticated and (current_user.has_role('admin') or current_user.has_role('section_responsible')) else 'false' }};
+        const canSuggestContainers = {{ 'true' if current_user.is_authenticated else 'false' }};
         
         // Cargar y dibujar secciones
-        var sectionsLayer = L.layerGroup();
+        const sectionsLayer = L.layerGroup();
         fetch('{{ url_for("inventory.api_sections") }}')
             .then(response => response.json())
             .then(sections => {
                 sections.forEach(function(section) {
                     if (section.geometry) {
-                        var polygon = geoJsonToLeaflet(section.geometry);
+                        const polygon = geoJsonToLeaflet(section.geometry);
                         if (polygon) {
-                            var color = getDistrictColor(section.district_code);
+                            const color = getDistrictColor(section.district_code);
                             
                             // Si es un LayerGroup (MultiPolygon), aplicar estilo a cada capa
                             if (polygon instanceof L.LayerGroup) {
@@ -601,7 +601,7 @@
             });
         
         // Cargar y dibujar boundary de la ciudad
-        var boundaryLayer = L.layerGroup();
+        const boundaryLayer = L.layerGroup();
         fetch('{{ url_for("inventory.api_boundary") }}')
             .then(response => {
                 if (!response.ok) {
@@ -616,7 +616,7 @@
                     return;
                 }
                 if (data.geometry) {
-                    var polygon = geoJsonToLeaflet(data.geometry);
+                    const polygon = geoJsonToLeaflet(data.geometry);
                     if (polygon) {
                         // Si es un LayerGroup (MultiPolygon), aplicar estilo a cada capa
                         if (polygon instanceof L.LayerGroup) {
@@ -665,7 +665,7 @@
                         
                         // Establecer maxBounds para limitar el movimiento del mapa
                         if (data.bounds) {
-                            var maxBounds = L.latLngBounds(
+                            const maxBounds = L.latLngBounds(
                                 data.bounds.southwest,  // [lat, lng]
                                 data.bounds.northeast   // [lat, lng]
                             );
@@ -684,15 +684,15 @@
             });
         
         // Crear grupo de marcadores de inventario
-        var markers = L.markerClusterGroup();
+        const markers = L.markerClusterGroup();
         
         // Definir capas base (solo OpenStreetMap por ahora, satelital se añadirá después)
-        var baseLayers = {
+        const baseLayers = {
             "{{ _('Mapa') }}": osmLayer
         };
         
         // Definir capas overlay
-        var overlayLayers = {
+        const overlayLayers = {
             "{{ _('Items d\'inventari') }}": markers,
             "{{ _('Punts de contenidors') }}": containerPointsLayer,
             "{{ _('Seccions') }}": sectionsLayer,
@@ -706,16 +706,16 @@
         map.addLayer(boundaryLayer);
         
         // Añadir control de capas al mapa
-        var layerControl = L.control.layers(baseLayers, overlayLayers, {
+        const layerControl = L.control.layers(baseLayers, overlayLayers, {
             position: 'topright',
             collapsed: true
         }).addTo(map);
         
         // Crear leyenda para puntos de contenedores
-        var legend = L.control({ position: 'bottomright' });
+        const legend = L.control({ position: 'bottomright' });
         
         legend.onAdd = function(map) {
-            var div = L.DomUtil.create('div', 'legend');
+            const div = L.DomUtil.create('div', 'legend');
             div.innerHTML = `
                 <div style="background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); font-size: 12px;">
                     <div style="font-weight: bold; margin-bottom: 8px; color: #333;">{{ _('Punts de contenidors') }}</div>
@@ -740,7 +740,7 @@
         
         // Category icons mapping (matches Python get_inventory_icon function)
         function getCategoryIconInfo(category, subcategory) {
-            var iconMapping = {
+            const iconMapping = {
                 // Palomas
                 'palomas_nido': { icon: 'fa-home', color: '#007bff' },
                 'palomas_excremento': { icon: 'fa-biohazard', color: '#dc3545' },
@@ -754,7 +754,7 @@
                 'basura_otro': { icon: 'fa-trash', color: '#6c757d' }
             };
             
-            var key = (category || '') + '_' + (subcategory || '');
+            let key = (category || '') + '_' + (subcategory || '');
             if (iconMapping[key]) {
                 return iconMapping[key];
             }
@@ -777,18 +777,18 @@
             }
             
             // Find the last dot (extension)
-            var lastDot = imagePath.lastIndexOf('.');
+            const lastDot = imagePath.lastIndexOf('.');
             if (lastDot === -1) {
                 // No extension found, return original
                 return imagePath;
             }
             
-            var ext = imagePath.substring(lastDot);
-            var nameWithPossibleSuffix = imagePath.substring(0, lastDot);
+            const ext = imagePath.substring(lastDot);
+            const nameWithPossibleSuffix = imagePath.substring(0, lastDot);
             
             // Remove any existing size suffix (_thumbnail, _medium, _large)
             // Pattern: _thumbnail, _medium, or _large at the end
-            var baseName = nameWithPossibleSuffix.replace(/_?(thumbnail|medium|large)$/i, '');
+            const baseName = nameWithPossibleSuffix.replace(/_?(thumbnail|medium|large)$/i, '');
             
             // Add the requested size suffix
             return baseName + '_' + size + ext;
@@ -796,7 +796,7 @@
         
         // Category icons with optional image
         function getCategoryIcon(category, subcategory, imagePath) {
-            var colors = {
+            const colors = {
                 'excremento': '#8B4513',
                 'nido': '#D2691E',
                 'plumas': '#708090',
@@ -805,12 +805,12 @@
                 'otro': '#696969'
             };
             
-            var iconInfo = getCategoryIconInfo(category, subcategory);
-            var color = colors[subcategory] || iconInfo.color || '#696969';
+            const iconInfo = getCategoryIconInfo(category, subcategory);
+            const color = colors[subcategory] || iconInfo.color || '#696969';
             
-            var size = 40; // Size for custom markers
-            var iconSize = [size, size];
-            var iconAnchor = [size/2, size/2];
+            const size = 40; // Size for custom markers
+            const iconSize = [size, size];
+            const iconAnchor = [size/2, size/2];
             
             // If image exists, use it as marker
             if (imagePath) {
@@ -858,14 +858,170 @@
             });
         }
         
+        // Función global para mostrar toasts personalizados
+        window.showToast = function(title, message, type = 'info') {
+            // Asegurarse de que Bootstrap esté disponible
+            if (typeof bootstrap === 'undefined') {
+                console.error('Bootstrap no está disponible');
+                // Fallback a alert si Bootstrap no está disponible
+                alert(title ? `${title}: ${message}` : message);
+                return;
+            }
+            
+            const typeClasses = {
+                'success': 'bg-success',
+                'error': 'bg-danger',
+                'warning': 'bg-warning text-dark',
+                'info': 'bg-info'
+            };
+            
+            // Crear o obtener contenedor de toasts
+            let toastContainer = document.getElementById('toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toast-container';
+                toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                toastContainer.style.zIndex = '9999';
+                document.body.appendChild(toastContainer);
+            }
+            
+            const toastDiv = document.createElement('div');
+            toastDiv.className = `toast align-items-center text-white ${typeClasses[type] || typeClasses.info} border-0`;
+            toastDiv.setAttribute('role', 'alert');
+            toastDiv.setAttribute('aria-live', 'assertive');
+            toastDiv.setAttribute('aria-atomic', 'true');
+            toastDiv.style.minWidth = '300px';
+            toastDiv.style.maxWidth = '400px';
+            
+            const iconMap = {
+                'success': 'fa-check-circle',
+                'error': 'fa-exclamation-circle',
+                'warning': 'fa-exclamation-triangle',
+                'info': 'fa-info-circle'
+            };
+            
+            const displayText = title ? (message ? `${title}<br>${message}` : title) : message;
+            
+            toastDiv.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas ${iconMap[type] || iconMap.info} me-2"></i>
+                        ${displayText}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toastDiv);
+            
+            // Inicializar y mostrar el toast
+            const toast = new bootstrap.Toast(toastDiv, { 
+                delay: type === 'error' ? 5000 : 3000,
+                autohide: true
+            });
+            
+            // Asegurarse de que el toast se muestre
+            toastDiv.addEventListener('shown.bs.toast', function() {
+                console.log('Toast mostrado correctamente');
+            });
+            
+            toast.show();
+            
+            // Limpiar el toast del DOM cuando se oculte
+            toastDiv.addEventListener('hidden.bs.toast', function() {
+                toastDiv.remove();
+                // Si el contenedor está vacío, mantenerlo para futuros toasts
+            });
+        };
+        
+        // Función auxiliar para mostrar alertas (wrapper para compatibilidad)
+        window.showAlert = function(message, type = 'info') {
+            console.log('showAlert called:', message, type);
+            window.showToast('', message, type);
+        };
+        
+        // Función global para mostrar confirmaciones personalizadas (reemplaza confirm() nativo)
+        window.showConfirm = function(message, title = '{{ _("Confirmar") }}') {
+            return new Promise((resolve) => {
+                // Asegurarse de que Bootstrap esté disponible
+                if (typeof bootstrap === 'undefined') {
+                    // Fallback a confirm nativo si Bootstrap no está disponible
+                    resolve(confirm(message));
+                    return;
+                }
+                
+                // Crear modal de confirmación
+                const modalDiv = document.createElement('div');
+                modalDiv.className = 'modal fade';
+                modalDiv.id = 'customConfirmModal';
+                modalDiv.setAttribute('tabindex', '-1');
+                modalDiv.setAttribute('aria-labelledby', 'customConfirmModalLabel');
+                modalDiv.setAttribute('aria-hidden', 'true');
+                
+                modalDiv.innerHTML = `
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="customConfirmModalLabel">
+                                    <i class="fas fa-question-circle me-2 text-primary"></i>${title}
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="mb-0">${message}</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="confirmCancelBtn">
+                                    <i class="fas fa-times me-1"></i>{{ _("Cancel·lar") }}
+                                </button>
+                                <button type="button" class="btn btn-primary" id="confirmOkBtn">
+                                    <i class="fas fa-check me-1"></i>{{ _("Confirmar") }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modalDiv);
+                
+                const modal = new bootstrap.Modal(modalDiv);
+                
+                // Manejar confirmación
+                document.getElementById('confirmOkBtn').addEventListener('click', function() {
+                    modal.hide();
+                    resolve(true);
+                });
+                
+                // Manejar cancelación
+                const cancelBtn = document.getElementById('confirmCancelBtn');
+                cancelBtn.addEventListener('click', function() {
+                    modal.hide();
+                    resolve(false);
+                });
+                
+                // Limpiar cuando se cierre el modal
+                modalDiv.addEventListener('hidden.bs.modal', function() {
+                    modalDiv.remove();
+                });
+                
+                // Mostrar modal
+                modal.show();
+            });
+        };
+        
         // Función auxiliar para sugerir un punt de contenidors (usuarios normales)
-        function handleContainerPointSuggestion(latlng) {
+        async function handleContainerPointSuggestion(latlng) {
             if (!canSuggestContainers) return;
             
-            var lat = latlng.lat;
-            var lng = latlng.lng;
+            const lat = latlng.lat;
+            const lng = latlng.lng;
             
-            if (!confirm('{{ _("Vols indicar que aquí hi ha contenidors? Un administrador o responsable revisarà la teva suggerència.") }}')) {
+            const confirmed = await window.showConfirm(
+                '{{ _("Vols indicar que aquí hi ha contenidors? Un administrador o responsable revisarà la teva suggerència.") }}',
+                '{{ _("Suggerir punt de contenidors") }}'
+            );
+            
+            if (!confirmed) {
                 return;
             }
             
@@ -882,29 +1038,34 @@
             .then(response => response.json())
             .then(data => {
                 if (data.error) {
-                    alert(data.error);
+                    showAlert(data.error, 'error');
                     return;
                 }
                 if (data.message) {
-                    alert(data.message);
+                    showAlert(data.message, 'success');
                 }
             })
             .catch(err => {
                 console.error('Error suggesting container point:', err);
-                alert('Error suggerint el punt de contenidors');
+                showAlert('{{ _("Error suggerint el punt de contenidors") }}', 'error');
             });
         }
         
         // Función auxiliar para crear un punt de contenidors desde una lat/lng (admin/responsables)
-        function handleContainerPointCreation(latlng, skipModeCheck) {
+        async function handleContainerPointCreation(latlng, skipModeCheck) {
             // skipModeCheck permite crear desde geolocalización sin activar el modo
             if (!skipModeCheck && (!isContainerPointMode || !canManageContainers)) return;
             if (!canManageContainers) return;
             
-            var lat = latlng.lat;
-            var lng = latlng.lng;
+            const lat = latlng.lat;
+            const lng = latlng.lng;
             
-            if (!confirm('{{ _("Crear un punt de contenidors en aquesta ubicació?") }}')) {
+            const confirmed = await window.showConfirm(
+                '{{ _("Crear un punt de contenidors en aquesta ubicació?") }}',
+                '{{ _("Crear punt de contenidors") }}'
+            );
+            
+            if (!confirmed) {
                 return;
             }
             
@@ -921,15 +1082,16 @@
             .then(response => response.json())
             .then(data => {
                 if (data.error) {
-                    alert(data.error);
+                    showAlert(data.error, 'error');
                     return;
                 }
                 // Recargar puntos
                 loadContainerPoints();
+                showAlert('{{ _("Punt de contenidors creat correctament") }}', 'success');
             })
             .catch(err => {
                 console.error('Error creating container point:', err);
-                alert('Error creant el punt de contenidors');
+                showAlert('{{ _("Error creant el punt de contenidors") }}', 'error');
             });
         }
         
@@ -945,12 +1107,12 @@
                         if (!point.geometry) {
                             return;
                         }
-                        var polygon = geoJsonToLeaflet(point.geometry, { pane: 'containerPane' });
+                        const polygon = geoJsonToLeaflet(point.geometry, { pane: 'containerPane' });
                         if (!polygon) {
                             return;
                         }
                         
-                        var isOverflow = point.status === 'overflow';
+                        const isOverflow = point.status === 'overflow';
                         
                         function styleOverflowLayer(layer) {
                             layer.setStyle({
@@ -971,7 +1133,7 @@
                         
                         // Animación parpadeante para desbordados (más agressiva)
                         if (isOverflow) {
-                            var blinkLayers = [];
+                            const blinkLayers = [];
                             if (polygon instanceof L.LayerGroup) {
                                 polygon.eachLayer(function(layer) {
                                     blinkLayers.push(layer);
@@ -981,8 +1143,8 @@
                             }
                             
                             blinkLayers.forEach(function(layer) {
-                                var on = true;
-                                var interval = setInterval(function() {
+                                let on = true;
+                                const interval = setInterval(function() {
                                     on = !on;
                                     if (on) {
                                         layer.setStyle({
@@ -1008,11 +1170,11 @@
                         }
                         
                         // Popup con controles (solo lectura o gestión según permisos)
-                        var statusLabel = isOverflow ? '{{ _("Desbordat") }}' : '{{ _("Normal") }}';
-                        var coordsText = point.address 
+                        const statusLabel = isOverflow ? '{{ _("Desbordat") }}' : '{{ _("Normal") }}';
+                        const coordsText = point.address 
                             ? point.address 
                             : `(${point.latitude.toFixed(5)}, ${point.longitude.toFixed(5)})`;
-                        var actionsHtml = '';
+                        let actionsHtml = '';
                         if (canManageContainers) {
                             actionsHtml = `
                                 <div class="mt-2 d-flex gap-1">
@@ -1048,7 +1210,7 @@
                             `;
                         }
                         
-                        var popupHtml = `
+                        const popupHtml = `
                             <div style="min-width: 160px;">
                                 <h6 class="fw-bold mb-1">{{ _('Punt de contenidors') }}</h6>
                                 <p class="small mb-1">
@@ -1078,18 +1240,18 @@
                         }
 
                         // Añadir icono de contenedor en el centre del punt
-                        var iconHtml = `
+                        const iconHtml = `
                             <div class="container-point-icon ${isOverflow ? 'overflow' : 'normal'}">
                                 <i class="fas fa-dumpster"></i>
                             </div>
                         `;
-                        var icon = L.divIcon({
+                        const icon = L.divIcon({
                             className: 'container-point-icon-wrapper',
                             html: iconHtml,
                             iconSize: [20, 20],
                             iconAnchor: [10, 10]
                         });
-                        var iconMarker = L.marker([point.latitude, point.longitude], {
+                        const iconMarker = L.marker([point.latitude, point.longitude], {
                             icon: icon,
                             pane: 'containerPane',
                             interactive: false
@@ -1261,8 +1423,13 @@
         }
         
         // Funciones accesibles desde popup (window.*)
-        window.reportContainerOverflow = function(pointId, button) {
-            if (!confirm('{{ _("Confirmes que aquest punt de contenidors està desbordat?") }}')) {
+        window.reportContainerOverflow = async function(pointId, button) {
+            const confirmed = await window.showConfirm(
+                '{{ _("Confirmes que aquest punt de contenidors està desbordat?") }}',
+                '{{ _("Reportar desbordament") }}'
+            );
+            
+            if (!confirmed) {
                 return;
             }
             if (button) {
@@ -1279,7 +1446,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.error) {
-                    alert(data.error);
+                    showAlert(data.error, 'error');
                     if (button) {
                         button.disabled = false;
                         button.innerHTML = '{{ _("Estan desbordats") }}';
@@ -1313,7 +1480,7 @@
             })
             .catch(err => {
                 console.error('Error reporting container overflow:', err);
-                alert('{{ _("Error en registrar el report. Intenta-ho de nou més tard.") }}');
+                showAlert('{{ _("Error en registrar el report. Intenta-ho de nou més tard.") }}', 'error');
                 if (button) {
                     button.disabled = false;
                     button.innerHTML = '{{ _("Estan desbordats") }}';
@@ -1333,33 +1500,49 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
-                        alert(data.error);
+                        showAlert(data.error, 'error');
+                    } else {
+                        showAlert('{{ _("Estat del punt actualitzat correctament") }}', 'success');
                     }
                     loadContainerPoints();
                 })
                 .catch(err => {
                     console.error('Error updating container point status:', err);
-                    alert('Error actualitzant l\'estat del punt de contenidors');
+                    showAlert('{{ _("Error actualitzant l\'estat del punt de contenidors") }}', 'error');
                 });
             };
             
-            window.deleteContainerPoint = function(pointId) {
-                if (!confirm('{{ _("Vols eliminar aquest punt de contenidors?") }}')) {
+            window.deleteContainerPoint = async function(pointId) {
+                const confirmed = await window.showConfirm(
+                    '{{ _("Vols eliminar aquest punt de contenidors?") }}',
+                    '{{ _("Eliminar punt de contenidors") }}'
+                );
+                
+                if (!confirmed) {
                     return;
                 }
                 fetch(`{{ url_for('inventory.delete_container_point', point_id=0) }}`.replace('0', pointId), {
                     method: 'DELETE',
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.success && data.error) {
-                        alert(data.error);
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            throw new Error(data.error || 'Error eliminant el punt de contenidors');
+                        });
                     }
-                    loadContainerPoints();
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        showAlert('{{ _("Punt de contenidors eliminat correctament") }}', 'success');
+                        loadContainerPoints();
+                    } else if (data.error) {
+                        showAlert(data.error, 'error');
+                    }
                 })
                 .catch(err => {
                     console.error('Error deleting container point:', err);
-                    alert('Error eliminant el punt de contenidors');
+                    showAlert(err.message || '{{ _("Error eliminant el punt de contenidors") }}', 'error');
                 });
             };
         }
@@ -1384,11 +1567,11 @@
         
         // Modo creación de puntos de contenedores (solo admin / responsables)
         if (canManageContainers) {
-            var toggleModeBtn = document.getElementById('toggle-container-mode');
-            var createFromLocationBtn = document.getElementById('create-container-from-location');
+            const toggleModeBtn = document.getElementById('toggle-container-mode');
+            const createFromLocationBtn = document.getElementById('create-container-from-location');
             
             // Variable para almacenar el handler del click del mapa
-            var mapClickHandler = null;
+            let mapClickHandler = null;
             
             if (toggleModeBtn) {
                 toggleModeBtn.addEventListener('click', function(e) {
@@ -1433,18 +1616,18 @@
                     e.preventDefault();
                     
                     if (!navigator.geolocation) {
-                        alert('{{ _("La geolocalización no está disponible en tu navegador.") }}');
+                        showAlert('{{ _("La geolocalización no está disponible en tu navegador.") }}', 'warning');
                         return;
                     }
                     
                     // Guardar referencia al botón y texto original
-                    var btn = createFromLocationBtn;
-                    var originalHTML = btn.innerHTML;
-                    var originalDisabled = btn.disabled;
+                    const btn = createFromLocationBtn;
+                    const originalHTML = btn.innerHTML;
+                    const originalDisabled = btn.disabled;
                     
                     // Mostrar indicador de carga inmediatamente
                     btn.disabled = true;
-                    var loadingHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ _("Obtenint ubicació...") }}';
+                    const loadingHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ _("Obtenint ubicació...") }}';
                     btn.innerHTML = loadingHTML;
                     
                     // Forzar actualización del DOM
@@ -1461,7 +1644,7 @@
                     // Función para manejar errores con mensajes más específicos
                     function handleGeolocationError(error) {
                         console.error('Geolocation error:', error);
-                        var errorMessage = '{{ _("No s\'ha pogut obtenir la teva ubicació.") }}';
+                        let errorMessage = '{{ _("No s\'ha pogut obtenir la teva ubicació.") }}';
                         
                         switch(error.code) {
                             case error.PERMISSION_DENIED:
@@ -1478,15 +1661,15 @@
                                 break;
                         }
                         
-                        alert(errorMessage);
+                        showAlert(errorMessage, 'error');
                         restoreButton();
                     }
                     
                     // Intentar primero con configuración más permisiva
                     navigator.geolocation.getCurrentPosition(
                         function(position) {
-                            var lat = position.coords.latitude;
-                            var lng = position.coords.longitude;
+                            const lat = position.coords.latitude;
+                            const lng = position.coords.longitude;
                             
                             console.log('Location obtained:', lat, lng);
                             
@@ -1494,7 +1677,7 @@
                             if (lat >= 40.5 && lat <= 41.5 && lng >= 0.5 && lng <= 2.0) {
                                 // Crear punto de contenedor en la ubicación actual
                                 // skipModeCheck = true porque viene de geolocalización, no del modo de clic
-                                var latlng = L.latLng(lat, lng);
+                                const latlng = L.latLng(lat, lng);
                                 if (canManageContainers) {
                                     handleContainerPointCreation(latlng, true);
                                 } else if (canSuggestContainers) {
@@ -1507,7 +1690,7 @@
                                 // Centrar mapa en la ubicación
                                 map.setView([lat, lng], 18);
                             } else {
-                                alert('{{ _("La teva ubicació està fora de l\'àrea de Tarragona. Si us plau, utilitza el mode de clic al mapa.") }}');
+                                showAlert('{{ _("La teva ubicació està fora de l\'àrea de Tarragona. Si us plau, utilitza el mode de clic al mapa.") }}', 'warning');
                                 restoreButton();
                             }
                         },
@@ -1522,13 +1705,13 @@
                             
                             navigator.geolocation.getCurrentPosition(
                                 function(position) {
-                                    var lat = position.coords.latitude;
-                                    var lng = position.coords.longitude;
+                                    const lat = position.coords.latitude;
+                                    const lng = position.coords.longitude;
                                     
                                     console.log('Location obtained on retry:', lat, lng);
                                     
                                         if (lat >= 40.5 && lat <= 41.5 && lng >= 0.5 && lng <= 2.0) {
-                                            var latlng = L.latLng(lat, lng);
+                                            const latlng = L.latLng(lat, lng);
                                             if (canManageContainers) {
                                                 // Admin/responsable: crear directamente
                                                 handleContainerPointCreation(latlng, true);
@@ -1539,7 +1722,7 @@
                                             restoreButton();
                                             map.setView([lat, lng], 18);
                                         } else {
-                                            alert('{{ _("La teva ubicació està fora de l\'àrea de Tarragona. Si us plau, utilitza el mode de clic al mapa.") }}');
+                                            showAlert('{{ _("La teva ubicació està fora de l\'àrea de Tarragona. Si us plau, utilitza el mode de clic al mapa.") }}', 'warning');
                                             restoreButton();
                                         }
                                 },
@@ -1564,25 +1747,25 @@
         
         // Botón para sugerir puntos desde ubicación (usuarios normales)
         if (canSuggestContainers && !canManageContainers) {
-            var suggestFromLocationBtn = document.getElementById('suggest-container-from-location');
+            const suggestFromLocationBtn = document.getElementById('suggest-container-from-location');
             
             if (suggestFromLocationBtn) {
                 suggestFromLocationBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     
                     if (!navigator.geolocation) {
-                        alert('{{ _("La geolocalización no está disponible en tu navegador.") }}');
+                        showAlert('{{ _("La geolocalización no está disponible en tu navegador.") }}', 'warning');
                         return;
                     }
                     
                     // Guardar referencia al botón y texto original
-                    var btn = suggestFromLocationBtn;
-                    var originalHTML = btn.innerHTML;
-                    var originalDisabled = btn.disabled;
+                    const btn = suggestFromLocationBtn;
+                    const originalHTML = btn.innerHTML;
+                    const originalDisabled = btn.disabled;
                     
                     // Mostrar indicador de carga inmediatamente
                     btn.disabled = true;
-                    var loadingHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ _("Obtenint ubicació...") }}';
+                    const loadingHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ _("Obtenint ubicació...") }}';
                     btn.innerHTML = loadingHTML;
                     btn.offsetHeight; // Trigger reflow
                     
@@ -1597,7 +1780,7 @@
                     // Función para manejar errores
                     function handleGeolocationError(error) {
                         console.error('Geolocation error:', error);
-                        var errorMessage = '{{ _("No s\'ha pogut obtenir la teva ubicació.") }}';
+                        let errorMessage = '{{ _("No s\'ha pogut obtenir la teva ubicació.") }}';
                         
                         switch(error.code) {
                             case error.PERMISSION_DENIED:
@@ -1611,25 +1794,25 @@
                                 break;
                         }
                         
-                        alert(errorMessage);
+                        showAlert(errorMessage, 'error');
                         restoreButton();
                     }
                     
                     // Intentar obtener ubicación
                     navigator.geolocation.getCurrentPosition(
                         function(position) {
-                            var lat = position.coords.latitude;
-                            var lng = position.coords.longitude;
+                            const lat = position.coords.latitude;
+                            const lng = position.coords.longitude;
                             
                             console.log('Location obtained:', lat, lng);
                             
                             if (lat >= 40.5 && lat <= 41.5 && lng >= 0.5 && lng <= 2.0) {
-                                var latlng = L.latLng(lat, lng);
+                                const latlng = L.latLng(lat, lng);
                                 handleContainerPointSuggestion(latlng);
                                 restoreButton();
                                 map.setView([lat, lng], 18);
                             } else {
-                                alert('{{ _("La teva ubicació està fora de l\'àrea de Tarragona.") }}');
+                                showAlert('{{ _("La teva ubicació està fora de l\'àrea de Tarragona.") }}', 'warning');
                                 restoreButton();
                             }
                         },
@@ -1640,18 +1823,18 @@
                             
                             navigator.geolocation.getCurrentPosition(
                                 function(position) {
-                                    var lat = position.coords.latitude;
-                                    var lng = position.coords.longitude;
+                                    const lat = position.coords.latitude;
+                                    const lng = position.coords.longitude;
                                     
                                     console.log('Location obtained on retry:', lat, lng);
                                     
                                     if (lat >= 40.5 && lat <= 41.5 && lng >= 0.5 && lng <= 2.0) {
-                                        var latlng = L.latLng(lat, lng);
+                                        const latlng = L.latLng(lat, lng);
                                         handleContainerPointSuggestion(latlng);
                                         restoreButton();
                                         map.setView([lat, lng], 18);
                                     } else {
-                                        alert('{{ _("La teva ubicació està fora de l\'àrea de Tarragona.") }}');
+                                        showAlert('{{ _("La teva ubicació està fora de l\'àrea de Tarragona.") }}', 'warning');
                                         restoreButton();
                                     }
                                 },
@@ -1674,12 +1857,12 @@
         }
         
         // Load items from API (usar valores de URL en catalán)
-        var category = '{{ selected_category or "" }}';
-        var subcategory = '{{ selected_subcategory or "" }}';
-        var params = [];
+        const category = '{{ selected_category or "" }}';
+        const subcategory = '{{ selected_subcategory or "" }}';
+        const params = [];
         if (category) params.push(`category=${category}`);
         if (subcategory) params.push(`subcategory=${subcategory}`);
-        var apiUrl = params.length > 0 ? 
+        const apiUrl = params.length > 0 ? 
             `{{ url_for('inventory.api_items') }}?${params.join('&')}` : 
             '{{ url_for('inventory.api_items') }}';
         
@@ -1687,9 +1870,9 @@
             .then(response => response.json())
             .then(items => {
                 items.forEach(function(item) {
-                    var voteButton = '';
-                    var resolveButton = '';
-                    var isAuthenticated = {{ 'true' if current_user.is_authenticated else 'false' }};
+                    let voteButton = '';
+                    let resolveButton = '';
+                    const isAuthenticated = {{ 'true' if current_user.is_authenticated else 'false' }};
                     const imageThumb = item.image_url_thumbnail || item.image_url || null;
                     const imageMedium = item.image_url || null;
                     
@@ -1717,15 +1900,15 @@
                         `;
                     }
                     
-                    var iconInfo = getCategoryIconInfo(item.category, item.subcategory);
+                    const iconInfo = getCategoryIconInfo(item.category, item.subcategory);
                     // Detect mobile screen size
-                    var isMobile = window.innerWidth <= 768;
-                    var popupMinWidth = isMobile ? '150px' : '180px';
+                    const isMobile = window.innerWidth <= 768;
+                    const popupMinWidth = isMobile ? '150px' : '180px';
                     
                     // Truncate address to max 25 characters
-                    var truncatedAddress = item.address ? (item.address.length > 25 ? item.address.substring(0, 25) + '...' : item.address) : '';
+                    const truncatedAddress = item.address ? (item.address.length > 25 ? item.address.substring(0, 25) + '...' : item.address) : '';
                     
-                    var popupContent = `
+                    const popupContent = `
                         <div style="min-width: ${popupMinWidth}; max-width: ${isMobile ? '200px' : '220px'};">
                             <div class="d-flex align-items-center mb-1">
                                 <i class="fas ${iconInfo.icon} ${iconInfo.color ? 'text-primary' : ''} me-1" style="font-size: 0.85rem;"></i>
@@ -1758,7 +1941,7 @@
                         </div>
                     `;
                     
-                    var marker = L.marker([item.latitude, item.longitude], {
+                    const marker = L.marker([item.latitude, item.longitude], {
                         icon: getCategoryIcon(item.category, item.subcategory, imageThumb)
                     });
                     
@@ -1771,14 +1954,14 @@
                 
                 // Fit map to show all markers
                 if (items.length > 0) {
-                    var group = new L.featureGroup(markers.getLayers());
+                    const group = new L.featureGroup(markers.getLayers());
                     map.fitBounds(group.getBounds().pad(0.1));
                 }
                 
                 // Handle vote and resolve button clicks
                 map.on('popupopen', function(e) {
-                    var popup = e.popup;
-                    var content = popup.getContent();
+                    const popup = e.popup;
+                    const content = popup.getContent();
                     
                     // Re-bind vote buttons after popup opens
                     setTimeout(function() {
@@ -1786,7 +1969,7 @@
                             btn.addEventListener('click', function(e) {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                var itemId = this.getAttribute('data-item-id');
+                                const itemId = this.getAttribute('data-item-id');
                                 voteForItem(itemId, this);
                             });
                         });
@@ -1796,7 +1979,7 @@
                             btn.addEventListener('click', function(e) {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                var itemId = this.getAttribute('data-item-id');
+                                const itemId = this.getAttribute('data-item-id');
                                 resolveItem(itemId, this);
                             });
                         });
@@ -1806,9 +1989,9 @@
                             btn.addEventListener('click', function(e) {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                var url = this.getAttribute('data-url');
-                                var title = this.getAttribute('data-title');
-                                var itemId = this.getAttribute('data-item-id');
+                                const url = this.getAttribute('data-url');
+                                const title = this.getAttribute('data-title');
+                                const itemId = this.getAttribute('data-item-id');
                                 shareItem(url, title, itemId);
                             });
                         });
@@ -1825,7 +2008,7 @@
             button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ _("Processant...") }}';
             
             // Get CSRF token from meta tag or form
-            var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || 
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || 
                            document.querySelector('input[name="csrf_token"]')?.value || 
                            '{{ csrf_token() }}';
             
@@ -1845,11 +2028,11 @@
                     button.innerHTML = '+1';
                     
                     // Update importance count in popup
-                    var popupContent = button.closest('.leaflet-popup-content');
-                    var countElement = popupContent.querySelector('.d-flex .small strong');
+                    const popupContent = button.closest('.leaflet-popup-content');
+                    let countElement = popupContent.querySelector('.d-flex .small strong');
                     if (!countElement) {
                         // Try finding it in the stats section
-                        var statsSection = button.closest('.border-top').previousElementSibling;
+                        const statsSection = button.closest('.border-top').previousElementSibling;
                         if (statsSection) {
                             countElement = statsSection.querySelector('strong');
                         }
@@ -1859,7 +2042,7 @@
                     }
                     
                     // Disable resolve button if it exists (mutually exclusive)
-                    var resolveBtn = button.closest('.d-flex').querySelector('.resolve-btn');
+                    const resolveBtn = button.closest('.d-flex').querySelector('.resolve-btn');
                     if (resolveBtn) {
                         resolveBtn.disabled = true;
                         resolveBtn.classList.remove('btn-warning');
@@ -1872,15 +2055,15 @@
                     
                     // Update resolved count if it changed
                     if (data.resolved_count !== undefined) {
-                        var popupContent = button.closest('.leaflet-popup-content');
-                        var resolvedCountDiv = popupContent.querySelector('.resolved-count-display');
+                        const popupContent = button.closest('.leaflet-popup-content');
+                        let resolvedCountDiv = popupContent.querySelector('.resolved-count-display');
                         if (resolvedCountDiv && data.resolved_count === 0) {
                             resolvedCountDiv.remove();
                         } else if (data.resolved_count > 0) {
                             if (!resolvedCountDiv) {
                                 resolvedCountDiv = document.createElement('div');
                                 resolvedCountDiv.className = 'mt-2 pt-2 border-top resolved-count-display';
-                                var buttonsDiv = button.closest('.d-flex').closest('.border-top');
+                                const buttonsDiv = button.closest('.d-flex').closest('.border-top');
                                 if (buttonsDiv) {
                                     buttonsDiv.parentNode.insertBefore(resolvedCountDiv, buttonsDiv);
                                 }
@@ -1895,7 +2078,7 @@
                     }
                     
                     // Show success message
-                    var alert = document.createElement('div');
+                    const alert = document.createElement('div');
                     alert.className = 'alert alert-success alert-dismissible fade show mt-2';
                     alert.innerHTML = `
                         <i class="fas fa-check-circle me-2"></i>${data.message}
@@ -1903,14 +2086,14 @@
                     `;
                     button.closest('.d-flex').closest('.border-top').after(alert);
                 } else {
-                    alert(data.error || '{{ _("Error al votar") }}');
+                    showAlert(data.error || '{{ _("Error al votar") }}', 'error');
                     button.disabled = false;
                     button.innerHTML = '+1';
                 }
             })
             .catch(error => {
                 console.error('Error voting:', error);
-                alert('{{ _("Error al votar. Intenta-ho de nou.") }}');
+                showAlert('{{ _("Error al votar. Intenta-ho de nou.") }}', 'error');
                 button.disabled = false;
                 button.innerHTML = '<i class="fas fa-thumbs-up me-1"></i>{{ _("Confirmar importància") }}';
             });
@@ -1922,7 +2105,7 @@
             button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ _("Processant...") }}';
             
             // Get CSRF token
-            var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || 
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || 
                            document.querySelector('input[name="csrf_token"]')?.value || 
                            '{{ csrf_token() }}';
             
@@ -1945,7 +2128,7 @@
                     }
                     
                     // Disable vote button if it exists (mutually exclusive)
-                    var voteBtn = button.closest('.d-flex').querySelector('.vote-btn');
+                    const voteBtn = button.closest('.d-flex').querySelector('.vote-btn');
                     if (voteBtn) {
                         voteBtn.disabled = true;
                         voteBtn.classList.remove('btn-primary');
@@ -1954,11 +2137,11 @@
                     
                     // Update importance count if it changed
                     if (data.importance_count !== undefined) {
-                        var popupContent = button.closest('.leaflet-popup-content');
-                        var countElement = popupContent.querySelector('.d-flex .small strong');
+                        const popupContent = button.closest('.leaflet-popup-content');
+                        let countElement = popupContent.querySelector('.d-flex .small strong');
                         if (!countElement) {
                             // Try finding it in the stats section
-                            var statsSection = button.closest('.border-top').previousElementSibling;
+                            const statsSection = button.closest('.border-top').previousElementSibling;
                             if (statsSection) {
                                 countElement = statsSection.querySelector('strong');
                             }
@@ -1969,15 +2152,15 @@
                     }
                     
                     // Update resolved count in popup
-                    var popupContent = button.closest('.leaflet-popup-content');
+                    const popupContent = button.closest('.leaflet-popup-content');
                     if (popupContent) {
                         // Find or create resolved count display
-                        var resolvedCountDiv = popupContent.querySelector('.resolved-count-display');
+                        let resolvedCountDiv = popupContent.querySelector('.resolved-count-display');
                         if (!resolvedCountDiv) {
                             // Create it if it doesn't exist
                             resolvedCountDiv = document.createElement('div');
                             resolvedCountDiv.className = 'mt-2 pt-2 border-top resolved-count-display';
-                            var buttonsDiv = button.closest('.d-flex').closest('.border-top');
+                            const buttonsDiv = button.closest('.d-flex').closest('.border-top');
                             if (buttonsDiv) {
                                 buttonsDiv.parentNode.insertBefore(resolvedCountDiv, buttonsDiv);
                             }
@@ -1993,13 +2176,13 @@
                     // If auto-resolved, show message and reload items
                     if (data.auto_resolved) {
                         setTimeout(function() {
-                            alert('{{ _("Aquest item s\'ha tancat automàticament després de múltiples confirmacions que ja no hi és.") }}');
+                            window.showToast('{{ _("Item tancat") }}', '{{ _("Aquest item s\'ha tancat automàticament després de múltiples confirmacions que ja no hi és.") }}', 'warning');
                             // Reload items to update map
-                            location.reload();
+                            setTimeout(() => location.reload(), 2000);
                         }, 1500);
                     } else {
                         // Show success message
-                        var alert = document.createElement('div');
+                        const alert = document.createElement('div');
                         alert.className = 'alert alert-success alert-dismissible fade show mt-2';
                         alert.innerHTML = `
                             <i class="fas fa-check-circle me-2"></i>${data.message}
@@ -2009,9 +2192,9 @@
                     }
                 } else {
                     // Mostrar error inline en el popup
-                    var popup = button.closest('.leaflet-popup-content');
+                    const popup = button.closest('.leaflet-popup-content');
                     if (popup) {
-                        var alertDiv = document.createElement('div');
+                        const alertDiv = document.createElement('div');
                         alertDiv.className = 'alert alert-warning alert-dismissible fade show mt-2';
                         alertDiv.innerHTML = `
                             <i class="fas fa-exclamation-triangle me-2"></i>${data.error || '{{ _("Error al reportar") }}'}
@@ -2019,7 +2202,7 @@
                         `;
                         popup.appendChild(alertDiv);
                     } else {
-                        alert(data.error || '{{ _("Error al reportar") }}');
+                        showAlert(data.error || '{{ _("Error al reportar") }}', 'error');
                     }
                     button.disabled = false;
                     // Ensure rounded-pill class is present
@@ -2031,9 +2214,9 @@
             })
             .catch(error => {
                 console.error('Error resolving item:', error);
-                var popup = button.closest('.leaflet-popup-content');
+                const popup = button.closest('.leaflet-popup-content');
                 if (popup) {
-                    var alertDiv = document.createElement('div');
+                    const alertDiv = document.createElement('div');
                     alertDiv.className = 'alert alert-warning alert-dismissible fade show mt-2';
                     alertDiv.innerHTML = `
                         <i class="fas fa-exclamation-triangle me-2"></i>{{ _("Error al reportar. Intenta-ho de nou.") }}
@@ -2041,7 +2224,7 @@
                     `;
                     popup.appendChild(alertDiv);
                 } else {
-                    alert('{{ _("Error al reportar. Intenta-ho de nou.") }}');
+                    showAlert('{{ _("Error al reportar. Intenta-ho de nou.") }}', 'error');
                 }
                 button.disabled = false;
                 button.innerHTML = '<i class="fas fa-times-circle me-1"></i>{{ _("Ja no hi és") }}';
@@ -2074,7 +2257,7 @@
                 console.log('Share count response:', data);
                 if (data.success) {
                     // Update share count in popup if visible
-                    var shareCountSpan = document.querySelector(`[data-item-id="${itemId}"]`)?.closest('.leaflet-popup-content')?.querySelector('.text-info strong');
+                    const shareCountSpan = document.querySelector(`[data-item-id="${itemId}"]`)?.closest('.leaflet-popup-content')?.querySelector('.text-info strong');
                     if (shareCountSpan && shareCountSpan.textContent) {
                         shareCountSpan.textContent = data.share_count;
                     }
@@ -2088,8 +2271,8 @@
         // Open share modal
         function openShareModal(url, title, itemId) {
             // Create a temporary element with share modal
-            var shareDiv = document.createElement('div');
-            var shareText = title + ' ' + url;
+            const shareDiv = document.createElement('div');
+            const shareText = title + ' ' + url;
             shareDiv.innerHTML = `
                 <div class="modal fade" id="shareModal" tabindex="-1">
                     <div class="modal-dialog">
@@ -2148,9 +2331,9 @@
             
             // Wait for modal to be in DOM before adding event listeners
             setTimeout(function() {
-                var modalItemId = itemId;
+                const modalItemId = itemId;
                 console.log('Setting up share buttons for item:', modalItemId);
-                var shareButtons = document.querySelectorAll('.share-facebook-btn, .share-twitter-btn, .share-whatsapp-btn');
+                const shareButtons = document.querySelectorAll('.share-facebook-btn, .share-twitter-btn, .share-whatsapp-btn');
                 console.log('Found share buttons:', shareButtons.length);
                 shareButtons.forEach(function(btn) {
                     btn.addEventListener('click', function(e) {
@@ -2159,47 +2342,21 @@
                     });
                 });
                 
-                var linkBtn = document.getElementById('share-link-btn');
+                const linkBtn = document.getElementById('share-link-btn');
                 if (linkBtn) {
                     linkBtn.addEventListener('click', function() {
                         navigator.clipboard.writeText(url).then(function() {
                             incrementShareCount(modalItemId);
-                            showToast('Enllaç copiat! 🔗', 'URL copiada al portapapers', 'success');
+                            window.showToast('Enllaç copiat! 🔗', 'URL copiada al portapapers', 'success');
                             document.getElementById('shareModal').querySelector('[data-bs-dismiss]').click();
                         });
                     });
                 }
             }, 100);
             
-            // Toast function
-            function showToast(title, message, type) {
-                var toastDiv = document.createElement('div');
-                toastDiv.className = 'toast align-items-center text-white bg-' + (type === 'success' ? 'success' : 'info') + ' border-0';
-                toastDiv.setAttribute('role', 'alert');
-                toastDiv.setAttribute('aria-live', 'assertive');
-                toastDiv.setAttribute('aria-atomic', 'true');
-                toastDiv.style.position = 'fixed';
-                toastDiv.style.top = '20px';
-                toastDiv.style.right = '20px';
-                toastDiv.style.zIndex = '9999';
-                toastDiv.innerHTML = `
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            <strong>${title}</strong><br>
-                            ${message}
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                    </div>
-                `;
-                document.body.appendChild(toastDiv);
-                var toast = new bootstrap.Toast(toastDiv, { delay: 3000 });
-                toast.show();
-                toastDiv.addEventListener('hidden.bs.toast', function() {
-                    toastDiv.remove();
-                });
-            }
+            // La función showToast ya está definida globalmente arriba
             
-            var shareModal = new bootstrap.Modal(document.getElementById('shareModal'));
+            const shareModal = new bootstrap.Modal(document.getElementById('shareModal'));
             shareModal.show();
             // Remove modal from DOM after it's hidden
             document.getElementById('shareModal').addEventListener('hidden.bs.modal', function() {
