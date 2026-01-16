@@ -145,6 +145,153 @@
 <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Función global para mostrar toasts personalizados
+        window.showToast = function(title, message, type = 'info') {
+            // Asegurarse de que Bootstrap esté disponible
+            if (typeof bootstrap === 'undefined') {
+                console.error('Bootstrap no está disponible');
+                // Fallback a alert nativo si Bootstrap no está disponible
+                if (title) {
+                    alert(`${title}: ${message}`);
+                } else {
+                    alert(message);
+                }
+                return;
+            }
+            
+            const typeClasses = {
+                'success': 'bg-success',
+                'error': 'bg-danger',
+                'warning': 'bg-warning text-dark',
+                'info': 'bg-info'
+            };
+            
+            // Crear o obtener contenedor de toasts
+            let toastContainer = document.getElementById('toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toast-container';
+                toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                toastContainer.style.zIndex = '9999';
+                document.body.appendChild(toastContainer);
+            }
+            
+            const toastDiv = document.createElement('div');
+            toastDiv.className = `toast align-items-center text-white ${typeClasses[type] || typeClasses.info} border-0`;
+            toastDiv.setAttribute('role', 'alert');
+            toastDiv.setAttribute('aria-live', 'assertive');
+            toastDiv.setAttribute('aria-atomic', 'true');
+            toastDiv.style.minWidth = '300px';
+            toastDiv.style.maxWidth = '400px';
+            
+            const iconMap = {
+                'success': 'fa-check-circle',
+                'error': 'fa-exclamation-circle',
+                'warning': 'fa-exclamation-triangle',
+                'info': 'fa-info-circle'
+            };
+            
+            const displayText = title ? (message ? `${title}<br>${message}` : title) : message;
+            
+            toastDiv.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas ${iconMap[type] || iconMap.info} me-2"></i>
+                        ${displayText}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toastDiv);
+            
+            // Inicializar y mostrar el toast
+            const toast = new bootstrap.Toast(toastDiv, { 
+                delay: type === 'error' ? 5000 : 3000,
+                autohide: true
+            });
+            
+            toast.show();
+            
+            // Limpiar el toast del DOM cuando se oculte
+            toastDiv.addEventListener('hidden.bs.toast', function() {
+                toastDiv.remove();
+            });
+        };
+        
+        // Función auxiliar para mostrar alertas (wrapper para compatibilidad)
+        window.showAlert = function(message, type = 'info') {
+            window.showToast('', message, type);
+        };
+        
+        // Función global para mostrar confirmaciones personalizadas (reemplaza confirm() nativo)
+        window.showConfirm = function(message, title = '{{ _("Confirmar") }}') {
+            return new Promise((resolve) => {
+                // Asegurarse de que Bootstrap esté disponible
+                if (typeof bootstrap === 'undefined') {
+                    // Fallback a confirm nativo si Bootstrap no está disponible
+                    resolve(confirm(message));
+                    return;
+                }
+                
+                // Crear modal de confirmación
+                const modalDiv = document.createElement('div');
+                modalDiv.className = 'modal fade';
+                modalDiv.id = 'customConfirmModal';
+                modalDiv.setAttribute('tabindex', '-1');
+                modalDiv.setAttribute('aria-labelledby', 'customConfirmModalLabel');
+                modalDiv.setAttribute('aria-hidden', 'true');
+                
+                modalDiv.innerHTML = `
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="customConfirmModalLabel">
+                                    <i class="fas fa-question-circle me-2 text-primary"></i>${title}
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="mb-0">${message}</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="confirmCancelBtn">
+                                    <i class="fas fa-times me-1"></i>{{ _("Cancel·lar") }}
+                                </button>
+                                <button type="button" class="btn btn-primary" id="confirmOkBtn">
+                                    <i class="fas fa-check me-1"></i>{{ _("Confirmar") }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modalDiv);
+                
+                const modal = new bootstrap.Modal(modalDiv);
+                
+                // Manejar confirmación
+                document.getElementById('confirmOkBtn').addEventListener('click', function() {
+                    modal.hide();
+                    resolve(true);
+                });
+                
+                // Manejar cancelación
+                const cancelBtn = document.getElementById('confirmCancelBtn');
+                cancelBtn.addEventListener('click', function() {
+                    modal.hide();
+                    resolve(false);
+                });
+                
+                // Limpiar cuando se cierre el modal
+                modalDiv.addEventListener('hidden.bs.modal', function() {
+                    modalDiv.remove();
+                });
+                
+                // Mostrar modal
+                modal.show();
+            });
+        };
         var map = null;
         var marker = null;
         var locationMode = 'auto'; // 'auto' or 'manual'
@@ -373,7 +520,7 @@
         // Get current location (only when user explicitly requests it)
         function getCurrentLocation() {
             if (!navigator.geolocation) {
-                alert('{{ _("La geolocalización no está disponible en tu navegador. Por favor, selecciona la ubicación en el mapa.") }}');
+                window.showAlert('{{ _("La geolocalización no está disponible en tu navegador. Por favor, selecciona la ubicación en el mapa.") }}', 'warning');
                 return;
             }
             
@@ -399,7 +546,7 @@
                     } else {
                         // Outside Tarragona - show manual option
                         document.getElementById('location-loading').style.display = 'none';
-                        alert('{{ _("Tu ubicación está fuera del área de Tarragona. Por favor, selecciona la ubicación en el mapa.") }}');
+                        window.showAlert('{{ _("Tu ubicación está fuera del área de Tarragona. Por favor, selecciona la ubicación en el mapa.") }}', 'warning');
                         showManualLocationOption();
                     }
                 },
@@ -420,7 +567,7 @@
                     
                     // Only show alert for permission denied or timeout, not for unavailable (which is common)
                     if (error.code === error.PERMISSION_DENIED || error.code === error.TIMEOUT) {
-                        alert(errorMsg);
+                        window.showAlert(errorMsg, 'error');
                     }
                     
                     // Always show manual option as fallback
@@ -634,13 +781,13 @@
         function handleImageSelection(file) {
             // Validate file type
             if (!file.type.match('image.*')) {
-                alert('{{ _("Por favor, selecciona un archivo de imagen válido") }}');
+                window.showAlert('{{ _("Por favor, selecciona un archivo de imagen válido") }}', 'error');
                 return;
             }
             
             // Validate file size (max 10MB)
             if (file.size > 10 * 1024 * 1024) {
-                alert('{{ _("La imagen es demasiado grande. Máximo 10MB") }}');
+                window.showAlert('{{ _("La imagen es demasiado grande. Máximo 10MB") }}', 'error');
                 return;
             }
             
@@ -696,7 +843,7 @@
             var subcategoryField = document.getElementById('subcategory');
             if (subcategoryField.disabled) {
                 e.preventDefault();
-                alert('{{ _("Por favor, selecciona una categoría y subcategoría") }}');
+                window.showAlert('{{ _("Por favor, selecciona una categoría y subcategoría") }}', 'error');
                 return false;
             }
             subcategoryField.disabled = false; // Enable before submit
@@ -704,7 +851,7 @@
             // Validate image is required
             if (!imageInput.files || imageInput.files.length === 0) {
                 e.preventDefault();
-                alert('{{ _("Por favor, sube una foto del item. La foto es obligatoria.") }}');
+                window.showAlert('{{ _("Por favor, sube una foto del item. La foto es obligatoria.") }}', 'error');
                 return false;
             }
             
@@ -717,19 +864,19 @@
             // Verificar que los campos no estén vacíos
             if (!category || category.trim() === '') {
                 e.preventDefault();
-                alert('{{ _("Por favor, selecciona una categoría") }}');
+                window.showAlert('{{ _("Por favor, selecciona una categoría") }}', 'error');
                 return false;
             }
             
             if (!subcategory || subcategory.trim() === '') {
                 e.preventDefault();
-                alert('{{ _("Por favor, selecciona una subcategoría") }}');
+                window.showAlert('{{ _("Por favor, selecciona una subcategoría") }}', 'error');
                 return false;
             }
             
             if (!latStr || latStr.trim() === '' || !lngStr || lngStr.trim() === '') {
                 e.preventDefault();
-                alert('{{ _("Por favor, selecciona una ubicación en el mapa o usa el botón \"Usar la meva ubicació actual\"") }}');
+                window.showAlert('{{ _("Por favor, selecciona una ubicación en el mapa o usa el botón \"Usar la meva ubicació actual\"") }}', 'error');
                 return false;
             }
             
@@ -739,14 +886,14 @@
             
             if (isNaN(lat) || isNaN(lng)) {
                 e.preventDefault();
-                alert('{{ _("Las coordenadas no son válidas. Por favor, selecciona una ubicación en el mapa.") }}');
+                window.showAlert('{{ _("Las coordenadas no son válidas. Por favor, selecciona una ubicación en el mapa.") }}', 'error');
                 return false;
             }
             
             // Verificar que las coordenadas estén en un rango razonable (Tarragona está alrededor de 41.1, 1.2)
             if (lat < 40 || lat > 42 || lng < 0 || lng > 2) {
                 e.preventDefault();
-                alert('{{ _("Las coordenadas están fuera del área de Tarragona. Por favor, selecciona una ubicación válida.") }}');
+                window.showAlert('{{ _("Las coordenadas están fuera del área de Tarragona. Por favor, selecciona una ubicación válida.") }}', 'error');
                 return false;
             }
             
@@ -761,7 +908,7 @@
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ _("Comprovant...") }}';
             
             // Buscar items cercanos ANTES de hacer el submit
-            checkNearbyItems(lat, lng, category, subcategory, function(hasNearby) {
+            checkNearbyItems(lat, lng, category, subcategory, submitBtn, originalBtnText, function(hasNearby) {
                 isCheckingNearby = false;
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalBtnText;
@@ -779,7 +926,7 @@
         form.addEventListener('submit', handleSubmit);
         
         // Función para buscar items cercanos
-        function checkNearbyItems(lat, lng, category, subcategory, callback) {
+        function checkNearbyItems(lat, lng, category, subcategory, submitBtn, originalBtnText, callback) {
             var radius = 50; // 50 metros
             
             fetch(`{{ url_for('inventory.api_nearby_items') }}?lat=${lat}&lng=${lng}&category=${category}&subcategory=${subcategory}&radius=${radius}`)
@@ -787,7 +934,7 @@
                 .then(data => {
                     if (data.items && data.items.length > 0) {
                         // Hay items cercanos - mostrar modal
-                        showNearbyItemsModal(data.items, callback);
+                        showNearbyItemsModal(data.items, submitBtn, originalBtnText, callback);
                     } else {
                         // No hay items cercanos
                         callback(false);
@@ -800,8 +947,16 @@
                 });
         }
         
+        // Función para restaurar el botón de submit
+        function restoreSubmitButton(submitBtn, originalBtnText) {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }
+        }
+        
         // Función para mostrar modal con items cercanos (estilo toast móvil)
-        function showNearbyItemsModal(items, callback) {
+        function showNearbyItemsModal(items, submitBtn, originalBtnText, callback) {
             // Crear modal estilo toast móvil
             var modal = document.createElement('div');
             modal.className = 'nearby-items-modal';
@@ -942,20 +1097,22 @@
                 .then(data => {
                     if (data.success) {
                         // Mostrar mensaje de éxito
-                        alert("{{ _('Vot registrat! El comptador d\'importància s\'ha incrementat.') }}");
+                        window.showToast('{{ _("Vot registrat") }}', "{{ _('El comptador d\'importància s\'ha incrementat.') }}", 'success');
                         // Cerrar modal
                         modal.remove();
-                        // Redirigir al mapa
-                        window.location.href = '{{ url_for("inventory.inventory_map") }}';
+                        // Redirigir al mapa después de un breve delay para que se vea el toast
+                        setTimeout(() => {
+                            window.location.href = '{{ url_for("inventory.inventory_map") }}';
+                        }, 1500);
                     } else {
-                        alert(data.error || "{{ _('Error al votar') }}");
+                        window.showAlert(data.error || "{{ _('Error al votar') }}", 'error');
                         this.disabled = false;
                         this.innerHTML = '<i class="fas fa-thumbs-up me-2"></i>{{ _("Votar item seleccionat (+1)") }}';
                     }
                 })
                 .catch(error => {
                     console.error('Error voting:', error);
-                    alert("{{ _('Error al votar. Intenta-ho de nou.') }}");
+                    window.showAlert("{{ _('Error al votar. Intenta-ho de nou.') }}", 'error');
                     this.disabled = false;
                     this.innerHTML = '<i class="fas fa-thumbs-up me-2"></i>{{ _("Votar item seleccionat (+1)") }}';
                 });
@@ -964,20 +1121,30 @@
             // Crear nuevo item de todas formas
             document.getElementById('create-new-item').addEventListener('click', function() {
                 modal.remove();
+                // Restaurar botón antes de hacer submit
+                restoreSubmitButton(submitBtn, originalBtnText);
+                isCheckingNearby = false;
                 // Proceder con el submit normal
                 shouldSubmitNormally = true;
                 form.submit();
             });
             
+            // Función para cerrar el modal y restaurar el botón
+            function closeModal() {
+                modal.remove();
+                restoreSubmitButton(submitBtn, originalBtnText);
+                isCheckingNearby = false;
+            }
+            
             // Cerrar modal
             document.getElementById('close-nearby-modal').addEventListener('click', function() {
-                modal.remove();
+                closeModal();
             });
             
             // Cerrar al hacer click fuera (solo en el overlay)
             modal.addEventListener('click', function(e) {
                 if (e.target === modal) {
-                    modal.remove();
+                    closeModal();
                 }
             });
         }
