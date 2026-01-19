@@ -2073,6 +2073,11 @@
         
         // Vote function
         function voteForItem(itemId, button) {
+            if (!button) {
+                console.error('Button is null or undefined');
+                return;
+            }
+            
             button.disabled = true;
             button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ _("Processant...") }}';
             
@@ -2088,13 +2093,25 @@
                 },
                 body: `csrf_token=${encodeURIComponent(csrfToken)}`
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json().catch(error => {
+                    console.error('Error parsing JSON response:', error);
+                    throw new Error('Invalid JSON response');
+                });
+            })
             .then(data => {
-                if (data.success) {
+                if (data && data.success) {
                     // Update vote button - keep it active but disabled
-                    button.disabled = true;
-                    // Keep btn-primary class to show it's selected
-                    button.innerHTML = '+1';
+                    if (button && button.parentNode) {
+                        button.disabled = true;
+                        // Keep btn-primary class to show it's selected
+                        button.innerHTML = '+1';
+                    } else {
+                        console.error('Button element not found or removed from DOM after vote');
+                    }
                     
                     // Update importance count in popup
                     const popupContent = button.closest('.leaflet-popup-content');
@@ -2155,21 +2172,31 @@
                     `;
                     button.closest('.d-flex').closest('.border-top').after(alert);
                 } else {
+                    // Response was ok but success is false
                     showAlert(data.error || '{{ _("Error al votar") }}', 'error');
-                    button.disabled = false;
-                    button.innerHTML = '+1';
+                    if (button) {
+                        button.disabled = false;
+                        button.innerHTML = '<i class="fas fa-plus"></i>';
+                    }
                 }
             })
             .catch(error => {
                 console.error('Error voting:', error);
                 showAlert('{{ _("Error al votar. Intenta-ho de nou.") }}', 'error');
-                button.disabled = false;
-                button.innerHTML = '<i class="fas fa-thumbs-up me-1"></i>{{ _("Confirmar importància") }}';
+                if (button) {
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fas fa-plus"></i>';
+                }
             });
         }
         
         // Resolve function (ya no está)
         function resolveItem(itemId, button) {
+            if (!button) {
+                console.error('Button is null or undefined');
+                return;
+            }
+            
             button.disabled = true;
             button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ _("Processant...") }}';
             
@@ -2185,15 +2212,28 @@
                 },
                 body: `csrf_token=${encodeURIComponent(csrfToken)}`
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json().catch(error => {
+                    console.error('Error parsing JSON response:', error);
+                    throw new Error('Invalid JSON response');
+                });
+            })
             .then(data => {
-                if (data.success) {
+                if (data && data.success) {
                     // Update resolve button state - keep it active but disabled
-                    button.disabled = true;
-                    // Keep btn-warning class to show it's selected
-                    // Ensure rounded-pill class is present
-                    if (!button.classList.contains('rounded-pill')) {
-                        button.classList.add('rounded-pill');
+                    if (button && button.parentNode) {
+                        button.disabled = true;
+                        // Keep btn-warning class to show it's selected
+                        // Ensure rounded-pill class is present
+                        if (!button.classList.contains('rounded-pill')) {
+                            button.classList.add('rounded-pill');
+                        }
+                        button.innerHTML = '<i class="fas fa-times-circle"></i>';
+                    } else {
+                        console.error('Button element not found or removed from DOM after resolve');
                     }
                     
                     // Disable vote button if it exists (mutually exclusive)
@@ -2260,43 +2300,21 @@
                         button.closest('.d-flex').closest('.border-top').after(alert);
                     }
                 } else {
-                    // Mostrar error inline en el popup
-                    const popup = button.closest('.leaflet-popup-content');
-                    if (popup) {
-                        const alertDiv = document.createElement('div');
-                        alertDiv.className = 'alert alert-warning alert-dismissible fade show mt-2';
-                        alertDiv.innerHTML = `
-                            <i class="fas fa-exclamation-triangle me-2"></i>${data.error || '{{ _("Error al reportar") }}'}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        `;
-                        popup.appendChild(alertDiv);
-                    } else {
-                        showAlert(data.error || '{{ _("Error al reportar") }}', 'error');
+                    // Response was ok but success is false
+                    showAlert(data.error || '{{ _("Error al reportar que ja no hi és") }}', 'error');
+                    if (button) {
+                        button.disabled = false;
+                        button.innerHTML = '<i class="fas fa-times-circle"></i>';
                     }
-                    button.disabled = false;
-                    // Ensure rounded-pill class is present
-                    if (!button.classList.contains('rounded-pill')) {
-                        button.classList.add('rounded-pill');
-                    }
-                    button.innerHTML = '<i class="fas fa-times-circle me-1"></i>{{ _("Ja no hi és") }}';
                 }
             })
             .catch(error => {
-                console.error('Error resolving item:', error);
-                const popup = button.closest('.leaflet-popup-content');
-                if (popup) {
-                    const alertDiv = document.createElement('div');
-                    alertDiv.className = 'alert alert-warning alert-dismissible fade show mt-2';
-                    alertDiv.innerHTML = `
-                        <i class="fas fa-exclamation-triangle me-2"></i>{{ _("Error al reportar. Intenta-ho de nou.") }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    `;
-                    popup.appendChild(alertDiv);
-                } else {
-                    showAlert('{{ _("Error al reportar. Intenta-ho de nou.") }}', 'error');
+                console.error('Error resolving:', error);
+                showAlert('{{ _("Error al reportar que ja no hi és. Intenta-ho de nou.") }}', 'error');
+                if (button) {
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fas fa-times-circle"></i>';
                 }
-                button.disabled = false;
-                button.innerHTML = '<i class="fas fa-times-circle me-1"></i>{{ _("Ja no hi és") }}';
             });
         }
         
