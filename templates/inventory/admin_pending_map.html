@@ -106,8 +106,27 @@
             'otro': '📌'
         };
         
-        // Usar emoji del backend directamente, o fallback
-        var emojiToUse = emoji || emojis[category] || '📌';
+        // Usar emoji/icono del backend directamente, o fallback
+        var emojiOrIcon = emoji || emojis[category] || '📌';
+        
+        // Detectar si es un icono de Font Awesome (empieza con "fa-")
+        var isFontAwesome = emojiOrIcon && (emojiOrIcon.startsWith('fa-') || emojiOrIcon.startsWith('fas ') || emojiOrIcon.startsWith('fa '));
+        
+        // Crear el HTML del icono/emoji
+        var iconHtml;
+        if (isFontAwesome) {
+            // Es un icono de Font Awesome, renderizarlo correctamente
+            var iconClass = emojiOrIcon.startsWith('fa-') ? 'fas ' + emojiOrIcon : emojiOrIcon;
+            iconHtml = '<i class="' + iconClass + '" style="color: white; font-size: 18px;"></i>';
+        } else {
+            // Es un emoji, mostrarlo directamente
+            iconHtml = emojiOrIcon;
+        }
+        
+        // Función helper para escapar HTML para usar en atributos
+        function escapeHtmlForAttribute(html) {
+            return html.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
         
         var size = 40; // Increased size to accommodate images
         var iconSize = [size, size];
@@ -115,44 +134,62 @@
         
         // If image URL exists, use it as marker
         if (imageUrl) {
+            var escapedIconHtml = escapeHtmlForAttribute(iconHtml);
+            // Crear una función helper para manejar el error de la imagen de forma segura
+            var errorHandler = 'try { ' +
+                'var img = this; ' +
+                'if (img) { ' +
+                    'img.style.display = \'none\'; ' +
+                    'var parent = img.parentElement; ' +
+                    'if (parent) { ' +
+                        'parent.innerHTML = \'' + escapedIconHtml + '\'; ' +
+                        'if (parent.style) { ' +
+                            'parent.style.fontSize = \'20px\'; ' +
+                        '} ' +
+                    '} ' +
+                '} ' +
+            '} catch(e) { ' +
+                'console.error(\'Error handling marker image:\', e); ' +
+            '}';
+            
             return L.divIcon({
                 className: 'custom-marker-image',
-                html: `<div style="width: ${size}px; 
-                                  height: ${size}px; 
-                                  border-radius: 50%; 
-                                  border: 3px solid white;
-                                  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-                                  overflow: hidden;
-                                  background-color: ${colors[category] || '#696969'};
-                                  display: flex;
-                                  align-items: center;
-                                  justify-content: center;">
-                            <img src="${imageUrl}" 
-                                 style="width: 100%; 
-                                        height: 100%; 
-                                        object-fit: cover;
-                                        border-radius: 50%;" 
-                                 alt="${category}"
-                                 onerror="this.style.display='none'; this.parentElement.innerHTML='${emojiToUse}'; this.parentElement.style.fontSize='20px';">
-                        </div>`,
+                html: '<div style="width: ' + size + 'px; ' +
+                                  'height: ' + size + 'px; ' +
+                                  'border-radius: 50%; ' +
+                                  'border: 3px solid white; ' +
+                                  'box-shadow: 0 2px 6px rgba(0,0,0,0.4); ' +
+                                  'overflow: hidden; ' +
+                                  'background-color: ' + (colors[category] || '#696969') + '; ' +
+                                  'display: flex; ' +
+                                  'align-items: center; ' +
+                                  'justify-content: center;">' +
+                            '<img src="' + imageUrl + '" ' +
+                                 'style="width: 100%; ' +
+                                        'height: 100%; ' +
+                                        'object-fit: cover; ' +
+                                        'border-radius: 50%;" ' +
+                                 'alt="' + category + '" ' +
+                                 'onerror="' + errorHandler + '">' +
+                        '</div>',
                 iconSize: iconSize,
                 iconAnchor: iconAnchor
             });
         }
         
-        // Default icon with emoji
+        // Default icon with emoji/Font Awesome
         return L.divIcon({
             className: 'custom-marker',
-            html: `<div style="background-color: ${colors[category] || '#696969'}; 
-                              width: ${size}px; 
-                              height: ${size}px; 
-                              border-radius: 50%; 
-                              border: 3px solid white;
-                              box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-                              display: flex;
-                              align-items: center;
-                              justify-content: center;
-                              font-size: 18px;">${emojiToUse}</div>`,
+            html: '<div style="background-color: ' + (colors[category] || '#696969') + '; ' +
+                              'width: ' + size + 'px; ' +
+                              'height: ' + size + 'px; ' +
+                              'border-radius: 50%; ' +
+                              'border: 3px solid white; ' +
+                              'box-shadow: 0 2px 4px rgba(0,0,0,0.3); ' +
+                              'display: flex; ' +
+                              'align-items: center; ' +
+                              'justify-content: center; ' +
+                              'font-size: 18px;">' + iconHtml + '</div>',
             iconSize: iconSize,
             iconAnchor: iconAnchor
         });
