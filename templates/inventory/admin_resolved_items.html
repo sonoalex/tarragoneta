@@ -86,9 +86,9 @@
                             {% endif %}
                         </div>
                         
-                        <form method="POST" action="{{ url_for('inventory.admin_resolve_item', id=item.id) }}" class="mb-0">
+                        <form method="POST" action="{{ url_for('inventory.admin_resolve_item', id=item.id) }}" class="mb-0 resolve-form" data-item-id="{{ item.id }}">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit" class="btn btn-success w-100" style="border-radius: 50px;">
+                            <button type="submit" class="btn btn-success w-100 resolve-btn" style="border-radius: 50px;">
                                 <i class="fas fa-check-circle me-2"></i>{{ _('Marcar com resolt') }}
                             </button>
                         </form>
@@ -106,5 +106,60 @@
         {% endif %}
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle resolve form submissions
+    document.querySelectorAll('.resolve-form').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            var button = form.querySelector('.resolve-btn');
+            var originalHTML = button.innerHTML;
+            
+            // Disable button and show loading state
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ _("Processant...") }}';
+            
+            // Submit form via fetch to handle response
+            e.preventDefault();
+            
+            var formData = new FormData(form);
+            var csrfToken = formData.get('csrf_token');
+            
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': csrfToken
+                }
+            })
+            .then(response => {
+                if (response.ok || response.redirected) {
+                    // Success - reload page or redirect
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                    } else {
+                        // Reload page to show updated list
+                        window.location.reload();
+                    }
+                } else {
+                    // Error - restore button state
+                    button.disabled = false;
+                    button.innerHTML = originalHTML;
+                    alert('{{ _("Error al processar la sol·licitud") }}');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Restore button state on error
+                button.disabled = false;
+                button.innerHTML = originalHTML;
+                alert('{{ _("Error al processar la sol·licitud") }}');
+            });
+        });
+    });
+});
+</script>
 {% endblock %}
 
