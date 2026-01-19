@@ -1246,6 +1246,12 @@ def admin_inventory():
             cat_key = "no-category"
         by_category[cat_key] = by_category.get(cat_key, 0) + 1
     
+    # Contar items aprobados con resolved_count > 0
+    items_with_resolved = InventoryItem.query.filter(
+        InventoryItem.status == InventoryItemStatus.APPROVED.value,
+        InventoryItem.resolved_count > 0
+    ).count()
+    
     return render_template('inventory/admin.html',
                          items=items,
                          pagination=pagination,
@@ -1257,7 +1263,41 @@ def admin_inventory():
                          by_category=by_category,
                          status_filter=status_filter,
                          page=page,
-                         per_page=per_page)
+                         per_page=per_page,
+                         items_with_resolved=items_with_resolved)
+
+@bp.route('/admin/resolved-items')
+@login_required
+@roles_required('admin')
+def admin_resolved_items():
+    """Listado de items activos ordenados por resolved_count (ja no hi és)"""
+    from app.utils import get_inventory_category_name, get_inventory_emoji, get_image_url
+    
+    # Obtener items aprobados con resolved_count > 0, ordenados por resolved_count DESC
+    items = InventoryItem.query.filter(
+        InventoryItem.status == InventoryItemStatus.APPROVED.value,
+        InventoryItem.resolved_count > 0
+    ).order_by(InventoryItem.resolved_count.desc(), InventoryItem.created_at.desc()).all()
+    
+    # Preparar datos para la template
+    items_data = []
+    for item in items:
+        # Obtener categorías del item usando la relación many-to-many
+        main_cats = [cat for cat in item.categories if cat.parent_id is None]
+        sub_cats = [cat for cat in item.categories if cat.parent_id is not None]
+        item_category = main_cats[0].code if main_cats else None
+        item_subcategory = sub_cats[0].code if sub_cats else None
+        
+        items_data.append({
+            'item': item,
+            'category': item_category,
+            'subcategory': item_subcategory,
+            'category_name': get_inventory_category_name(item_category, item_subcategory),
+            'emoji': get_inventory_emoji(item_category, item_subcategory),
+            'image_url': get_image_url(item.image_path, 'thumbnail') if item.image_path else None
+        })
+    
+    return render_template('inventory/admin_resolved_items.html', items_data=items_data)
 
 @bp.route('/admin/<int:id>/resolve', methods=['POST'])
 @login_required
@@ -1268,6 +1308,14 @@ def admin_resolve_item(id):
     success, message = item.resolve(resolved_by=current_user)
     if success:
         db.session.commit()
+        
+        # Send resolution email if reporter exists
+        if item.reporter:
+            try:
+                from app.services.email_service import EmailService
+                EmailService.send_inventory_item_resolved(item, item.reporter.email)
+            except Exception as e:
+                current_app.logger.error(f'Error sending inventory resolution email: {str(e)}', exc_info=True)
     else:
         flash(message, 'warning')
     
@@ -1276,6 +1324,9 @@ def admin_resolve_item(id):
     page = request.form.get('page', request.args.get('page', 1, type=int), type=int)
     status_filter = request.form.get('status', request.args.get('status', 'all'))
     per_page = request.form.get('per_page', request.args.get('per_page', 20, type=int), type=int)
+    # Si venimos de resolved-items, redirigir ahí
+    if request.referrer and 'resolved-items' in request.referrer:
+        return redirect(url_for('inventory.admin_resolved_items'))
     return redirect(url_for('inventory.admin_inventory', status=status_filter, page=page, per_page=per_page))
 
 

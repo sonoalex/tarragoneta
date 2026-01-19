@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Items amb "Ja no hi és"') }} - Tarracograf{% endblock %}
+
+{% block extra_css %}
+<style>
+    .resolved-badge {
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+    .item-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .item-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="py-5" style="background: var(--bg-cream); padding-top: 120px;">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="display-5 fw-bold mb-2">{{ _('Items amb "Ja no hi és"') }}</h1>
+                        <p class="text-muted">{{ _('Items actius ordenats per nombre de reports de "ja no hi és"') }}</p>
+                    </div>
+                    <a href="{{ url_for('inventory.admin_inventory') }}" 
+                       class="btn btn-outline-secondary" style="border-radius: 50px;">
+                        <i class="fas fa-list me-2"></i>{{ _('Veure tot l\'inventari') }}
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {% if items_data %}
+        <div class="row">
+            {% for item_data in items_data %}
+            {% set item = item_data.item %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card border-0 shadow-sm item-card" style="border-radius: 16px; height: 100%;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="d-flex align-items-center">
+                                {% if item_data.emoji %}
+                                    {% if item_data.emoji.startswith('fa-') or item_data.emoji.startswith('fas ') or item_data.emoji.startswith('fa ') %}
+                                        <i class="fas {{ item_data.emoji if item_data.emoji.startswith('fa-') else item_data.emoji.split()[-1] }} me-2" style="font-size: 1.5rem;"></i>
+                                    {% else %}
+                                        <span style="font-size: 1.5rem;">{{ item_data.emoji }}</span>
+                                    {% endif %}
+                                {% endif %}
+                                <div>
+                                    <h6 class="fw-bold mb-0">{{ item_data.category_name }}</h6>
+                                    <small class="text-muted">{{ item.address or _('Sense adreça') }}</small>
+                                </div>
+                            </div>
+                            <span class="badge bg-danger resolved-badge">
+                                <i class="fas fa-exclamation-triangle me-1"></i>{{ item.resolved_count }}
+                            </span>
+                        </div>
+                        
+                        {% if item.description %}
+                        <p class="small mb-3">{{ item.description }}</p>
+                        {% endif %}
+                        
+                        {% if item_data.image_url %}
+                        <div class="mb-3">
+                            <img src="{{ item_data.image_url }}" 
+                                 class="img-fluid rounded" 
+                                 style="max-height: 150px; width: 100%; object-fit: cover;"
+                                 alt="{{ item_data.category_name }}">
+                        </div>
+                        {% endif %}
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>{{ item.created_at.strftime('%d/%m/%Y') if item.created_at else _('Sense data') }}
+                            </small>
+                            {% if item.reporter %}
+                            <small class="text-muted">
+                                <i class="fas fa-user me-1"></i>{{ item.reporter.username }}
+                            </small>
+                            {% endif %}
+                        </div>
+                        
+                        <form method="POST" action="{{ url_for('inventory.admin_resolve_item', id=item.id) }}" class="mb-0">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-success w-100" style="border-radius: 50px;">
+                                <i class="fas fa-check-circle me-2"></i>{{ _('Marcar com resolt') }}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+            <h4 class="text-muted">{{ _('No hi ha items amb reports de "ja no hi és"') }}</h4>
+            <p class="text-muted">{{ _('Tots els items actius estan sense reports de "ja no hi és"') }}</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+

@@ -120,14 +120,24 @@
                                 </a>
                             </li>
                         </ul>
-                        {% if pending_items > 0 %}
-                        <a class="btn btn-warning text-dark" 
-                           href="{{ url_for('inventory.admin_pending_map') }}"
-                           style="border-radius: 50px; white-space: nowrap;">
-                            <i class="fas fa-map me-2"></i>{{ _('Veure Mapa de Pendents') }}
-                            <span class="badge bg-dark ms-2">{{ pending_items }}</span>
-                        </a>
-                        {% endif %}
+                        <div class="d-flex gap-2 flex-wrap">
+                            {% if pending_items > 0 %}
+                            <a class="btn btn-warning text-dark" 
+                               href="{{ url_for('inventory.admin_pending_map') }}"
+                               style="border-radius: 50px; white-space: nowrap;">
+                                <i class="fas fa-map me-2"></i>{{ _('Veure Mapa de Pendents') }}
+                                <span class="badge bg-dark ms-2">{{ pending_items }}</span>
+                            </a>
+                            {% endif %}
+                            {% if items_with_resolved > 0 %}
+                            <a class="btn btn-danger" 
+                               href="{{ url_for('inventory.admin_resolved_items') }}"
+                               style="border-radius: 50px; white-space: nowrap;">
+                                <i class="fas fa-exclamation-triangle me-2"></i>{{ _('Items amb "Ja no hi és"') }}
+                                <span class="badge bg-light text-danger ms-2">{{ items_with_resolved }}</span>
+                            </a>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
