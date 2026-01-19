@@ -1006,13 +1006,6 @@
             // Altura del modal: 75% en móvil, 70% en desktop (máximo 600px)
             const modalHeight = isMobile ? Math.floor(viewportHeight * 0.75) : Math.min(Math.floor(viewportHeight * 0.7), 600);
             
-            // Debug
-            console.log('Modal Debug:', {
-                viewportHeight,
-                isMobile,
-                modalHeight,
-                bottom: 0
-            });
             
             modal.style.cssText = `
                 position: fixed;
@@ -1187,32 +1180,6 @@
             
             bodyScrollLock.lock();
             
-            // Debug: Verificar que los botones existen
-            setTimeout(function() {
-                const buttonsContainer = document.getElementById('nearby-buttons-container');
-                const voteBtn = document.getElementById('vote-nearby-item');
-                const createBtn = document.getElementById('create-new-item');
-                console.log('Buttons Debug:', {
-                    containerExists: !!buttonsContainer,
-                    containerVisible: buttonsContainer ? window.getComputedStyle(buttonsContainer).display !== 'none' : false,
-                    containerHeight: buttonsContainer ? buttonsContainer.offsetHeight : 0,
-                    voteBtnExists: !!voteBtn,
-                    createBtnExists: !!createBtn,
-                    modalHeight: modal.offsetHeight,
-                    modalTop: modal.offsetTop,
-                    viewportHeight: window.innerHeight
-                });
-                
-                if (buttonsContainer) {
-                    const rect = buttonsContainer.getBoundingClientRect();
-                    console.log('Buttons Container Position:', {
-                        top: rect.top,
-                        bottom: rect.bottom,
-                        height: rect.height,
-                        visible: rect.top < window.innerHeight && rect.bottom > 0
-                    });
-                }
-            }, 100);
             
             var selectedItemId = null;
             
