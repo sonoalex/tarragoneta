@@ -146,7 +146,18 @@
                                     <div class="small fw-bold">{{ _('Item reportat') }}</div>
                                     <div class="small text-muted">{{ item.created_at.strftime('%d/%m/%Y') if item.created_at else '' }}</div>
                                 </div>
-                                {% set icon_class, color_class = get_inventory_icon(item.category, item.subcategory) %}
+                                {% set main_cats = [] %}
+                                {% set sub_cats = [] %}
+                                {% for cat in item.categories %}
+                                    {% if cat.parent_id is none %}
+                                        {% set _ = main_cats.append(cat) %}
+                                    {% else %}
+                                        {% set _ = sub_cats.append(cat) %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% set item_category = main_cats[0].code if main_cats else None %}
+                                {% set item_subcategory = sub_cats[0].code if sub_cats else None %}
+                                {% set icon_class, color_class = get_inventory_icon(item_category, item_subcategory) %}
                                 <i class="fas {{ icon_class }} {{ color_class }}"></i>
                             </div>
                         </div>
@@ -198,9 +209,20 @@
                         {% for item in reported_items[:10] %}
                         <tr>
                             <td>
-                                {% set icon_class, color_class = get_inventory_icon(item.category, item.subcategory) %}
+                                {% set main_cats = [] %}
+                                {% set sub_cats = [] %}
+                                {% for cat in item.categories %}
+                                    {% if cat.parent_id is none %}
+                                        {% set _ = main_cats.append(cat) %}
+                                    {% else %}
+                                        {% set _ = sub_cats.append(cat) %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% set item_category = main_cats[0].code if main_cats else None %}
+                                {% set item_subcategory = sub_cats[0].code if sub_cats else None %}
+                                {% set icon_class, color_class = get_inventory_icon(item_category, item_subcategory) %}
                                 <i class="fas {{ icon_class }} {{ color_class }} me-2"></i>
-                                {{ get_inventory_category_name(item.category, item.subcategory) }}
+                                {{ get_inventory_category_name(item_category, item_subcategory) }}
                             </td>
                             <td>
                                 {% if item.address %}
